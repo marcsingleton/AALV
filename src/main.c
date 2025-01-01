@@ -1,5 +1,72 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
+typedef struct
+{
+    char *seq;
+    char *id;
+    char *header;
+    int len;
+} SeqRecord;
+
+typedef struct
+{
+    char *SeqRecord;
+    int len;
+} SeqRecordArray;
+
+int parse_fasta(FILE *fp, SeqRecord **records_ptr)
+{
+    long pos;
+
+    int nrecords = 0;
+    char *line = NULL;
+    size_t capacity;
+    ssize_t linelen;
+
+    if ((pos = ftell(fp)) == -1)
+    {
+        perror("ftell failed in parse_fasta.");
+        exit(1);
+    }
+
+    while ((linelen = getline(&line, &capacity, fp)) > 0)
+    {
+        if (line[0] == '>')
+        {
+            nrecords++;
+        }
+    }
+    printf("Number of records is: %d\n", nrecords);
+
+    if (fseek(fp, pos, SEEK_SET) == -1)
+    {
+        perror("fseek failed in parse_fasta.");
+        exit(1);
+    }
+
+    int i = 0;
+    *records_ptr = malloc(nrecords * sizeof(SeqRecord));
+    while ((linelen = getline(&line, &capacity, fp)) > 0)
+    {
+        if (line[0] == '>')
+        {
+            char *header = malloc(linelen + 1);
+            strncpy(header, line, linelen);
+            SeqRecord *p = *records_ptr + i;
+            p->header = header;
+        }
+    }
+
+    if (line != NULL)
+    {
+        free(line);
+    }
+
+    fseek(fp, pos, SEEK_SET);
+    return nrecords;
+}
 
 int main(int argc, char *argv[])
 {
@@ -24,21 +91,22 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    SeqRecord *records = NULL;
+    int nrecords = parse_fasta(alignment, &records);
+
     // Main loop
     // Display current file
     // Read input
     // Process input
-    char *line = NULL;
-    size_t capacity = 0;
-    ssize_t linelen;
-    while ((linelen = getline(&line, &capacity, alignment)) > 0)
+    for (int i = 0; i < nrecords; i++)
     {
-        fputs(line, stdout);
+        printf("Record %d\n", i);
+        printf("Record header %s\n", records[0].header);
+        fputs(records[i].header, stdin);
     }
 
     // Clean up
     // Free memory and restore terminal options
-    free(line);
     fclose(alignment);
     return 0;
 }
