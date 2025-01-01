@@ -56,6 +56,7 @@ int parse_fasta(FILE *fp, SeqRecord **records_ptr)
             strncpy(header, line, linelen);
             SeqRecord *p = *records_ptr + i;
             p->header = header;
+            i++;
         }
     }
 
@@ -101,8 +102,7 @@ int main(int argc, char *argv[])
     for (int i = 0; i < nrecords; i++)
     {
         printf("Record %d\n", i);
-        printf("Record header %s\n", records[0].header);
-        fputs(records[i].header, stdin);
+        printf("%s\n", records[i].header);
     }
 
     // Clean up
