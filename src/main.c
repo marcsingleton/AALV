@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+// Sequences
 typedef struct
 {
     char *seq;
@@ -17,6 +18,7 @@ typedef struct
     int len;
 } SeqRecordArray;
 
+// Formats
 int parse_fasta(FILE *fp, SeqRecord **records_ptr)
 {
     // Record initial position of stream
@@ -99,6 +101,7 @@ int parse_fasta(FILE *fp, SeqRecord **records_ptr)
     return nrecords;
 }
 
+// Main
 int main(int argc, char *argv[])
 {
     // Process arguments
