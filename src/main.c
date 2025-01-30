@@ -18,6 +18,44 @@ typedef struct
     int len;
 } SeqRecordArray;
 
+// Arrays
+#define INIT_CAPACITY 16
+#define EXPAND_FACTOR 2
+
+typedef struct
+{
+    void *data;
+    size_t size;
+    size_t capacity;
+    size_t len;
+} Array;
+
+Array *create_array(size_t size)
+{
+    Array *array = malloc(sizeof(Array));
+    array->data = malloc(INIT_CAPACITY * size);
+    array->size = size;
+    array->capacity = INIT_CAPACITY;
+    array->len = 0;
+
+    return array;
+}
+
+void append_array(void *value, Array **array_ptr)
+{
+    Array *array = *array_ptr;
+    if (array->len < array->capacity)
+    {
+        void *dst = (char *)array->data + (array->len) * (array->size);
+        memcpy(dst, value, array->size);
+        (array->len)++;
+    }
+    else
+    {
+        printf("Array is full!\n");
+    }
+}
+
 // Formats
 int parse_fasta(FILE *fp, SeqRecord **records_ptr)
 {
@@ -104,6 +142,12 @@ int parse_fasta(FILE *fp, SeqRecord **records_ptr)
 // Main
 int main(int argc, char *argv[])
 {
+    Array *int_array = create_array(sizeof(int));
+    for (int i = 0; i <= INIT_CAPACITY + 1; i++)
+    {
+        append_array(&i, &int_array);
+    }
+
     // Process arguments
     if (argc != 2)
     {
