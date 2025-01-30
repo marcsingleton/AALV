@@ -6,3 +6,6 @@ all: $(SRC_DIR)/main.c build
 
 build:
 	mkdir -p $(BUILD_DIR)
+
+clean:
+	rm -r $(BUILD_DIR)
