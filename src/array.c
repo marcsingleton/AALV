@@ -19,9 +19,8 @@ Array *create_array(size_t size)
     return array;
 }
 
-void append_array(void *value, Array **array_ptr)
+void append_array(void *value, Array *array)
 {
-    Array *array = *array_ptr;
     if (array->len < array->capacity)
     {
         void *dst = (char *)array->data + (array->len) * (array->size);
@@ -32,4 +31,13 @@ void append_array(void *value, Array **array_ptr)
     {
         printf("Array is full!\n");
     }
+}
+
+void *get_array(size_t index, Array *array)
+{
+    if (index >= array->len)
+    {
+        return NULL;
+    }
+    return (char *)array->data + (index * array->size);
 }
