@@ -12,7 +12,7 @@ int array_init(Array *array, size_t size)
 {
     void *ptr = malloc(INIT_CAPACITY * size);
     if (ptr == NULL)
-        return -1;
+        return 1;
     array->data = malloc(INIT_CAPACITY * size);
     array->size = size;
     array->capacity = INIT_CAPACITY;
@@ -36,7 +36,7 @@ int array_append(Array *array, void *value)
         void *ptr = realloc(array->data, EXPAND_FACTOR * array->capacity * array->size);
         if (ptr == NULL)
         {
-            return -1;
+            return 1;
         }
         array->data = ptr;
         array->capacity = EXPAND_FACTOR * array->capacity;
