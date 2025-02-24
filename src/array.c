@@ -8,7 +8,7 @@
 #define INIT_CAPACITY 16
 #define EXPAND_FACTOR 2
 
-Array *create_array(size_t size)
+Array *array_create(size_t size)
 {
     Array *array = malloc(sizeof(Array));
     array->data = malloc(INIT_CAPACITY * size);
@@ -19,7 +19,7 @@ Array *create_array(size_t size)
     return array;
 }
 
-int append_array(void *value, Array *array)
+int array_append(void *value, Array *array)
 {
     if (array->len >= array->capacity)
     {
@@ -37,7 +37,7 @@ int append_array(void *value, Array *array)
     return 0;
 }
 
-void *get_array(size_t index, Array *array)
+void *array_get(size_t index, Array *array)
 {
     if (index >= array->len)
     {

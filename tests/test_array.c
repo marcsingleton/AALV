@@ -5,12 +5,12 @@
 
 void test_init_capacity()
 {
-    Array *array = create_array(1);
+    Array *array = array_create(1);
 }
 
 void test_append()
 {
-    Array *array = create_array(sizeof(1));
+    Array *array = array_create(sizeof(int));
     assert(array->capacity == 16);
     printf("Assertion successful!\n");
     for (int i = 0; i < 17; i++)
@@ -19,7 +19,7 @@ void test_append()
     }
     for (int i = 0; i < 17; i++)
     {
-        int x = *(int *)get_array(i, array);
+        int x = *(int *)array_get(i, array);
         printf("Got element %d\n", x);
     }
 }

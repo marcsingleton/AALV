@@ -13,8 +13,8 @@ typedef struct
     size_t len;
 } Array;
 
-Array *create_array(size_t size);
-int append_array(void *value, Array *array);
-void *get_array(size_t index, Array *array);
+Array *array_create(size_t size);
+int array_append(void *value, Array *array);
+void *array_get(size_t index, Array *array);
 
 #endif // ARRAY_H
