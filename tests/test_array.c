@@ -71,14 +71,5 @@ TestFunction tests[] = {
 
 int main()
 {
-    for (int i = 0; i < NTESTS; i++)
-    {
-        TestFunction test = tests[i];
-        printf("Testing function %s\n", test.func_name);
-        int code = (*test.func_ptr)();
-        if (code == 0)
-            printf("    Passed!\n");
-        else
-            printf("    Failed with code %d\n", code);
-    }
+    run_tests(tests, NTESTS);
 }
