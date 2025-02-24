@@ -14,7 +14,7 @@ typedef struct
 } Array;
 
 Array *create_array(size_t size);
-void append_array(void *value, Array *array);
+int append_array(void *value, Array *array);
 void *get_array(size_t index, Array *array);
 
 #endif // ARRAY_H

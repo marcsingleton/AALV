@@ -19,18 +19,22 @@ Array *create_array(size_t size)
     return array;
 }
 
-void append_array(void *value, Array *array)
+int append_array(void *value, Array *array)
 {
-    if (array->len < array->capacity)
+    if (array->len >= array->capacity)
     {
-        void *dst = (char *)array->data + (array->len) * (array->size);
-        memcpy(dst, value, array->size);
-        (array->len)++;
+        void *ptr = realloc(array->data, EXPAND_FACTOR * array->capacity * array->size);
+        if (ptr == NULL)
+        {
+            return -1;
+        }
+        array->data = ptr;
+        array->capacity = EXPAND_FACTOR * array->capacity;
     }
-    else
-    {
-        printf("Array is full!\n");
-    }
+    void *dst = (char *)array->data + array->len * array->size;
+    memcpy(dst, value, array->size);
+    (array->len)++;
+    return 0;
 }
 
 void *get_array(size_t index, Array *array)
