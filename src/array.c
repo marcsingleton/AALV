@@ -8,12 +8,16 @@
 #define INIT_CAPACITY 16
 #define EXPAND_FACTOR 2
 
-void array_init(Array *array, size_t size)
+int array_init(Array *array, size_t size)
 {
+    void *ptr = malloc(INIT_CAPACITY * size);
+    if (ptr == NULL)
+        return -1;
     array->data = malloc(INIT_CAPACITY * size);
     array->size = size;
     array->capacity = INIT_CAPACITY;
     array->len = 0;
+    return 0;
 }
 
 void array_free(Array *array)
