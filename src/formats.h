@@ -2,7 +2,7 @@
 #define FORMATS_H
 
 /*
- * Functions for reading sequence formats and structures for holding them
+ * Alignment IO
  */
 
 typedef struct

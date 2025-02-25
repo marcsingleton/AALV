@@ -1,6 +1,10 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+/*
+ * Test runners
+ */
+
 typedef struct
 {
     int (*func_ptr)(void);
