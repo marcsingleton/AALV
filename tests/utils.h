@@ -7,18 +7,23 @@ typedef struct
     char *func_name;
 } TestFunction;
 
-void run_tests(TestFunction *tests, size_t ntests)
+void run_tests(TestFunction *tests, int ntests, char *module_name)
 {
+    int npasses = 0;
     for (int i = 0; i < ntests; i++)
     {
         TestFunction test = tests[i];
-        printf("Testing function %s\n", test.func_name);
+        printf("Running %s", test.func_name);
         int code = (*test.func_ptr)();
         if (code == 0)
-            printf("    Passed!\n");
+        {
+            printf("...passed!\n");
+            npasses++;
+        }
         else
-            printf("    Failed with code %d\n", code);
+            printf("...failed with code %d.\n", code);
     }
+    printf("%d / %d tests passed in module %s\n", npasses, ntests, module_name);
 }
 
 #endif // UTILS_H

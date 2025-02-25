@@ -71,5 +71,5 @@ TestFunction tests[] = {
 
 int main()
 {
-    run_tests(tests, NTESTS);
+    run_tests(tests, NTESTS, "test_array.c");
 }
