@@ -6,7 +6,7 @@ SRC := array.c formats.c
 SRC_OBJ := $(SRC:%.c=$(BUILD_DIR)/%.o)
 SRC_TARGET := $(BUILD_DIR)/aalv
 
-TESTS := test_array.c
+TESTS := test_array.c test_formats.c
 TESTS_TARGET := $(TESTS:%.c=$(BUILD_DIR)/%)
 
 # SRC rules
