@@ -5,6 +5,8 @@
  * Test runners
  */
 
+#include <stdio.h>
+
 typedef struct
 {
     int (*func_ptr)(void);
