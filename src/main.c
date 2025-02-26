@@ -36,8 +36,9 @@ int main(int argc, char *argv[])
     // Process input
     for (int i = 0; i < nrecords; i++)
     {
-        printf("Record %d\n", i);
+        printf("\nRecord %d\n", i);
         printf("%s\n", records[i].header);
+        printf("%s\n", records[i].seq);
     }
 
     // Clean up
