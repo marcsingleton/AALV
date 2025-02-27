@@ -34,6 +34,9 @@ int parse_fasta(FILE *fp, SeqRecord **records_ptr)
         }
     }
 
+    if (nrecords == 0)
+        return nrecords;
+
     if (fseek(fp, pos, SEEK_SET) == -1)
     {
         perror("fseek failed in parse_fasta.");
