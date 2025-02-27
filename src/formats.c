@@ -48,7 +48,6 @@ int parse_fasta(FILE *fp, SeqRecord **records_ptr)
     *records_ptr = ptr;
 
     // Read until first non-empty line
-    size_t linelen;
     while ((linelen = getline(&line, &capacity, fp)) == 1 && line[0] == '\n')
         printf("Reading until non-empty...\n");
     if (line[0] != '>')
@@ -67,28 +66,39 @@ int parse_fasta(FILE *fp, SeqRecord **records_ptr)
             continue;
         }
 
-        char *header = malloc(linelen);
+        ssize_t trimlen;
+        if (line[linelen - 1] == '\n')
+            trimlen = linelen - 1;
+        else
+            trimlen = linelen;
+
+        char *header = malloc(trimlen); // +1 for null; -1 for excluding >
         if (header == NULL)
         {
             perror("malloc failed in parse_fasta");
             exit(1);
         }
-        memcpy(header, line + 1, linelen - 1);
-        header[linelen - 2] = '\0';
+        memcpy(header, line + 1, trimlen - 1);
+        header[trimlen - 1] = '\0';
 
         char *seq = NULL;
         size_t seqlen = 0;
         while ((linelen = getline(&line, &capacity, fp)) > 0 && (line[0] != '>'))
         {
-            ptr = realloc(seq, seqlen + linelen);
+            if (line[linelen - 1] == '\n')
+                trimlen = linelen - 1;
+            else
+                trimlen = linelen;
+
+            ptr = realloc(seq, seqlen + trimlen + 1);
             if (ptr == NULL)
             {
                 perror("realloc failed in parse_fasta");
                 exit(1);
             }
             seq = ptr;
-            memcpy(seq + seqlen, line, linelen);
-            seqlen += linelen - 1;
+            memcpy(seq + seqlen, line, trimlen);
+            seqlen += trimlen;
             seq[seqlen] = '\0';
         }
         (*records_ptr + i)->header = header;
