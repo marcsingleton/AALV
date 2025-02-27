@@ -48,7 +48,7 @@ int parse_fasta(FILE *fp, SeqRecord **records_ptr)
     *records_ptr = ptr;
 
     // Read until first non-empty line
-    size_t linespan;
+    size_t linelen;
     while ((linelen = getline(&line, &capacity, fp)) == 1 && line[0] == '\n')
         printf("Reading until non-empty...\n");
     if (line[0] != '>')
@@ -61,7 +61,7 @@ int parse_fasta(FILE *fp, SeqRecord **records_ptr)
     int i = 0;
     while (linelen > 0)
     {
-        if (linespan == 1)
+        if (linelen == 1)
         {
             linelen = getline(&line, &capacity, fp);
             continue;
