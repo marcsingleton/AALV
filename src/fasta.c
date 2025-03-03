@@ -6,6 +6,12 @@
 #include "fasta.h"
 #include "seqrecord.h"
 
+const int FASTA_ERROR_INVALID_FORMAT = -1;
+const int FASTA_ERROR_RECORD_OVERFLOW = -2;
+const int FASTA_ERROR_SEQUENCE_OVERFLOW = -3;
+const int FASTA_ERROR_FILE_IO = -4;
+const int FASTA_ERROR_MEMORY_ALLOCATION = -5;
+
 void fasta_parse_free(char *line, char *header, char *seq)
 {
     if (line != NULL)

@@ -3,11 +3,11 @@
 
 #include "seqrecord.h"
 
-int FASTA_ERROR_INVALID_FORMAT = -1;
-int FASTA_ERROR_RECORD_OVERFLOW = -2;
-int FASTA_ERROR_SEQUENCE_OVERFLOW = -3;
-int FASTA_ERROR_FILE_IO = -4;
-int FASTA_ERROR_MEMORY_ALLOCATION = -5;
+extern const int FASTA_ERROR_INVALID_FORMAT;
+extern const int FASTA_ERROR_RECORD_OVERFLOW;
+extern const int FASTA_ERROR_SEQUENCE_OVERFLOW;
+extern const int FASTA_ERROR_FILE_IO;
+extern const int FASTA_ERROR_MEMORY_ALLOCATION;
 
 int fasta_parse(FILE *fp, SeqRecord **records_ptr);
 
