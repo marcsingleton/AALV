@@ -142,12 +142,6 @@ int parse_fasta(FILE *fp, SeqRecord **records_ptr)
         i++;
     }
 
-    if (fseek(fp, pos, SEEK_SET) == -1)
-    {
-        parse_fasta_free(line, header, seq);
-        return FASTA_ERROR_FILE_IO;
-    }
-
     free(line);
 
     return nrecords;
