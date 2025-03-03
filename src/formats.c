@@ -5,6 +5,12 @@
 
 #include "formats.h"
 
+int FASTA_ERROR_INVALID_FORMAT = -1;
+int FASTA_ERROR_RECORD_OVERFLOW = -2;
+int FASTA_ERROR_SEQUENCE_OVERFLOW = -3;
+int FASTA_ERROR_FILE_IO = -4;
+int FASTA_ERROR_MEMORY_ALLOCATION = -5;
+
 void parse_fasta_free(char *line, char *header, char *seq)
 {
     if (line != NULL)
@@ -35,7 +41,7 @@ int parse_fasta(FILE *fp, SeqRecord **records_ptr)
     if ((pos = ftell(fp)) == -1)
     {
         parse_fasta_free(line, header, seq);
-        return -3;
+        return FASTA_ERROR_FILE_IO;
     }
 
     // Count number of records
@@ -48,7 +54,7 @@ int parse_fasta(FILE *fp, SeqRecord **records_ptr)
             else
             {
                 parse_fasta_free(line, header, seq);
-                return -1;
+                return FASTA_ERROR_RECORD_OVERFLOW;
             }
         }
     }
@@ -62,13 +68,13 @@ int parse_fasta(FILE *fp, SeqRecord **records_ptr)
     if (fseek(fp, pos, SEEK_SET) == -1)
     {
         parse_fasta_free(line, header, seq);
-        return -3;
+        return FASTA_ERROR_FILE_IO;
     }
     void *ptr = malloc(nrecords * sizeof(SeqRecord));
     if (ptr == NULL)
     {
         parse_fasta_free(line, header, seq);
-        return -4;
+        return FASTA_ERROR_MEMORY_ALLOCATION;
     }
     *records_ptr = ptr;
 
@@ -78,7 +84,7 @@ int parse_fasta(FILE *fp, SeqRecord **records_ptr)
     if (line[0] != '>')
     {
         parse_fasta_free(line, header, seq);
-        return -2;
+        return FASTA_ERROR_INVALID_FORMAT;
     }
 
     // Read records
@@ -100,7 +106,7 @@ int parse_fasta(FILE *fp, SeqRecord **records_ptr)
         if (header == NULL)
         {
             parse_fasta_free(line, header, seq);
-            return -4;
+            return FASTA_ERROR_MEMORY_ALLOCATION;
         }
         memcpy(header, line + 1, trimlen - 1);
         header[trimlen - 1] = '\0';
@@ -117,13 +123,13 @@ int parse_fasta(FILE *fp, SeqRecord **records_ptr)
             if (seqlen >= INT_MAX - trimlen - 1)
             {
                 parse_fasta_free(line, header, seq);
-                return -5;
+                return FASTA_ERROR_SEQUENCE_OVERFLOW;
             }
             ptr = realloc(seq, seqlen + trimlen + 1);
             if (ptr == NULL)
             {
                 parse_fasta_free(line, header, seq);
-                return -4;
+                return FASTA_ERROR_MEMORY_ALLOCATION;
             }
 
             seq = ptr;
@@ -139,7 +145,7 @@ int parse_fasta(FILE *fp, SeqRecord **records_ptr)
     if (fseek(fp, pos, SEEK_SET) == -1)
     {
         parse_fasta_free(line, header, seq);
-        return -3;
+        return FASTA_ERROR_FILE_IO;
     }
 
     free(line);
