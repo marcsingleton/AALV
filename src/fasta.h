@@ -9,6 +9,6 @@ int FASTA_ERROR_SEQUENCE_OVERFLOW = -3;
 int FASTA_ERROR_FILE_IO = -4;
 int FASTA_ERROR_MEMORY_ALLOCATION = -5;
 
-int parse_fasta(FILE *fp, SeqRecord **records_ptr);
+int fasta_parse(FILE *fp, SeqRecord **records_ptr);
 
 #endif // FASTA_H
