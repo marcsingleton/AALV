@@ -1,7 +1,8 @@
 #include <stdio.h>
 
 #include "array.h"
-#include "formats.h"
+#include "fasta.h"
+#include "seqrecord.h"
 
 // Main
 int main(int argc, char *argv[])
@@ -28,7 +29,7 @@ int main(int argc, char *argv[])
     }
 
     SeqRecord *records = NULL;
-    int nrecords = parse_fasta(alignment, &records);
+    int nrecords = fasta_parse(alignment, &records);
 
     // Main loop
     // Display current file
