@@ -5,21 +5,40 @@
 
 #include "formats.h"
 
+void parse_fasta_free(char *line, char *header, char *seq)
+{
+    if (line != NULL)
+        free(line);
+    if (header != NULL)
+        free(header);
+    if (seq != NULL)
+        free(seq);
+}
+
 int parse_fasta(FILE *fp, SeqRecord **records_ptr)
 {
-    // Record initial position of stream
+    // Declarations
     long pos;
-    if ((pos = ftell(fp)) == -1)
-    {
-        perror("ftell failed in parse_fasta.");
-        exit(1);
-    }
 
-    // Count number of records
     int nrecords = 0;
+
     char *line = NULL;
     size_t capacity;
     ssize_t linelen;
+
+    ssize_t trimlen;
+    char *header = NULL;
+    char *seq = NULL;
+    size_t seqlen = 0;
+
+    // Record initial position of stream
+    if ((pos = ftell(fp)) == -1)
+    {
+        parse_fasta_free(line, header, seq);
+        return -3;
+    }
+
+    // Count number of records
     while ((linelen = getline(&line, &capacity, fp)) > 0)
     {
         if (line[0] == '>')
@@ -28,25 +47,28 @@ int parse_fasta(FILE *fp, SeqRecord **records_ptr)
                 nrecords++;
             else
             {
-                printf("Number of records in FASTA exceeds maximum (%d). Quitting...\n", INT_MAX);
-                exit(1);
+                parse_fasta_free(line, header, seq);
+                return -1;
             }
         }
     }
-
     if (nrecords == 0)
+    {
+        parse_fasta_free(line, header, seq);
         return nrecords;
+    }
 
+    // Reset stream and allocate memory
     if (fseek(fp, pos, SEEK_SET) == -1)
     {
-        perror("fseek failed in parse_fasta.");
-        exit(1);
+        parse_fasta_free(line, header, seq);
+        return -3;
     }
     void *ptr = malloc(nrecords * sizeof(SeqRecord));
     if (ptr == NULL)
     {
-        perror("malloc failed in parse_fasta");
-        exit(1);
+        parse_fasta_free(line, header, seq);
+        return -4;
     }
     *records_ptr = ptr;
 
@@ -55,8 +77,8 @@ int parse_fasta(FILE *fp, SeqRecord **records_ptr)
         printf("Reading until non-empty...\n");
     if (line[0] != '>')
     {
-        printf("First non-empty line did not start with '>' (instead %s). Quitting...\n", line);
-        exit(1);
+        parse_fasta_free(line, header, seq);
+        return -2;
     }
 
     // Read records
@@ -69,23 +91,22 @@ int parse_fasta(FILE *fp, SeqRecord **records_ptr)
             continue;
         }
 
-        ssize_t trimlen;
         if (line[linelen - 1] == '\n')
             trimlen = linelen - 1;
         else
             trimlen = linelen;
 
-        char *header = malloc(trimlen); // +1 for null; -1 for excluding >
+        header = malloc(trimlen); // +1 for null; -1 for excluding >
         if (header == NULL)
         {
-            perror("malloc failed in parse_fasta");
-            exit(1);
+            parse_fasta_free(line, header, seq);
+            return -4;
         }
         memcpy(header, line + 1, trimlen - 1);
         header[trimlen - 1] = '\0';
 
-        char *seq = NULL;
-        size_t seqlen = 0;
+        seq = NULL;
+        seqlen = 0;
         while ((linelen = getline(&line, &capacity, fp)) > 0 && (line[0] != '>'))
         {
             if (line[linelen - 1] == '\n')
@@ -93,12 +114,18 @@ int parse_fasta(FILE *fp, SeqRecord **records_ptr)
             else
                 trimlen = linelen;
 
+            if (seqlen >= INT_MAX - trimlen - 1)
+            {
+                parse_fasta_free(line, header, seq);
+                return -5;
+            }
             ptr = realloc(seq, seqlen + trimlen + 1);
             if (ptr == NULL)
             {
-                perror("realloc failed in parse_fasta");
-                exit(1);
+                parse_fasta_free(line, header, seq);
+                return -4;
             }
+
             seq = ptr;
             memcpy(seq + seqlen, line, trimlen);
             seqlen += trimlen;
@@ -109,12 +136,13 @@ int parse_fasta(FILE *fp, SeqRecord **records_ptr)
         i++;
     }
 
-    if (line != NULL)
-        free(line);
     if (fseek(fp, pos, SEEK_SET) == -1)
     {
-        perror("fseek failed in parse_fasta.");
-        exit(1);
+        parse_fasta_free(line, header, seq);
+        return -3;
     }
+
+    free(line);
+
     return nrecords;
 }
