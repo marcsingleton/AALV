@@ -1,9 +1,5 @@
-#ifndef FORMATS_H
-#define FORMATS_H
-
-/*
- * Alignment IO
- */
+#ifndef SEQRECORD_H
+#define SEQRECORD_H
 
 typedef struct
 {
@@ -19,6 +15,4 @@ typedef struct
     int len;
 } SeqRecordArray;
 
-int parse_fasta(FILE *fp, SeqRecord **records_ptr);
-
-#endif // FORMATS_H
+#endif // SEQRECORD_H

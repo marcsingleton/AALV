@@ -3,13 +3,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "formats.h"
-
-int FASTA_ERROR_INVALID_FORMAT = -1;
-int FASTA_ERROR_RECORD_OVERFLOW = -2;
-int FASTA_ERROR_SEQUENCE_OVERFLOW = -3;
-int FASTA_ERROR_FILE_IO = -4;
-int FASTA_ERROR_MEMORY_ALLOCATION = -5;
+#include "fasta.h"
+#include "seqrecord.h"
 
 void parse_fasta_free(char *line, char *header, char *seq)
 {
