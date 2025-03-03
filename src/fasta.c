@@ -149,3 +149,26 @@ int fasta_parse(FILE *fp, SeqRecord **records_ptr)
 
     return nrecords;
 }
+
+int fasta_read(const char *path, SeqRecord **records_ptr)
+{
+    FILE *fp = fopen(path, "r");
+    if (fp == NULL)
+        return FASTA_ERROR_FILE_IO;
+
+    SeqRecord *ptr = malloc(sizeof(SeqRecord));
+    if (ptr == NULL)
+        return FASTA_ERROR_MEMORY_ALLOCATION;
+
+    int nrecords = fasta_parse(fp, &ptr);
+
+    if (fclose(fp) != 0)
+    {
+        free(ptr);
+        return FASTA_ERROR_FILE_IO;
+    }
+
+    *records_ptr = ptr;
+
+    return nrecords;
+}

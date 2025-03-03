@@ -11,4 +11,6 @@ extern const int FASTA_ERROR_MEMORY_ALLOCATION;
 
 int fasta_parse(FILE *fp, SeqRecord **records_ptr);
 
+int fasta_read(const char *path, SeqRecord **records_ptr);
+
 #endif // FASTA_H
