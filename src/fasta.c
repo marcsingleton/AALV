@@ -38,6 +38,14 @@ int fasta_parse(FILE *fp, SeqRecord **records_ptr)
     char *seq = NULL;
     size_t seqlen = 0;
 
+    size_t bufferlen = 1024;
+    char *buffer = malloc(bufferlen);
+    if (buffer == NULL)
+    {
+        fasta_parse_free(line, header, seq);
+        return FASTA_ERROR_MEMORY_ALLOCATION;
+    }
+
     // Record initial position of stream
     if ((pos = ftell(fp)) == -1)
     {
@@ -114,32 +122,51 @@ int fasta_parse(FILE *fp, SeqRecord **records_ptr)
         memcpy(header, line + 1, trimlen - 1);
         header[trimlen - 1] = '\0';
 
-        seq = NULL;
         seqlen = 0;
         while ((linelen = getline(&line, &capacity, fp)) > 0 && (line[0] != '>'))
         {
+            // Trim line
             if (line[linelen - 1] == '\n')
                 trimlen = linelen - 1;
             else
                 trimlen = linelen;
 
+            // Check for sequence overflow
             if (seqlen >= INT_MAX - trimlen - 1)
             {
                 fasta_parse_free(line, header, seq);
                 return FASTA_ERROR_SEQUENCE_OVERFLOW;
             }
-            ptr = realloc(seq, seqlen + trimlen + 1);
-            if (ptr == NULL)
-            {
-                fasta_parse_free(line, header, seq);
-                return FASTA_ERROR_MEMORY_ALLOCATION;
-            }
 
-            seq = ptr;
-            memcpy(seq + seqlen, line, trimlen);
+            // Check for buffer capacity
+            while (bufferlen <= seqlen + trimlen + 1)
+            {
+                if (bufferlen >= INT_MAX / 2) // Can fail with margin if INT_MAX is odd
+                {
+                    fasta_parse_free(line, header, seq);
+                    return FASTA_ERROR_MEMORY_ALLOCATION;
+                }
+                ptr = realloc(buffer, 2 * bufferlen);
+                if (ptr == NULL)
+                {
+                    fasta_parse_free(line, header, seq);
+                    return FASTA_ERROR_MEMORY_ALLOCATION;
+                }
+                buffer = ptr;
+                bufferlen *= 2;
+            }
+            memcpy(buffer + seqlen, line, trimlen);
             seqlen += trimlen;
-            seq[seqlen] = '\0';
+            buffer[seqlen] = '\0';
         }
+        seq = malloc(seqlen + 1);
+        if (seq == NULL)
+        {
+            fasta_parse_free(line, header, seq);
+            return FASTA_ERROR_MEMORY_ALLOCATION;
+        }
+        memcpy(seq, buffer, seqlen + 1);
+
         (*records_ptr + i)->header = header;
         (*records_ptr + i)->seq = seq;
         i++;
