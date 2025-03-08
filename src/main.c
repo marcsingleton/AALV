@@ -21,15 +21,10 @@ int main(int argc, char *argv[])
     // - If no matching extension, infer with sniffer
     // - Error if no sniffer is successful
     // - Error if an explicit or inferred format is malformed
-    FILE *alignment = fopen(argv[1], "r");
-    if (alignment == NULL)
-    {
-        fputs("Failed to open file. Quitting...\n", stderr);
-        return 1;
-    }
 
     SeqRecord *records = NULL;
-    int nrecords = fasta_parse(alignment, &records);
+    int nrecords = fasta_read(argv[1], &records);
+    printf("Records is: %d\n", nrecords);
 
     // Main loop
     // Display current file
@@ -44,6 +39,5 @@ int main(int argc, char *argv[])
 
     // Clean up
     // Free memory and restore terminal options
-    fclose(alignment);
     return 0;
 }
