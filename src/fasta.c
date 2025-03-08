@@ -17,7 +17,7 @@ int fasta_parse(FILE *fp, SeqRecord **records_ptr)
     // Declarations
     long pos = 0;
 
-    void *ptr; // A generic temporary pointer for allocations
+    void *ptr = NULL; // A generic temporary pointer for allocations
 
     int nrecords = 0;
     SeqRecord *new_records = NULL;
@@ -55,13 +55,12 @@ int fasta_parse(FILE *fp, SeqRecord **records_ptr)
     {
         if (line[0] == '>')
         {
-            if (INT_MAX - 1 >= nrecords)
-                nrecords++;
-            else
+            if (nrecords > INT_MAX - 1)
             {
                 nrecords = FASTA_ERROR_RECORD_OVERFLOW;
                 goto cleanup;
             }
+            nrecords++;
         }
     }
     if (nrecords == 0)
@@ -95,7 +94,7 @@ int fasta_parse(FILE *fp, SeqRecord **records_ptr)
     // Read records
     while (linelen > 0)
     {
-        if (linelen == 1)
+        if (line[0] == '\n')
         {
             linelen = getline(&line, &capacity, fp);
             continue;
@@ -134,7 +133,7 @@ int fasta_parse(FILE *fp, SeqRecord **records_ptr)
             // Check for buffer capacity
             while (bufferlen <= seqlen + trimlen + 1)
             {
-                if (bufferlen >= INT_MAX / 2) // Can fail with some margin if INT_MAX is odd
+                if (bufferlen >= INT_MAX / 2)
                 {
                     nrecords = FASTA_ERROR_MEMORY_ALLOCATION;
                     goto cleanup;
@@ -171,23 +170,23 @@ int fasta_parse(FILE *fp, SeqRecord **records_ptr)
     *records_ptr = new_records;
     return nrecords;
 
+cleanup:
+    free(line);
+    free(buffer);
+    free(header);
+    free(seq);
+    if (new_records != NULL)
     {
-    cleanup:
-        free(line);
-        free(buffer);
-        free(header);
-        free(seq);
-        if (new_records != NULL)
+        header = NULL; // To guard against double frees
+        seq = NULL;
+        for (int i = 0; i < record_index; i++)
         {
-            for (int i = 0; i < record_index; i++)
-            {
-                free(new_records[i].header);
-                free(new_records[i].seq);
-            }
+            free(new_records[i].header);
+            free(new_records[i].seq);
         }
-        free(new_records);
-        return nrecords;
     }
+    free(new_records);
+    return nrecords;
 }
 
 int fasta_read(const char *path, SeqRecord **records_ptr)
@@ -196,15 +195,11 @@ int fasta_read(const char *path, SeqRecord **records_ptr)
     if (fp == NULL)
         return FASTA_ERROR_FILE_IO;
 
-    SeqRecord *ptr = malloc(sizeof(SeqRecord));
-    if (ptr == NULL)
-        return FASTA_ERROR_MEMORY_ALLOCATION;
-
+    SeqRecord *ptr = NULL;
     int nrecords = fasta_parse(fp, &ptr);
 
     if (fclose(fp) != 0)
     {
-        free(ptr);
         return FASTA_ERROR_FILE_IO;
     }
 
