@@ -13,4 +13,8 @@ int fasta_parse(FILE *fp, SeqRecord **records_ptr);
 
 int fasta_read(const char *path, SeqRecord **records_ptr);
 
+int fasta_fwrite(FILE *fp, const SeqRecord *records, const int nrecords, const int maxlen);
+
+int fasta_write(const char *path, const SeqRecord *records, const int nrecords, const int maxlen);
+
 #endif // FASTA_H

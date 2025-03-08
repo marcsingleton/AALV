@@ -207,3 +207,37 @@ int fasta_read(const char *path, SeqRecord **records_ptr)
 
     return nrecords;
 }
+
+int fasta_fwrite(FILE *fp, const SeqRecord *records, const int nrecords, const int maxlen)
+{
+    for (int i = 0; i < nrecords; i++)
+    {
+        SeqRecord record = records[i];
+        fprintf(fp, ">%s\n", record.header);
+        int seqlen = strlen(record.seq);
+        int nlines = seqlen / maxlen;
+        int j = 0;
+        for (int j = 0; j < nlines; j++)
+        {
+            fwrite(record.seq + j * maxlen, sizeof(char), maxlen, fp);
+            fputc('\n', fp);
+        }
+        int nchars = seqlen % maxlen;
+        if (nchars > 0)
+        {
+            if (nlines > 0)
+                j++;
+            fwrite(record.seq + j * maxlen, sizeof(char), nchars, fp);
+            fputc('\n', fp);
+        }
+    }
+    return 0;
+}
+
+int fasta_write(const char *path, const SeqRecord *records, const int nrecords, const int maxlen)
+{
+    FILE *fp = fopen(path, "w");
+    int code = fasta_fwrite(fp, records, nrecords, maxlen);
+    fclose(fp);
+    return code;
+}
