@@ -30,12 +30,7 @@ int main(int argc, char *argv[])
     // Display current file
     // Read input
     // Process input
-    for (int i = 0; i < nrecords; i++)
-    {
-        printf("\nRecord %d\n", i);
-        printf("%s\n", records[i].header);
-        printf("%s\n", records[i].seq);
-    }
+    fasta_fwrite(stdout, records, nrecords, 10);
 
     // Clean up
     // Free memory and restore terminal options
