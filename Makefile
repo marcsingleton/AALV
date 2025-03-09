@@ -6,7 +6,7 @@ SRC := array.c fasta.c seqrecord.c
 SRC_OBJ := $(SRC:%.c=$(BUILD_DIR)/%.o)
 SRC_TARGET := $(BUILD_DIR)/aalv
 
-TESTS := test_array.c test_formats.c
+TESTS := test_array.c test_fasta.c
 TESTS_TARGET := $(TESTS:%.c=$(BUILD_DIR)/%)
 
 # SRC rules
