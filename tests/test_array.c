@@ -3,6 +3,8 @@
 #include "array.h"
 #include "utils.h"
 
+#define MODULE_NAME "test_array"
+
 int test_init()
 {
     Array array;
@@ -70,5 +72,5 @@ TestFunction tests[] = {
 
 int main()
 {
-    run_tests(tests, NTESTS, "test_array.c");
+    run_tests(tests, NTESTS, MODULE_NAME);
 }
