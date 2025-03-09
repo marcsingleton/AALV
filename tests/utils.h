@@ -19,15 +19,15 @@ void run_tests(TestFunction *tests, int ntests, char *module_name)
     for (int i = 0; i < ntests; i++)
     {
         TestFunction test = tests[i];
-        printf("Running %s", test.func_name);
+        printf("Running %s...", test.func_name);
         int code = (*test.func_ptr)();
         if (code == 0)
         {
-            printf("...passed!\n");
+            printf("passed!\n");
             npasses++;
         }
         else
-            printf("...failed with code %d.\n", code);
+            printf("failed with code %d.\n", code);
     }
     printf("%d / %d tests passed in module %s\n", npasses, ntests, module_name);
 }
