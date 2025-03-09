@@ -12,7 +12,7 @@ const int FASTA_ERROR_SEQUENCE_OVERFLOW = -3;
 const int FASTA_ERROR_FILE_IO = -4;
 const int FASTA_ERROR_MEMORY_ALLOCATION = -5;
 
-int fasta_parse(FILE *fp, SeqRecord **records_ptr)
+int fasta_fread(FILE *fp, SeqRecord **records_ptr)
 {
     // Declarations
     long pos = 0;
@@ -196,7 +196,7 @@ int fasta_read(const char *path, SeqRecord **records_ptr)
         return FASTA_ERROR_FILE_IO;
 
     SeqRecord *ptr = NULL;
-    int nrecords = fasta_parse(fp, &ptr);
+    int nrecords = fasta_fread(fp, &ptr);
 
     if (fclose(fp) != 0)
     {
