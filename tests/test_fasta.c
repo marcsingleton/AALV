@@ -7,10 +7,15 @@
 
 #define MODULE_NAME "test_fasta"
 
+#define SEQ1 "This is the first sequence."
+#define SEQ2 "This is the second sequence. It is a bit longer than the first."
+#define SEQ3 "This is the third sequence!"
 SeqRecord records[] = {
-    {"header1", NULL, "This is the first sequence.", 1},
-    {"header2", NULL, "This is the second sequence. It is at least 50 characters.", 1},
+    {.header = "id1 metadata1", .seq = SEQ1, .len = sizeof(SEQ1)},
+    {.header = "id2 metadata2", .seq = SEQ2, .len = sizeof(SEQ2)},
+    {.header = "id3 metadata3", .seq = SEQ3, .len = sizeof(SEQ3)},
 };
+#define NRECORDS sizeof(records) / sizeof(SeqRecord)
 
 int records_equal(SeqRecord *records_1, SeqRecord *records_2, int nrecords)
 {
