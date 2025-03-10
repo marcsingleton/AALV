@@ -34,12 +34,13 @@ int records_equal(SeqRecord *records_1, SeqRecord *records_2, int nrecords)
 
 int test_read_write()
 {
-    char buffer[2048];
-    FILE *fp = fmemopen(buffer, 2048, "rw");
-    fasta_fwrite(fp, records, 2, 100);
+    int bufferlen = 1024;
+    char buffer[bufferlen];
+    FILE *fp = fmemopen(buffer, bufferlen, "rw");
+    fasta_fwrite(fp, records, NRECORDS, 100);
     fseek(fp, 0, SEEK_SET);
     SeqRecord *new_records = NULL;
-    int nrecords = fasta_parse(fp, &new_records);
+    int nrecords = fasta_fread(fp, &new_records);
     int code = records_equal(records, new_records, 2);
     if (code == 1)
         return 0;
