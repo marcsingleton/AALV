@@ -213,22 +213,7 @@ int fasta_fwrite(FILE *fp, const SeqRecord *records, const int nrecords, const i
     {
         SeqRecord record = records[i];
         fprintf(fp, ">%s\n", record.header);
-        int seqlen = strlen(record.seq);
-        int nlines = seqlen / maxlen;
-        int j = 0;
-        for (int j = 0; j < nlines; j++)
-        {
-            fwrite(record.seq + j * maxlen, sizeof(char), maxlen, fp);
-            fputc('\n', fp);
-        }
-        int nchars = seqlen % maxlen;
-        if (nchars > 0)
-        {
-            if (nlines > 0)
-                j++;
-            fwrite(record.seq + j * maxlen, sizeof(char), nchars, fp);
-            fputc('\n', fp);
-        }
+        fasta_wrap_string(fp, record.seq, maxlen);
     }
     return 0;
 }
@@ -239,4 +224,24 @@ int fasta_write(const char *path, const SeqRecord *records, const int nrecords, 
     int code = fasta_fwrite(fp, records, nrecords, maxlen);
     fclose(fp);
     return code;
+}
+
+void fasta_wrap_string(FILE *fp, const char *string, const int maxlen)
+{
+    int seqlen = strlen(string);
+    int nlines = seqlen / maxlen;
+    int j = 0;
+    for (int j = 0; j < nlines; j++)
+    {
+        fwrite(string + j * maxlen, sizeof(char), maxlen, fp);
+        fputc('\n', fp);
+    }
+    int nchars = seqlen % maxlen;
+    if (nchars > 0)
+    {
+        if (nlines > 0)
+            j++;
+        fwrite(string + j * maxlen, sizeof(char), nchars, fp);
+        fputc('\n', fp);
+    }
 }
