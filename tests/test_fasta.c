@@ -47,8 +47,24 @@ int test_read_write()
     return 1;
 }
 
+int test_no_header()
+{
+    int bufferlen = 1024;
+    char buffer[bufferlen];
+    FILE *fp = fmemopen(buffer, bufferlen, "rw");
+    fasta_wrap_string(fp, records[0].seq, 100);
+    fasta_fwrite(fp, records + 1, NRECORDS - 1, 100);
+    fseek(fp, 0, SEEK_SET);
+    SeqRecord *new_records = NULL;
+    int nrecords = fasta_fread(fp, &new_records);
+    if (nrecords == FASTA_ERROR_INVALID_FORMAT)
+        return 0;
+    return 1;
+}
+
 TestFunction tests[] = {
     {&test_read_write, "test_read_write"},
+    {&test_no_header, "test_no_header"},
 };
 
 #define NTESTS sizeof(tests) / sizeof(TestFunction)
