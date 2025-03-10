@@ -82,8 +82,7 @@ int fasta_fread(FILE *fp, SeqRecord **records_ptr)
 
     // Read until first non-empty line
     while ((linelen = getline(&line, &capacity, fp)) == 1 && line[0] == '\n')
-    {
-    }
+        ;
 
     if (line[0] != '>')
     {
