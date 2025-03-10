@@ -3,9 +3,9 @@
 
 typedef struct
 {
+    char *header;
     char *seq;
     char *id;
-    char *header;
     int len;
 } SeqRecord;
 
