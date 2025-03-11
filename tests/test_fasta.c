@@ -64,7 +64,13 @@ int test_no_header()
 
 int test_empty_file()
 {
-    return 1;
+    char buffer[BUFFERLEN] = "";
+    FILE *fp = fmemopen(buffer, 1, "rw");
+    SeqRecord *new_records = NULL;
+    int nrecords = fasta_fread(fp, &new_records);
+    if (nrecords != 0)
+        return 1;
+    return 0;
 }
 
 int test_non_fasta()
@@ -75,6 +81,7 @@ int test_non_fasta()
 TestFunction tests[] = {
     {&test_read_write, "test_read_write"},
     {&test_no_header, "test_no_header"},
+    {&test_empty_file, "test_empty_file"},
 };
 
 #define NTESTS sizeof(tests) / sizeof(TestFunction)
