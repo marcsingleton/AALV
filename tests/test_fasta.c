@@ -17,6 +17,7 @@ SeqRecord records[] = {
 };
 #define NRECORDS sizeof(records) / sizeof(SeqRecord)
 #define BUFFERLEN 1024 // Must be large enough to hold above SeqRecords
+#define MAXLEN 10      // Make small enough to ensure above records will wrap a few times
 
 int records_equal(SeqRecord *records_1, SeqRecord *records_2, int nrecords)
 {
@@ -54,7 +55,7 @@ int test_read_write()
 {
     char buffer[BUFFERLEN];
     FILE *fp = fmemopen(buffer, BUFFERLEN, "rw");
-    fasta_fwrite(fp, records, NRECORDS, 10);
+    fasta_fwrite(fp, records, NRECORDS, MAXLEN);
     fseek(fp, 0, SEEK_SET);
     SeqRecord *new_records = NULL;
     int nrecords = fasta_fread(fp, &new_records);
@@ -69,8 +70,8 @@ int test_no_header()
 {
     char buffer[BUFFERLEN];
     FILE *fp = fmemopen(buffer, BUFFERLEN, "rw");
-    fasta_wrap_string(fp, records[0].seq, records[0].len, 10);
-    fasta_fwrite(fp, records + 1, NRECORDS - 1, 10);
+    fasta_wrap_string(fp, records[0].seq, records[0].len, MAXLEN);
+    fasta_fwrite(fp, records + 1, NRECORDS - 1, MAXLEN);
     fseek(fp, 0, SEEK_SET);
     SeqRecord *new_records = NULL;
     int nrecords = fasta_fread(fp, &new_records);
@@ -100,7 +101,7 @@ int test_blank_lines()
     {
         SeqRecord *record = records + i;
         fprintf(fp, ">%s\n\n", record->header);
-        wrap_string_with_blanks(fp, record->seq, record->len, 10);
+        wrap_string_with_blanks(fp, record->seq, record->len, MAXLEN);
     }
     fseek(fp, 0, SEEK_SET);
     SeqRecord *new_records = NULL;
