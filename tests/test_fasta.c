@@ -33,6 +33,23 @@ int records_equal(SeqRecord *records_1, SeqRecord *records_2, int nrecords)
     return 1;
 }
 
+void wrap_string_with_blanks(FILE *fp, const char *s, const int len, const int maxlen)
+{
+    int nlines = len / maxlen;
+    int j;
+    for (j = 0; j < nlines; j++)
+    {
+        fwrite(s + j * maxlen, sizeof(char), maxlen, fp);
+        fputs("\n\n", fp);
+    }
+    int nchars = len % maxlen;
+    if (nchars > 0)
+    {
+        fwrite(s + j * maxlen, sizeof(char), nchars, fp);
+        fputs("\n\n", fp);
+    }
+}
+
 int test_read_write()
 {
     char buffer[BUFFERLEN];
@@ -74,6 +91,27 @@ int test_empty_file()
     return 0;
 }
 
+int test_blank_lines()
+{
+    char buffer[BUFFERLEN];
+    FILE *fp = fmemopen(buffer, BUFFERLEN, "rw");
+    fputs("\n\n\n", fp);
+    for (int i = 0; i < NRECORDS; i++)
+    {
+        SeqRecord *record = records + i;
+        fprintf(fp, ">%s\n\n", record->header);
+        wrap_string_with_blanks(fp, record->seq, record->len, 10);
+    }
+    fseek(fp, 0, SEEK_SET);
+    SeqRecord *new_records = NULL;
+    int nrecords = fasta_fread(fp, &new_records);
+    if (nrecords != NRECORDS)
+        return 1;
+    if (records_equal(records, new_records, NRECORDS) != 1)
+        return 1;
+    return 0;
+}
+
 int test_non_fasta()
 {
     char buffer[BUFFERLEN] =
@@ -92,6 +130,7 @@ TestFunction tests[] = {
     {&test_read_write, "test_read_write"},
     {&test_no_header, "test_no_header"},
     {&test_empty_file, "test_empty_file"},
+    {&test_blank_lines, "test_blank_lines"},
     {&test_non_fasta, "test_non_fasta"},
 };
 
