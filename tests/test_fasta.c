@@ -16,6 +16,7 @@ SeqRecord records[] = {
     {.header = "id3 metadata3", .seq = SEQ3, .len = sizeof(SEQ3)},
 };
 #define NRECORDS sizeof(records) / sizeof(SeqRecord)
+#define BUFFERLEN 1024 // Must be large enough to hold above SeqRecords
 
 int records_equal(SeqRecord *records_1, SeqRecord *records_2, int nrecords)
 {
@@ -34,9 +35,8 @@ int records_equal(SeqRecord *records_1, SeqRecord *records_2, int nrecords)
 
 int test_read_write()
 {
-    int bufferlen = 1024;
-    char buffer[bufferlen];
-    FILE *fp = fmemopen(buffer, bufferlen, "rw");
+    char buffer[BUFFERLEN];
+    FILE *fp = fmemopen(buffer, BUFFERLEN, "rw");
     fasta_fwrite(fp, records, NRECORDS, 100);
     fseek(fp, 0, SEEK_SET);
     SeqRecord *new_records = NULL;
@@ -49,9 +49,8 @@ int test_read_write()
 
 int test_no_header()
 {
-    int bufferlen = 1024;
-    char buffer[bufferlen];
-    FILE *fp = fmemopen(buffer, bufferlen, "rw");
+    char buffer[BUFFERLEN];
+    FILE *fp = fmemopen(buffer, BUFFERLEN, "rw");
     fasta_wrap_string(fp, records[0].seq, records[0].len, 100);
     fasta_fwrite(fp, records + 1, NRECORDS - 1, 100);
     fseek(fp, 0, SEEK_SET);
@@ -59,6 +58,16 @@ int test_no_header()
     int nrecords = fasta_fread(fp, &new_records);
     if (nrecords == FASTA_ERROR_INVALID_FORMAT)
         return 0;
+    return 1;
+}
+
+int test_empty_file()
+{
+    return 1;
+}
+
+int test_non_fasta()
+{
     return 1;
 }
 
