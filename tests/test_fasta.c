@@ -9,11 +9,11 @@
 
 #define SEQ1 "This is the first sequence."
 #define SEQ2 "This is the second sequence. It is a bit longer than the first."
-#define SEQ3 "This is the third sequence!"
+#define SEQ3 "This is the third sequence in the array!"
 SeqRecord records[] = {
-    {.header = "id1 metadata1", .seq = SEQ1, .len = sizeof(SEQ1)},
-    {.header = "id2 metadata2", .seq = SEQ2, .len = sizeof(SEQ2)},
-    {.header = "id3 metadata3", .seq = SEQ3, .len = sizeof(SEQ3)},
+    {.header = "id1 metadata1", .seq = SEQ1, .len = sizeof(SEQ1) - 1},
+    {.header = "id2 metadata2", .seq = SEQ2, .len = sizeof(SEQ2) - 1},
+    {.header = "id3 metadata3", .seq = SEQ3, .len = sizeof(SEQ3) - 1},
 };
 #define NRECORDS sizeof(records) / sizeof(SeqRecord)
 #define BUFFERLEN 1024 // Must be large enough to hold above SeqRecords
