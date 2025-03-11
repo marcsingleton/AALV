@@ -37,7 +37,7 @@ int test_read_write()
 {
     char buffer[BUFFERLEN];
     FILE *fp = fmemopen(buffer, BUFFERLEN, "rw");
-    fasta_fwrite(fp, records, NRECORDS, 100);
+    fasta_fwrite(fp, records, NRECORDS, 10);
     fseek(fp, 0, SEEK_SET);
     SeqRecord *new_records = NULL;
     int nrecords = fasta_fread(fp, &new_records);
@@ -52,8 +52,8 @@ int test_no_header()
 {
     char buffer[BUFFERLEN];
     FILE *fp = fmemopen(buffer, BUFFERLEN, "rw");
-    fasta_wrap_string(fp, records[0].seq, records[0].len, 100);
-    fasta_fwrite(fp, records + 1, NRECORDS - 1, 100);
+    fasta_wrap_string(fp, records[0].seq, records[0].len, 10);
+    fasta_fwrite(fp, records + 1, NRECORDS - 1, 10);
     fseek(fp, 0, SEEK_SET);
     SeqRecord *new_records = NULL;
     int nrecords = fasta_fread(fp, &new_records);
