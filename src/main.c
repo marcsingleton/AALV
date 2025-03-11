@@ -2,7 +2,7 @@
 
 #include "array.h"
 #include "fasta.h"
-#include "seqrecord.h"
+#include "sequences.h"
 
 // Main
 int main(int argc, char *argv[])

@@ -4,7 +4,7 @@
 #include <string.h>
 
 #include "fasta.h"
-#include "seqrecord.h"
+#include "sequences.h"
 
 const int FASTA_ERROR_INVALID_FORMAT = -1;
 const int FASTA_ERROR_RECORD_OVERFLOW = -2;

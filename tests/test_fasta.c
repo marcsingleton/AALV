@@ -2,7 +2,7 @@
 #include <string.h>
 
 #include "fasta.h"
-#include "seqrecord.h"
+#include "sequences.h"
 #include "utils.h"
 
 #define MODULE_NAME "test_fasta"

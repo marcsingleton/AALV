@@ -1,5 +1,5 @@
-#ifndef SEQRECORD_H
-#define SEQRECORD_H
+#ifndef SEQUENCES_H
+#define SEQUENCES_H
 
 /*
  * Sequence data structures
@@ -19,4 +19,4 @@ typedef struct
     size_t len;
 } SeqRecordArray;
 
-#endif // SEQRECORD_H
+#endif // SEQUENCES_H

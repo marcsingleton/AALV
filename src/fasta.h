@@ -5,7 +5,7 @@
  * FASTA format IO
  */
 
-#include "seqrecord.h"
+#include "sequences.h"
 
 extern const int FASTA_ERROR_INVALID_FORMAT;
 extern const int FASTA_ERROR_RECORD_OVERFLOW;
