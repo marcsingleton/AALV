@@ -5,6 +5,8 @@
  * Sequence data structures
  */
 
+#include <stddef.h>
+
 typedef struct
 {
     char *header;
