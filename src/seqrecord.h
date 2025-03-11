@@ -6,13 +6,13 @@ typedef struct
     char *header;
     char *seq;
     char *id;
-    int len;
+    size_t len;
 } SeqRecord;
 
 typedef struct
 {
     char *SeqRecord;
-    int len;
+    size_t len;
 } SeqRecordArray;
 
 #endif // SEQRECORD_H
