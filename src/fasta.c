@@ -50,8 +50,24 @@ int fasta_fread(FILE *fp, SeqRecord **records_ptr)
         goto cleanup;
     }
 
+    // Read until first non-empty line
+    while ((linelen = getline(&line, &capacity, fp)) == 1 && line[0] == '\n')
+        ;
+
+    // Check for empty files and improper formatting
+    if (linelen <= 0)
+    {
+        nrecords = 0;
+        goto cleanup;
+    }
+    if (line[0] != '>')
+    {
+        nrecords = FASTA_ERROR_INVALID_FORMAT;
+        goto cleanup;
+    }
+
     // Count number of records
-    while ((linelen = getline(&line, &capacity, fp)) > 0)
+    while (linelen > 0)
     {
         if (line[0] == '>')
         {
@@ -62,9 +78,8 @@ int fasta_fread(FILE *fp, SeqRecord **records_ptr)
             }
             nrecords++;
         }
+        linelen = getline(&line, &capacity, fp);
     }
-    if (nrecords == 0)
-        goto cleanup;
 
     // Reset stream and allocate memory
     if (fseek(fp, pos, SEEK_SET) == -1)
@@ -83,12 +98,6 @@ int fasta_fread(FILE *fp, SeqRecord **records_ptr)
     // Read until first non-empty line
     while ((linelen = getline(&line, &capacity, fp)) == 1 && line[0] == '\n')
         ;
-
-    if (line[0] != '>')
-    {
-        nrecords = FASTA_ERROR_INVALID_FORMAT;
-        goto cleanup;
-    }
 
     // Read records
     while (linelen > 0)
