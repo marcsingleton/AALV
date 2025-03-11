@@ -158,8 +158,10 @@ int fasta_fread(FILE *fp, SeqRecord **records_ptr)
         }
         memcpy(seq, buffer, seqlen + 1);
 
-        new_records[record_index].header = header;
-        new_records[record_index].seq = seq;
+        SeqRecord *new_record = new_records + record_index;
+        new_record->header = header;
+        new_record->seq = seq;
+        new_record->len = seqlen;
         record_index++;
     }
 
