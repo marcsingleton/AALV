@@ -231,8 +231,8 @@ int fasta_write(const char *path, SeqRecord *records, const int nrecords, const 
 void fasta_wrap_string(FILE *fp, const char *s, const int len, const int maxlen)
 {
     int nlines = len / maxlen;
-    int j = 0;
-    for (int j = 0; j < nlines; j++)
+    int j;
+    for (j = 0; j < nlines; j++)
     {
         fwrite(s + j * maxlen, sizeof(char), maxlen, fp);
         fputc('\n', fp);
@@ -240,8 +240,6 @@ void fasta_wrap_string(FILE *fp, const char *s, const int len, const int maxlen)
     int nchars = len % maxlen;
     if (nchars > 0)
     {
-        if (nlines > 0)
-            j++;
         fwrite(s + j * maxlen, sizeof(char), nchars, fp);
         fputc('\n', fp);
     }
