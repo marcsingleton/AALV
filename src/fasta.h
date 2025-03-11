@@ -17,6 +17,6 @@ int fasta_fwrite(FILE *fp, const SeqRecord *records, const int nrecords, const i
 
 int fasta_write(const char *path, const SeqRecord *records, const int nrecords, const int maxlen);
 
-void fasta_wrap_string(FILE *fp, const char *string, const int maxlen);
+void fasta_wrap_string(FILE *fp, const char *s, const int len, const int maxlen);
 
 #endif // FASTA_H

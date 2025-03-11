@@ -52,7 +52,7 @@ int test_no_header()
     int bufferlen = 1024;
     char buffer[bufferlen];
     FILE *fp = fmemopen(buffer, bufferlen, "rw");
-    fasta_wrap_string(fp, records[0].seq, 100);
+    fasta_wrap_string(fp, records[0].seq, records[0].len, 100);
     fasta_fwrite(fp, records + 1, NRECORDS - 1, 100);
     fseek(fp, 0, SEEK_SET);
     SeqRecord *new_records = NULL;

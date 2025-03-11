@@ -215,7 +215,7 @@ int fasta_fwrite(FILE *fp, const SeqRecord *records, const int nrecords, const i
     {
         SeqRecord record = records[i];
         fprintf(fp, ">%s\n", record.header);
-        fasta_wrap_string(fp, record.seq, maxlen);
+        fasta_wrap_string(fp, record.seq, record.len, maxlen);
     }
     return 0;
 }
@@ -228,22 +228,21 @@ int fasta_write(const char *path, const SeqRecord *records, const int nrecords, 
     return code;
 }
 
-void fasta_wrap_string(FILE *fp, const char *string, const int maxlen)
+void fasta_wrap_string(FILE *fp, const char *s, const int len, const int maxlen)
 {
-    int seqlen = strlen(string);
-    int nlines = seqlen / maxlen;
+    int nlines = len / maxlen;
     int j = 0;
     for (int j = 0; j < nlines; j++)
     {
-        fwrite(string + j * maxlen, sizeof(char), maxlen, fp);
+        fwrite(s + j * maxlen, sizeof(char), maxlen, fp);
         fputc('\n', fp);
     }
-    int nchars = seqlen % maxlen;
+    int nchars = len % maxlen;
     if (nchars > 0)
     {
         if (nlines > 0)
             j++;
-        fwrite(string + j * maxlen, sizeof(char), nchars, fp);
+        fwrite(s + j * maxlen, sizeof(char), nchars, fp);
         fputc('\n', fp);
     }
 }
