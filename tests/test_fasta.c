@@ -76,13 +76,23 @@ int test_empty_file()
 
 int test_non_fasta()
 {
-    return 1;
+    char buffer[BUFFERLEN] =
+        "Here's a multiline\n"
+        "file that's definitely not\n"
+        "a FASTA.";
+    FILE *fp = fmemopen(buffer, BUFFERLEN, "rw");
+    SeqRecord *new_records = NULL;
+    int nrecords = fasta_fread(fp, &new_records);
+    if (nrecords != FASTA_ERROR_INVALID_FORMAT)
+        return 1;
+    return 0;
 }
 
 TestFunction tests[] = {
     {&test_read_write, "test_read_write"},
     {&test_no_header, "test_no_header"},
     {&test_empty_file, "test_empty_file"},
+    {&test_non_fasta, "test_non_fasta"},
 };
 
 #define NTESTS sizeof(tests) / sizeof(TestFunction)
