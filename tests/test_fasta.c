@@ -41,10 +41,11 @@ int test_read_write()
     fseek(fp, 0, SEEK_SET);
     SeqRecord *new_records = NULL;
     int nrecords = fasta_fread(fp, &new_records);
-    int code = records_equal(records, new_records, 2);
-    if (code == 1)
-        return 0;
-    return 1;
+    if (nrecords != NRECORDS)
+        return 1;
+    if (records_equal(records, new_records, NRECORDS) != 1)
+        return 1;
+    return 0;
 }
 
 int test_no_header()
@@ -56,9 +57,9 @@ int test_no_header()
     fseek(fp, 0, SEEK_SET);
     SeqRecord *new_records = NULL;
     int nrecords = fasta_fread(fp, &new_records);
-    if (nrecords == FASTA_ERROR_INVALID_FORMAT)
-        return 0;
-    return 1;
+    if (nrecords != FASTA_ERROR_INVALID_FORMAT)
+        return 1;
+    return 0;
 }
 
 int test_empty_file()
