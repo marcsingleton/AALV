@@ -1,6 +1,10 @@
 #ifndef SEQRECORD_H
 #define SEQRECORD_H
 
+/*
+ * Sequence data structures
+ */
+
 typedef struct
 {
     char *header;

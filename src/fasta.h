@@ -1,6 +1,10 @@
 #ifndef FASTA_H
 #define FASTA_H
 
+/*
+ * FASTA format IO
+ */
+
 #include "seqrecord.h"
 
 extern const int FASTA_ERROR_INVALID_FORMAT;
