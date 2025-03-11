@@ -64,8 +64,9 @@ int test_no_header()
 
 int test_empty_file()
 {
-    char buffer[BUFFERLEN] = "";
+    char buffer[BUFFERLEN];
     FILE *fp = fmemopen(buffer, 1, "rw");
+    fgetc(fp); // Consume the single byte of buffer
     SeqRecord *new_records = NULL;
     int nrecords = fasta_fread(fp, &new_records);
     if (nrecords != 0)
