@@ -2,7 +2,7 @@ SRC_DIR := src
 TESTS_DIR := tests
 BUILD_DIR := build
 
-SRC := array.c fasta.c seqrecord.c
+SRC := array.c fasta.c sequences.c
 SRC_OBJ := $(SRC:%.c=$(BUILD_DIR)/%.o)
 SRC_TARGET := $(BUILD_DIR)/aalv
 
