@@ -5,7 +5,7 @@
 
 #define MODULE_NAME "test_array"
 
-int test_init()
+int test_init(void)
 {
     Array array;
     int code = array_init(&array, sizeof(int));
@@ -15,7 +15,7 @@ int test_init()
         return 0;
 }
 
-int test_append_get()
+int test_append_get(void)
 {
     Array array;
     int code = array_init(&array, sizeof(int));
@@ -40,14 +40,14 @@ int test_append_get()
     return 0;
 }
 
-int test_get_out_of_bounds()
+int test_get_out_of_bounds(void)
 {
     Array array;
     int code = array_init(&array, sizeof(int));
     size_t len = 32;
     if (code != 0)
         return 1;
-    for (int i = 0; i < len; i++)
+    for (size_t i = 0; i < len; i++)
     {
         code = array_append(&array, &i);
         if (code != 0)
@@ -70,7 +70,7 @@ TestFunction tests[] = {
 
 #define NTESTS sizeof(tests) / sizeof(TestFunction)
 
-int main()
+int main(void)
 {
     run_tests(tests, NTESTS, MODULE_NAME);
 }

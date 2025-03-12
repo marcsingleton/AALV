@@ -132,7 +132,7 @@ int fasta_fread(FILE *fp, SeqRecord **records_ptr)
                 trimlen = linelen;
 
             // Check for sequence overflow
-            if (seqlen >= INT_MAX - trimlen - 1)
+            if (seqlen >= SIZE_MAX - trimlen - 1)
             {
                 nrecords = FASTA_ERROR_SEQUENCE_OVERFLOW;
                 goto cleanup;
@@ -141,7 +141,7 @@ int fasta_fread(FILE *fp, SeqRecord **records_ptr)
             // Check for buffer capacity
             while (bufferlen <= seqlen + trimlen + 1)
             {
-                if (bufferlen >= INT_MAX / 2)
+                if (bufferlen >= SIZE_MAX / 2)
                 {
                     nrecords = FASTA_ERROR_MEMORY_ALLOCATION;
                     goto cleanup;

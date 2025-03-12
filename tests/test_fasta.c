@@ -51,7 +51,7 @@ void wrap_string_with_blanks(FILE *fp, const char *s, const int len, const int m
     }
 }
 
-int test_read_write()
+int test_read_write(void)
 {
     char buffer[BUFFERLEN];
     FILE *fp = fmemopen(buffer, BUFFERLEN, "rw");
@@ -66,7 +66,7 @@ int test_read_write()
     return 0;
 }
 
-int test_no_header()
+int test_no_header(void)
 {
     char buffer[BUFFERLEN];
     FILE *fp = fmemopen(buffer, BUFFERLEN, "rw");
@@ -80,7 +80,7 @@ int test_no_header()
     return 0;
 }
 
-int test_empty_file()
+int test_empty_file(void)
 {
     char buffer[BUFFERLEN];
     FILE *fp = fmemopen(buffer, 1, "rw");
@@ -92,12 +92,12 @@ int test_empty_file()
     return 0;
 }
 
-int test_blank_lines()
+int test_blank_lines(void)
 {
     char buffer[BUFFERLEN];
     FILE *fp = fmemopen(buffer, BUFFERLEN, "rw");
     fputs("\n\n\n", fp);
-    for (int i = 0; i < NRECORDS; i++)
+    for (size_t i = 0; i < NRECORDS; i++) // To match NRECORDS type
     {
         SeqRecord *record = records + i;
         fprintf(fp, ">%s\n\n", record->header);
@@ -113,7 +113,7 @@ int test_blank_lines()
     return 0;
 }
 
-int test_non_fasta()
+int test_non_fasta(void)
 {
     char buffer[BUFFERLEN] =
         "Here's a multiline\n"
@@ -137,7 +137,7 @@ TestFunction tests[] = {
 
 #define NTESTS sizeof(tests) / sizeof(TestFunction)
 
-int main()
+int main(void)
 {
     run_tests(tests, NTESTS, MODULE_NAME);
 }
