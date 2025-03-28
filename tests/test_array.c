@@ -7,59 +7,92 @@
 
 int test_init(void)
 {
+    int code = 0;
     Array array;
-    int code = array_init(&array, sizeof(int));
-    if (code != 0 || array.size != sizeof(int) || array.capacity == 0 || array.len != 0)
-        return 1;
+    int value = array_init(&array, sizeof(int));
+    if (value != 0 || array.size != sizeof(int) || array.capacity == 0 || array.len != 0)
+        code = 1;
     else
-        return 0;
+        code = 0;
+    array_free(&array);
+    return code;
 }
 
 int test_append_get(void)
 {
+    int code = 0;
     Array array;
-    int code = array_init(&array, sizeof(int));
-    if (code != 0)
-        return 1;
+    int value = array_init(&array, sizeof(int));
+    if (value != 0)
+    {
+        code = 1;
+        goto cleanup;
+    }
     int n = 1024;
     for (int i = 0; i < n; i++)
     {
-        code = array_append(&array, &i);
-        if (code != 0)
-            return 2;
+        value = array_append(&array, &i);
+        if (value != 0)
+        {
+            code = 2;
+            goto cleanup;
+        }
     }
     for (int i = 0; i < 1024; i++)
     {
         int *ptr = array_get(&array, i);
         if (ptr == NULL)
-            return 3;
+        {
+            code = 3;
+            goto cleanup;
+        }
         int x = *ptr;
         if (x != i)
-            return 4;
+        {
+            code = 4;
+            goto cleanup;
+        }
     }
-    return 0;
+cleanup:
+    array_free(&array);
+    return code;
 }
 
 int test_get_out_of_bounds(void)
 {
+    int code = 0;
     Array array;
-    int code = array_init(&array, sizeof(int));
+    int value = array_init(&array, sizeof(int));
     size_t len = 32;
-    if (code != 0)
-        return 1;
+    if (value != 0)
+    {
+        code = 1;
+        goto cleanup;
+    }
     for (size_t i = 0; i < len; i++)
     {
-        code = array_append(&array, &i);
-        if (code != 0)
-            return 2;
+        value = array_append(&array, &i);
+        if (value != 0)
+        {
+            code = 2;
+            goto cleanup;
+        }
     }
     int *ptr = array_get(&array, len - 1);
     if (ptr == NULL)
-        return 3;
+    {
+        code = 3;
+        goto cleanup;
+    }
     ptr = array_get(&array, len);
     if (ptr != NULL)
-        return 4;
-    return 0;
+    {
+        code = 4;
+        goto cleanup;
+    }
+cleanup:
+    array_free(&array);
+    return code;
 }
 
 TestFunction tests[] = {
