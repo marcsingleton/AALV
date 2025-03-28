@@ -23,4 +23,6 @@ int fasta_write(const char *path, SeqRecord *records, const int nrecords, const 
 
 void fasta_wrap_string(FILE *fp, const char *s, const int len, const int maxlen);
 
+char *fasta_get_id(const char *header);
+
 #endif // FASTA_H

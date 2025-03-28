@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <limits.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -252,4 +253,41 @@ void fasta_wrap_string(FILE *fp, const char *s, const int len, const int maxlen)
         fwrite(s + j * maxlen, sizeof(char), nchars, fp);
         fputc('\n', fp);
     }
+}
+
+char *fasta_get_id(const char *header)
+{
+    size_t start = SIZE_MAX, stop = SIZE_MAX;
+    size_t i = 0;
+
+    // Check for start and stop
+    // A string in memory without the null terminator will always be less than SIZE_MAX, so no need to check
+    char c;
+    while ((c = header[i]) != '\0')
+    {
+        if (start == SIZE_MAX && !isspace(c))
+            start = i;
+        else if (start != SIZE_MAX && isspace(c))
+        {
+            stop = i;
+            break;
+        }
+        i++;
+    }
+
+    size_t len;
+    if (start == SIZE_MAX) // No start
+        len = 0;
+    else if (stop == SIZE_MAX) // Start but no stop
+        len = i - start;
+    else // Start and stop
+        len = stop - start;
+
+    // Allocate memory
+    char *id = malloc(len + 1);
+    if (id == NULL)
+        return id;
+    strncpy(id, header + start, len);
+    *(id + len) = '\0';
+    return id;
 }
