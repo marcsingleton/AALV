@@ -36,11 +36,10 @@ int main(int argc, char *argv[])
     record_array.records = records;
     record_array.len = len;
 
-    SeqRecord *record;
     printf("Read %d records\r\n", record_array.len);
     for (int i = 0; i < record_array.len; i++)
     {
-        record = record_array.records + i;
+        SeqRecord *record = record_array.records + i;
         printf("Record %d\r\n", i);
         printf("\theader: %s\r\n\tid: %s\r\n\tseq: %s\r\n", record->header, record->id, record->seq);
     }
@@ -79,7 +78,7 @@ int main(int argc, char *argv[])
     }
 
     // Free memory
-    free_seq_record_array(&record_array);
+    sequences_free_seq_record_array(&record_array);
 
     // Restore terminal options
     terminal_use_normal_buffer();
