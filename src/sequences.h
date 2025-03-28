@@ -6,6 +6,7 @@
  */
 
 #include <stddef.h>
+#include <stdlib.h>
 
 typedef struct
 {
@@ -17,8 +18,10 @@ typedef struct
 
 typedef struct
 {
-    char *SeqRecord;
-    size_t len;
+    SeqRecord *records;
+    int len;
 } SeqRecordArray;
+
+void free_seq_record_array(SeqRecordArray *record_array);
 
 #endif // SEQUENCES_H
