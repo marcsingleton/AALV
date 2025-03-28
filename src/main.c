@@ -22,6 +22,7 @@ int main(int argc, char *argv[])
     struct termios old_termios;
     struct termios raw_termios;
     terminal_enable_raw_mode(&old_termios, &raw_termios);
+    terminal_use_alternate_buffer();
 
     // Read files
     // - Try to match extensions
@@ -49,6 +50,22 @@ int main(int argc, char *argv[])
         {
             printf("%d\r\n", c);
         }
+        else if (c == 'j')
+        {
+            terminal_cursor_down();
+        }
+        else if (c == 'k')
+        {
+            terminal_cursor_up();
+        }
+        else if (c == 'h')
+        {
+            terminal_cursor_left();
+        }
+        else if (c == 'l')
+        {
+            terminal_cursor_right();
+        }
         else
         {
             printf("%d ('%c')\r\n", c, c);
@@ -57,6 +74,7 @@ int main(int argc, char *argv[])
 
     // Clean up
     // Free memory and restore terminal options
+    terminal_use_normal_buffer();
     terminal_disable_raw_mode(&old_termios);
     return 0;
 }
