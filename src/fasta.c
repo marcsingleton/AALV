@@ -32,7 +32,7 @@ int fasta_fread(FILE *fp, SeqRecord **records_ptr)
     char *seq = NULL;
     size_t seqlen = 0;
 
-    size_t bufferlen = 1;
+    size_t bufferlen = 256;
     char *buffer = NULL;
     ptr = malloc(bufferlen);
 
