@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "fasta.h"
@@ -127,12 +128,45 @@ int test_non_fasta(void)
     return 0;
 }
 
+int test_get_id(void)
+{
+    typedef struct
+    {
+        char *header;
+        char *id;
+    } IdTest;
+    IdTest tests[] = {
+        {"id", "id"},
+        {"    id", "id"},
+        {"id    ", "id"},
+        {"    id    ", "id"},
+        {" id metadata", "id"},
+        {"", ""},
+        {NULL, NULL},
+    };
+
+    int code = 0;
+    char *expected_id = NULL;
+    char *returned_id = NULL;
+    for (int i = 0; tests[i].header != NULL; i++)
+    {
+        expected_id = tests[i].id;
+        returned_id = fasta_get_id(tests[i].header);
+        if (returned_id == NULL || strcmp(expected_id, returned_id) != 0)
+            code += 1;
+        free(returned_id);
+    }
+
+    return code;
+}
+
 TestFunction tests[] = {
     {&test_read_write, "test_read_write"},
     {&test_no_header, "test_no_header"},
     {&test_empty_file, "test_empty_file"},
     {&test_blank_lines, "test_blank_lines"},
     {&test_non_fasta, "test_non_fasta"},
+    {&test_get_id, "test_get_id"},
 };
 
 #define NTESTS sizeof(tests) / sizeof(TestFunction)
