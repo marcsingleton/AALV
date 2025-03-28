@@ -31,12 +31,13 @@ int main(int argc, char *argv[])
     // - Error if an explicit or inferred format is malformed
 
     SeqRecord *records = NULL;
-    int nrecords = fasta_read(argv[1], &records);
-    printf("%d\r\n", nrecords);
+    int nrecords = fasta_read(argv[1], &records); // TODO: test for errors
+    printf("Read %d records\r\n", nrecords);
     for (int i = 0; i < nrecords; i++)
     {
         SeqRecord record = *(records + i);
-        printf("%s\r\n", record.seq);
+        printf("Record %d\r\n", i);
+        printf("\theader: %s\r\n\tid: %s\r\n\tseq: %s\r\n", record.header, record.id, record.seq);
     }
 
     // Main loop
