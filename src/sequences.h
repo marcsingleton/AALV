@@ -22,6 +22,7 @@ typedef struct
     int len;
 } SeqRecordArray;
 
-void free_seq_record_array(SeqRecordArray *record_array);
+void sequences_free_seq_records(SeqRecord *records, int nrecords);
+void sequences_free_seq_record_array(SeqRecordArray *record_array);
 
 #endif // SEQUENCES_H
