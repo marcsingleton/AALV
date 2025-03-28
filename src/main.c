@@ -30,14 +30,19 @@ int main(int argc, char *argv[])
     // - Error if no sniffer is successful
     // - Error if an explicit or inferred format is malformed
 
+    SeqRecordArray record_array;
     SeqRecord *records = NULL;
-    int nrecords = fasta_read(argv[1], &records); // TODO: test for errors
-    printf("Read %d records\r\n", nrecords);
-    for (int i = 0; i < nrecords; i++)
+    int len = fasta_read(argv[1], &records); // TODO: test for errors
+    record_array.records = records;
+    record_array.len = len;
+
+    SeqRecord *record;
+    printf("Read %d records\r\n", record_array.len);
+    for (int i = 0; i < record_array.len; i++)
     {
-        SeqRecord record = *(records + i);
+        record = record_array.records + i;
         printf("Record %d\r\n", i);
-        printf("\theader: %s\r\n\tid: %s\r\n\tseq: %s\r\n", record.header, record.id, record.seq);
+        printf("\theader: %s\r\n\tid: %s\r\n\tseq: %s\r\n", record->header, record->id, record->seq);
     }
 
     // Main loop
@@ -73,8 +78,10 @@ int main(int argc, char *argv[])
         }
     }
 
-    // Clean up
-    // Free memory and restore terminal options
+    // Free memory
+    free_seq_record_array(&record_array);
+
+    // Restore terminal options
     terminal_use_normal_buffer();
     terminal_disable_raw_mode(&old_termios);
     return 0;
