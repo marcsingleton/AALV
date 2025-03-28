@@ -31,6 +31,7 @@ int fasta_fread(FILE *fp, SeqRecord **records_ptr)
     ssize_t trimlen = 0;
     char *header = NULL;
     char *seq = NULL;
+    char *id = NULL;
     size_t seqlen = 0;
 
     size_t bufferlen = 256;
@@ -103,6 +104,7 @@ int fasta_fread(FILE *fp, SeqRecord **records_ptr)
     // Read records
     while (linelen > 0)
     {
+        // Get header
         if (line[0] == '\n')
         {
             linelen = getline(&line, &capacity, fp);
@@ -123,6 +125,15 @@ int fasta_fread(FILE *fp, SeqRecord **records_ptr)
         memcpy(header, line + 1, trimlen - 1);
         header[trimlen - 1] = '\0';
 
+        // Get id
+        char *id = fasta_get_id(header);
+        if (id == NULL)
+        {
+            nrecords = FASTA_ERROR_MEMORY_ALLOCATION;
+            goto cleanup;
+        }
+
+        // Get seq
         seqlen = 0;
         while ((linelen = getline(&line, &capacity, fp)) > 0 && (line[0] != '>'))
         {
@@ -170,8 +181,10 @@ int fasta_fread(FILE *fp, SeqRecord **records_ptr)
 
         SeqRecord *new_record = new_records + record_index;
         new_record->header = header;
+        new_record->id = id;
         new_record->seq = seq;
         new_record->len = seqlen;
+
         record_index++;
     }
 
@@ -185,14 +198,17 @@ cleanup:
     free(line);
     free(buffer);
     free(header);
+    free(id);
     free(seq);
     if (new_records != NULL)
     {
         header = NULL; // To guard against double frees
+        id = NULL;
         seq = NULL;
         for (int i = 0; i < record_index; i++)
         {
             free(new_records[i].header);
+            free(new_records[i].id);
             free(new_records[i].seq);
         }
     }
