@@ -37,11 +37,12 @@ int array_append(Array *array, void *value)
     {
         if (array->capacity > array->max_capacity / EXPAND_FACTOR)
             return 1;
-        void *ptr = realloc(array->data, EXPAND_FACTOR * array->capacity * array->size);
+        size_t new_capacity = EXPAND_FACTOR * array->capacity;
+        void *ptr = realloc(array->data, new_capacity * array->size);
         if (ptr == NULL)
             return 1;
         array->data = ptr;
-        array->capacity = EXPAND_FACTOR * array->capacity;
+        array->capacity = new_capacity;
     }
     void *dst = (char *)array->data + array->len * array->size;
     memcpy(dst, value, array->size);
