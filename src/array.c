@@ -49,6 +49,32 @@ int array_append(Array *array, void *value)
     return 0;
 }
 
+int array_extend(Array *array, void *values, size_t len)
+{
+    if (array->len > array->max_capacity - len)
+        return 1;
+    size_t new_len = array->len + len;
+    if (new_len > array->capacity)
+    {
+        size_t new_capacity = array->capacity;
+        while (new_len > new_capacity)
+        {
+            if (new_capacity > array->max_capacity / EXPAND_FACTOR)
+                return 1;
+            new_capacity *= EXPAND_FACTOR;
+        }
+        void *ptr = realloc(array->data, new_capacity * array->size);
+        if (ptr == NULL)
+            return 1;
+        array->data = ptr;
+        array->capacity = new_capacity;
+    }
+    void *dst = (char *)array->data + array->len * array->size;
+    memcpy(dst, values, len * array->size);
+    array->len = new_len;
+    return 0;
+}
+
 void *array_get(Array *array, size_t index)
 {
     if (index >= array->len)
