@@ -9,7 +9,9 @@ int test_init(void)
 {
     int code = 0;
     Array array;
-    int value = array_init(&array, sizeof(int));
+    int value;
+
+    value = array_init(&array, sizeof(int));
     if (value != 0 || array.size != sizeof(int) || array.capacity == 0 || array.len != 0)
         code = 1;
     else
@@ -22,7 +24,9 @@ int test_append_get(void)
 {
     int code = 0;
     Array array;
-    int value = array_init(&array, sizeof(int));
+    int value;
+
+    value = array_init(&array, sizeof(int));
     if (value != 0)
     {
         code = 1;
@@ -62,7 +66,9 @@ int test_get_out_of_bounds(void)
 {
     int code = 0;
     Array array;
-    int value = array_init(&array, sizeof(int));
+    int value;
+    value = array_init(&array, sizeof(int));
+
     size_t len = 32;
     if (value != 0)
     {
