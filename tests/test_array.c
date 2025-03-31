@@ -64,6 +64,77 @@ cleanup:
     return code;
 }
 
+int test_extend_get(void)
+{
+    int code = 0;
+    Array array_1, array_2;
+    int value;
+
+    if (array_init(&array_1, sizeof(int)) != 0 || array_init(&array_2, sizeof(int)) != 0)
+    {
+        code = 1;
+        goto cleanup;
+    }
+    int n_1 = 1024;
+    for (int i = 0; i < n_1; i++)
+    {
+        int x = 2 * i * i - 1;
+        value = array_append(&array_1, &x);
+        if (value != 0)
+        {
+            code = 2;
+            goto cleanup;
+        }
+    }
+    int n_2 = 1024;
+    for (int i = 0; i < n_2; i++)
+    {
+        int x = i * i - 1;
+        value = array_append(&array_2, &x);
+        if (value != 0)
+        {
+            code = 3;
+            goto cleanup;
+        }
+    }
+    value = array_extend(&array_1, array_2.data, array_2.len);
+    if (value != 0)
+    {
+        code = 4;
+        goto cleanup;
+    }
+    for (int i = 0; i < n_1 + n_2; i++)
+    {
+        int *ptr = array_get(&array_1, i);
+        if (ptr == NULL)
+        {
+            code = 5;
+            goto cleanup;
+        }
+        int actual_x = *ptr;
+        int expected_x;
+        if (i < n_1)
+            expected_x = 2 * i * i - 1;
+        else if (i < n_1 + n_2)
+            expected_x = (i - n_1) * (i - n_1) - 1;
+        else
+        {
+            code = 6;
+            goto cleanup;
+        }
+        if (actual_x != expected_x)
+        {
+            code = 7;
+            goto cleanup;
+        }
+    }
+
+cleanup:
+    array_free(&array_1);
+    array_free(&array_2);
+    return code;
+}
+
 int test_get_out_of_bounds(void)
 {
     int code = 0;
@@ -106,6 +177,7 @@ cleanup:
 TestFunction tests[] = {
     {&test_init, "test_init"},
     {&test_append_get, "test_append"},
+    {&test_extend_get, "test_extend"},
     {&test_get_out_of_bounds, "test_get_out_of_bounds"},
 };
 
