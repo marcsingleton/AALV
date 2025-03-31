@@ -35,14 +35,15 @@ int test_append_get(void)
     int n = 1024;
     for (int i = 0; i < n; i++)
     {
-        value = array_append(&array, &i);
+        int x = 2 * i * i - 1;
+        value = array_append(&array, &x);
         if (value != 0)
         {
             code = 2;
             goto cleanup;
         }
     }
-    for (int i = 0; i < 1024; i++)
+    for (int i = 0; i < n; i++)
     {
         int *ptr = array_get(&array, i);
         if (ptr == NULL)
@@ -50,8 +51,9 @@ int test_append_get(void)
             code = 3;
             goto cleanup;
         }
-        int x = *ptr;
-        if (x != i)
+        int actual_x = *ptr;
+        int expected_x = 2 * i * i - 1;
+        if (actual_x != expected_x)
         {
             code = 4;
             goto cleanup;
