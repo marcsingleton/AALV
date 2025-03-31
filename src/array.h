@@ -10,6 +10,7 @@ typedef struct
     void *data;
     size_t size;
     size_t capacity;
+    size_t max_capacity;
     size_t len;
 } Array;
 

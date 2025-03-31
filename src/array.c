@@ -16,6 +16,7 @@ int array_init(Array *array, size_t size)
     array->data = malloc(INIT_CAPACITY * size);
     array->size = size;
     array->capacity = INIT_CAPACITY;
+    array->max_capacity = SIZE_MAX / size;
     array->len = 0;
     return 0;
 }
@@ -26,6 +27,7 @@ void array_free(Array *array)
     array->data = NULL;
     array->size = 0;
     array->capacity = 0;
+    array->max_capacity = 0;
     array->len = 0;
 }
 
@@ -33,11 +35,11 @@ int array_append(Array *array, void *value)
 {
     if (array->len >= array->capacity)
     {
+        if (array->capacity > array->max_capacity / EXPAND_FACTOR)
+            return 1;
         void *ptr = realloc(array->data, EXPAND_FACTOR * array->capacity * array->size);
         if (ptr == NULL)
-        {
             return 1;
-        }
         array->data = ptr;
         array->capacity = EXPAND_FACTOR * array->capacity;
     }
