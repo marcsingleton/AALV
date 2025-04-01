@@ -1,9 +1,10 @@
-#include <ctype.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 
 #include "array.h"
 #include "fasta.h"
+#include "input.h"
 #include "sequences.h"
 #include "state.h"
 #include "terminal.h"
@@ -62,36 +63,12 @@ int main(int argc, char *argv[])
     // Display current file
     // Read input
     // Process input
-    char c;
-    while (read(STDIN_FILENO, &c, 1) == 1 && c != 'q')
+    int action;
+    while (1)
     {
-        if (iscntrl(c))
-        {
-            printf("%d\r\n", c);
-        }
-        else if (c == 'j')
-        {
-            terminal_cursor_down();
-        }
-        else if (c == 'k')
-        {
-            terminal_cursor_up();
-        }
-        else if (c == 'h')
-        {
-            terminal_cursor_left();
-        }
-        else if (c == 'l')
-        {
-            terminal_cursor_right();
-        }
-        else
-        {
-            printf("%d ('%c')\r\n", c, c);
-        }
+        action = input_get_action();
+        input_process_action(action);
     }
-
-    return 0;
 }
 
 void cleanup(void)
