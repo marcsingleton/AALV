@@ -1,12 +1,14 @@
 #include <ctype.h>
 #include <stdio.h>
-#include <termios.h>
 #include <unistd.h>
 
 #include "array.h"
 #include "fasta.h"
 #include "sequences.h"
+#include "state.h"
 #include "terminal.h"
+
+State state;
 
 // Main
 int main(int argc, char *argv[])
@@ -19,9 +21,7 @@ int main(int argc, char *argv[])
     }
 
     // Set screen and terminal options
-    struct termios old_termios;
-    struct termios raw_termios;
-    terminal_enable_raw_mode(&old_termios, &raw_termios);
+    terminal_enable_raw_mode(&state.old_termios, &state.raw_termios);
     terminal_use_alternate_buffer();
 
     // Read files
@@ -82,6 +82,6 @@ int main(int argc, char *argv[])
 
     // Restore terminal options
     terminal_use_normal_buffer();
-    terminal_disable_raw_mode(&old_termios);
+    terminal_disable_raw_mode(&state.old_termios);
     return 0;
 }
