@@ -24,6 +24,9 @@ int main(int argc, char *argv[])
     terminal_enable_raw_mode(&state.old_termios, &state.raw_termios);
     terminal_use_alternate_buffer();
 
+    int rows, cols;
+    terminal_get_window_size(&rows, &cols);
+
     // Read files
     // - Try to match extensions
     // - If no matching extension, infer with sniffer

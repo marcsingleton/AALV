@@ -11,5 +11,6 @@ void terminal_cursor_up(void);
 void terminal_cursor_down(void);
 void terminal_cursor_right(void);
 void terminal_cursor_left(void);
+int terminal_get_window_size(int *rows, int *cols);
 
 #endif // TERMINAL_H
