@@ -3,7 +3,8 @@
 
 #include <termios.h>
 
-void terminal_enable_raw_mode(struct termios *old_termios, struct termios *raw_termios);
+int terminal_get_termios(struct termios *termios_p);
+int terminal_enable_raw_mode(struct termios *old_termios, struct termios *raw_termios);
 void terminal_disable_raw_mode(struct termios *old_termios);
 void terminal_use_alternate_buffer(void);
 void terminal_use_normal_buffer(void);

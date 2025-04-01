@@ -6,12 +6,16 @@
 
 #include "terminal.h"
 
-void terminal_enable_raw_mode(struct termios *old_termios, struct termios *raw_termios)
+int terminal_get_termios(struct termios *termios_p)
 {
-    tcgetattr(STDIN_FILENO, old_termios);
+    return tcgetattr(STDIN_FILENO, termios_p);
+}
+
+int terminal_enable_raw_mode(struct termios *old_termios, struct termios *raw_termios)
+{
     *raw_termios = *old_termios;
     cfmakeraw(raw_termios);
-    tcsetattr(STDIN_FILENO, TCSAFLUSH, raw_termios);
+    return tcsetattr(STDIN_FILENO, TCSAFLUSH, raw_termios);
 }
 
 void terminal_disable_raw_mode(struct termios *old_termios)

@@ -9,6 +9,7 @@
 #include "terminal.h"
 
 State state;
+void cleanup(void);
 
 // Main
 int main(int argc, char *argv[])
@@ -21,7 +22,17 @@ int main(int argc, char *argv[])
     }
 
     // Set screen and terminal options
-    terminal_enable_raw_mode(&state.old_termios, &state.raw_termios);
+    if (terminal_get_termios(&state.old_termios) != 0)
+    {
+        fputs("Failed to get current termios. Quitting...\n", stderr);
+        return 1;
+    }
+    atexit(&cleanup); // Only register when get_termios is successful
+    if (terminal_enable_raw_mode(&state.old_termios, &state.raw_termios) != 0)
+    {
+        fputs("Failed to set raw mode. Quitting...\n", stderr);
+        return 1;
+    };
     terminal_use_alternate_buffer();
 
     int rows, cols;
@@ -80,11 +91,15 @@ int main(int argc, char *argv[])
         }
     }
 
+    return 0;
+}
+
+void cleanup(void)
+{
     // Free memory
-    sequences_free_seq_record_array(&record_array);
+    sequences_free_seq_record_array(&state.record_array); // Null if unset, so always safe to free
 
     // Restore terminal options
     terminal_use_normal_buffer();
     terminal_disable_raw_mode(&state.old_termios);
-    return 0;
 }
