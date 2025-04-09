@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 
 #include "array.h"
+#include "error.h"
 #include "fasta.h"
 #include "input.h"
 #include "sequences.h"
@@ -11,6 +13,7 @@
 
 State state;
 void cleanup(void);
+extern char error_message[ERROR_MESSAGE_LEN];
 
 // Main
 int main(int argc, char *argv[])
@@ -18,20 +21,20 @@ int main(int argc, char *argv[])
     // Process arguments
     if (argc != 2)
     {
-        fputs("Incorrect number of arguments. Quitting...\n", stderr);
+        strncpy(error_message, "Incorrect number of arguments. Quitting...\n", ERROR_MESSAGE_LEN);
         return 1;
     }
 
     // Set screen and terminal options
     if (terminal_get_termios(&state.old_termios) != 0)
     {
-        fputs("Failed to get current termios. Quitting...\n", stderr);
+        strncpy(error_message, "Failed to get current termios. Quitting...\n", ERROR_MESSAGE_LEN);
         return 1;
     }
     atexit(&cleanup); // Only register when get_termios is successful
     if (terminal_enable_raw_mode(&state.old_termios, &state.raw_termios) != 0)
     {
-        fputs("Failed to set raw mode. Quitting...\n", stderr);
+        strncpy(error_message, "Failed to set raw mode. Quitting...\n", ERROR_MESSAGE_LEN);
         return 1;
     };
     terminal_use_alternate_buffer();
@@ -44,17 +47,20 @@ int main(int argc, char *argv[])
     // - If no matching extension, infer with sniffer
     // - Error if no sniffer is successful
     // - Error if an explicit or inferred format is malformed
-
-    SeqRecordArray record_array;
     SeqRecord *records = NULL;
-    int len = fasta_read(argv[1], &records); // TODO: test for errors
-    record_array.records = records;
-    record_array.len = len;
-
-    printf("Read %d records\r\n", record_array.len);
-    for (int i = 0; i < record_array.len; i++)
+    int len = fasta_read(argv[1], &records);
+    if (len < 0)
     {
-        SeqRecord *record = record_array.records + i;
+        snprintf(error_message, ERROR_MESSAGE_LEN, "Error processing input file: %d\n", len);
+        return 1;
+    }
+    state.record_array.records = records;
+    state.record_array.len = len;
+
+    printf("Read %d records\r\n", state.record_array.len);
+    for (int i = 0; i < state.record_array.len; i++)
+    {
+        SeqRecord *record = state.record_array.records + i;
         printf("Record %d\r\n", i);
         printf("\theader: %s\r\n\tid: %s\r\n\tseq: %s\r\n", record->header, record->id, record->seq);
     }
@@ -79,4 +85,8 @@ void cleanup(void)
     // Restore terminal options
     terminal_use_normal_buffer();
     terminal_disable_raw_mode(&state.old_termios);
+
+    // Print error
+    if (error_message[0] != '\0')
+        fputs(error_message, stderr);
 }
