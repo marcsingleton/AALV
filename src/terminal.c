@@ -4,6 +4,7 @@
 #include <termios.h>
 #include <unistd.h>
 
+#include "array.h"
 #include "terminal.h"
 
 int terminal_get_termios(struct termios *termios_p)
@@ -25,32 +26,38 @@ void terminal_disable_raw_mode(struct termios *old_termios)
 
 void terminal_use_alternate_buffer(void)
 {
-    write(STDOUT_FILENO, "\x1b[?1049h\x1b[H", 11); // Use alternate buffer and move cursor to top left
+    char s[] = "\x1b[?1049h\x1b[H"; // Use alternate buffer and move cursor to top left
+    write(STDOUT_FILENO, s, sizeof(s) - 1);
 }
 
 void terminal_use_normal_buffer(void)
 {
-    write(STDOUT_FILENO, "\x1b[?1049l", 8);
+    char s[] = "\x1b[?1049l";
+    write(STDOUT_FILENO, s, sizeof(s) - 1);
 }
 
-void terminal_cursor_up(void)
+void terminal_cursor_up(Array *buffer)
 {
-    write(STDOUT_FILENO, "\x1b[A", 3);
+    char s[] = "\x1b[A";
+    array_extend(buffer, s, sizeof(s) - 1);
 }
 
-void terminal_cursor_down(void)
+void terminal_cursor_down(Array *buffer)
 {
-    write(STDOUT_FILENO, "\x1b[B", 3);
+    char s[] = "\x1b[B";
+    array_extend(buffer, s, sizeof(s) - 1);
 }
 
-void terminal_cursor_right(void)
+void terminal_cursor_right(Array *buffer)
 {
-    write(STDOUT_FILENO, "\x1b[C", 3);
+    char s[] = "\x1b[C";
+    array_extend(buffer, s, sizeof(s) - 1);
 }
 
-void terminal_cursor_left(void)
+void terminal_cursor_left(Array *buffer)
 {
-    write(STDOUT_FILENO, "\x1b[D", 3);
+    char s[] = "\x1b[D";
+    array_extend(buffer, s, sizeof(s) - 1);
 }
 
 int terminal_get_window_size(int *rows, int *cols)

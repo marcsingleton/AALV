@@ -70,10 +70,13 @@ int main(int argc, char *argv[])
     // Read input
     // Process input
     int action;
+    Array buffer;
+    array_init(&buffer, sizeof(char));
     while (1)
     {
         action = input_get_action();
-        input_process_action(action);
+        input_process_action(action, &buffer);
+        input_buffer_flush(&buffer);
     }
 }
 
