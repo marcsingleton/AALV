@@ -19,7 +19,7 @@ typedef struct
 typedef struct
 {
     SeqRecord *records;
-    int len;
+    unsigned int len;
 } SeqRecordArray;
 
 void sequences_free_seq_records(SeqRecord *records, int nrecords);
