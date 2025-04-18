@@ -77,6 +77,18 @@ void terminal_cursor_ij(Array *buffer, const unsigned int i, const unsigned int 
     array_extend(buffer, s, len + 1);
 }
 
+void terminal_cursor_hide(Array *buffer)
+{
+    char s[] = "\x1b[?25l";
+    array_extend(buffer, s, sizeof(s) - 1);
+}
+
+void terminal_cursor_show(Array *buffer)
+{
+    char s[] = "\x1b[?25h";
+    array_extend(buffer, s, sizeof(s) - 1);
+}
+
 int terminal_get_window_size(unsigned int *rows, unsigned int *cols)
 {
     struct winsize ws;
