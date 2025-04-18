@@ -16,6 +16,7 @@ int input_get_action(void)
 
 int input_process_action(int action, Array *buffer)
 {
+    terminal_cursor_hide(buffer);
     switch (action)
     {
     case 'j':
@@ -34,6 +35,8 @@ int input_process_action(int action, Array *buffer)
         exit(0);
         break;
     }
+    display_cursor(buffer);
+    terminal_cursor_show(buffer);
     return 0;
 }
 
