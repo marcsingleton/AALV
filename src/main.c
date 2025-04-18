@@ -67,9 +67,16 @@ int main(int argc, char *argv[])
 
     state.header_pane_width = 30;
     state.ruler_pane_height = 5;
+    state.cursor_i = state.ruler_pane_height + 1;
+    state.cursor_j = state.header_pane_width + 1;
+
+    terminal_cursor_hide(&buffer);
     display_ruler_pane(&buffer);
     display_header_pane(&buffer);
     display_sequence_pane(&buffer);
+    display_cursor(&buffer);
+    terminal_cursor_show(&buffer);
+
     input_buffer_flush(&buffer);
 
     while (1)
