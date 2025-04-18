@@ -33,11 +33,6 @@ int input_process_action(int action, Array *buffer)
     case 'q':
         exit(0);
         break;
-    default:
-        if (iscntrl(action))
-            printf("%d\r\n", action);
-        else
-            printf("%d ('%c')\r\n", action, action);
     }
     return 0;
 }
