@@ -12,6 +12,8 @@ void terminal_cursor_up(Array *buffer);
 void terminal_cursor_down(Array *buffer);
 void terminal_cursor_right(Array *buffer);
 void terminal_cursor_left(Array *buffer);
-int terminal_get_window_size(int *rows, int *cols);
+void terminal_cursor_origin(Array *buffer);
+void terminal_cursor_ij(Array *buffer, const unsigned int i, const unsigned int j);
+int terminal_get_window_size(unsigned int *rows, unsigned int *cols);
 
 #endif // TERMINAL_H
