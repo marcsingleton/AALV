@@ -70,3 +70,8 @@ void display_sequence_pane(Array *buffer)
             break;
     }
 }
+
+void display_cursor(Array *buffer)
+{
+    terminal_cursor_ij(buffer, state.cursor_i, state.cursor_j);
+}
