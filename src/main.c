@@ -4,6 +4,7 @@
 #include <unistd.h>
 
 #include "array.h"
+#include "display.h"
 #include "error.h"
 #include "fasta.h"
 #include "input.h"
@@ -39,8 +40,7 @@ int main(int argc, char *argv[])
     };
     terminal_use_alternate_buffer();
 
-    int rows, cols;
-    terminal_get_window_size(&rows, &cols);
+    terminal_get_window_size(&state.terminal_rows, &state.terminal_cols);
 
     // Read files
     // - Try to match extensions
@@ -57,14 +57,6 @@ int main(int argc, char *argv[])
     state.record_array.records = records;
     state.record_array.len = len;
 
-    printf("Read %d records\r\n", state.record_array.len);
-    for (int i = 0; i < state.record_array.len; i++)
-    {
-        SeqRecord *record = state.record_array.records + i;
-        printf("Record %d\r\n", i);
-        printf("\theader: %s\r\n\tid: %s\r\n\tseq: %s\r\n", record->header, record->id, record->seq);
-    }
-
     // Main loop
     // Display current file
     // Read input
@@ -72,6 +64,14 @@ int main(int argc, char *argv[])
     int action;
     Array buffer;
     array_init(&buffer, sizeof(char));
+
+    state.header_pane_width = 30;
+    state.ruler_pane_height = 5;
+    display_ruler_pane(&buffer);
+    display_header_pane(&buffer);
+    display_sequence_pane(&buffer);
+    input_buffer_flush(&buffer);
+
     while (1)
     {
         action = input_get_action();
