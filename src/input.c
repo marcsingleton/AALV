@@ -4,8 +4,12 @@
 #include <unistd.h>
 
 #include "array.h"
+#include "display.h"
 #include "input.h"
+#include "state.h"
 #include "terminal.h"
+
+extern State state;
 
 int input_get_action(void)
 {
@@ -20,16 +24,28 @@ int input_process_action(int action, Array *buffer)
     switch (action)
     {
     case 'j':
-        terminal_cursor_down(buffer);
+        if (state.cursor_i < state.terminal_rows)
+        {
+            state.cursor_i++;
+        }
         break;
     case 'k':
-        terminal_cursor_up(buffer);
+        if (state.cursor_i > state.ruler_pane_height + 1)
+        {
+            state.cursor_i--;
+        }
         break;
     case 'h':
-        terminal_cursor_left(buffer);
+        if (state.cursor_j > state.header_pane_width + 1)
+        {
+            state.cursor_j--;
+        }
         break;
     case 'l':
-        terminal_cursor_right(buffer);
+        if (state.cursor_j < state.terminal_cols)
+        {
+            state.cursor_j++;
+        }
         break;
     case 'q':
         exit(0);
