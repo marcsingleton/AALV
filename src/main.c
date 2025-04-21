@@ -67,6 +67,8 @@ int main(int argc, char *argv[])
 
     state.header_pane_width = 30;
     state.ruler_pane_height = 5;
+    state.offset_i = 0;
+    state.offset_j = 0;
     state.cursor_i = state.ruler_pane_height + 1;
     state.cursor_j = state.header_pane_width + 1;
 

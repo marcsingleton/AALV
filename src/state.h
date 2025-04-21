@@ -16,11 +16,12 @@ typedef struct
     SeqRecordArray record_array;
     unsigned int terminal_rows;
     unsigned int terminal_cols;
-    unsigned int cursor_i;
-    unsigned int cursor_j;
     unsigned int header_pane_width;
     unsigned int ruler_pane_height;
-    size_t record_offset;
+    unsigned int cursor_i;
+    unsigned int cursor_j;
+    unsigned int offset_i;
+    unsigned int offset_j;
 } State;
 
 #endif // STATE_H
