@@ -24,11 +24,14 @@ int input_process_action(int action, Array *buffer)
     switch (action)
     {
     case 'j':
-        if (state.cursor_i < state.terminal_rows)
+    {
+        unsigned int record_index = state.cursor_i + state.offset_i - state.ruler_pane_height - 1;
+        if (record_index < state.record_array.len - 1)
         {
             state.cursor_i++;
         }
         break;
+    }
     case 'k':
         if (state.cursor_i > state.ruler_pane_height + 1)
         {
@@ -42,11 +45,16 @@ int input_process_action(int action, Array *buffer)
         }
         break;
     case 'l':
-        if (state.cursor_j < state.terminal_cols)
+    {
+        unsigned int record_index = state.cursor_i + state.offset_i - state.ruler_pane_height - 1;
+        SeqRecord record = state.record_array.records[record_index];
+        unsigned int max_j = record.len - state.offset_j + state.header_pane_width;
+        if (state.cursor_j < state.terminal_cols && state.cursor_j < max_j)
         {
             state.cursor_j++;
         }
         break;
+    }
     case 'q':
         exit(0);
         break;
