@@ -73,5 +73,9 @@ void display_sequence_pane(Array *buffer)
 
 void display_cursor(Array *buffer)
 {
-    terminal_cursor_ij(buffer, state.cursor_i, state.cursor_j);
+    unsigned int record_index = state.cursor_i + state.offset_i - state.ruler_pane_height - 1;
+    SeqRecord record = state.record_array.records[record_index];
+    unsigned int max_j = record.len - state.offset_j + state.header_pane_width;
+    unsigned int j = (max_j > state.cursor_j) ? state.cursor_j : max_j;
+    terminal_cursor_ij(buffer, state.cursor_i, j);
 }
