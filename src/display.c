@@ -11,7 +11,7 @@ void display_header_pane(Array *buffer)
     for (unsigned int i = state.ruler_pane_height + 1; i <= state.terminal_rows; i++)
     {
         terminal_cursor_ij(buffer, i, 1);
-        unsigned int record_index = i - state.ruler_pane_height - 1;
+        unsigned int record_index = i + state.offset_i - state.ruler_pane_height - 1;
         if (record_index < state.record_array.len)
         {
             SeqRecord record = state.record_array.records[record_index];
