@@ -4,8 +4,9 @@
 #include <termios.h>
 
 int terminal_get_termios(struct termios *termios_p);
+int terminal_get_window_size(unsigned int *rows, unsigned int *cols);
 int terminal_enable_raw_mode(struct termios *old_termios, struct termios *raw_termios);
-void terminal_disable_raw_mode(struct termios *old_termios);
+int terminal_disable_raw_mode(struct termios *old_termios);
 void terminal_use_alternate_buffer(void);
 void terminal_use_normal_buffer(void);
 void terminal_cursor_up(Array *buffer);
@@ -16,6 +17,5 @@ void terminal_cursor_origin(Array *buffer);
 void terminal_cursor_ij(Array *buffer, const unsigned int i, const unsigned int j);
 void terminal_cursor_hide(Array *buffer);
 void terminal_cursor_show(Array *buffer);
-int terminal_get_window_size(unsigned int *rows, unsigned int *cols);
 
 #endif // TERMINAL_H
