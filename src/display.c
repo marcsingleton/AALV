@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <string.h>
 
 #include "array.h"
@@ -54,6 +55,38 @@ void display_ruler_pane(Array *buffer)
     array_extend(buffer, "╆", sizeof("╆") - 1);
     for (unsigned int j = state.header_pane_width + 1; j <= state.terminal_cols; j++)
         array_extend(buffer, "━", sizeof("━") - 1);
+}
+
+void display_ruler_pane_ticks(Array *buffer)
+{
+    unsigned int tick_spacing = 10;
+    unsigned int q = state.offset_j / tick_spacing;
+    unsigned int r = state.offset_j % tick_spacing;
+    if (r >= 0)
+        q++;
+
+    unsigned int x = q * tick_spacing;
+    unsigned int j;
+    while ((j = x - state.offset_j + state.header_pane_width) <= state.terminal_cols)
+    {
+        terminal_cursor_ij(buffer, state.ruler_pane_height, j);
+        array_extend(buffer, "┷", sizeof("┷") - 1);
+
+        char c[2];
+        unsigned int n = x;
+        unsigned int d;
+        do
+        {
+            d = n % 10;
+            n = n / 10;
+            snprintf(c, 2, "%d", d);
+            terminal_cursor_up(buffer);
+            terminal_cursor_left(buffer);
+            array_append(buffer, c);
+        } while (n != 0);
+
+        x += tick_spacing;
+    }
 }
 
 void display_sequence_pane(Array *buffer)

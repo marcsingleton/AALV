@@ -74,6 +74,7 @@ int main(int argc, char *argv[])
 
     terminal_cursor_hide(&buffer);
     display_ruler_pane(&buffer);
+    display_ruler_pane_ticks(&buffer);
     display_header_pane(&buffer);
     display_sequence_pane(&buffer);
     display_cursor(&buffer);
