@@ -44,6 +44,7 @@ void display_ruler_pane(Array *buffer)
     terminal_cursor_ij(buffer, 1, state.header_pane_width);
     for (unsigned int i = 1; i < state.ruler_pane_height; i++)
     {
+        terminal_clear_line(buffer);
         char s[] = "│\n\b";
         array_extend(buffer, s, sizeof(s) - 1);
     }
@@ -60,17 +61,16 @@ void display_sequence_pane(Array *buffer)
     for (unsigned int i = state.ruler_pane_height + 1; i <= state.terminal_rows; i++)
     {
         unsigned int record_index = i + state.offset_i - state.ruler_pane_height - 1;
+        terminal_cursor_ij(buffer, i, state.header_pane_width + 1);
+        terminal_clear_line_right(buffer);
         if (record_index < state.record_array.len)
         {
-            terminal_cursor_ij(buffer, i, state.header_pane_width + 1);
             SeqRecord record = state.record_array.records[record_index];
             int cols = state.terminal_cols - state.header_pane_width;
             int len = record.len - state.offset_j;
             len = cols > len ? len : cols;
             array_extend(buffer, record.seq + state.offset_j, len);
         }
-        else
-            break;
     }
 }
 
