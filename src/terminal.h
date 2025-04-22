@@ -17,5 +17,9 @@ void terminal_cursor_origin(Array *buffer);
 void terminal_cursor_ij(Array *buffer, const unsigned int i, const unsigned int j);
 void terminal_cursor_hide(Array *buffer);
 void terminal_cursor_show(Array *buffer);
+void terminal_clear_screen(Array *buffer);
+void terminal_clear_line(Array *buffer);
+void terminal_clear_line_left(Array *buffer);
+void terminal_clear_line_right(Array *buffer);
 
 #endif // TERMINAL_H

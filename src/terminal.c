@@ -101,3 +101,27 @@ void terminal_cursor_show(Array *buffer)
     char s[] = "\x1b[?25h";
     array_extend(buffer, s, sizeof(s) - 1);
 }
+
+void terminal_clear_screen(Array *buffer)
+{
+    char s[] = "\x1b[?2J";
+    array_extend(buffer, s, sizeof(s) - 1);
+}
+
+void terminal_clear_line(Array *buffer)
+{
+    char s[] = "\x1b[2K";
+    array_extend(buffer, s, sizeof(s) - 1);
+}
+
+void terminal_clear_line_left(Array *buffer)
+{
+    char s[] = "\x1b[1K";
+    array_extend(buffer, s, sizeof(s) - 1);
+}
+
+void terminal_clear_line_right(Array *buffer)
+{
+    char s[] = "\x1b[0K";
+    array_extend(buffer, s, sizeof(s) - 1);
+}
