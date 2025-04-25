@@ -49,11 +49,17 @@ int input_process_action(int action, Array *buffer)
             {
                 state.offset_x = record.len - 1;
                 state.cursor_j = state.header_pane_width + 1;
+                display_ruler_pane(buffer);
+                display_ruler_pane_ticks(buffer);
+                display_sequence_pane(buffer);
             }
             else if (record.len == state.offset_x + 1)
             {
                 state.offset_x--;
                 state.cursor_j = state.header_pane_width + 1;
+                display_ruler_pane(buffer);
+                display_ruler_pane_ticks(buffer);
+                display_sequence_pane(buffer);
             }
             else
             {
@@ -67,6 +73,9 @@ int input_process_action(int action, Array *buffer)
         else if (state.cursor_j == state.header_pane_width + 1 && state.offset_x > 0)
         {
             state.offset_x--;
+            display_ruler_pane(buffer);
+            display_ruler_pane_ticks(buffer);
+            display_sequence_pane(buffer);
         }
         break;
     }
@@ -82,6 +91,9 @@ int input_process_action(int action, Array *buffer)
         else if (state.cursor_j == state.terminal_cols && cursor_x < record.len)
         {
             state.offset_x++;
+            display_ruler_pane(buffer);
+            display_ruler_pane_ticks(buffer);
+            display_sequence_pane(buffer);
         }
         break;
     }
