@@ -25,7 +25,7 @@ int input_process_action(int action, Array *buffer)
     {
     case 'j':
     {
-        unsigned int record_index = state.cursor_i + state.offset_i - state.ruler_pane_height - 1;
+        unsigned int record_index = state.cursor_i + state.offset_y - state.ruler_pane_height - 1;
         if (record_index < state.record_array.len - 1)
         {
             state.cursor_i++;

@@ -12,7 +12,7 @@ void display_header_pane(Array *buffer)
     for (unsigned int i = state.ruler_pane_height + 1; i <= state.terminal_rows; i++)
     {
         terminal_cursor_ij(buffer, i, 1);
-        unsigned int record_index = i + state.offset_i - state.ruler_pane_height - 1;
+        unsigned int record_index = i + state.offset_y - state.ruler_pane_height - 1;
         if (record_index < state.record_array.len)
         {
             SeqRecord record = state.record_array.records[record_index];
@@ -60,14 +60,14 @@ void display_ruler_pane(Array *buffer)
 void display_ruler_pane_ticks(Array *buffer)
 {
     unsigned int tick_spacing = 10;
-    unsigned int q = state.offset_j / tick_spacing;
-    unsigned int r = state.offset_j % tick_spacing;
+    unsigned int q = state.offset_x / tick_spacing;
+    unsigned int r = state.offset_x % tick_spacing;
     if (r >= 0)
         q++;
 
     unsigned int x = q * tick_spacing;
     unsigned int j;
-    while ((j = x - state.offset_j + state.header_pane_width) <= state.terminal_cols)
+    while ((j = x - state.offset_x + state.header_pane_width) <= state.terminal_cols)
     {
         terminal_cursor_ij(buffer, state.ruler_pane_height, j);
         array_extend(buffer, "┷", sizeof("┷") - 1);
@@ -93,23 +93,23 @@ void display_sequence_pane(Array *buffer)
 {
     for (unsigned int i = state.ruler_pane_height + 1; i <= state.terminal_rows; i++)
     {
-        unsigned int record_index = i + state.offset_i - state.ruler_pane_height - 1;
+        unsigned int record_index = i + state.offset_y - state.ruler_pane_height - 1;
         terminal_cursor_ij(buffer, i, state.header_pane_width + 1);
         terminal_clear_line_right(buffer);
         if (record_index < state.record_array.len)
         {
             SeqRecord record = state.record_array.records[record_index];
             int cols = state.terminal_cols - state.header_pane_width;
-            int len = record.len - state.offset_j;
+            int len = record.len - state.offset_x;
             len = cols > len ? len : cols;
-            array_extend(buffer, record.seq + state.offset_j, len);
+            array_extend(buffer, record.seq + state.offset_x, len);
         }
     }
 }
 
 void display_cursor(Array *buffer)
 {
-    unsigned int record_index = state.cursor_i + state.offset_i - state.ruler_pane_height - 1;
+    unsigned int record_index = state.cursor_i + state.offset_y - state.ruler_pane_height - 1;
     SeqRecord record = state.record_array.records[record_index];
     unsigned int max_j = record.len - state.offset_j + state.header_pane_width;
     unsigned int j = (max_j > state.cursor_j) ? state.cursor_j : max_j;
