@@ -28,16 +28,33 @@ int input_process_action(int action, Array *buffer)
         unsigned int record_index = state.cursor_i + state.offset_y - state.ruler_pane_height - 1;
         if (record_index < state.record_array.len - 1)
         {
-            state.cursor_i++;
+            if (state.cursor_i < state.terminal_rows)
+                state.cursor_i++;
+            else
+            {
+                state.offset_y++;
+                display_header_pane(buffer);
+                display_sequence_pane(buffer);
+            }
         }
         break;
     }
     case 'k':
-        if (state.cursor_i > state.ruler_pane_height + 1)
+    {
+        unsigned int record_index = state.cursor_i + state.offset_y - state.ruler_pane_height - 1;
+        if (record_index > 0)
         {
-            state.cursor_i--;
+            if (state.cursor_i > state.ruler_pane_height + 1)
+                state.cursor_i--;
+            else
+            {
+                state.offset_y--;
+                display_header_pane(buffer);
+                display_sequence_pane(buffer);
+            }
         }
         break;
+    }
     case 'h':
     {
         unsigned int record_index = state.cursor_i + state.offset_y - state.ruler_pane_height - 1;
