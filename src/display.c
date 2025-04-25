@@ -41,7 +41,7 @@ void display_header_pane(Array *buffer)
     }
 }
 
-void display_ruler_pane(Array *buffer)
+void display_ruler_pane(Array *buffer) // TODO: Add continuation markers
 {
     terminal_cursor_ij(buffer, 1, state.header_pane_width);
     for (unsigned int i = 1; i < state.ruler_pane_height; i++)
@@ -76,13 +76,13 @@ void display_ruler_pane_ticks(Array *buffer)
         char c[2];
         unsigned int n = x;
         unsigned int d;
+        unsigned int i = state.ruler_pane_height - 1;
         do
         {
             d = n % 10;
             n = n / 10;
             snprintf(c, 2, "%d", d);
-            terminal_cursor_up(buffer);
-            terminal_cursor_left(buffer);
+            terminal_cursor_ij(buffer, i--, j);
             array_append(buffer, c);
         } while (n != 0);
 
