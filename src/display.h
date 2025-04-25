@@ -7,6 +7,8 @@
 
 #include "array.h"
 
+#define HEADER_PANE_ELLIPSES "..."
+
 void display_header_pane(Array *buffer);
 void display_ruler_pane(Array *buffer);
 void display_ruler_pane_ticks(Array *buffer);

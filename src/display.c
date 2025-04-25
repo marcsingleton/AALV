@@ -2,6 +2,7 @@
 #include <string.h>
 
 #include "array.h"
+#include "display.h"
 #include "state.h"
 #include "terminal.h"
 
@@ -26,7 +27,7 @@ void display_header_pane(Array *buffer)
             else
             {
                 array_extend(buffer, record.header, state.header_pane_width - 4);
-                array_extend(buffer, "...", 3);
+                array_extend(buffer, HEADER_PANE_ELLIPSES, sizeof(HEADER_PANE_ELLIPSES) - 1);
             }
             array_extend(buffer, "┃", sizeof("┃") - 1);
         }
