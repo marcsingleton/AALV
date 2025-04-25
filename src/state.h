@@ -20,8 +20,8 @@ typedef struct
     unsigned int ruler_pane_height;
     unsigned int cursor_i;
     unsigned int cursor_j;
-    unsigned int offset_i;
-    unsigned int offset_j;
+    unsigned int offset_y;
+    unsigned int offset_x;
 } State;
 
 #endif // STATE_H
