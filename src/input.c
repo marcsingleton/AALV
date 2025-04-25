@@ -72,12 +72,16 @@ int input_process_action(int action, Array *buffer)
     }
     case 'l':
     {
-        unsigned int record_index = state.cursor_i + state.offset_i - state.ruler_pane_height - 1;
+        unsigned int record_index = state.cursor_i + state.offset_y - state.ruler_pane_height - 1;
         SeqRecord record = state.record_array.records[record_index];
-        unsigned int max_j = record.len - state.offset_j + state.header_pane_width;
-        if (state.cursor_j < state.terminal_cols && state.cursor_j < max_j)
+        unsigned int cursor_x = state.cursor_j + state.offset_x - state.header_pane_width;
+        if (state.cursor_j < state.terminal_cols && cursor_x < record.len)
         {
             state.cursor_j++;
+        }
+        else if (state.cursor_j == state.terminal_cols && cursor_x < record.len)
+        {
+            state.offset_x++;
         }
         break;
     }
