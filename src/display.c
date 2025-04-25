@@ -111,7 +111,10 @@ void display_cursor(Array *buffer)
 {
     unsigned int record_index = state.cursor_i + state.offset_y - state.ruler_pane_height - 1;
     SeqRecord record = state.record_array.records[record_index];
-    unsigned int max_j = record.len - state.offset_j + state.header_pane_width;
-    unsigned int j = (max_j > state.cursor_j) ? state.cursor_j : max_j;
-    terminal_cursor_ij(buffer, state.cursor_i, j);
+    unsigned int cursor_x = state.cursor_j + state.offset_x - state.header_pane_width;
+    cursor_x = (record.len > cursor_x) ? cursor_x : record.len;
+    if (cursor_x > state.offset_x)
+        terminal_cursor_ij(buffer, state.cursor_i, cursor_x - state.offset_x + state.header_pane_width);
+    else
+        terminal_cursor_ij(buffer, state.cursor_i, state.header_pane_width + 1);
 }
