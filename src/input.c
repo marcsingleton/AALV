@@ -1,4 +1,5 @@
 #include <ctype.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -32,9 +33,7 @@ int input_process_action(int action, Array *buffer)
                 state.cursor_i++;
             else
             {
-                state.offset_y++;
-                display_header_pane(buffer);
-                display_sequence_pane(buffer);
+                state_set_offset_y(&state, state.offset_y + 1);
             }
         }
         break;
@@ -48,9 +47,7 @@ int input_process_action(int action, Array *buffer)
                 state.cursor_i--;
             else
             {
-                state.offset_y--;
-                display_header_pane(buffer);
-                display_sequence_pane(buffer);
+                state_set_offset_y(&state, state.offset_y - 1);
             }
         }
         break;
@@ -64,19 +61,13 @@ int input_process_action(int action, Array *buffer)
         {
             if (record.len < state.offset_x + 1)
             {
-                state.offset_x = record.len - 1;
+                state_set_offset_x(&state, record.len - 1);
                 state.cursor_j = state.header_pane_width + 1;
-                display_ruler_pane(buffer);
-                display_ruler_pane_ticks(buffer);
-                display_sequence_pane(buffer);
             }
             else if (record.len == state.offset_x + 1)
             {
-                state.offset_x--;
+                state_set_offset_x(&state, state.offset_x - 1);
                 state.cursor_j = state.header_pane_width + 1;
-                display_ruler_pane(buffer);
-                display_ruler_pane_ticks(buffer);
-                display_sequence_pane(buffer);
             }
             else
             {
@@ -89,10 +80,7 @@ int input_process_action(int action, Array *buffer)
         }
         else if (state.cursor_j == state.header_pane_width + 1 && state.offset_x > 0)
         {
-            state.offset_x--;
-            display_ruler_pane(buffer);
-            display_ruler_pane_ticks(buffer);
-            display_sequence_pane(buffer);
+            state_set_offset_x(&state, state.offset_x - 1);
         }
         break;
     }
@@ -107,10 +95,7 @@ int input_process_action(int action, Array *buffer)
         }
         else if (state.cursor_j == state.terminal_cols && cursor_x < record.len)
         {
-            state.offset_x++;
-            display_ruler_pane(buffer);
-            display_ruler_pane_ticks(buffer);
-            display_sequence_pane(buffer);
+            state_set_offset_x(&state, state.offset_x + 1);
         }
         break;
     }
@@ -121,27 +106,21 @@ int input_process_action(int action, Array *buffer)
         unsigned int sequence_pane_width = state.terminal_cols - state.header_pane_width;
         if (record.len < sequence_pane_width)
         {
-            state.offset_x = 0;
+            state_set_offset_x(&state, 0);
             state.cursor_j = record.len + state.header_pane_width;
         }
         else
         {
-            state.offset_x = record.len - sequence_pane_width;
+            state_set_offset_x(&state, record.len - sequence_pane_width);
             state.cursor_j = state.terminal_cols;
         }
-        display_ruler_pane(buffer);
-        display_ruler_pane_ticks(buffer);
-        display_sequence_pane(buffer);
         break;
     }
     case '0':
     case '^':
     {
-        state.offset_x = 0;
+        state_set_offset_x(&state, 0);
         state.cursor_j = state.header_pane_width + 1;
-        display_ruler_pane(buffer);
-        display_ruler_pane_ticks(buffer);
-        display_sequence_pane(buffer);
         break;
     }
     case 'o':
@@ -149,11 +128,7 @@ int input_process_action(int action, Array *buffer)
         unsigned int min_width = sizeof(HEADER_PANE_ELLIPSES) - 1 + 1; // Remove null, add separator
         if (state.header_pane_width > min_width)
         {
-            state.header_pane_width--;
-            display_ruler_pane(buffer);
-            display_ruler_pane_ticks(buffer);
-            display_header_pane(buffer);
-            display_sequence_pane(buffer);
+            state_set_header_pane_width(&state, state.header_pane_width - 1);
         }
         break;
     }
@@ -161,17 +136,29 @@ int input_process_action(int action, Array *buffer)
     {
         if (state.header_pane_width < state.terminal_cols - 1)
         {
-            state.header_pane_width++;
-            display_ruler_pane(buffer);
-            display_ruler_pane_ticks(buffer);
-            display_header_pane(buffer);
-            display_sequence_pane(buffer);
+            state_set_header_pane_width(&state, state.header_pane_width + 1);
         }
         break;
     }
     case 'q':
         exit(0);
         break;
+    }
+    if (state.refresh_ruler_pane)
+    {
+        display_ruler_pane(buffer);
+        display_ruler_pane_ticks(buffer);
+        state.refresh_ruler_pane = false;
+    }
+    if (state.refresh_header_pane)
+    {
+        display_header_pane(buffer);
+        state.refresh_header_pane = false;
+    }
+    if (state.refresh_sequence_pane)
+    {
+        display_sequence_pane(buffer);
+        state.refresh_sequence_pane = false;
     }
     display_cursor(buffer);
     terminal_cursor_show(buffer);
