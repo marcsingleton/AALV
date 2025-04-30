@@ -8,6 +8,14 @@
 
 extern State state;
 
+void display_all_panes(Array *buffer)
+{
+    display_ruler_pane(buffer);
+    display_ruler_pane_ticks(buffer);
+    display_header_pane(buffer);
+    display_sequence_pane(buffer);
+}
+
 void display_header_pane(Array *buffer)
 {
     for (unsigned int i = state.ruler_pane_height + 1; i <= state.terminal_rows; i++)

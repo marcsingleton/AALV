@@ -73,10 +73,7 @@ int main(int argc, char *argv[])
     state.cursor_j = state.header_pane_width + 1;
 
     terminal_cursor_hide(&buffer);
-    display_ruler_pane(&buffer);
-    display_ruler_pane_ticks(&buffer);
-    display_header_pane(&buffer);
-    display_sequence_pane(&buffer);
+    display_all_panes(&buffer);
     display_cursor(&buffer);
     terminal_cursor_show(&buffer);
 
