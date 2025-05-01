@@ -49,7 +49,7 @@ void display_header_pane(Array *buffer)
     }
 }
 
-void display_ruler_pane(Array *buffer) // TODO: Add continuation markers
+void display_ruler_pane(Array *buffer)
 {
     terminal_cursor_ij(buffer, 1, state.header_pane_width);
     for (unsigned int i = 1; i < state.ruler_pane_height; i++)
@@ -110,8 +110,17 @@ void display_sequence_pane(Array *buffer)
             SeqRecord record = state.record_array.records[record_index];
             int cols = state.terminal_cols - state.header_pane_width;
             int len = record.len - state.offset_x;
-            len = cols > len ? len : cols;
-            array_extend(buffer, record.seq + state.offset_x, len);
+            if (state.offset_x > 0)
+                array_append(buffer, "<");
+            else
+                array_append(buffer, record.seq + state.offset_x);
+            if (len > cols)
+            {
+                array_extend(buffer, record.seq + state.offset_x + 1, cols - 2);
+                array_append(buffer, ">");
+            }
+            else
+                array_extend(buffer, record.seq + state.offset_x + 1, len - 1);
         }
     }
 }
