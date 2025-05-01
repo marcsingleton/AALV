@@ -25,8 +25,8 @@ void display_header_pane(Array *buffer)
         if (record_index < state.record_array.len)
         {
             SeqRecord record = state.record_array.records[record_index];
-            unsigned int len = strnlen(record.header, state.header_pane_width - 1);
-            if (len < state.header_pane_width - 1)
+            unsigned int len = strnlen(record.header, state.header_pane_width);
+            if (len <= state.header_pane_width - 1)
             {
                 array_extend(buffer, record.header, len);
                 for (unsigned int j = len + 1; j <= state.header_pane_width - 1; j++)
