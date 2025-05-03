@@ -6,8 +6,8 @@
 void state_set_header_pane_width(State *state, unsigned int header_pane_width)
 {
     unsigned int min_width = sizeof(HEADER_PANE_ELLIPSES) - 1 + 1; // Remove null, add separator
-    if (header_pane_width >= state->terminal_cols)
-        header_pane_width = state->terminal_cols - 1;
+    if (header_pane_width > state->terminal_cols - 2)
+        header_pane_width = state->terminal_cols - 2;
     if (header_pane_width < min_width)
         header_pane_width = min_width;
     if (header_pane_width != state->header_pane_width)
