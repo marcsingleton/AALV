@@ -5,7 +5,6 @@
 #include <unistd.h>
 
 #include "array.h"
-#include "display.h"
 #include "input.h"
 #include "state.h"
 #include "terminal.h"
@@ -162,13 +161,10 @@ void input_move_line_end(void)
 
 void input_increase_header_pane_width(void)
 {
-    if (state.header_pane_width < state.terminal_cols - 1)
-        state_set_header_pane_width(&state, state.header_pane_width + 1);
+    state_set_header_pane_width(&state, state.header_pane_width + 1);
 }
 
 void input_decrease_header_pane_width(void)
 {
-    unsigned int min_width = sizeof(HEADER_PANE_ELLIPSES) - 1 + 1; // Remove null, add separator
-    if (state.header_pane_width > min_width)
-        state_set_header_pane_width(&state, state.header_pane_width - 1);
+    state_set_header_pane_width(&state, state.header_pane_width - 1);
 }

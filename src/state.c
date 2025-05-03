@@ -1,13 +1,22 @@
 #include <stdbool.h>
 
+#include "display.h"
 #include "state.h"
 
 void state_set_header_pane_width(State *state, unsigned int header_pane_width)
 {
-    state->header_pane_width = header_pane_width;
-    state->refresh_ruler_pane = true;
-    state->refresh_header_pane = true;
-    state->refresh_sequence_pane = true;
+    unsigned int min_width = sizeof(HEADER_PANE_ELLIPSES) - 1 + 1; // Remove null, add separator
+    if (header_pane_width >= state->terminal_cols)
+        header_pane_width = state->terminal_cols - 1;
+    if (header_pane_width < min_width)
+        header_pane_width = min_width;
+    if (header_pane_width != state->header_pane_width)
+    {
+        state->header_pane_width = header_pane_width;
+        state->refresh_ruler_pane = true;
+        state->refresh_header_pane = true;
+        state->refresh_sequence_pane = true;
+    }
 }
 
 void state_set_offset_x(State *state, unsigned int offset_x)

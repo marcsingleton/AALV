@@ -94,6 +94,7 @@ int main(int argc, char *argv[])
         {
             terminal_get_window_size(&state.terminal_rows, &state.terminal_cols);
             terminal_clear_screen(&buffer);
+            state_set_header_pane_width(&state, state.header_pane_width);
             state.refresh_ruler_pane = true;
             state.refresh_header_pane = true;
             state.refresh_sequence_pane = true;
