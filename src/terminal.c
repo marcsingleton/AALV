@@ -106,7 +106,7 @@ void terminal_cursor_show(Array *buffer)
 
 void terminal_clear_screen(Array *buffer)
 {
-    char s[] = "\x1b[?2J";
+    char s[] = "\x1b[2J";
     array_extend(buffer, s, sizeof(s) - 1);
 }
 
