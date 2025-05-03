@@ -18,7 +18,7 @@ void display_all_panes(Array *buffer)
 
 void display_header_pane(Array *buffer)
 {
-    for (unsigned int i = state.ruler_pane_height + 1; i <= state.terminal_rows; i++)
+    for (unsigned int i = state.ruler_pane_height + 1; i <= state.terminal_rows - 2; i++)
     {
         terminal_cursor_ij(buffer, i, 1);
         unsigned int record_index = i + state.offset_y - state.ruler_pane_height - 1;
@@ -47,6 +47,13 @@ void display_header_pane(Array *buffer)
             array_extend(buffer, "┃", sizeof("┃") - 1);
         }
     }
+
+    terminal_cursor_ij(buffer, state.terminal_rows - 1, 1);
+    for (unsigned int j = 1; j <= state.header_pane_width - 1; j++)
+    {
+        array_extend(buffer, "─", sizeof("─") - 1);
+    }
+    array_extend(buffer, "┺", sizeof("┺") - 1);
 }
 
 void display_ruler_pane(Array *buffer)
@@ -100,7 +107,7 @@ void display_ruler_pane_ticks(Array *buffer)
 
 void display_sequence_pane(Array *buffer)
 {
-    for (unsigned int i = state.ruler_pane_height + 1; i <= state.terminal_rows; i++)
+    for (unsigned int i = state.ruler_pane_height + 1; i <= state.terminal_rows - 2; i++)
     {
         unsigned int record_index = i + state.offset_y - state.ruler_pane_height - 1;
         terminal_cursor_ij(buffer, i, state.header_pane_width + 1);
@@ -122,6 +129,10 @@ void display_sequence_pane(Array *buffer)
             else
                 array_extend(buffer, record.seq + state.offset_x + 1, len - 1);
         }
+
+        terminal_cursor_ij(buffer, state.terminal_rows - 1, state.header_pane_width + 1);
+        for (unsigned int j = state.header_pane_width + 1; j <= state.terminal_cols; j++)
+            array_extend(buffer, "━", sizeof("━") - 1);
     }
 }
 

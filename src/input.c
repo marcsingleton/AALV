@@ -93,7 +93,7 @@ void input_move_down(void)
     unsigned int record_index = state.cursor_i + state.offset_y - state.ruler_pane_height - 1;
     if (record_index < state.record_array.len - 1)
     {
-        if (state.cursor_i < state.terminal_rows)
+        if (state.cursor_i < state.terminal_rows - 2)
             state.cursor_i++;
         else
             state_set_offset_y(&state, state.offset_y + 1);
