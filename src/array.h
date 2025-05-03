@@ -5,6 +5,8 @@
  * Dynamic arrays
  */
 
+#include <stddef.h>
+
 typedef struct
 {
     void *data;
