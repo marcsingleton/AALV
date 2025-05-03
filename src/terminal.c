@@ -32,6 +32,8 @@ int terminal_enable_raw_mode(struct termios *old_termios, struct termios *raw_te
 {
     *raw_termios = *old_termios;
     cfmakeraw(raw_termios);
+    raw_termios->c_cc[VMIN] = 0;
+    raw_termios->c_cc[VTIME] = 1;
     return tcsetattr(STDIN_FILENO, TCSAFLUSH, raw_termios);
 }
 

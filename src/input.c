@@ -21,9 +21,6 @@ int input_get_action(void)
 
 int input_process_action(int action, Array *buffer)
 {
-    terminal_cursor_hide(buffer);
-
-    // Parse actions
     switch (action)
     {
     case 'j':
@@ -55,27 +52,6 @@ int input_process_action(int action, Array *buffer)
         exit(0);
         break;
     }
-
-    // Check for refreshes
-    if (state.refresh_ruler_pane)
-    {
-        display_ruler_pane(buffer);
-        display_ruler_pane_ticks(buffer);
-        state.refresh_ruler_pane = false;
-    }
-    if (state.refresh_header_pane)
-    {
-        display_header_pane(buffer);
-        state.refresh_header_pane = false;
-    }
-    if (state.refresh_sequence_pane)
-    {
-        display_sequence_pane(buffer);
-        state.refresh_sequence_pane = false;
-    }
-
-    display_cursor(buffer);
-    terminal_cursor_show(buffer);
 
     return 0;
 }

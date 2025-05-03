@@ -1,3 +1,4 @@
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -13,8 +14,10 @@
 #include "terminal.h"
 
 State state;
-void cleanup(void);
 extern char error_message[ERROR_MESSAGE_LEN];
+
+void cleanup(void);
+void handle_sigwinch(int signum);
 
 // Main
 int main(int argc, char *argv[])
@@ -41,6 +44,7 @@ int main(int argc, char *argv[])
     terminal_use_alternate_buffer();
 
     terminal_get_window_size(&state.terminal_rows, &state.terminal_cols);
+    signal(SIGWINCH, handle_sigwinch);
 
     // Read files
     // - Try to match extensions
@@ -83,6 +87,37 @@ int main(int argc, char *argv[])
     {
         action = input_get_action();
         input_process_action(action, &buffer);
+
+        // Re-paint screen if necessary
+        terminal_cursor_hide(&buffer);
+        if (state.refresh_window)
+        {
+            terminal_get_window_size(&state.terminal_rows, &state.terminal_cols);
+            terminal_clear_screen(&buffer);
+            state.refresh_ruler_pane = true;
+            state.refresh_header_pane = true;
+            state.refresh_sequence_pane = true;
+            state.refresh_window = false;
+        }
+        if (state.refresh_ruler_pane)
+        {
+            display_ruler_pane(&buffer);
+            display_ruler_pane_ticks(&buffer);
+            state.refresh_ruler_pane = false;
+        }
+        if (state.refresh_header_pane)
+        {
+            display_header_pane(&buffer);
+            state.refresh_header_pane = false;
+        }
+        if (state.refresh_sequence_pane)
+        {
+            display_sequence_pane(&buffer);
+            state.refresh_sequence_pane = false;
+        }
+        display_cursor(&buffer);
+        terminal_cursor_show(&buffer);
+
         input_buffer_flush(&buffer);
     }
 }
@@ -99,4 +134,10 @@ void cleanup(void)
     // Print error
     if (error_message[0] != '\0')
         fputs(error_message, stderr);
+}
+
+void handle_sigwinch(int signum)
+{
+    (void)signum; // Suppress unused parameter warning
+    state.refresh_window = true;
 }

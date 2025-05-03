@@ -26,6 +26,7 @@ typedef struct
     bool refresh_ruler_pane;
     bool refresh_header_pane;
     bool refresh_sequence_pane;
+    bool refresh_window;
 } State;
 
 void state_set_header_pane_width(State *state, unsigned int header_pane_width);
