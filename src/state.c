@@ -32,3 +32,19 @@ void state_set_offset_sequence(State *state, unsigned int offset_sequence)
     state->refresh_ruler_pane = true;
     state->refresh_sequence_pane = true;
 }
+
+unsigned int state_get_record_panes_height(State *state)
+{
+    if (state->terminal_rows <= state->ruler_pane_height + 2)
+        return 0;
+    else
+        return state->terminal_rows - state->ruler_pane_height - 2;
+}
+
+unsigned int state_get_sequence_pane_width(State *state)
+{
+    if (state->terminal_cols <= state->header_pane_width)
+        return 0;
+    else
+        return state->terminal_cols - state->header_pane_width;
+}

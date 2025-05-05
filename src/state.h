@@ -35,5 +35,7 @@ void state_set_header_pane_width(State *state, unsigned int header_pane_width);
 void state_set_offset_record(State *state, unsigned int offset_record);
 void state_set_offset_header(State *state, unsigned int offset_header);
 void state_set_offset_sequence(State *state, unsigned int offset_sequence);
+unsigned int state_get_record_panes_height(State *state);
+unsigned int state_get_sequence_pane_width(State *state);
 
 #endif // STATE_H
