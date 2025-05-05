@@ -3,6 +3,9 @@
 
 /*
  * Input functions
+ *
+ * Functions in this module may modify the global State variable. They should refrain from displaying any changes and
+ * should instead mark panes to be refreshed as necessary.
  */
 
 #include "array.h"

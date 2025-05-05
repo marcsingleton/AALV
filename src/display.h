@@ -3,6 +3,9 @@
 
 /*
  * Display functions
+ *
+ * Functions in this module may access the global State variable, so they operate within the context of a program in
+ * execution. These functions may not modify the program State, however.
  */
 
 #include "array.h"
