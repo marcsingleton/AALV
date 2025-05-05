@@ -19,16 +19,16 @@ void state_set_header_pane_width(State *state, unsigned int header_pane_width)
     }
 }
 
-void state_set_offset_x(State *state, unsigned int offset_x)
+void state_set_offset_sequence(State *state, unsigned int offset_sequence)
 {
-    state->offset_x = offset_x;
+    state->offset_sequence = offset_sequence;
     state->refresh_ruler_pane = true;
     state->refresh_sequence_pane = true;
 }
 
-void state_set_offset_y(State *state, unsigned int offset_y)
+void state_set_offset_record(State *state, unsigned int offset_record)
 {
-    state->offset_y = offset_y;
+    state->offset_record = offset_record;
     state->refresh_header_pane = true;
     state->refresh_sequence_pane = true;
 }

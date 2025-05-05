@@ -71,10 +71,12 @@ int main(int argc, char *argv[])
 
     state.header_pane_width = 30;
     state.ruler_pane_height = 5;
-    state.offset_y = 0;
-    state.offset_x = 0;
-    state.cursor_i = state.ruler_pane_height + 1;
-    state.cursor_j = state.header_pane_width + 1;
+    state.offset_record = 0;
+    state.offset_header = 0;
+    state.offset_sequence = 0;
+    state.cursor_record_i = 0;
+    state.cursor_header_j = 0;
+    state.cursor_sequence_j = 0;
 
     terminal_cursor_hide(&buffer);
     display_all_panes(&buffer);
