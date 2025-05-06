@@ -16,6 +16,18 @@ void state_set_header_pane_width(State *state, unsigned int header_pane_width)
         state->refresh_ruler_pane = true;
         state->refresh_header_pane = true;
         state->refresh_sequence_pane = true;
+        state->refresh_command_pane = true;
+    }
+}
+
+void state_set_tick_spacing(State *state, unsigned int tick_spacing)
+{
+    if (tick_spacing < 1)
+        tick_spacing = 1;
+    if (tick_spacing != state->tick_spacing)
+    {
+        state->tick_spacing = tick_spacing;
+        state->refresh_ruler_pane = true;
     }
 }
 

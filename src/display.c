@@ -19,7 +19,6 @@ void display_all_panes(Array *buffer)
 void display_header_pane(Array *buffer)
 {
     unsigned int record_panes_height = state_get_record_panes_height(&state);
-
     terminal_cursor_ij(buffer, state.ruler_pane_height + 1, state.header_pane_width);
     for (unsigned int i = 0; i < record_panes_height; i++)
     {
@@ -31,7 +30,6 @@ void display_header_pane(Array *buffer)
     for (unsigned int i = 0; i < record_panes_height; i++)
     {
         unsigned int record_index = i + state.offset_record;
-
         terminal_cursor_ij(buffer, i + state.ruler_pane_height + 1, 1);
         if (record_index < state.record_array.len)
         {
@@ -48,13 +46,6 @@ void display_header_pane(Array *buffer)
         else
             array_extend(buffer, "~", sizeof("~") - 1);
     }
-
-    terminal_cursor_ij(buffer, state.ruler_pane_height + record_panes_height + 1, 1);
-    for (unsigned int j = 0; j < state.header_pane_width - 1; j++)
-    {
-        array_extend(buffer, "─", sizeof("─") - 1);
-    }
-    array_extend(buffer, "┺", sizeof("┺") - 1);
 }
 
 void display_ruler_pane(Array *buffer)
@@ -63,31 +54,35 @@ void display_ruler_pane(Array *buffer)
     for (unsigned int i = 0; i < state.ruler_pane_height; i++)
     {
         terminal_clear_line(buffer);
-        char s[] = "│\n\b";
+        char s[] = "┃\n\b";
         array_extend(buffer, s, sizeof(s) - 1);
     }
 
     unsigned int sequence_pane_width = state_get_sequence_pane_width(&state);
     terminal_cursor_ij(buffer, state.ruler_pane_height, 1);
     for (unsigned int j = 0; j < state.header_pane_width - 1; j++)
-        array_extend(buffer, "─", sizeof("─") - 1);
-    array_extend(buffer, "╆", sizeof("╆") - 1);
+        array_extend(buffer, "━", sizeof("━") - 1);
+    if (state.terminal_rows <= state.ruler_pane_height)
+        array_extend(buffer, "┻", sizeof("┻") - 1);
+    else
+        array_extend(buffer, "╋", sizeof("╋") - 1);
     for (unsigned int j = 0; j < sequence_pane_width; j++)
         array_extend(buffer, "━", sizeof("━") - 1);
 }
 
 void display_ruler_pane_ticks(Array *buffer)
 {
-    unsigned int tick_spacing = 10;
-    unsigned int q = state.offset_sequence / tick_spacing;
-    unsigned int r = state.offset_sequence % tick_spacing;
-    if (r >= 0)
+    unsigned int tick_spacing = state.tick_spacing;
+    unsigned int x0 = state.offset_sequence + state.record_array.offset;
+    unsigned int q = x0 / tick_spacing;
+    unsigned int r = x0 % tick_spacing;
+    if (r > 0)
         q++;
 
     unsigned int x = q * tick_spacing;
     unsigned int j;
     unsigned int sequence_pane_width = state_get_sequence_pane_width(&state);
-    while ((j = x - state.offset_sequence) < sequence_pane_width)
+    while ((j = x - state.offset_sequence - state.record_array.offset) < sequence_pane_width)
     {
         terminal_cursor_ij(buffer, state.ruler_pane_height, j + state.header_pane_width + 1);
         array_extend(buffer, "┷", sizeof("┷") - 1);
@@ -98,8 +93,8 @@ void display_ruler_pane_ticks(Array *buffer)
         unsigned int i = state.ruler_pane_height - 1;
         do
         {
-            d = n % tick_spacing;
-            n = n / tick_spacing;
+            d = n % 10;
+            n = n / 10;
             snprintf(c, 2, "%d", d);
             terminal_cursor_ij(buffer, i--, j + state.header_pane_width + 1);
             array_append(buffer, c);
@@ -112,7 +107,6 @@ void display_ruler_pane_ticks(Array *buffer)
 void display_sequence_pane(Array *buffer)
 {
     unsigned int record_panes_height = state_get_record_panes_height(&state);
-    unsigned int sequence_pane_width = state_get_sequence_pane_width(&state);
     for (unsigned int i = 0; i < record_panes_height; i++)
     {
         unsigned int record_index = i + state.offset_record;
@@ -137,10 +131,21 @@ void display_sequence_pane(Array *buffer)
                 array_extend(buffer, record.seq + state.offset_sequence + 1, len - 1);
         }
     }
+}
 
-    terminal_cursor_ij(buffer,
-                       state.ruler_pane_height + record_panes_height + 1,
-                       state.header_pane_width + 1);
+void display_command_pane(Array *buffer)
+{
+    if (state.terminal_rows <= state.ruler_pane_height)
+        return;
+
+    unsigned int record_panes_height = state_get_record_panes_height(&state);
+    unsigned int sequence_pane_width = state_get_sequence_pane_width(&state);
+    terminal_cursor_ij(buffer, state.ruler_pane_height + record_panes_height + 1, 1);
+    for (unsigned int j = 0; j < state.header_pane_width - 1; j++)
+    {
+        array_extend(buffer, "━", sizeof("━") - 1);
+    }
+    array_extend(buffer, "┻", sizeof("┻") - 1);
     for (unsigned int j = 0; j < sequence_pane_width; j++)
         array_extend(buffer, "━", sizeof("━") - 1);
 }

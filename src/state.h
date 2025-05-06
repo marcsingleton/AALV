@@ -19,6 +19,7 @@ typedef struct
     unsigned int terminal_cols;
     unsigned int header_pane_width;
     unsigned int ruler_pane_height;
+    unsigned int tick_spacing;
     unsigned int offset_record;
     unsigned int offset_header;
     unsigned int offset_sequence;
@@ -28,10 +29,12 @@ typedef struct
     bool refresh_ruler_pane;
     bool refresh_header_pane;
     bool refresh_sequence_pane;
+    bool refresh_command_pane;
     bool refresh_window;
 } State;
 
 void state_set_header_pane_width(State *state, unsigned int header_pane_width);
+void state_set_tick_spacing(State *state, unsigned int tick_spacing);
 void state_set_offset_record(State *state, unsigned int offset_record);
 void state_set_offset_header(State *state, unsigned int offset_header);
 void state_set_offset_sequence(State *state, unsigned int offset_sequence);

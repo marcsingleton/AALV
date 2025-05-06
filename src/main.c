@@ -60,6 +60,7 @@ int main(int argc, char *argv[])
     }
     state.record_array.records = records;
     state.record_array.len = len;
+    state.record_array.offset = 3;
 
     // Main loop
     // Display current file
@@ -71,6 +72,7 @@ int main(int argc, char *argv[])
 
     state.header_pane_width = 30;
     state.ruler_pane_height = 5;
+    state.tick_spacing = 10;
     state.offset_record = 0;
     state.offset_header = 0;
     state.offset_sequence = 0;
@@ -81,6 +83,7 @@ int main(int argc, char *argv[])
     terminal_cursor_hide(&buffer);
     display_all_panes(&buffer);
     display_cursor(&buffer);
+    display_command_pane(&buffer);
     terminal_cursor_show(&buffer);
 
     input_buffer_flush(&buffer);
@@ -100,6 +103,7 @@ int main(int argc, char *argv[])
             state.refresh_ruler_pane = true;
             state.refresh_header_pane = true;
             state.refresh_sequence_pane = true;
+            state.refresh_command_pane = true;
             state.refresh_window = false;
         }
         if (state.refresh_ruler_pane)
@@ -117,6 +121,11 @@ int main(int argc, char *argv[])
         {
             display_sequence_pane(&buffer);
             state.refresh_sequence_pane = false;
+        }
+        if (state.refresh_command_pane)
+        {
+            display_command_pane(&buffer);
+            state.refresh_command_pane = false;
         }
         display_cursor(&buffer);
         terminal_cursor_show(&buffer);

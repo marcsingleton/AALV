@@ -20,6 +20,7 @@ typedef struct
 {
     SeqRecord *records;
     unsigned int len;
+    unsigned int offset;
 } SeqRecordArray;
 
 void sequences_free_seq_records(SeqRecord *records, int nrecords);
