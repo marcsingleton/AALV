@@ -135,19 +135,29 @@ void display_sequence_pane(Array *buffer)
 
 void display_command_pane(Array *buffer)
 {
-    if (state.terminal_rows <= state.ruler_pane_height)
-        return;
-
     unsigned int record_panes_height = state_get_record_panes_height(&state);
     unsigned int sequence_pane_width = state_get_sequence_pane_width(&state);
-    terminal_cursor_ij(buffer, state.ruler_pane_height + record_panes_height + 1, 1);
-    for (unsigned int j = 0; j < state.header_pane_width - 1; j++)
+
+    if (state.terminal_rows > state.ruler_pane_height)
     {
-        array_extend(buffer, "━", sizeof("━") - 1);
+        terminal_cursor_ij(buffer, state.ruler_pane_height + record_panes_height + 1, 1);
+        for (unsigned int j = 0; j < state.header_pane_width - 1; j++)
+        {
+            array_extend(buffer, "━", sizeof("━") - 1);
+        }
+        array_extend(buffer, "┻", sizeof("┻") - 1);
+        for (unsigned int j = 0; j < sequence_pane_width; j++)
+            array_extend(buffer, "━", sizeof("━") - 1);
     }
-    array_extend(buffer, "┻", sizeof("┻") - 1);
-    for (unsigned int j = 0; j < sequence_pane_width; j++)
-        array_extend(buffer, "━", sizeof("━") - 1);
+
+    if (state.terminal_rows > state.ruler_pane_height + 1)
+    {
+        char text[256];
+        int n = snprintf(text, sizeof(text), "ROW %d COL %d", state.cursor_record_i, state.cursor_sequence_j);
+        terminal_cursor_ij(buffer, state.ruler_pane_height + record_panes_height + 2, 1);
+        terminal_clear_line(buffer);
+        array_extend(buffer, text, n);
+    }
 }
 
 void display_cursor(Array *buffer)
