@@ -110,8 +110,8 @@ void input_move_right(void)
     unsigned int record_index = state.cursor_record_i + state.offset_record;
     SeqRecord record = state.record_array.records[record_index];
     unsigned int sequence_pane_width = state.terminal_cols - state.header_pane_width;
-    unsigned int sequence_position = state.cursor_sequence_j + state.offset_sequence;
-    if (sequence_position < record.len - 1)
+    unsigned int sequence_index = state.cursor_sequence_j + state.offset_sequence;
+    if (sequence_index < record.len - 1)
     {
         if (state.cursor_sequence_j < sequence_pane_width - 1)
             state.cursor_sequence_j++;
@@ -124,8 +124,8 @@ void input_move_left(void)
 {
     unsigned int record_index = state.cursor_record_i + state.offset_record;
     SeqRecord record = state.record_array.records[record_index];
-    unsigned int sequence_position = state.cursor_sequence_j + state.offset_sequence;
-    if (sequence_position > record.len)
+    unsigned int sequence_index = state.cursor_sequence_j + state.offset_sequence;
+    if (sequence_index > record.len)
     {
         if (record.len < state.offset_sequence + 1)
         {
@@ -158,14 +158,14 @@ void input_move_line_end(void)
 {
     unsigned int record_index = state.cursor_record_i + state.offset_record;
     SeqRecord record = state.record_array.records[record_index];
-    unsigned int position_max = state.terminal_cols - state.header_pane_width + state.offset_sequence;
+    unsigned int index_max = state.terminal_cols - state.header_pane_width + state.offset_sequence;
     if (record.len < state.offset_sequence)
     {
         unsigned int offset_sequence = (record.len > 1) ? record.len - 2 : 0;
         state_set_offset_sequence(&state, offset_sequence);
         state.cursor_sequence_j = 0;
     }
-    else if (record.len < position_max)
+    else if (record.len < index_max)
     {
         state.cursor_sequence_j = record.len - state.offset_sequence - 1;
     }
