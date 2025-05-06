@@ -19,6 +19,7 @@ void display_all_panes(Array *buffer)
 void display_header_pane(Array *buffer)
 {
     unsigned int record_panes_height = state_get_record_panes_height(&state);
+
     terminal_cursor_ij(buffer, state.ruler_pane_height + 1, state.header_pane_width);
     for (unsigned int i = 0; i < record_panes_height; i++)
     {
@@ -163,12 +164,22 @@ void display_command_pane(Array *buffer)
 void display_cursor(Array *buffer)
 {
     unsigned int record_index = state.cursor_record_i + state.offset_record;
+    unsigned int sequence_index = state.cursor_sequence_j + state.offset_sequence;
+    unsigned int render_index;
+
+    unsigned int record_panes_height = state_get_record_panes_height(&state);
+    render_index = (record_index >= record_panes_height) ? record_panes_height - 1 : record_index;
+    unsigned int cursor_i = render_index + state.ruler_pane_height + 1;
+
     SeqRecord record = state.record_array.records[record_index];
-    unsigned int sequence_position = state.cursor_sequence_j + state.offset_sequence;
-    unsigned int display_position = (record.len > sequence_position) ? sequence_position : record.len;
-    unsigned int cursor_i = state.cursor_record_i + state.ruler_pane_height + 1;
-    if (display_position > state.offset_sequence)
-        terminal_cursor_ij(buffer, cursor_i, display_position - state.offset_sequence + state.header_pane_width + 1);
+    render_index = (record.len > sequence_index) ? sequence_index : record.len;
+    unsigned int cursor_j;
+    if (render_index > state.offset_sequence)
+        cursor_j = render_index - state.offset_sequence + state.header_pane_width + 1;
     else
-        terminal_cursor_ij(buffer, cursor_i, state.header_pane_width + 1);
+        cursor_j = state.header_pane_width + 1;
+
+    terminal_cursor_ij(buffer, cursor_i, cursor_j);
+    if (record_panes_height > 0)
+        terminal_cursor_show(buffer);
 }

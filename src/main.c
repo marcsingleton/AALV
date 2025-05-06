@@ -128,7 +128,6 @@ int main(int argc, char *argv[])
             state.refresh_command_pane = false;
         }
         display_cursor(&buffer);
-        terminal_cursor_show(&buffer);
 
         input_buffer_flush(&buffer);
     }
