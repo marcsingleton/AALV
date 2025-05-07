@@ -93,11 +93,11 @@ void input_move_up(void)
     if (record_index == 0)
         return;
 
-        if (state.cursor_record_i > 0)
-            state.cursor_record_i--;
-        else
-            state_set_offset_record(&state, state.offset_record - 1);
-    }
+    if (state.cursor_record_i > 0)
+        state.cursor_record_i--;
+    else
+        state_set_offset_record(&state, state.offset_record - 1);
+}
 
 void input_move_down(void)
 {
@@ -111,11 +111,11 @@ void input_move_down(void)
     if (record_index >= state.record_array.len - 1)
         return;
 
-        if (state.cursor_record_i + state.ruler_pane_height < state.terminal_rows - 3)
-            state.cursor_record_i++;
-        else
-            state_set_offset_record(&state, state.offset_record + 1);
-    }
+    if (state.cursor_record_i + state.ruler_pane_height < state.terminal_rows - 3)
+        state.cursor_record_i++;
+    else
+        state_set_offset_record(&state, state.offset_record + 1);
+}
 
 void input_move_right(void)
 {
@@ -123,13 +123,13 @@ void input_move_right(void)
     SeqRecord record = state.record_array.records[record_index];
     unsigned int sequence_pane_width = state.terminal_cols - state.header_pane_width;
     unsigned int sequence_index = state.cursor_sequence_j + state.offset_sequence;
-    if (sequence_index < record.len - 1)
-    {
-        if (state.cursor_sequence_j < sequence_pane_width - 1)
-            state.cursor_sequence_j++;
-        else if (state.cursor_sequence_j == sequence_pane_width - 1)
-            state_set_offset_sequence(&state, state.offset_sequence + 1);
-    }
+    if (sequence_index >= record.len - 1)
+        return;
+
+    if (state.cursor_sequence_j < sequence_pane_width - 1)
+        state.cursor_sequence_j++;
+    else if (state.cursor_sequence_j == sequence_pane_width - 1)
+        state_set_offset_sequence(&state, state.offset_sequence + 1);
 }
 
 void input_move_left(void)
@@ -137,6 +137,9 @@ void input_move_left(void)
     unsigned int record_index = state.cursor_record_i + state.offset_record;
     SeqRecord record = state.record_array.records[record_index];
     unsigned int sequence_index = state.cursor_sequence_j + state.offset_sequence;
+    if (sequence_index == 0)
+        return;
+
     if (sequence_index > record.len)
     {
         if (record.len < state.offset_sequence + 1)
@@ -156,7 +159,7 @@ void input_move_left(void)
     }
     else if (state.cursor_sequence_j > 0)
         state.cursor_sequence_j--;
-    else if (state.cursor_sequence_j == 0 && state.offset_sequence > 0)
+    else if (state.cursor_sequence_j == 0)
         state_set_offset_sequence(&state, state.offset_sequence - 1);
 }
 
