@@ -94,10 +94,15 @@ void display_ruler_pane_ticks(Array *buffer)
         unsigned int i = state.ruler_pane_height - 1;
         do
         {
+            terminal_cursor_ij(buffer, i--, j + state.header_pane_width + 1);
+            if (i == 0)
+            {
+                array_extend(buffer, "⋮", sizeof("⋮"));
+                break;
+            }
             d = n % 10;
             n = n / 10;
             snprintf(c, 2, "%d", d);
-            terminal_cursor_ij(buffer, i--, j + state.header_pane_width + 1);
             array_append(buffer, c);
         } while (n != 0);
 
