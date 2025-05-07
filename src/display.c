@@ -141,39 +141,38 @@ void display_command_pane(Array *buffer)
 
     if (state.terminal_rows <= state.ruler_pane_height)
         return;
-        terminal_cursor_ij(buffer, state.ruler_pane_height + record_panes_height + 1, 1);
-        for (unsigned int j = 0; j < state.header_pane_width - 1; j++)
-        {
-            array_extend(buffer, "━", sizeof("━") - 1);
-        }
-        array_extend(buffer, "┻", sizeof("┻") - 1);
-        for (unsigned int j = 0; j < sequence_pane_width; j++)
-            array_extend(buffer, "━", sizeof("━") - 1);
+    terminal_cursor_ij(buffer, state.ruler_pane_height + record_panes_height + 1, 1);
+    for (unsigned int j = 0; j < state.header_pane_width - 1; j++)
+    {
+        array_extend(buffer, "━", sizeof("━") - 1);
+    }
+    array_extend(buffer, "┻", sizeof("┻") - 1);
+    for (unsigned int j = 0; j < sequence_pane_width; j++)
+        array_extend(buffer, "━", sizeof("━") - 1);
 
     if (state.terminal_rows <= state.ruler_pane_height + 1)
         return;
     char text[256];
-        int n = snprintf(text, sizeof(text), "ROW %d COL %d", state.cursor_record_i, state.cursor_sequence_j);
+    int n = snprintf(text, sizeof(text), "ROW %d COL %d", state.cursor_record_i, state.cursor_sequence_j);
     terminal_cursor_ij(buffer, state.ruler_pane_height + record_panes_height + 2, state.terminal_cols - n + 1);
-        terminal_clear_line(buffer);
-        array_extend(buffer, text, n);
+    terminal_clear_line(buffer);
+    array_extend(buffer, text, n);
 }
 
 void display_cursor(Array *buffer)
 {
-    unsigned int record_index = state.cursor_record_i + state.offset_record;
-    unsigned int sequence_index = state.cursor_sequence_j + state.offset_sequence;
-    unsigned int render_index;
-
     unsigned int record_panes_height = state_get_record_panes_height(&state);
-    render_index = (record_index >= record_panes_height) ? record_panes_height - 1 : record_index;
-    unsigned int cursor_i = render_index + state.ruler_pane_height + 1;
+    unsigned render_index_i = (state.cursor_record_i >= record_panes_height) ? record_panes_height - 1
+                                                                             : state.cursor_record_i;
+    unsigned int cursor_i = render_index_i + state.ruler_pane_height + 1;
 
+    unsigned int record_index = render_index_i + state.offset_record;
+    unsigned int sequence_index = state.cursor_sequence_j + state.offset_sequence;
     SeqRecord record = state.record_array.records[record_index];
-    render_index = (record.len > sequence_index) ? sequence_index : record.len;
+    unsigned int render_index_j = (record.len > sequence_index) ? sequence_index : record.len;
     unsigned int cursor_j;
-    if (render_index > state.offset_sequence)
-        cursor_j = render_index - state.offset_sequence + state.header_pane_width + 1;
+    if (render_index_j > state.offset_sequence)
+        cursor_j = render_index_j - state.offset_sequence + state.header_pane_width + 1;
     else
         cursor_j = state.header_pane_width + 1;
 
