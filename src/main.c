@@ -95,6 +95,7 @@ int main(int argc, char *argv[])
 
         // Re-paint screen if necessary
         terminal_cursor_hide(&buffer);
+        state.refresh_command_pane = true;
         if (state.refresh_window)
         {
             terminal_get_window_size(&state.terminal_rows, &state.terminal_cols);
