@@ -83,27 +83,39 @@ void input_buffer_flush(Array *buffer)
 
 void input_move_up(void)
 {
+    unsigned int record_panes_height = state_get_record_panes_height(&state);
+    if (record_panes_height == 0)
+        return;
+
+    if (state.cursor_record_i >= record_panes_height)
+        state.cursor_record_i = record_panes_height - 1;
     unsigned int record_index = state.cursor_record_i + state.offset_record;
-    if (record_index > 0)
-    {
+    if (record_index == 0)
+        return;
+
         if (state.cursor_record_i > 0)
             state.cursor_record_i--;
         else
             state_set_offset_record(&state, state.offset_record - 1);
     }
-}
 
 void input_move_down(void)
 {
+    unsigned int record_panes_height = state_get_record_panes_height(&state);
+    if (record_panes_height == 0)
+        return;
+
+    if (state.cursor_record_i >= record_panes_height)
+        state.cursor_record_i = record_panes_height - 1;
     unsigned int record_index = state.cursor_record_i + state.offset_record;
-    if (record_index < state.record_array.len - 1)
-    {
+    if (record_index >= state.record_array.len - 1)
+        return;
+
         if (state.cursor_record_i + state.ruler_pane_height < state.terminal_rows - 3)
             state.cursor_record_i++;
         else
             state_set_offset_record(&state, state.offset_record + 1);
     }
-}
 
 void input_move_right(void)
 {
