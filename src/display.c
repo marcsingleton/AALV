@@ -162,6 +162,9 @@ void display_command_pane(Array *buffer)
 void display_cursor(Array *buffer)
 {
     unsigned int record_panes_height = state_get_record_panes_height(&state);
+    if (record_panes_height == 0)
+        return;
+
     unsigned render_index_i = (state.cursor_record_i >= record_panes_height) ? record_panes_height - 1
                                                                              : state.cursor_record_i;
     unsigned int cursor_i = render_index_i + state.ruler_pane_height + 1;
@@ -177,6 +180,5 @@ void display_cursor(Array *buffer)
         cursor_j = state.header_pane_width + 1;
 
     terminal_cursor_ij(buffer, cursor_i, cursor_j);
-    if (record_panes_height > 0)
-        terminal_cursor_show(buffer);
+    terminal_cursor_show(buffer);
 }
