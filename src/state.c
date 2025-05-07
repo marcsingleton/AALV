@@ -20,6 +20,22 @@ void state_set_header_pane_width(State *state, unsigned int header_pane_width)
     }
 }
 
+void state_set_ruler_pane_height(State *state, unsigned int ruler_pane_height)
+{
+    unsigned int min_height = 2;
+    if (ruler_pane_height > state->terminal_rows - 2)
+        ruler_pane_height = state->terminal_rows - 2;
+    if (ruler_pane_height < min_height)
+        ruler_pane_height = min_height;
+    if (ruler_pane_height != state->ruler_pane_height)
+    {
+        state->ruler_pane_height = ruler_pane_height;
+        state->refresh_ruler_pane = true;
+        state->refresh_header_pane = true;
+        state->refresh_sequence_pane = true;
+    }
+}
+
 void state_set_tick_spacing(State *state, unsigned int tick_spacing)
 {
     if (tick_spacing < 1)

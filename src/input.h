@@ -21,6 +21,8 @@ void input_move_line_start(void);
 void input_move_line_end(void);
 void input_increase_header_pane_width(void);
 void input_decrease_header_pane_width(void);
+void input_increase_ruler_pane_height(void);
+void input_decrease_ruler_pane_height(void);
 void input_increase_tick_spacing(void);
 void input_decrease_tick_spacing(void);
 

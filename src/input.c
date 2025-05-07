@@ -61,6 +61,12 @@ int input_process_action(int action, Array *buffer)
     case '[':
         input_decrease_header_pane_width();
         break;
+    case '}':
+        input_increase_ruler_pane_height();
+        break;
+    case '{':
+        input_decrease_ruler_pane_height();
+        break;
     case '+':
         input_increase_tick_spacing();
         break;
@@ -200,6 +206,16 @@ void input_increase_header_pane_width(void)
 void input_decrease_header_pane_width(void)
 {
     state_set_header_pane_width(&state, state.header_pane_width - 1);
+}
+
+void input_increase_ruler_pane_height(void)
+{
+    state_set_ruler_pane_height(&state, state.ruler_pane_height + 1);
+}
+
+void input_decrease_ruler_pane_height(void)
+{
+    state_set_ruler_pane_height(&state, state.ruler_pane_height - 1);
 }
 
 void input_increase_tick_spacing(void)
