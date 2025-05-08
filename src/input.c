@@ -187,14 +187,12 @@ void input_move_line_end(void)
         state.cursor_sequence_j = 0;
     }
     else if (record.len < index_max)
-    {
         state.cursor_sequence_j = record.len - state.offset_sequence - 1;
-    }
     else
     {
         unsigned int sequence_pane_width = state.terminal_cols - state.header_pane_width;
         state_set_offset_sequence(&state, record.len - sequence_pane_width);
-        state.cursor_sequence_j = sequence_pane_width;
+        state.cursor_sequence_j = sequence_pane_width - 1;
     }
 }
 
