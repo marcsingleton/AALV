@@ -10,7 +10,8 @@
 
 #include "array.h"
 
-#define HEADER_PANE_ELLIPSES "..."
+#define HEADER_PANE_ELLIPSES L"..."
+#define RULER_PANE_ELLIPSES L"···" // Re-oriented vertically
 
 void display_all_panes(Array *buffer);
 void display_header_pane(Array *buffer);

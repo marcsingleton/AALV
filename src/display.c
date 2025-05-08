@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <wchar.h>
 
 #include "array.h"
 #include "display.h"
@@ -95,15 +96,20 @@ void display_ruler_pane_ticks(Array *buffer)
         do
         {
             terminal_cursor_ij(buffer, i--, j + state.header_pane_width + 1);
-            if (i == 0)
-            {
-                array_extend(buffer, "⋮", sizeof("⋮"));
-                break;
-            }
             d = n % 10;
             n = n / 10;
             snprintf(c, 2, "%d", d);
-            array_append(buffer, c);
+            array_append(buffer, c); // Excludes null in c
+            if (i == 0 && n != 0)
+            {
+                unsigned int width = wcswidth(RULER_PANE_ELLIPSES, sizeof(RULER_PANE_ELLIPSES));
+                for (i = 0; i < width; i++)
+                {
+                    terminal_cursor_ij(buffer, i + 1, j + state.header_pane_width + 1);
+                    array_extend(buffer, "·", sizeof("·"));
+                }
+                break;
+            }
         } while (n != 0);
 
         x += tick_spacing;
@@ -148,9 +154,7 @@ void display_command_pane(Array *buffer)
         return;
     terminal_cursor_ij(buffer, state.ruler_pane_height + record_panes_height + 1, 1);
     for (unsigned int j = 0; j < state.header_pane_width - 1; j++)
-    {
         array_extend(buffer, "━", sizeof("━") - 1);
-    }
     array_extend(buffer, "┻", sizeof("┻") - 1);
     for (unsigned int j = 0; j < sequence_pane_width; j++)
         array_extend(buffer, "━", sizeof("━") - 1);

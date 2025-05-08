@@ -1,11 +1,12 @@
 #include <stdbool.h>
+#include <wchar.h>
 
 #include "display.h"
 #include "state.h"
 
 void state_set_header_pane_width(State *state, unsigned int header_pane_width)
 {
-    unsigned int min_width = sizeof(HEADER_PANE_ELLIPSES) - 1 + 1; // Remove null, add separator
+    unsigned int min_width = wcswidth(HEADER_PANE_ELLIPSES, sizeof(HEADER_PANE_ELLIPSES)) + 1;
     if (header_pane_width > state->terminal_cols - 2)
         header_pane_width = state->terminal_cols - 2;
     if (header_pane_width < min_width)
@@ -22,7 +23,8 @@ void state_set_header_pane_width(State *state, unsigned int header_pane_width)
 
 void state_set_ruler_pane_height(State *state, unsigned int ruler_pane_height)
 {
-    unsigned int min_height = 2;
+
+    unsigned int min_height = wcswidth(RULER_PANE_ELLIPSES, sizeof(RULER_PANE_ELLIPSES)) + 1;
     if (ruler_pane_height > state->terminal_rows - 2)
         ruler_pane_height = state->terminal_rows - 2;
     if (ruler_pane_height < min_height)

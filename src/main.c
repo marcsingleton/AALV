@@ -1,3 +1,4 @@
+#include <locale.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -60,7 +61,7 @@ int main(int argc, char *argv[])
     }
     state.record_array.records = records;
     state.record_array.len = len;
-    state.record_array.offset = 3;
+    state.record_array.offset = 990;
 
     // Main loop
     // Display current file
@@ -70,6 +71,7 @@ int main(int argc, char *argv[])
     Array buffer;
     array_init(&buffer, sizeof(char));
 
+    setlocale(LC_ALL, ""); // Necessary for wcswidth calls
     state.header_pane_width = 30;
     state.ruler_pane_height = 5;
     state.tick_spacing = 10;
