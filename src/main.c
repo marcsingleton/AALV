@@ -1,5 +1,4 @@
 #include <locale.h>
-#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -18,7 +17,6 @@ State state;
 extern char error_message[ERROR_MESSAGE_LEN];
 
 void cleanup(void);
-void handle_sigwinch(int signum);
 
 // Main
 int main(int argc, char *argv[])
@@ -44,8 +42,7 @@ int main(int argc, char *argv[])
     };
     terminal_use_alternate_buffer();
 
-    terminal_get_window_size(&state.terminal_rows, &state.terminal_cols);
-    signal(SIGWINCH, handle_sigwinch);
+    setlocale(LC_ALL, ""); // Necessary for wcswidth calls
 
     // Read files
     // - Try to match extensions
@@ -71,24 +68,9 @@ int main(int argc, char *argv[])
     Array buffer;
     array_init(&buffer, sizeof(char));
 
-    setlocale(LC_ALL, ""); // Necessary for wcswidth calls
     state.header_pane_width = 30;
     state.ruler_pane_height = 5;
     state.tick_spacing = 10;
-    state.offset_record = 0;
-    state.offset_header = 0;
-    state.offset_sequence = 0;
-    state.cursor_record_i = 0;
-    state.cursor_header_j = 0;
-    state.cursor_sequence_j = 0;
-
-    terminal_cursor_hide(&buffer);
-    display_all_panes(&buffer);
-    display_cursor(&buffer);
-    display_command_pane(&buffer);
-    terminal_cursor_show(&buffer);
-
-    input_buffer_flush(&buffer);
 
     while (1)
     {
@@ -98,11 +80,19 @@ int main(int argc, char *argv[])
         // Re-paint screen if necessary
         terminal_cursor_hide(&buffer);
         state.refresh_command_pane = true;
+
+        unsigned int rows, cols;
+        terminal_get_window_size(&rows, &cols);
+        if (state.terminal_rows != rows || state.terminal_cols != cols)
+        {
+            state.terminal_rows = rows;
+            state.terminal_cols = cols;
+            state.refresh_window = true;
+        }
         if (state.refresh_window)
         {
-            terminal_get_window_size(&state.terminal_rows, &state.terminal_cols);
             terminal_clear_screen(&buffer);
-            state_set_header_pane_width(&state, state.header_pane_width);
+            state_set_header_pane_width(&state, state.header_pane_width); // Triggers automatic header pane re-size
             state.refresh_ruler_pane = true;
             state.refresh_header_pane = true;
             state.refresh_sequence_pane = true;
@@ -148,10 +138,4 @@ void cleanup(void)
     // Print error
     if (error_message[0] != '\0')
         fputs(error_message, stderr);
-}
-
-void handle_sigwinch(int signum)
-{
-    (void)signum; // Suppress unused parameter warning
-    state.refresh_window = true;
 }
