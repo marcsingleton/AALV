@@ -119,6 +119,8 @@ void display_ruler_pane_ticks(Array *buffer)
 void display_sequence_pane(Array *buffer)
 {
     unsigned int record_panes_height = state_get_record_panes_height(&state);
+    unsigned int sequence_pane_width = state_get_sequence_pane_width(&state);
+
     for (unsigned int i = 0; i < record_panes_height; i++)
     {
         unsigned int record_index = i + state.offset_record;
@@ -128,19 +130,17 @@ void display_sequence_pane(Array *buffer)
         if (record_index < state.record_array.len)
         {
             SeqRecord record = state.record_array.records[record_index];
-            int cols = state.terminal_cols - state.header_pane_width;
-            int len = record.len - state.offset_sequence;
             if (state.offset_sequence > 0)
                 array_append(buffer, "<");
             else
                 array_append(buffer, record.seq + state.offset_sequence);
-            if (len > cols)
+            if (record.len > state.offset_sequence + sequence_pane_width)
             {
-                array_extend(buffer, record.seq + state.offset_sequence + 1, cols - 2);
+                array_extend(buffer, record.seq + state.offset_sequence + 1, sequence_pane_width - 2);
                 array_append(buffer, ">");
             }
-            else
-                array_extend(buffer, record.seq + state.offset_sequence + 1, len - 1);
+            else if (record.len > state.offset_sequence)
+                array_extend(buffer, record.seq + state.offset_sequence + 1, record.len - state.offset_sequence - 1);
         }
     }
 }
@@ -162,7 +162,10 @@ void display_command_pane(Array *buffer)
     if (state.terminal_rows <= state.ruler_pane_height + 1)
         return;
     char text[256];
-    int n = snprintf(text, sizeof(text), "ROW %d COL %d", state.cursor_record_i, state.cursor_sequence_j);
+    int n = snprintf(text, sizeof(text),
+                     "ROW %d COL %d",
+                     state.offset_header + state.cursor_record_i,
+                     state.offset_sequence + state.cursor_sequence_j + state.record_array.offset);
     terminal_cursor_ij(buffer, state.ruler_pane_height + record_panes_height + 2, state.terminal_cols - n + 1);
     terminal_clear_line(buffer);
     array_extend(buffer, text, n);
