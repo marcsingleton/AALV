@@ -47,10 +47,16 @@ int input_process_action(int action, Array *buffer)
         input_move_up(5);
         break;
     case 'l':
-        input_move_right();
+        input_move_right(1);
+        break;
+    case 'L':
+        input_move_right(5);
         break;
     case 'h':
-        input_move_left();
+        input_move_left(1);
+        break;
+    case 'H':
+        input_move_left(5);
         break;
     case '$':
         input_move_line_end();
@@ -140,50 +146,79 @@ void input_move_down(unsigned int x)
         state.cursor_record_i += x;
 }
 
-void input_move_right(void)
+void input_move_right(unsigned int x)
 {
-    unsigned int record_index = state.cursor_record_i + state.offset_record;
-    SeqRecord record = state.record_array.records[record_index];
-    unsigned int sequence_pane_width = state.terminal_cols - state.header_pane_width;
-    unsigned int sequence_index = state.cursor_sequence_j + state.offset_sequence;
-    if (sequence_index >= record.len - 1)
-        return;
+    unsigned int record_panes_height = state_get_record_panes_height(&state);
+    unsigned int sequence_pane_width = state_get_sequence_pane_width(&state);
 
-    if (state.cursor_sequence_j < sequence_pane_width - 1)
-        state.cursor_sequence_j++;
-    else if (state.cursor_sequence_j == sequence_pane_width - 1)
-        state_set_offset_sequence(&state, state.offset_sequence + 1);
-}
+    if (state.cursor_record_i > record_panes_height - 1)
+        state.cursor_record_i = record_panes_height - 1;
+    if (state.cursor_sequence_j > sequence_pane_width)
+        state.cursor_sequence_j = sequence_pane_width - 1;
 
-void input_move_left(void)
-{
     unsigned int record_index = state.cursor_record_i + state.offset_record;
     SeqRecord record = state.record_array.records[record_index];
     unsigned int sequence_index = state.cursor_sequence_j + state.offset_sequence;
-    if (sequence_index == 0)
-        return;
 
-    if (sequence_index > record.len)
+    if (sequence_index > record.len - 1)
     {
-        if (record.len < state.offset_sequence + 1)
+        sequence_index = record.len - 1;
+        if (sequence_index < state.offset_sequence)
         {
-            unsigned int offset_sequence = (record.len > 1) ? record.len - 2 : 0;
-            state_set_offset_sequence(&state, offset_sequence);
             state.cursor_sequence_j = 0;
-        }
-        else if (record.len == state.offset_sequence + 1)
-        {
-            unsigned int offset_sequence = (state.offset_sequence > 1) ? state.offset_sequence - 1 : 0;
-            state_set_offset_sequence(&state, offset_sequence);
-            state.cursor_sequence_j = 0;
+            state_set_offset_sequence(&state, sequence_index);
         }
         else
-            state.cursor_sequence_j = record.len - state.offset_sequence - 1;
+            state.cursor_sequence_j = sequence_index - state.offset_sequence;
     }
-    else if (state.cursor_sequence_j > 0)
-        state.cursor_sequence_j--;
-    else if (state.cursor_sequence_j == 0)
-        state_set_offset_sequence(&state, state.offset_sequence - 1);
+
+    if (x + sequence_index >= record.len - 1)
+        x = record.len - 1 - sequence_index;
+    if (x + state.cursor_sequence_j > sequence_pane_width - 1)
+    {
+        x += state.cursor_sequence_j - sequence_pane_width + 1;
+        state.cursor_sequence_j = sequence_pane_width - 1;
+        state_set_offset_sequence(&state, state.offset_sequence + x);
+    }
+    else
+        state.cursor_sequence_j += x;
+}
+
+void input_move_left(unsigned int x)
+{
+    unsigned int record_panes_height = state_get_record_panes_height(&state);
+    unsigned int sequence_pane_width = state_get_sequence_pane_width(&state);
+
+    if (state.cursor_record_i > record_panes_height - 1)
+        state.cursor_record_i = record_panes_height - 1;
+    if (state.cursor_sequence_j > sequence_pane_width)
+        state.cursor_sequence_j = sequence_pane_width - 1;
+
+    unsigned int record_index = state.cursor_record_i + state.offset_record;
+    SeqRecord record = state.record_array.records[record_index];
+    unsigned int sequence_index = state.cursor_sequence_j + state.offset_sequence;
+
+    if (sequence_index > record.len - 1)
+    {
+        sequence_index = record.len - 1;
+        if (sequence_index < state.offset_sequence)
+        {
+            state.cursor_sequence_j = 0;
+            state_set_offset_sequence(&state, sequence_index);
+        }
+        else
+            state.cursor_sequence_j = sequence_index - state.offset_sequence;
+    }
+
+    if (x > sequence_index)
+        x = sequence_index;
+    if (x > state.cursor_sequence_j)
+    {
+        state.cursor_sequence_j = 0;
+        state_set_offset_sequence(&state, sequence_index - x);
+    }
+    else
+        state.cursor_sequence_j -= x;
 }
 
 void input_move_line_start(void)
