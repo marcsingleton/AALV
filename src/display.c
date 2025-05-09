@@ -181,7 +181,7 @@ void display_cursor(Array *buffer)
     unsigned int record_index = render_index_i + state.offset_record;
     unsigned int sequence_index = state.cursor_sequence_j + state.offset_sequence;
     SeqRecord record = state.record_array.records[record_index];
-    unsigned int render_index_j = (record.len > sequence_index) ? sequence_index : record.len;
+    unsigned int render_index_j = (record.len > sequence_index) ? sequence_index : record.len - 1;
     unsigned int cursor_j;
     if (render_index_j > state.offset_sequence)
         cursor_j = render_index_j - state.offset_sequence + state.header_pane_width + 1;
