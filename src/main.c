@@ -92,7 +92,8 @@ int main(int argc, char *argv[])
         if (state.refresh_window)
         {
             terminal_clear_screen(&buffer);
-            state_set_header_pane_width(&state, state.header_pane_width); // Triggers automatic header pane re-size
+            state_set_header_pane_width(&state, state.header_pane_width); // Triggers automatic re-sizes
+            state_set_ruler_pane_height(&state, state.ruler_pane_height);
             state.refresh_ruler_pane = true;
             state.refresh_header_pane = true;
             state.refresh_sequence_pane = true;
