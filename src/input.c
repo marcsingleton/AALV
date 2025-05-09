@@ -229,23 +229,11 @@ void input_move_line_start(void)
 
 void input_move_line_end(void)
 {
+
     unsigned int record_index = state.cursor_record_i + state.offset_record;
     SeqRecord record = state.record_array.records[record_index];
-    unsigned int index_max = state.terminal_cols - state.header_pane_width + state.offset_sequence;
-    if (record.len < state.offset_sequence)
-    {
-        unsigned int offset_sequence = (record.len > 1) ? record.len - 2 : 0;
-        state_set_offset_sequence(&state, offset_sequence);
-        state.cursor_sequence_j = 0;
-    }
-    else if (record.len < index_max)
-        state.cursor_sequence_j = record.len - state.offset_sequence - 1;
-    else
-    {
-        unsigned int sequence_pane_width = state.terminal_cols - state.header_pane_width;
-        state_set_offset_sequence(&state, record.len - sequence_pane_width);
-        state.cursor_sequence_j = sequence_pane_width - 1;
-    }
+    unsigned int sequence_index = state.cursor_sequence_j + state.offset_sequence;
+    input_move_right(record.len - 1 - sequence_index);
 }
 
 void input_increase_header_pane_width(void)
