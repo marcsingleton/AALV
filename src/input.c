@@ -35,10 +35,16 @@ int input_process_action(int action, Array *buffer)
     switch (action)
     {
     case 'j':
-        input_move_down();
+        input_move_down(1);
+        break;
+    case 'J':
+        input_move_down(5);
         break;
     case 'k':
-        input_move_up();
+        input_move_up(1);
+        break;
+    case 'K':
+        input_move_up(5);
         break;
     case 'l':
         input_move_right();
@@ -85,40 +91,53 @@ void input_buffer_flush(Array *buffer)
     buffer->len = 0;
 }
 
-void input_move_up(void)
+void input_move_up(unsigned int x)
 {
     unsigned int record_panes_height = state_get_record_panes_height(&state);
+    unsigned int sequence_pane_width = state_get_sequence_pane_width(&state);
     if (record_panes_height == 0)
         return;
 
-    if (state.cursor_record_i >= record_panes_height)
+    if (state.cursor_record_i > record_panes_height - 1)
         state.cursor_record_i = record_panes_height - 1;
-    unsigned int record_index = state.cursor_record_i + state.offset_record;
-    if (record_index == 0)
-        return;
+    if (state.cursor_sequence_j > sequence_pane_width)
+        state.cursor_sequence_j = sequence_pane_width - 1;
 
-    if (state.cursor_record_i > 0)
-        state.cursor_record_i--;
+    unsigned int record_index = state.cursor_record_i + state.offset_record;
+    if (x > record_index)
+        x = record_index;
+    if (x > state.cursor_record_i)
+    {
+        state.cursor_record_i = 0;
+        state_set_offset_record(&state, record_index - x);
+    }
     else
-        state_set_offset_record(&state, state.offset_record - 1);
+        state.cursor_record_i -= x;
 }
 
-void input_move_down(void)
+void input_move_down(unsigned int x)
 {
     unsigned int record_panes_height = state_get_record_panes_height(&state);
+    unsigned int sequence_pane_width = state_get_sequence_pane_width(&state);
     if (record_panes_height == 0)
         return;
 
-    if (state.cursor_record_i >= record_panes_height)
+    if (state.cursor_record_i > record_panes_height - 1)
         state.cursor_record_i = record_panes_height - 1;
-    unsigned int record_index = state.cursor_record_i + state.offset_record;
-    if (record_index >= state.record_array.len - 1)
-        return;
+    if (state.cursor_sequence_j > sequence_pane_width)
+        state.cursor_sequence_j = sequence_pane_width - 1;
 
-    if (state.cursor_record_i + state.ruler_pane_height < state.terminal_rows - 3)
-        state.cursor_record_i++;
+    unsigned int record_index = state.cursor_record_i + state.offset_record;
+    if (x + record_index >= state.record_array.len - 1)
+        x = state.record_array.len - 1 - record_index;
+    if (x + state.cursor_record_i > record_panes_height - 1)
+    {
+        x += state.cursor_record_i - record_panes_height + 1;
+        state.cursor_record_i = record_panes_height - 1;
+        state_set_offset_record(&state, state.offset_record + x);
+    }
     else
-        state_set_offset_record(&state, state.offset_record + 1);
+        state.cursor_record_i += x;
 }
 
 void input_move_right(void)

@@ -13,8 +13,8 @@
 int input_get_action(void);
 int input_process_action(int action, Array *buffer);
 void input_buffer_flush(Array *buffer);
-void input_move_up(void);
-void input_move_down(void);
+void input_move_up(unsigned int x);
+void input_move_down(unsigned int x);
 void input_move_right(void);
 void input_move_left(void);
 void input_move_line_start(void);
