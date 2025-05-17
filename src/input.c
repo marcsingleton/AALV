@@ -102,7 +102,7 @@ void input_move_up(unsigned int x)
     unsigned int record_panes_height = state_get_record_panes_height(&state);
     unsigned int sequence_pane_width = state_get_sequence_pane_width(&state);
     if (record_panes_height == 0)
-        return;
+        record_panes_height = 1; // Treat collapsed pane as single row
 
     if (state.cursor_record_i > record_panes_height - 1)
         state.cursor_record_i = record_panes_height - 1;
@@ -126,7 +126,7 @@ void input_move_down(unsigned int x)
     unsigned int record_panes_height = state_get_record_panes_height(&state);
     unsigned int sequence_pane_width = state_get_sequence_pane_width(&state);
     if (record_panes_height == 0)
-        return;
+        record_panes_height = 1; // Treat collapsed pane as single row
 
     if (state.cursor_record_i > record_panes_height - 1)
         state.cursor_record_i = record_panes_height - 1;
