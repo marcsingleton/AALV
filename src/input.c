@@ -65,6 +65,30 @@ int input_process_action(int action, Array *buffer)
     case '^':
         input_move_line_start();
         break;
+    case 'g':
+        input_move_first_record();
+        break;
+    case 'G':
+        input_move_last_record();
+        break;
+    case 'w':
+        input_move_top_edge();
+        break;
+    case 's':
+        input_move_vertical_middle();
+        break;
+    case 'x':
+        input_move_bottom_edge();
+        break;
+    case 'e':
+        input_move_left_edge();
+        break;
+    case 'r':
+        input_move_horizontal_middle();
+        break;
+    case 't':
+        input_move_right_edge();
+        break;
     case ']':
         input_increase_header_pane_width();
         break;
@@ -234,6 +258,51 @@ void input_move_line_end(void)
     SeqRecord record = state.record_array.records[record_index];
     unsigned int sequence_index = state.cursor_sequence_j + state.offset_sequence;
     input_move_right(record.len - 1 - sequence_index);
+}
+
+void input_move_first_record(void)
+{
+    state.cursor_record_i = 0;
+    state_set_offset_record(&state, 0);
+}
+
+void input_move_last_record(void)
+{
+    unsigned int record_index = state.cursor_record_i + state.offset_record;
+    unsigned int x = state.record_array.len - 1 - record_index;
+    input_move_down(x);
+}
+
+void input_move_bottom_edge(void)
+{
+    state.cursor_record_i = state_get_record_panes_height(&state) - 1;
+}
+
+void input_move_top_edge(void)
+{
+    state.cursor_record_i = 0;
+}
+
+void input_move_left_edge(void)
+{
+    state.cursor_sequence_j = 0;
+}
+
+void input_move_right_edge(void)
+{
+    state.cursor_sequence_j = state_get_sequence_pane_width(&state) - 1;
+}
+
+void input_move_vertical_middle(void)
+{
+    unsigned int record_panes_height = state_get_record_panes_height(&state);
+    state.cursor_record_i = record_panes_height / 2;
+}
+
+void input_move_horizontal_middle(void)
+{
+    unsigned int sequence_pane_width = state_get_sequence_pane_width(&state);
+    state.cursor_sequence_j = sequence_pane_width / 2;
 }
 
 void input_increase_header_pane_width(void)
