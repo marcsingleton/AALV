@@ -164,7 +164,7 @@ void display_command_pane(Array *buffer)
     char text[256];
     int n = snprintf(text, sizeof(text),
                      "ROW %d COL %d",
-                     state.offset_header + state.cursor_record_i,
+                     state.offset_record + state.cursor_record_i,
                      state.offset_sequence + state.cursor_sequence_j + state.record_array.offset);
     terminal_cursor_ij(buffer, state.ruler_pane_height + record_panes_height + 2, state.terminal_cols - n + 1);
     terminal_clear_line(buffer);
