@@ -79,8 +79,6 @@ int array_extend(Array *array, void *values, size_t len)
 void *array_get(Array *array, size_t index)
 {
     if (index >= array->len)
-    {
         return NULL;
-    }
     return (char *)array->data + (index * array->size);
 }

@@ -226,9 +226,7 @@ int fasta_read(const char *path, SeqRecord **records_ptr)
     int nrecords = fasta_fread(fp, &ptr);
 
     if (fclose(fp) != 0)
-    {
         return FASTA_ERROR_FILE_IO;
-    }
 
     *records_ptr = ptr;
 
