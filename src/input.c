@@ -58,6 +58,18 @@ int input_process_action(int action, Array *buffer)
     case 'H':
         input_move_left(5);
         break;
+    case 'U':
+        input_move_page_up(FULL);
+        break;
+    case 'D':
+        input_move_page_down(FULL);
+        break;
+    case 'u':
+        input_move_page_up(HALF);
+        break;
+    case 'd':
+        input_move_page_down(HALF);
+        break;
     case '$':
         input_move_line_end();
         break;
@@ -243,6 +255,58 @@ void input_move_left(unsigned int x)
     }
     else
         state.cursor_sequence_j -= x;
+}
+
+void input_move_page_up(PageSize page_size)
+{
+    unsigned int record_panes_height = state_get_record_panes_height(&state);
+    unsigned int sequence_pane_width = state_get_sequence_pane_width(&state);
+    if (record_panes_height == 0)
+        record_panes_height = 1; // Treat collapsed pane as single row
+
+    if (state.cursor_record_i > record_panes_height - 1)
+        state.cursor_record_i = record_panes_height - 1;
+    if (state.cursor_sequence_j > sequence_pane_width)
+        state.cursor_sequence_j = sequence_pane_width - 1;
+
+    unsigned int x = record_panes_height;
+    if (page_size == HALF)
+        x /= 2;
+    if (x > state.offset_record)
+        state_set_offset_record(&state, 0);
+    else
+        state_set_offset_record(&state, state.offset_record - x);
+}
+
+void input_move_page_down(PageSize page_size)
+{
+    unsigned int record_panes_height = state_get_record_panes_height(&state);
+    unsigned int sequence_pane_width = state_get_sequence_pane_width(&state);
+    if (record_panes_height == 0)
+        record_panes_height = 1; // Treat collapsed pane as single row
+
+    if (state.cursor_record_i > record_panes_height - 1)
+        state.cursor_record_i = record_panes_height - 1;
+    if (state.cursor_sequence_j > sequence_pane_width)
+        state.cursor_sequence_j = sequence_pane_width - 1;
+
+    unsigned int x = record_panes_height;
+    if (page_size == HALF)
+        x /= 2;
+    if (state.offset_record + x > state.record_array.len - 1)
+        state_set_offset_record(&state, state.record_array.len - 1);
+    else
+        state_set_offset_record(&state, state.offset_record + x);
+    if (state.offset_record + state.cursor_record_i > state.record_array.len - 1)
+        state.cursor_record_i = state.record_array.len - 1 - state.offset_record;
+}
+
+void input_move_page_right(void)
+{
+}
+
+void input_move_page_left(void)
+{
 }
 
 void input_move_line_start(void)

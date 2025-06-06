@@ -10,6 +10,12 @@
 
 #include "array.h"
 
+typedef enum
+{
+    FULL,
+    HALF
+} PageSize;
+
 int input_get_action(void);
 int input_process_action(int action, Array *buffer);
 void input_buffer_flush(Array *buffer);
@@ -17,6 +23,10 @@ void input_move_up(unsigned int x);
 void input_move_down(unsigned int x);
 void input_move_right(unsigned int x);
 void input_move_left(unsigned int x);
+void input_move_page_up(PageSize);
+void input_move_page_down(PageSize);
+void input_move_page_right(void);
+void input_move_page_left(void);
 void input_move_line_start(void);
 void input_move_line_end(void);
 void input_move_first_record(void);
