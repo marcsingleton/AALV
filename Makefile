@@ -2,12 +2,12 @@ SRC_DIR := src
 TESTS_DIR := tests
 BUILD_DIR := build
 
-SRC := array.c display.c fasta.c input.c terminal.c sequences.c state.c
-SRC_OBJ := $(SRC:%.c=$(BUILD_DIR)/%.o)
+SRCS := $(wildcard $(SRC_DIR)/*.c)
+SRC_OBJS := $(patsubst $(SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(SRCS))
 SRC_TARGET := $(BUILD_DIR)/aalv
 
 TESTS := test_array.c test_fasta.c
-TESTS_TARGET := $(TESTS:%.c=$(BUILD_DIR)/%)
+TESTS_TARGETS := $(TESTS:%.c=$(BUILD_DIR)/%)
 
 CC := cc
 CFLAGS := -Wall -Wextra -pedantic -std=c99
@@ -15,7 +15,7 @@ CFLAGS := -Wall -Wextra -pedantic -std=c99
 # SRC rules
 all: $(SRC_TARGET)
 
-$(SRC_TARGET): $(SRC_OBJ) $(SRC_DIR)/main.c
+$(SRC_TARGET): $(SRC_OBJS)
 	$(CC) $(CFLAGS) $^ -o $@
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
@@ -23,9 +23,9 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
 
 # TESTS rules
 .PHONY: test
-test: $(TESTS_TARGET)
+test: $(TESTS_TARGETS)
 
-$(BUILD_DIR)/test_%: $(TESTS_DIR)/test_%.c $(SRC_OBJ) | $(BUILD_DIR)
+$(BUILD_DIR)/test_%: $(TESTS_DIR)/test_%.c $(SRC_OBJS) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $^ -I$(SRC_DIR) -o $@
 	$@
 
