@@ -339,7 +339,11 @@ void input_move_last_record(void)
 
 void input_move_bottom_edge(void)
 {
-    state.cursor_record_i = state_get_record_panes_height(&state) - 1;
+    unsigned int record_panes_height = state_get_record_panes_height(&state);
+    if (state.offset_record + record_panes_height > state.record_array.len)
+        state.cursor_record_i = state.record_array.len - state.offset_record - 1;
+    else
+        state.cursor_record_i = record_panes_height - 1;
 }
 
 void input_move_top_edge(void)
@@ -360,7 +364,10 @@ void input_move_right_edge(void)
 void input_move_vertical_middle(void)
 {
     unsigned int record_panes_height = state_get_record_panes_height(&state);
-    state.cursor_record_i = record_panes_height / 2;
+    if (state.offset_record + record_panes_height > state.record_array.len)
+        state.cursor_record_i = (state.record_array.len - state.offset_record - 1) / 2;
+    else
+        state.cursor_record_i = (record_panes_height - 1) / 2;
 }
 
 void input_move_horizontal_middle(void)
