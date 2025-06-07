@@ -145,7 +145,7 @@ void input_buffer_flush(Array *buffer)
     buffer->len = 0;
 }
 
-void input_move_up(unsigned int x)
+void input_cursor_clamp(void)
 {
     unsigned int record_panes_height = state_get_record_panes_height(&state);
     unsigned int sequence_pane_width = state_get_sequence_pane_width(&state);
@@ -156,6 +156,11 @@ void input_move_up(unsigned int x)
         state.cursor_record_i = record_panes_height - 1;
     if (state.cursor_sequence_j > sequence_pane_width)
         state.cursor_sequence_j = sequence_pane_width - 1;
+}
+
+void input_move_up(unsigned int x)
+{
+    input_cursor_clamp();
 
     unsigned int record_index = state.cursor_record_i + state.offset_record;
     if (x > record_index)
@@ -171,15 +176,11 @@ void input_move_up(unsigned int x)
 
 void input_move_down(unsigned int x)
 {
+    input_cursor_clamp();
+
     unsigned int record_panes_height = state_get_record_panes_height(&state);
-    unsigned int sequence_pane_width = state_get_sequence_pane_width(&state);
     if (record_panes_height == 0)
         record_panes_height = 1; // Treat collapsed pane as single row
-
-    if (state.cursor_record_i > record_panes_height - 1)
-        state.cursor_record_i = record_panes_height - 1;
-    if (state.cursor_sequence_j > sequence_pane_width)
-        state.cursor_sequence_j = sequence_pane_width - 1;
 
     unsigned int record_index = state.cursor_record_i + state.offset_record;
     if (x + record_index >= state.record_array.len - 1)
@@ -196,13 +197,9 @@ void input_move_down(unsigned int x)
 
 void input_move_right(unsigned int x)
 {
-    unsigned int record_panes_height = state_get_record_panes_height(&state);
-    unsigned int sequence_pane_width = state_get_sequence_pane_width(&state);
+    input_cursor_clamp();
 
-    if (state.cursor_record_i > record_panes_height - 1)
-        state.cursor_record_i = record_panes_height - 1;
-    if (state.cursor_sequence_j > sequence_pane_width)
-        state.cursor_sequence_j = sequence_pane_width - 1;
+    unsigned int sequence_pane_width = state_get_sequence_pane_width(&state);
 
     unsigned int record_index = state.cursor_record_i + state.offset_record;
     SeqRecord record = state.record_array.records[record_index];
@@ -234,13 +231,7 @@ void input_move_right(unsigned int x)
 
 void input_move_left(unsigned int x)
 {
-    unsigned int record_panes_height = state_get_record_panes_height(&state);
-    unsigned int sequence_pane_width = state_get_sequence_pane_width(&state);
-
-    if (state.cursor_record_i > record_panes_height - 1)
-        state.cursor_record_i = record_panes_height - 1;
-    if (state.cursor_sequence_j > sequence_pane_width)
-        state.cursor_sequence_j = sequence_pane_width - 1;
+    input_cursor_clamp();
 
     unsigned int record_index = state.cursor_record_i + state.offset_record;
     SeqRecord record = state.record_array.records[record_index];
@@ -271,15 +262,11 @@ void input_move_left(unsigned int x)
 
 void input_move_page_up(PageSize page_size)
 {
+    input_cursor_clamp();
+
     unsigned int record_panes_height = state_get_record_panes_height(&state);
-    unsigned int sequence_pane_width = state_get_sequence_pane_width(&state);
     if (record_panes_height == 0)
         record_panes_height = 1; // Treat collapsed pane as single row
-
-    if (state.cursor_record_i > record_panes_height - 1)
-        state.cursor_record_i = record_panes_height - 1;
-    if (state.cursor_sequence_j > sequence_pane_width)
-        state.cursor_sequence_j = sequence_pane_width - 1;
 
     unsigned int x = record_panes_height;
     if (page_size == HALF)
@@ -292,15 +279,11 @@ void input_move_page_up(PageSize page_size)
 
 void input_move_page_down(PageSize page_size)
 {
+    input_cursor_clamp();
+
     unsigned int record_panes_height = state_get_record_panes_height(&state);
-    unsigned int sequence_pane_width = state_get_sequence_pane_width(&state);
     if (record_panes_height == 0)
         record_panes_height = 1; // Treat collapsed pane as single row
-
-    if (state.cursor_record_i > record_panes_height - 1)
-        state.cursor_record_i = record_panes_height - 1;
-    if (state.cursor_sequence_j > sequence_pane_width)
-        state.cursor_sequence_j = sequence_pane_width - 1;
 
     unsigned int x = record_panes_height;
     if (page_size == HALF)
@@ -315,15 +298,7 @@ void input_move_page_down(PageSize page_size)
 
 void input_move_page_right(PageSize page_size)
 {
-    unsigned int record_panes_height = state_get_record_panes_height(&state);
-    unsigned int sequence_pane_width = state_get_sequence_pane_width(&state);
-    if (record_panes_height == 0)
-        record_panes_height = 1; // Treat collapsed pane as single row
-
-    if (state.cursor_record_i > record_panes_height - 1)
-        state.cursor_record_i = record_panes_height - 1;
-    if (state.cursor_sequence_j > sequence_pane_width)
-        state.cursor_sequence_j = sequence_pane_width - 1;
+    input_cursor_clamp();
 
     unsigned int max_len = 0;
     for (unsigned int i = 0; i < state.record_array.len; i++)
@@ -332,7 +307,7 @@ void input_move_page_right(PageSize page_size)
             max_len = state.record_array.records[i].len;
     }
 
-    unsigned int x = sequence_pane_width;
+    unsigned int x = state_get_sequence_pane_width(&state);
     if (page_size == HALF)
         x /= 2;
     if (state.offset_sequence + x > max_len - 2) // Accounts for continuation symbol
@@ -343,17 +318,9 @@ void input_move_page_right(PageSize page_size)
 
 void input_move_page_left(PageSize page_size)
 {
-    unsigned int record_panes_height = state_get_record_panes_height(&state);
-    unsigned int sequence_pane_width = state_get_sequence_pane_width(&state);
-    if (record_panes_height == 0)
-        record_panes_height = 1; // Treat collapsed pane as single row
+    input_cursor_clamp();
 
-    if (state.cursor_record_i > record_panes_height - 1)
-        state.cursor_record_i = record_panes_height - 1;
-    if (state.cursor_sequence_j > sequence_pane_width)
-        state.cursor_sequence_j = sequence_pane_width - 1;
-
-    unsigned int x = sequence_pane_width;
+    unsigned int x = state_get_sequence_pane_width(&state);
     if (page_size == HALF)
         x /= 2;
     if (x > state.offset_sequence)
@@ -364,12 +331,16 @@ void input_move_page_left(PageSize page_size)
 
 void input_move_line_start(void)
 {
+    input_cursor_clamp();
+
     state_set_offset_sequence(&state, 0);
     state.cursor_sequence_j = 0;
 }
 
 void input_move_line_end(void)
 {
+    input_cursor_clamp();
+
     unsigned int record_index = state.cursor_record_i + state.offset_record;
     SeqRecord record = state.record_array.records[record_index];
     unsigned int sequence_index = state.cursor_sequence_j + state.offset_sequence;
@@ -378,12 +349,16 @@ void input_move_line_end(void)
 
 void input_move_first_record(void)
 {
+    input_cursor_clamp();
+
     state.cursor_record_i = 0;
     state_set_offset_record(&state, 0);
 }
 
 void input_move_last_record(void)
 {
+    input_cursor_clamp();
+
     unsigned int record_index = state.cursor_record_i + state.offset_record;
     unsigned int x = state.record_array.len - 1 - record_index;
     input_move_down(x);
@@ -391,6 +366,8 @@ void input_move_last_record(void)
 
 void input_move_bottom_edge(void)
 {
+    input_cursor_clamp();
+
     unsigned int record_panes_height = state_get_record_panes_height(&state);
     if (state.offset_record + record_panes_height > state.record_array.len)
         state.cursor_record_i = state.record_array.len - state.offset_record - 1;
@@ -400,21 +377,29 @@ void input_move_bottom_edge(void)
 
 void input_move_top_edge(void)
 {
+    input_cursor_clamp();
+
     state.cursor_record_i = 0;
 }
 
 void input_move_left_edge(void)
 {
+    input_cursor_clamp();
+
     state.cursor_sequence_j = 0;
 }
 
 void input_move_right_edge(void)
 {
+    input_cursor_clamp();
+
     state.cursor_sequence_j = state_get_sequence_pane_width(&state) - 1;
 }
 
 void input_move_vertical_middle(void)
 {
+    input_cursor_clamp();
+
     unsigned int record_panes_height = state_get_record_panes_height(&state);
     if (state.offset_record + record_panes_height > state.record_array.len)
         state.cursor_record_i = (state.record_array.len - state.offset_record - 1) / 2;
@@ -424,6 +409,8 @@ void input_move_vertical_middle(void)
 
 void input_move_horizontal_middle(void)
 {
+    input_cursor_clamp();
+
     unsigned int sequence_pane_width = state_get_sequence_pane_width(&state);
     state.cursor_sequence_j = sequence_pane_width / 2;
 }
