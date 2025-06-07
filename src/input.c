@@ -64,11 +64,23 @@ int input_process_action(int action, Array *buffer)
     case 'D':
         input_move_page_down(FULL);
         break;
+    case 'M':
+        input_move_page_right(FULL);
+        break;
+    case 'N':
+        input_move_page_left(FULL);
+        break;
     case 'u':
         input_move_page_up(HALF);
         break;
     case 'd':
         input_move_page_down(HALF);
+        break;
+    case 'm':
+        input_move_page_right(HALF);
+        break;
+    case 'n':
+        input_move_page_left(HALF);
         break;
     case '$':
         input_move_line_end();
@@ -301,12 +313,53 @@ void input_move_page_down(PageSize page_size)
         state.cursor_record_i = state.record_array.len - 1 - state.offset_record;
 }
 
-void input_move_page_right(void)
+void input_move_page_right(PageSize page_size)
 {
+    unsigned int record_panes_height = state_get_record_panes_height(&state);
+    unsigned int sequence_pane_width = state_get_sequence_pane_width(&state);
+    if (record_panes_height == 0)
+        record_panes_height = 1; // Treat collapsed pane as single row
+
+    if (state.cursor_record_i > record_panes_height - 1)
+        state.cursor_record_i = record_panes_height - 1;
+    if (state.cursor_sequence_j > sequence_pane_width)
+        state.cursor_sequence_j = sequence_pane_width - 1;
+
+    unsigned int max_len = 0;
+    for (unsigned int i = 0; i < state.record_array.len; i++)
+    {
+        if (state.record_array.records[i].len > max_len)
+            max_len = state.record_array.records[i].len;
+    }
+
+    unsigned int x = sequence_pane_width;
+    if (page_size == HALF)
+        x /= 2;
+    if (state.offset_sequence + x > max_len - 2) // Accounts for continuation symbol
+        state_set_offset_sequence(&state, max_len - 2);
+    else
+        state_set_offset_sequence(&state, state.offset_sequence + x);
 }
 
-void input_move_page_left(void)
+void input_move_page_left(PageSize page_size)
 {
+    unsigned int record_panes_height = state_get_record_panes_height(&state);
+    unsigned int sequence_pane_width = state_get_sequence_pane_width(&state);
+    if (record_panes_height == 0)
+        record_panes_height = 1; // Treat collapsed pane as single row
+
+    if (state.cursor_record_i > record_panes_height - 1)
+        state.cursor_record_i = record_panes_height - 1;
+    if (state.cursor_sequence_j > sequence_pane_width)
+        state.cursor_sequence_j = sequence_pane_width - 1;
+
+    unsigned int x = sequence_pane_width;
+    if (page_size == HALF)
+        x /= 2;
+    if (x > state.offset_sequence)
+        state_set_offset_sequence(&state, 0);
+    else
+        state_set_offset_sequence(&state, state.offset_sequence - x);
 }
 
 void input_move_line_start(void)
@@ -317,7 +370,6 @@ void input_move_line_start(void)
 
 void input_move_line_end(void)
 {
-
     unsigned int record_index = state.cursor_record_i + state.offset_record;
     SeqRecord record = state.record_array.records[record_index];
     unsigned int sequence_index = state.cursor_sequence_j + state.offset_sequence;
