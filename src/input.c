@@ -34,6 +34,12 @@ int input_process_action(int action, Array *buffer)
 {
     switch (action)
     {
+    case '>':
+        input_next_file();
+        break;
+    case '<':
+        input_previous_file();
+        break;
     case 'j':
         input_move_down(1);
         break;
@@ -143,6 +149,22 @@ void input_buffer_flush(Array *buffer)
 {
     write(STDOUT_FILENO, buffer->data, buffer->len);
     buffer->len = 0;
+}
+
+void input_next_file(void)
+{
+    if (state.active_file_index == state.nfiles - 1)
+        return;
+    state_set_active_file_index(&state, state.active_file_index + 1);
+    state.refresh_window = true;
+}
+
+void input_previous_file(void)
+{
+    if (state.active_file_index == 0)
+        return;
+    state_set_active_file_index(&state, state.active_file_index - 1);
+    state.refresh_window = true;
 }
 
 void input_cursor_clamp(void)
