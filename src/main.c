@@ -49,6 +49,13 @@ int main(int argc, char *argv[])
     // - If no matching extension, infer with sniffer
     // - Error if no sniffer is successful
     // - Error if an explicit or inferred format is malformed
+
+    // TODO: Dynamically allocate files and loop through arguments
+    FileState files[10];
+    state.files = files;
+    state.active_file = files;
+    state.active_file_index = 0;
+
     SeqRecord *records = NULL;
     int len = fasta_read(argv[1], &records);
     if (len < 0)
@@ -56,9 +63,10 @@ int main(int argc, char *argv[])
         snprintf(error_message, ERROR_MESSAGE_LEN, "Error processing input file: %d\n", len);
         return 1;
     }
-    state.record_array.records = records;
-    state.record_array.len = len;
-    state.record_array.offset = 990;
+    state.active_file->record_array.records = records;
+    state.active_file->record_array.records = records;
+    state.active_file->record_array.len = len;
+    state.active_file->record_array.offset = 990;
 
     // Main loop
     // Display current file
@@ -68,9 +76,9 @@ int main(int argc, char *argv[])
     Array buffer;
     array_init(&buffer, sizeof(char));
 
-    state.header_pane_width = 30;
-    state.ruler_pane_height = 5;
-    state.tick_spacing = 10;
+    state.active_file->header_pane_width = 30;
+    state.active_file->ruler_pane_height = 5;
+    state.active_file->tick_spacing = 10;
 
     while (1)
     {
@@ -92,8 +100,8 @@ int main(int argc, char *argv[])
         if (state.refresh_window)
         {
             terminal_clear_screen(&buffer);
-            state_set_header_pane_width(&state, state.header_pane_width); // Triggers automatic re-sizes
-            state_set_ruler_pane_height(&state, state.ruler_pane_height);
+            state_set_header_pane_width(&state, state.active_file->header_pane_width); // Triggers automatic re-sizes
+            state_set_ruler_pane_height(&state, state.active_file->ruler_pane_height);
             state.refresh_ruler_pane = true;
             state.refresh_header_pane = true;
             state.refresh_sequence_pane = true;
@@ -130,7 +138,8 @@ int main(int argc, char *argv[])
 void cleanup(void)
 {
     // Free memory
-    sequences_free_seq_record_array(&state.record_array); // Null if unset, so always safe to free
+    // TODO: Loop through files
+    sequences_free_seq_record_array(&state.active_file->record_array); // Null if unset, so always safe to free
 
     // Restore terminal options
     terminal_use_normal_buffer();
