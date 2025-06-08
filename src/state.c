@@ -104,3 +104,12 @@ unsigned int state_get_sequence_pane_width(State *state)
     else
         return state->terminal_cols - active_file->header_pane_width;
 }
+
+// State setters
+void state_set_active_file_index(State *state, unsigned int active_file_index)
+{
+    if (active_file_index > state->nfiles - 1)
+        active_file_index = state->nfiles - 1;
+    state->active_file_index = active_file_index;
+    state->active_file = state->files + active_file_index;
+}
