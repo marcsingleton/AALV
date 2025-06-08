@@ -84,7 +84,6 @@ void terminal_cursor_origin(Array *buffer)
 
 void terminal_cursor_ij(Array *buffer, const unsigned int i, const unsigned int j)
 {
-
     char s[4 + 2 * UINT_STR_MAX + 1]; // 4 template, 2 UINTS, and 1 null
     int len = sprintf(s, "\x1b[%d;%dH", i, j);
     array_extend(buffer, s, len + 1);
