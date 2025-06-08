@@ -22,7 +22,7 @@ void cleanup(void);
 int main(int argc, char *argv[])
 {
     // Process arguments
-    if (argc != 2)
+    if (argc < 2)
     {
         strncpy(error_message, "Incorrect number of arguments. Quitting...\n", ERROR_MESSAGE_LEN);
         return 1;
@@ -50,23 +50,35 @@ int main(int argc, char *argv[])
     // - Error if no sniffer is successful
     // - Error if an explicit or inferred format is malformed
 
-    // TODO: Dynamically allocate files and loop through arguments
-    FileState files[10];
+    FileState *files = malloc((argc - 1) * sizeof(FileState));
+    if (files == NULL)
+    {
+        strncpy(error_message, "Failed to allocate memory to load files. Quitting...\n", ERROR_MESSAGE_LEN);
+        return 1;
+    }
     state.files = files;
+    state.nfiles = argc - 1;
     state.active_file = files;
     state.active_file_index = 0;
 
-    SeqRecord *records = NULL;
-    int len = fasta_read(argv[1], &records);
-    if (len < 0)
+    for (unsigned int i = 0; i < state.nfiles; i++)
     {
-        snprintf(error_message, ERROR_MESSAGE_LEN, "Error processing input file: %d\n", len);
-        return 1;
+        SeqRecord *records = NULL;
+        int len = fasta_read(argv[i + 1], &records);
+        if (len < 0)
+        {
+            snprintf(error_message, ERROR_MESSAGE_LEN, "Error processing input file: %d\n", len);
+            return 1;
+        }
+        FileState *file = state.files + i;
+        file->record_array.records = records;
+        file->record_array.records = records;
+        file->record_array.len = len;
+        file->record_array.offset = 990;
+        file->header_pane_width = 30;
+        file->ruler_pane_height = 5;
+        file->tick_spacing = 10;
     }
-    state.active_file->record_array.records = records;
-    state.active_file->record_array.records = records;
-    state.active_file->record_array.len = len;
-    state.active_file->record_array.offset = 990;
 
     // Main loop
     // Display current file
@@ -75,10 +87,6 @@ int main(int argc, char *argv[])
     int action;
     Array buffer;
     array_init(&buffer, sizeof(char));
-
-    state.active_file->header_pane_width = 30;
-    state.active_file->ruler_pane_height = 5;
-    state.active_file->tick_spacing = 10;
 
     while (1)
     {
@@ -138,8 +146,9 @@ int main(int argc, char *argv[])
 void cleanup(void)
 {
     // Free memory
-    // TODO: Loop through files
-    sequences_free_seq_record_array(&state.active_file->record_array); // Null if unset, so always safe to free
+    for (FileState *file = state.files; file < state.files + state.nfiles; file++)
+        sequences_free_seq_record_array(&file->record_array); // Null if unset, so always safe to free
+    free(state.files);
 
     // Restore terminal options
     terminal_use_normal_buffer();
