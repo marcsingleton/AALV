@@ -146,8 +146,8 @@ int main(int argc, char *argv[])
 void cleanup(void)
 {
     // Free memory
-    for (FileState *file = state.files; file < state.files + state.nfiles; file++)
-        sequences_free_seq_record_array(&file->record_array); // Null if unset, so always safe to free
+    for (unsigned int i = 0; i < state.nfiles; i++)
+        sequences_free_seq_record_array(&state.files[i].record_array); // Null if unset, so always safe to free
     free(state.files);
 
     // Restore terminal options

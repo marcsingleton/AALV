@@ -110,9 +110,9 @@ int test_blank_lines(void)
     fputs("\n\n\n", fp);
     for (size_t i = 0; i < NRECORDS; i++) // To match NRECORDS type
     {
-        SeqRecord *record = records + i;
-        fprintf(fp, ">%s\n\n", record->header);
-        wrap_string_with_blanks(fp, record->seq, record->len, MAXLEN);
+        SeqRecord record = records[i];
+        fprintf(fp, ">%s\n\n", record.header);
+        wrap_string_with_blanks(fp, record.seq, record.len, MAXLEN);
     }
     fseek(fp, 0, SEEK_SET);
     SeqRecord *new_records = NULL;
@@ -151,11 +151,11 @@ int test_get_id(void)
         char *id;
     } IdTest;
     IdTest tests[] = {
-        {"id", "id"},
-        {"    id", "id"},
-        {"id    ", "id"},
-        {"    id    ", "id"},
-        {" id metadata", "id"},
+        {"id1", "id1"},
+        {"    id2", "id2"},
+        {"id3    ", "id3"},
+        {"    id4    ", "id4"},
+        {" id5 metadata", "id5"},
         {"", ""},
         {NULL, NULL},
     };
@@ -163,10 +163,10 @@ int test_get_id(void)
     int code = 0;
     char *expected_id = NULL;
     char *returned_id = NULL;
-    for (int i = 0; tests[i].header != NULL; i++)
+    for (IdTest *test = tests; test->header != NULL; test++)
     {
-        expected_id = tests[i].id;
-        returned_id = fasta_get_id(tests[i].header);
+        expected_id = test->id;
+        returned_id = fasta_get_id(test->header);
         if (returned_id == NULL || strcmp(expected_id, returned_id) != 0)
             code += 1;
         free(returned_id);

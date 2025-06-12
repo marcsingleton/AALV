@@ -207,9 +207,10 @@ cleanup:
         seq = NULL;
         for (int i = 0; i < record_index; i++)
         {
-            free(new_records[i].header);
-            free(new_records[i].id);
-            free(new_records[i].seq);
+            SeqRecord new_record = new_records[i];
+            free(new_record.header);
+            free(new_record.id);
+            free(new_record.seq);
         }
     }
     free(new_records);

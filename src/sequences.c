@@ -2,13 +2,12 @@
 
 void sequences_free_seq_records(SeqRecord *records, int nrecords)
 {
-    SeqRecord *record;
     for (int i = 0; i < nrecords; i++)
     {
-        record = records + i;
-        free(record->header);
-        free(record->id);
-        free(record->seq);
+        SeqRecord record = records[i];
+        free(record.header);
+        free(record.id);
+        free(record.seq);
     }
     free(records);
 }
