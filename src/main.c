@@ -13,6 +13,8 @@
 #include "state.h"
 #include "terminal.h"
 
+#define PROGRAM_NAME "aalv"
+
 State state;
 extern char error_message[ERROR_MESSAGE_LEN];
 
@@ -24,20 +26,20 @@ int main(int argc, char *argv[])
     // Process arguments
     if (argc < 2)
     {
-        strncpy(error_message, "Incorrect number of arguments. Quitting...\n", ERROR_MESSAGE_LEN);
+        strncpy(error_message, PROGRAM_NAME ": Incorrect number of arguments\n", ERROR_MESSAGE_LEN);
         return 1;
     }
 
     // Set screen and terminal options
     if (terminal_get_termios(&state.old_termios) != 0)
     {
-        strncpy(error_message, "Failed to get current termios. Quitting...\n", ERROR_MESSAGE_LEN);
+        strncpy(error_message, PROGRAM_NAME ": Failed to get current termios\n", ERROR_MESSAGE_LEN);
         return 1;
     }
     atexit(&cleanup); // Only register when get_termios is successful
     if (terminal_enable_raw_mode(&state.old_termios, &state.raw_termios) != 0)
     {
-        strncpy(error_message, "Failed to set raw mode. Quitting...\n", ERROR_MESSAGE_LEN);
+        strncpy(error_message, PROGRAM_NAME ": Failed to set raw mode", ERROR_MESSAGE_LEN);
         return 1;
     };
     terminal_use_alternate_buffer();
@@ -53,7 +55,7 @@ int main(int argc, char *argv[])
     FileState *files = malloc((argc - 1) * sizeof(FileState));
     if (files == NULL)
     {
-        strncpy(error_message, "Failed to allocate memory to load files. Quitting...\n", ERROR_MESSAGE_LEN);
+        strncpy(error_message, PROGRAM_NAME ": Failed to allocate memory to load files\n", ERROR_MESSAGE_LEN);
         return 1;
     }
     state.files = files;
@@ -63,11 +65,12 @@ int main(int argc, char *argv[])
 
     for (unsigned int i = 0; i < state.nfiles; i++)
     {
+        char *file_path = argv[i + 1];
         SeqRecord *records = NULL;
         int len = fasta_read(argv[i + 1], &records);
         if (len < 0)
         {
-            snprintf(error_message, ERROR_MESSAGE_LEN, "Error processing input file: %d\n", len);
+            snprintf(error_message, ERROR_MESSAGE_LEN, PROGRAM_NAME ": %s: Error processing file (code %d)\n", file_path, len);
             return 1;
         }
         FileState *file = state.files + i;
