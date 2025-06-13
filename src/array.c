@@ -82,3 +82,14 @@ void *array_get(Array *array, size_t index)
         return NULL;
     return (char *)array->data + (index * array->size);
 }
+
+int array_shrink(Array *array)
+{
+    size_t capacity = (array->len == 0) ? INIT_CAPACITY : array->len;
+    void *ptr = realloc(array->data, capacity * array->size);
+    if (ptr == NULL)
+        return 1;
+    array->data = ptr;
+    array->capacity = capacity;
+    return 0;
+}

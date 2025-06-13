@@ -21,5 +21,6 @@ void array_free(Array *array);
 int array_append(Array *array, void *value);
 int array_extend(Array *array, void *values, size_t len);
 void *array_get(Array *array, size_t index);
+int array_shrink(Array *array);
 
 #endif // ARRAY_H
