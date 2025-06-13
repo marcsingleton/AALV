@@ -140,14 +140,14 @@ int test_get_out_of_bounds(void)
     int code = 0;
     Array array;
     int value;
-    value = array_init(&array, sizeof(int));
 
-    size_t len = 32;
+    value = array_init(&array, sizeof(int));
     if (value != 0)
     {
         code = 1;
         goto cleanup;
     }
+    size_t len = 32;
     for (size_t i = 0; i < len; i++)
     {
         value = array_append(&array, &i);
@@ -174,11 +174,44 @@ cleanup:
     return code;
 }
 
+int test_shrink(void)
+{
+    int code = 0;
+    Array array;
+    int value;
+
+    value = array_init(&array, sizeof(int));
+    if (value != 0)
+    {
+        code = 1;
+        goto cleanup;
+    }
+    size_t capacity = array.capacity;
+    array_shrink(&array);
+    if (array.capacity != capacity)
+    {
+        code = 2;
+        goto cleanup;
+    }
+    for (size_t i = 0; i < capacity + 1; i++)
+        array_append(&array, &i);
+    array_shrink(&array);
+    if (array.capacity != array.len)
+    {
+        code = 3;
+        goto cleanup;
+    }
+cleanup:
+    array_free(&array);
+    return code;
+}
+
 TestFunction tests[] = {
     {&test_init, "test_init"},
     {&test_append_get, "test_append"},
     {&test_extend_get, "test_extend"},
     {&test_get_out_of_bounds, "test_get_out_of_bounds"},
+    {&test_shrink, "test_shrink"},
 };
 
 #define NTESTS sizeof(tests) / sizeof(TestFunction)
