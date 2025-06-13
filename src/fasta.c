@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "array.h"
 #include "fasta.h"
 #include "sequences.h"
 
@@ -16,13 +17,11 @@ const int FASTA_ERROR_MEMORY_ALLOCATION = -5;
 int fasta_fread(FILE *fp, SeqRecord **records_ptr)
 {
     // Declarations
-    long pos = 0;
-
     void *ptr = NULL; // A generic temporary pointer for allocations
 
     int nrecords = 0;
-    SeqRecord *new_records = NULL;
-    int record_index = 0;
+    Array new_records;
+    array_init(&new_records, sizeof(SeqRecord));
 
     char *line = NULL;
     size_t capacity = 0;
@@ -45,13 +44,6 @@ int fasta_fread(FILE *fp, SeqRecord **records_ptr)
     }
     buffer = ptr;
 
-    // Record initial position of stream
-    if ((pos = ftell(fp)) == -1)
-    {
-        nrecords = FASTA_ERROR_FILE_IO;
-        goto cleanup;
-    }
-
     // Read until first non-empty line
     while ((linelen = getline(&line, &capacity, fp)) == 1 && line[0] == '\n')
         ;
@@ -67,39 +59,6 @@ int fasta_fread(FILE *fp, SeqRecord **records_ptr)
         nrecords = FASTA_ERROR_INVALID_FORMAT;
         goto cleanup;
     }
-
-    // Count number of records
-    while (linelen > 0)
-    {
-        if (line[0] == '>')
-        {
-            if (nrecords > INT_MAX - 1)
-            {
-                nrecords = FASTA_ERROR_RECORD_OVERFLOW;
-                goto cleanup;
-            }
-            nrecords++;
-        }
-        linelen = getline(&line, &capacity, fp);
-    }
-
-    // Reset stream and allocate memory
-    if (fseek(fp, pos, SEEK_SET) == -1)
-    {
-        nrecords = FASTA_ERROR_FILE_IO;
-        goto cleanup;
-    }
-    ptr = malloc(nrecords * sizeof(SeqRecord));
-    if (ptr == NULL)
-    {
-        nrecords = FASTA_ERROR_MEMORY_ALLOCATION;
-        goto cleanup;
-    }
-    new_records = ptr;
-
-    // Read until first non-empty line
-    while ((linelen = getline(&line, &capacity, fp)) == 1 && line[0] == '\n')
-        ;
 
     // Read records
     while (linelen > 0)
@@ -179,19 +138,21 @@ int fasta_fread(FILE *fp, SeqRecord **records_ptr)
         }
         memcpy(seq, buffer, seqlen + 1);
 
-        SeqRecord *new_record = new_records + record_index;
-        new_record->header = header;
-        new_record->id = id;
-        new_record->seq = seq;
-        new_record->len = seqlen;
-
-        record_index++;
+        SeqRecord new_record = {
+            .header = header,
+            .id = id,
+            .seq = seq,
+            .len = seqlen,
+        };
+        array_append(&new_records, &new_record);
     }
 
     free(line);
     free(buffer);
 
-    *records_ptr = new_records;
+    array_shrink(&new_records);
+    *records_ptr = new_records.data;
+    nrecords = new_records.len;
     return nrecords;
 
 cleanup:
@@ -200,20 +161,19 @@ cleanup:
     free(header);
     free(id);
     free(seq);
-    if (new_records != NULL)
+
+    header = NULL; // To guard against double frees
+    id = NULL;
+    seq = NULL;
+    for (size_t i = 0; i < new_records.len; i++)
     {
-        header = NULL; // To guard against double frees
-        id = NULL;
-        seq = NULL;
-        for (int i = 0; i < record_index; i++)
-        {
-            SeqRecord new_record = new_records[i];
-            free(new_record.header);
-            free(new_record.id);
-            free(new_record.seq);
-        }
+        SeqRecord *new_record = array_get(&new_records, i);
+        free(new_record->header);
+        free(new_record->id);
+        free(new_record->seq);
     }
-    free(new_records);
+
+    array_free(&new_records);
     return nrecords;
 }
 
