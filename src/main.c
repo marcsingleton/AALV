@@ -1,3 +1,4 @@
+#include <getopt.h>
 #include <locale.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -20,10 +21,91 @@ extern char error_message[ERROR_MESSAGE_LEN];
 
 void cleanup(void);
 
+typedef struct
+{
+    const char *long_name;
+    const char short_name;
+    const char *description;
+    const char *usage;
+    int has_arg;
+} Argument;
+
+typedef struct
+{
+    char *name;
+    char *exts;
+    int (*reader)(const char *, SeqRecord **);
+} Format;
+
+Argument arguments[] = {
+    {"format",
+     'f',
+     "comma-separated list of format extensions for input files",
+     "-f <fmt,...,fmt>",
+     required_argument},
+    {"list-formats",
+     0,
+     "list allowable formats and their recognized extensions",
+     "--list-formats",
+     no_argument},
+    // help
+    // sequence types
+};
+
+#define NARGUMENTS sizeof(arguments) / sizeof(Argument)
+
+Format formats[] = {
+    {"FASTA", "fasta,fa,faa,fna,afa", &fasta_read},
+    // CLUSTAL
+    // PHYLIP
+    // STOCKHOLM
+};
+
+#define NFORMATS sizeof(formats) / sizeof(Format)
+
 // Main
 int main(int argc, char *argv[])
 {
     // Process arguments
+    struct option long_options[NARGUMENTS];
+    for (unsigned int i = 0; i < NARGUMENTS; i++)
+    {
+        Argument *argument = arguments + i;
+        struct option *long_option = long_options + i;
+        long_option->name = argument->long_name;
+        long_option->has_arg = argument->has_arg;
+        long_option->flag = 0;
+        long_option->val = 1;
+    }
+
+    char *format_args = NULL;
+    while (1)
+    {
+        int option_index = 0;
+        int c = getopt_long(argc, argv, "", long_options, &option_index);
+        if (c == -1)
+            break;
+        const char *name = arguments[option_index].long_name;
+
+        // Check for help first
+        if (strcmp(name, "list-formats") == 0)
+        {
+            printf("Format\tExtensions\n");
+            for (unsigned int i = 0; i < NFORMATS; i++)
+            {
+                Format *format = formats + i;
+                printf("%s\t%s\n", format->name, format->exts);
+            }
+            return 0;
+        }
+        else if (strcmp(name, "format") == 0)
+        {
+            format_args = argv[optind - 1];
+            printf("Identified the following formats: %s\n", format_args);
+        }
+    }
+
+    // If not a TTY and no positional arguments, print usage message (short help)
     if (argc < 2)
     {
         strncpy(error_message, PROGRAM_NAME ": Incorrect number of arguments\n", ERROR_MESSAGE_LEN);
