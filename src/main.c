@@ -129,11 +129,6 @@ int main(int argc, char *argv[])
     setlocale(LC_ALL, ""); // Necessary for wcswidth calls
 
     // Read files
-    // - Try to match extensions
-    // - If no matching extension, infer with sniffer
-    // - Error if no sniffer is successful
-    // - Error if an explicit or inferred format is malformed
-
     FileState *files = malloc((argc - 1) * sizeof(FileState));
     if (files == NULL)
     {
@@ -147,14 +142,42 @@ int main(int argc, char *argv[])
 
     for (unsigned int i = 0; i < state.nfiles; i++)
     {
-        char *file_path = argv[i + 1];
+        // Iterate over provided arguments following options
+        // - File path is "loop" variable
+        // - Special case: If a tty, consider - as implicit first path
+        //      - malloc call assign extra slot as well
+
+        // Parser selection logic: takes the input arguments and selects a parser
+        // - Attempt to extract format from formats
+        //      - Exit if no match
+        // - Attempt to extract format from path
+        //      - Special case: - (stdin) needs a format
+        //      - If no match, infer with sniffer
+        //          - Exit if no sniffer is successful
+        // - Exit if an explicit or inferred format is malformed
+
+        // Parsing logic
+        // - Open file from path
+        //      - Special case: - provide stdin
+        // - Call parser
+
+        char *file_path = argv[optind + i];
         SeqRecord *records = NULL;
-        int len = fasta_read(argv[i + 1], &records);
+        int len = fasta_read(file_path, &records);
         if (len < 0)
         {
             snprintf(error_message, ERROR_MESSAGE_LEN, PROGRAM_NAME ": %s: Error processing file (code %d)\n", file_path, len);
             return 1;
         }
+
+        // Set sequence type
+        // - Types: protein,nucleic,mixed,unknown
+        // - For each sequence
+        //      - Get possible sequence types
+        //      - If types is given, extract type
+        //          - If given type is compatible with inferred type, use given type
+        //          - Otherwise, use inferred type
+
         FileState *file = state.files + i;
         file->record_array.records = records;
         file->record_array.records = records;
