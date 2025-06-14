@@ -30,12 +30,14 @@ test: $(TESTS_TARGETS)
 
 $(BUILD_DIR)/test_%: $(TESTS_DIR)/test_%.c $(TESTS_OBJS) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $^ -I$(SRC_DIR) -o $@
+	@echo
 	$@
+	@echo
 
 # Utility rules
 $(BUILD_DIR):
-	mkdir -p $(BUILD_DIR)
+	@mkdir -p $(BUILD_DIR)
 
 .PHONY: clean
 clean:
-	rm -rf $(BUILD_DIR)
+	@rm -rf $(BUILD_DIR)
