@@ -7,10 +7,10 @@ SRCS := $(filter-out $(SRC_DIR)/main.c, $(SRCS))
 SRC_OBJS := $(patsubst $(SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(SRCS))
 SRC_TARGET := $(BUILD_DIR)/aalv
 
-TESTS := test_array.c test_fasta.c
+TESTS := $(wildcard $(TESTS_DIR)/*.c)
 TESTS_DEPS := array.c fasta.c sequences.c
 TESTS_OBJS := $(TESTS_DEPS:%.c=$(BUILD_DIR)/%.o)
-TESTS_TARGETS := $(TESTS:%.c=$(BUILD_DIR)/%)
+TESTS_TARGETS := $(TESTS:$(TESTS_DIR)/%.c=$(BUILD_DIR)/%)
 
 CC := cc
 CFLAGS := -Wall -Wextra -pedantic -std=c99
