@@ -18,9 +18,9 @@ void run_tests(TestFunction *tests, int ntests, char *module_name)
     int npasses = 0;
     for (int i = 0; i < ntests; i++)
     {
-        TestFunction test = tests[i];
-        printf("Running %s...", test.func_name);
-        int code = (*test.func_ptr)();
+        TestFunction *test = tests + i;
+        printf("Running %s...", test->func_name);
+        int code = (*test->func_ptr)();
         if (code == 0)
         {
             printf("passed!\n");
