@@ -299,7 +299,9 @@ void input_move_page_up(PageSize page_size)
     unsigned int x = record_panes_height;
     if (page_size == HALF)
         x /= 2;
-    if (x > active_file->offset_record)
+    if (active_file->offset_record == 0)
+        return;
+    else if (x > active_file->offset_record)
         state_set_offset_record(&state, 0);
     else
         state_set_offset_record(&state, active_file->offset_record - x);
@@ -317,7 +319,9 @@ void input_move_page_down(PageSize page_size)
     unsigned int x = record_panes_height;
     if (page_size == HALF)
         x /= 2;
-    if (active_file->offset_record + x > active_file->record_array.len - 1)
+    if (active_file->offset_record == active_file->record_array.len - 1)
+        return;
+    else if (active_file->offset_record + x > active_file->record_array.len - 1)
         state_set_offset_record(&state, active_file->record_array.len - 1);
     else
         state_set_offset_record(&state, active_file->offset_record + x);
