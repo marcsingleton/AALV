@@ -20,28 +20,38 @@ State state;
 extern char error_message[ERROR_MESSAGE_LEN];
 
 void cleanup(void);
+void print_help(void);
 void print_usage(void);
+
+typedef enum
+{
+    OMIT,
+    SHORT_NAME,
+    LONG_NAME,
+    ALL_NAMES,
+} UsageStyle;
 
 typedef struct
 {
     const char *long_name;
     const char short_name;
     const char *description;
-    const char *usage;
-    int has_arg;
+    const char *argument_syntax;
+    const UsageStyle usage_style;
+    const int has_arg; // getopt_long field
 } Argument;
 
 typedef struct
 {
-    char *name;
-    char *exts;
+    const char *name;
+    const char *exts;
     int (*reader)(const char *, SeqRecord **);
 } Format;
 
 typedef struct
 {
-    char *name;
-    char *identifiers;
+    const char *name;
+    const char *identifiers;
 } SeqType;
 
 // Order
@@ -49,32 +59,38 @@ Argument arguments[] = {
     {"help",
      'h',
      "print usage and options then exit",
-     "-h | --help",
+     "",
+     SHORT_NAME,
      no_argument},
     {"version",
      'v',
      "print version then exit",
-     "-v | --version",
+     "",
+     OMIT,
      no_argument},
     {"format",
      'f',
      "comma-separated list of format extensions for input files",
-     "-f <fmt,...,fmt>",
+     "<fmt,...,fmt>",
+     SHORT_NAME,
      required_argument},
     {"list-formats",
      0,
      "list allowable formats and their recognized extensions then exit",
-     "--list-formats",
+     "",
+     OMIT,
      no_argument},
     {"list-types",
      0,
      "list allowable types and their recognized identifiers then exit",
-     "--list-types",
+     "",
+     OMIT,
      no_argument},
     {"type",
      't',
      "comma-separated list of sequence types for input files",
-     "-t <type,...,type>",
+     "<type,...,type>",
+     SHORT_NAME,
      required_argument},
 };
 
@@ -180,7 +196,7 @@ int main(int argc, char *argv[])
         }
         else if (strcmp(name, "help") == 0)
         {
-            printf("This is the long help message\n");
+            print_help();
             return 0;
         }
         else if (strcmp(name, "list-formats") == 0)
@@ -379,7 +395,116 @@ void cleanup(void)
         fputs(error_message, stderr);
 }
 
+void print_help(void)
+{
+    unsigned int nmax;
+    unsigned int nchars;
+
+    // Usage section
+    char *prefix = "usage: " PROGRAM_NAME;
+    int prefix_size = (int)(sizeof(prefix) - 1);
+
+    nmax = 80;
+    nchars = 0;
+
+    nchars += printf("%s", prefix);
+    for (unsigned int i = 0; i < NARGUMENTS; i++)
+    {
+        Argument *argument = arguments + i;
+        bool has_arg = (argument->has_arg == no_argument) ? false : true;
+        if (nchars > nmax)
+        {
+            putchar('\n');
+            nchars = printf("%*s", prefix_size, "");
+        }
+        else
+        {
+            putchar(' ');
+            nchars++;
+        }
+        if (argument->long_name && argument->short_name)
+        {
+            if (has_arg)
+                nchars += printf("[--%s %s | -%c %s]",
+                                 argument->long_name, argument->argument_syntax,
+                                 argument->short_name, argument->argument_syntax);
+            else
+                nchars += printf("[--%s | -%c]",
+                                 argument->long_name,
+                                 argument->short_name);
+        }
+        else if (argument->long_name)
+        {
+            if (has_arg)
+                nchars += printf("[--%s %s]",
+                                 argument->long_name, argument->argument_syntax);
+            else
+                nchars += printf("[--%s]",
+                                 argument->long_name);
+        }
+        else if (argument->short_name)
+        {
+            if (has_arg)
+                nchars += printf("[-%c %s]",
+                                 argument->short_name, argument->argument_syntax);
+            else
+                nchars += printf("[-%c]",
+                                 argument->short_name);
+        }
+    }
+    printf("\n%*s[<file> ...]\n\n", prefix_size, "");
+
+    // Synopsis section
+    printf("aalv is a vim-inspired alignment viewer\n\n");
+
+    // Options section
+    printf("options:\n");
+    for (unsigned int i = 0; i < NARGUMENTS; i++)
+    {
+        Argument *argument = arguments + i;
+        printf("    --%s\n        %s\n", argument->long_name, argument->description);
+    }
+}
+
 void print_usage(void)
 {
-    printf("usage: " PROGRAM_NAME " [<file> ...]\n");
+    char *prefix = "usage: " PROGRAM_NAME;
+
+    printf("%s", prefix);
+    for (unsigned int i = 0; i < NARGUMENTS; i++)
+    {
+        Argument *argument = arguments + i;
+        bool has_arg = (argument->has_arg == no_argument) ? false : true;
+        switch (argument->usage_style) // This can be poorly formatted if the usage_style does not match the arguments
+        {
+        case OMIT:
+            break;
+        case SHORT_NAME:
+            if (has_arg)
+                printf(" [-%c %s]",
+                       argument->short_name, argument->argument_syntax);
+            else
+                printf(" [-%c]",
+                       argument->short_name);
+            break;
+        case LONG_NAME:
+            if (has_arg)
+                printf(" [--%s=%s]",
+                       argument->long_name, argument->argument_syntax);
+            else
+                printf(" [--%s]",
+                       argument->long_name);
+            break;
+        case ALL_NAMES:
+            if (has_arg)
+                printf(" [--%s=%s | -%c %s]",
+                       argument->long_name, argument->argument_syntax,
+                       argument->short_name, argument->argument_syntax);
+            else
+                printf(" [--%s | -%c]",
+                       argument->long_name, argument->short_name);
+            break;
+        }
+    }
+    printf(" [<file> ...]\n");
 }
