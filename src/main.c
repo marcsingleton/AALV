@@ -19,10 +19,6 @@
 State state;
 extern char error_message[ERROR_MESSAGE_LEN];
 
-void cleanup(void);
-void print_help(void);
-void print_usage(void);
-
 typedef enum
 {
     OMIT,
@@ -36,7 +32,7 @@ typedef struct
     const char *long_name;
     const char short_name;
     const char *description;
-    const char *argument_syntax;
+    const char *usage_arg;
     const UsageStyle usage_style;
     const int has_arg; // getopt_long field
 } Argument;
@@ -53,6 +49,11 @@ typedef struct
     const char *name;
     const char *identifiers;
 } SeqType;
+
+void cleanup(void);
+void print_long_help(void);
+void print_short_help(void);
+int print_option_usage(Argument *argument, UsageStyle usage_style, bool brackets, char *style_sep);
 
 // Order
 Argument arguments[] = {
@@ -176,7 +177,7 @@ int main(int argc, char *argv[])
             break;
         else if (c == '?')
         {
-            print_usage();
+            print_short_help();
             return 1;
         }
 
@@ -191,12 +192,12 @@ int main(int argc, char *argv[])
         }
         else if (c == 'h')
         {
-            print_usage();
+            print_short_help();
             return 0;
         }
         else if (strcmp(name, "help") == 0)
         {
-            print_help();
+            print_long_help();
             return 0;
         }
         else if (strcmp(name, "list-formats") == 0)
@@ -236,7 +237,7 @@ int main(int argc, char *argv[])
     // Check for positional arguments
     if (isatty(STDIN_FILENO) && optind == argc)
     {
-        print_usage();
+        print_short_help();
         return 1;
     }
 
@@ -395,7 +396,7 @@ void cleanup(void)
         fputs(error_message, stderr);
 }
 
-void print_help(void)
+void print_long_help(void)
 {
     unsigned int nmax;
     unsigned int nchars;
@@ -411,7 +412,13 @@ void print_help(void)
     for (unsigned int i = 0; i < NARGUMENTS; i++)
     {
         Argument *argument = arguments + i;
-        bool has_arg = (argument->has_arg == no_argument) ? false : true;
+        UsageStyle usage_style = OMIT;
+        if (argument->long_name && argument->short_name)
+            usage_style = ALL_NAMES;
+        else if (argument->long_name)
+            usage_style = LONG_NAME;
+        else if (argument->short_name)
+            usage_style = SHORT_NAME;
         if (nchars > nmax)
         {
             putchar('\n');
@@ -422,35 +429,7 @@ void print_help(void)
             putchar(' ');
             nchars++;
         }
-        if (argument->long_name && argument->short_name)
-        {
-            if (has_arg)
-                nchars += printf("[--%s %s | -%c %s]",
-                                 argument->long_name, argument->argument_syntax,
-                                 argument->short_name, argument->argument_syntax);
-            else
-                nchars += printf("[--%s | -%c]",
-                                 argument->long_name,
-                                 argument->short_name);
-        }
-        else if (argument->long_name)
-        {
-            if (has_arg)
-                nchars += printf("[--%s %s]",
-                                 argument->long_name, argument->argument_syntax);
-            else
-                nchars += printf("[--%s]",
-                                 argument->long_name);
-        }
-        else if (argument->short_name)
-        {
-            if (has_arg)
-                nchars += printf("[-%c %s]",
-                                 argument->short_name, argument->argument_syntax);
-            else
-                nchars += printf("[-%c]",
-                                 argument->short_name);
-        }
+        nchars += print_option_usage(argument, usage_style, true, " |");
     }
     printf("\n%*s[<file> ...]\n\n", prefix_size, "");
 
@@ -459,14 +438,29 @@ void print_help(void)
 
     // Options section
     printf("options:\n");
+
+    nmax = 24;
     for (unsigned int i = 0; i < NARGUMENTS; i++)
     {
         Argument *argument = arguments + i;
-        printf("    --%s\n        %s\n", argument->long_name, argument->description);
+        UsageStyle usage_style = OMIT;
+        if (argument->long_name && argument->short_name)
+            usage_style = ALL_NAMES;
+        else if (argument->long_name)
+            usage_style = LONG_NAME;
+        else if (argument->short_name)
+            usage_style = SHORT_NAME;
+        nchars = printf("    ");
+        nchars += print_option_usage(argument, usage_style, false, ",");
+        if (nchars > nmax - 2) // Two spaces of buffer
+            printf("\n%*s", nmax, "");
+        else
+            printf("%*s", nmax - nchars, "");
+        printf("%s\n", argument->description);
     }
 }
 
-void print_usage(void)
+void print_short_help(void)
 {
     char *prefix = "usage: " PROGRAM_NAME;
 
@@ -474,37 +468,58 @@ void print_usage(void)
     for (unsigned int i = 0; i < NARGUMENTS; i++)
     {
         Argument *argument = arguments + i;
-        bool has_arg = (argument->has_arg == no_argument) ? false : true;
-        switch (argument->usage_style) // This can be poorly formatted if the usage_style does not match the arguments
-        {
-        case OMIT:
-            break;
-        case SHORT_NAME:
-            if (has_arg)
-                printf(" [-%c %s]",
-                       argument->short_name, argument->argument_syntax);
-            else
-                printf(" [-%c]",
-                       argument->short_name);
-            break;
-        case LONG_NAME:
-            if (has_arg)
-                printf(" [--%s=%s]",
-                       argument->long_name, argument->argument_syntax);
-            else
-                printf(" [--%s]",
-                       argument->long_name);
-            break;
-        case ALL_NAMES:
-            if (has_arg)
-                printf(" [--%s=%s | -%c %s]",
-                       argument->long_name, argument->argument_syntax,
-                       argument->short_name, argument->argument_syntax);
-            else
-                printf(" [--%s | -%c]",
-                       argument->long_name, argument->short_name);
-            break;
-        }
+        if (argument->usage_style == OMIT)
+            continue;
+        putchar(' ');
+        print_option_usage(argument, argument->usage_style, true, " |");
     }
     printf(" [<file> ...]\n");
+}
+
+int print_option_usage(Argument *argument, UsageStyle usage_style, bool brackets, char *style_sep)
+{
+    const char *arg_sep = "";
+    const char *arg = "";
+    if (argument->has_arg)
+    {
+        arg_sep = " ";
+        arg = argument->usage_arg;
+    }
+    const char *lbracket = "";
+    const char *rbracket = "";
+    if (brackets)
+    {
+        lbracket = "[";
+        rbracket = "]";
+    }
+    switch (usage_style) // This can be poorly formatted if the usage_style does not match the arguments
+    {
+    case OMIT:
+        return 0;
+    case SHORT_NAME:
+        return printf("%s"
+                      "-%c"
+                      "%s%s%s",
+                      lbracket,
+                      argument->short_name, arg_sep, arg,
+                      rbracket);
+    case LONG_NAME:
+        return printf("%s"
+                      "--%s%s%s"
+                      "%s",
+                      lbracket,
+                      argument->long_name, arg_sep, arg,
+                      rbracket);
+    case ALL_NAMES:
+        return printf("%s"
+                      "--%s%s%s"
+                      "%s "
+                      "-%c%s%s"
+                      "%s",
+                      lbracket,
+                      argument->long_name, arg_sep, arg,
+                      style_sep,
+                      argument->short_name, arg_sep, arg,
+                      rbracket);
+    }
 }
