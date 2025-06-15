@@ -20,6 +20,7 @@ State state;
 extern char error_message[ERROR_MESSAGE_LEN];
 
 void cleanup(void);
+void print_usage(void);
 
 typedef struct
 {
@@ -37,7 +38,24 @@ typedef struct
     int (*reader)(const char *, SeqRecord **);
 } Format;
 
+typedef struct
+{
+    char *name;
+    char *identifiers;
+} SeqType;
+
+// Order
 Argument arguments[] = {
+    {"help",
+     'h',
+     "print usage and options then exit",
+     "-h | --help",
+     no_argument},
+    {"version",
+     'v',
+     "print version then exit",
+     "-v | --version",
+     no_argument},
     {"format",
      'f',
      "comma-separated list of format extensions for input files",
@@ -45,11 +63,19 @@ Argument arguments[] = {
      required_argument},
     {"list-formats",
      0,
-     "list allowable formats and their recognized extensions",
+     "list allowable formats and their recognized extensions then exit",
      "--list-formats",
      no_argument},
-    // help
-    // sequence types
+    {"list-types",
+     0,
+     "list allowable types and their recognized identifiers then exit",
+     "--list-types",
+     no_argument},
+    {"type",
+     't',
+     "comma-separated list of sequence types for input files",
+     "-t <type,...,type>",
+     required_argument},
 };
 
 #define NARGUMENTS sizeof(arguments) / sizeof(Argument)
@@ -63,32 +89,101 @@ Format formats[] = {
 
 #define NFORMATS sizeof(formats) / sizeof(Format)
 
+SeqType types[] = {
+    {"nucleic", "nucleic,nt"},
+    {"protein", "protein,aa"},
+};
+
+#define NTYPES sizeof(types) / sizeof(SeqType)
+
 // Main
 int main(int argc, char *argv[])
 {
-    // Process arguments
-    struct option long_options[NARGUMENTS];
+    // Prepare arguments
+    struct option long_options[NARGUMENTS + 1]; // Extra struct of 0s to mark end
+    Array short_options_array;
+    array_init(&short_options_array, sizeof(char));
     for (unsigned int i = 0; i < NARGUMENTS; i++)
     {
         Argument *argument = arguments + i;
+
+        // Fill struct for long options
         struct option *long_option = long_options + i;
         long_option->name = argument->long_name;
         long_option->has_arg = argument->has_arg;
         long_option->flag = 0;
-        long_option->val = 1;
-    }
+        long_option->val = 0;
 
+        // Fill array for short options syntax
+        if (!argument->short_name)
+            continue;
+        char s = argument->short_name;
+        array_append(&short_options_array, &s);
+        switch (argument->has_arg)
+        {
+        case required_argument:
+        {
+            char s[] = ":";
+            array_extend(&short_options_array, &s, sizeof(s) - 1);
+            break;
+        }
+        case optional_argument:
+        {
+            char s[] = "::";
+            array_extend(&short_options_array, &s, sizeof(s) - 1);
+            break;
+        }
+        }
+    }
+    char s[] = "\0"; // Null terminate
+    array_extend(&short_options_array, &s, sizeof(s) - 1);
+
+    // Convert array of short options to string
+    char *short_options = malloc(short_options_array.len * short_options_array.size);
+    if (short_options == NULL)
+    {
+        strncpy(error_message, PROGRAM_NAME ": Failed to allocate memory to create options string\n", ERROR_MESSAGE_LEN);
+        return 1;
+    }
+    memcpy(short_options, short_options_array.data, short_options_array.len * short_options_array.size);
+    array_free(&short_options_array);
+
+    // Parse arguments
     char *format_args = NULL;
+    char *type_args = NULL;
     while (1)
     {
-        int option_index = 0;
-        int c = getopt_long(argc, argv, "", long_options, &option_index);
+        // Check if next argument is a known option
+        int option_index = -1;
+        int c = getopt_long(argc, argv, short_options, long_options, &option_index);
         if (c == -1)
             break;
-        const char *name = arguments[option_index].long_name;
+        else if (c == '?')
+        {
+            print_usage();
+            return 1;
+        }
 
-        // Check for help first
-        if (strcmp(name, "list-formats") == 0)
+        // Process option
+        const char *name = "";
+        if (option_index != -1)
+            name = arguments[option_index].long_name;
+        if (c == 'f' || strcmp(name, "format") == 0)
+        {
+            format_args = argv[optind - 1];
+            printf("Identified the following formats: %s\n", format_args);
+        }
+        else if (c == 'h')
+        {
+            print_usage();
+            return 0;
+        }
+        else if (strcmp(name, "help") == 0)
+        {
+            printf("This is the long help message\n");
+            return 0;
+        }
+        else if (strcmp(name, "list-formats") == 0)
         {
             printf("Format\tExtensions\n");
             for (unsigned int i = 0; i < NFORMATS; i++)
@@ -98,17 +193,34 @@ int main(int argc, char *argv[])
             }
             return 0;
         }
-        else if (strcmp(name, "format") == 0)
+        else if (strcmp(name, "list-types") == 0)
         {
-            format_args = argv[optind - 1];
-            printf("Identified the following formats: %s\n", format_args);
+            printf("Type\tIdentifiers\n");
+            for (unsigned int i = 0; i < NTYPES; i++)
+            {
+                SeqType *type = types + i;
+                printf("%s\t%s\n", type->name, type->identifiers);
+            }
+            return 0;
+        }
+        else if (c == 't' || strcmp(name, "type") == 0)
+        {
+            type_args = argv[optind - 1];
+            printf("Identified the following types: %s\n", type_args);
+        }
+        else if (c == 'v' || strcmp(name, "version") == 0)
+        {
+            printf("aalv 0.1.0 dev\n");
+            return 0;
         }
     }
 
-    // If not a TTY and no positional arguments, print usage message (short help)
-    if (argc < 2)
+    free(short_options);
+
+    // Check for positional arguments
+    if (isatty(STDIN_FILENO) && optind == argc)
     {
-        strncpy(error_message, PROGRAM_NAME ": Incorrect number of arguments\n", ERROR_MESSAGE_LEN);
+        print_usage();
         return 1;
     }
 
@@ -265,4 +377,9 @@ void cleanup(void)
     // Print error
     if (error_message[0] != '\0')
         fputs(error_message, stderr);
+}
+
+void print_usage(void)
+{
+    printf("usage: " PROGRAM_NAME " [<file> ...]\n");
 }
