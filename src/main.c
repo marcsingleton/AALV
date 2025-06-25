@@ -277,14 +277,18 @@ int main(int argc, char *argv[])
     setlocale(LC_ALL, ""); // Necessary for wcswidth calls
 
     // Read files
-    FileState *files = malloc((argc - 1) * sizeof(FileState));
+    unsigned int nfiles = argc - optind;
+    if (!isatty(STDIN_FILENO))
+        nfiles++; // If not a tty, treat stdin as an implicit first file
+
+    FileState *files = malloc(nfiles * sizeof(FileState));
     if (files == NULL)
     {
         strncpy(error_message, PROGRAM_NAME ": Failed to allocate memory to load files\n", ERROR_MESSAGE_LEN);
         return 1;
     }
     state.files = files;
-    state.nfiles = argc - 1;
+    state.nfiles = nfiles;
     state.active_file = files;
     state.active_file_index = 0;
 
@@ -309,7 +313,8 @@ int main(int argc, char *argv[])
         //      - Special case: - provide stdin
         // - Call parser
 
-        char *file_path = argv[optind + i];
+        char *file_path = argv[optind + file_index];
+
         SeqRecord *records = NULL;
         int len = fasta_read(file_path, &records);
         if (len < 0)
@@ -326,8 +331,7 @@ int main(int argc, char *argv[])
         //          - If given type is compatible with inferred type, use given type
         //          - Otherwise, use inferred type
 
-        FileState *file = state.files + i;
-        file->record_array.records = records;
+        FileState *file = state.files + file_index;
         file->record_array.records = records;
         file->record_array.len = len;
         file->record_array.offset = 990;
