@@ -6,7 +6,6 @@
  */
 
 #include <stdbool.h>
-#include <termios.h>
 
 #include "array.h"
 #include "sequences.h"
@@ -28,8 +27,6 @@ typedef struct
 typedef struct
 {
     // Global state variables
-    struct termios old_termios;
-    struct termios raw_termios;
     unsigned int terminal_rows;
     unsigned int terminal_cols;
     bool refresh_ruler_pane;

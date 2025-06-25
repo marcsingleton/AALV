@@ -18,6 +18,11 @@
 #define PROGRAM_NAME "aalv"
 
 State state;
+
+struct termios old_termios;
+struct termios raw_termios;
+bool raw_mode = false;
+
 extern char error_message[ERROR_MESSAGE_LEN];
 
 typedef enum
@@ -117,6 +122,8 @@ SeqType types[] = {
 // Main
 int main(int argc, char *argv[])
 {
+    atexit(&cleanup);
+
     // Prepare arguments
     struct option long_options[NARGUMENTS + 1]; // Extra struct of 0s to mark end
     Array short_options_array;
@@ -260,22 +267,6 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    // Set screen and terminal options
-    if (terminal_get_termios(&state.old_termios) != 0)
-    {
-        strncpy(error_message, PROGRAM_NAME ": Failed to get current termios\n", ERROR_MESSAGE_LEN);
-        return 1;
-    }
-    atexit(&cleanup); // Only register when get_termios is successful
-    if (terminal_enable_raw_mode(&state.old_termios, &state.raw_termios) != 0)
-    {
-        strncpy(error_message, PROGRAM_NAME ": Failed to set raw mode", ERROR_MESSAGE_LEN);
-        return 1;
-    };
-    terminal_use_alternate_buffer();
-
-    setlocale(LC_ALL, ""); // Necessary for wcswidth calls
-
     // Read files
     unsigned int nfiles = argc - optind;
     if (!isatty(STDIN_FILENO))
@@ -344,6 +335,22 @@ int main(int argc, char *argv[])
         str_free_split(format_args, n_format_args);
     if (n_type_args > 0)
         str_free_split(type_args, n_type_args);
+
+    // Set screen and terminal options
+    if (terminal_get_termios(&old_termios) != 0)
+    {
+        strncpy(error_message, PROGRAM_NAME ": Failed to get current termios\n", ERROR_MESSAGE_LEN);
+        return 1;
+    }
+    if (terminal_enable_raw_mode(&old_termios, &raw_termios) != 0)
+    {
+        strncpy(error_message, PROGRAM_NAME ": Failed to set raw mode", ERROR_MESSAGE_LEN);
+        return 1;
+    };
+    raw_mode = true;
+    terminal_use_alternate_buffer();
+
+    setlocale(LC_ALL, ""); // Necessary for wcswidth calls
 
     // Main loop
     // Display current file
@@ -416,8 +423,11 @@ void cleanup(void)
     free(state.files);
 
     // Restore terminal options
-    terminal_use_normal_buffer();
-    terminal_disable_raw_mode(&state.old_termios);
+    if (raw_mode)
+    {
+        terminal_use_normal_buffer();
+        terminal_disable_raw_mode(&old_termios);
+    }
 
     // Print error
     if (error_message[0] != '\0')
