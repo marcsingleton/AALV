@@ -12,6 +12,7 @@
 #include "input.h"
 #include "sequences.h"
 #include "state.h"
+#include "str.h"
 #include "terminal.h"
 
 #define PROGRAM_NAME "aalv"
@@ -166,8 +167,10 @@ int main(int argc, char *argv[])
     array_free(&short_options_array);
 
     // Parse arguments
-    char *format_args = NULL;
-    char *type_args = NULL;
+    char **format_args = NULL;
+    unsigned int n_format_args = 0;
+    char **type_args = NULL;
+    unsigned int n_type_args = 0;
     while (1)
     {
         // Check if next argument is a known option
@@ -187,8 +190,16 @@ int main(int argc, char *argv[])
             name = arguments[option_index].long_name;
         if (c == 'f' || strcmp(name, "format") == 0)
         {
-            format_args = argv[optind - 1];
-            printf("Identified the following formats: %s\n", format_args);
+            int code = str_split(&format_args, argv[optind - 1], ',');
+            if (code < 0)
+            {
+                strncpy(error_message, PROGRAM_NAME ": Failed to parse formats\n", ERROR_MESSAGE_LEN);
+                return 1;
+            }
+            n_format_args = code;
+            printf("Identified the following formats:\n");
+            for (unsigned int i = 0; i < n_format_args; i++)
+                printf("    %s\n", format_args[i]);
         }
         else if (c == 'h')
         {
@@ -222,8 +233,16 @@ int main(int argc, char *argv[])
         }
         else if (c == 't' || strcmp(name, "type") == 0)
         {
-            type_args = argv[optind - 1];
-            printf("Identified the following types: %s\n", type_args);
+            int code = str_split(&type_args, argv[optind - 1], ',');
+            if (code < 0)
+            {
+                strncpy(error_message, PROGRAM_NAME ": Failed to parse types\n", ERROR_MESSAGE_LEN);
+                return 1;
+            }
+            n_type_args = code;
+            printf("Identified the following types:\n");
+            for (unsigned int i = 0; i < n_type_args; i++)
+                printf("    %s\n", type_args[i]);
         }
         else if (c == 'v' || strcmp(name, "version") == 0)
         {
@@ -316,6 +335,11 @@ int main(int argc, char *argv[])
         file->ruler_pane_height = 5;
         file->tick_spacing = 10;
     }
+
+    if (n_format_args > 0)
+        str_free_split(format_args, n_format_args);
+    if (n_type_args > 0)
+        str_free_split(type_args, n_type_args);
 
     // Main loop
     // Display current file
