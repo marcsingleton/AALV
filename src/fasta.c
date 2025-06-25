@@ -17,6 +17,8 @@ const int FASTA_ERROR_MEMORY_ALLOCATION = -5;
 int fasta_fread(FILE *fp, SeqRecord **records_ptr)
 {
     // Declarations
+    int code;
+
     void *ptr = NULL; // A generic temporary pointer for allocations
 
     int nrecords = 0;
@@ -39,7 +41,7 @@ int fasta_fread(FILE *fp, SeqRecord **records_ptr)
 
     if (ptr == NULL)
     {
-        nrecords = FASTA_ERROR_MEMORY_ALLOCATION;
+        code = FASTA_ERROR_MEMORY_ALLOCATION;
         goto cleanup;
     }
     buffer = ptr;
@@ -51,12 +53,12 @@ int fasta_fread(FILE *fp, SeqRecord **records_ptr)
     // Check for empty files and improper formatting
     if (linelen <= 0)
     {
-        nrecords = 0;
+        code = 0;
         goto cleanup;
     }
     if (line[0] != '>')
     {
-        nrecords = FASTA_ERROR_INVALID_FORMAT;
+        code = FASTA_ERROR_INVALID_FORMAT;
         goto cleanup;
     }
 
@@ -78,7 +80,7 @@ int fasta_fread(FILE *fp, SeqRecord **records_ptr)
         header = malloc(trimlen); // +1 for null; -1 for excluding >
         if (header == NULL)
         {
-            nrecords = FASTA_ERROR_MEMORY_ALLOCATION;
+            code = FASTA_ERROR_MEMORY_ALLOCATION;
             goto cleanup;
         }
         memcpy(header, line + 1, trimlen - 1);
@@ -88,7 +90,7 @@ int fasta_fread(FILE *fp, SeqRecord **records_ptr)
         char *id = fasta_get_id(header);
         if (id == NULL)
         {
-            nrecords = FASTA_ERROR_MEMORY_ALLOCATION;
+            code = FASTA_ERROR_MEMORY_ALLOCATION;
             goto cleanup;
         }
 
@@ -105,7 +107,7 @@ int fasta_fread(FILE *fp, SeqRecord **records_ptr)
             // Check for sequence overflow
             if (seqlen >= SIZE_MAX - trimlen - 1)
             {
-                nrecords = FASTA_ERROR_SEQUENCE_OVERFLOW;
+                code = FASTA_ERROR_SEQUENCE_OVERFLOW;
                 goto cleanup;
             }
 
@@ -114,13 +116,13 @@ int fasta_fread(FILE *fp, SeqRecord **records_ptr)
             {
                 if (bufferlen >= SIZE_MAX / 2)
                 {
-                    nrecords = FASTA_ERROR_MEMORY_ALLOCATION;
+                    code = FASTA_ERROR_MEMORY_ALLOCATION;
                     goto cleanup;
                 }
                 ptr = realloc(buffer, 2 * bufferlen);
                 if (ptr == NULL)
                 {
-                    nrecords = FASTA_ERROR_MEMORY_ALLOCATION;
+                    code = FASTA_ERROR_MEMORY_ALLOCATION;
                     goto cleanup;
                 }
                 buffer = ptr;
@@ -133,7 +135,7 @@ int fasta_fread(FILE *fp, SeqRecord **records_ptr)
         seq = malloc(seqlen + 1);
         if (seq == NULL)
         {
-            nrecords = FASTA_ERROR_MEMORY_ALLOCATION;
+            code = FASTA_ERROR_MEMORY_ALLOCATION;
             goto cleanup;
         }
         memcpy(seq, buffer, seqlen + 1);
@@ -174,7 +176,7 @@ cleanup:
     }
 
     array_free(&new_records);
-    return nrecords;
+    return code;
 }
 
 int fasta_read(const char *path, SeqRecord **records_ptr)
