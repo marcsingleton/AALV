@@ -54,7 +54,7 @@ typedef struct
 void cleanup(void);
 void print_long_help(void);
 void print_short_help(void);
-int print_option_usage(Argument *argument, UsageStyle usage_style, bool brackets, char *style_sep);
+int print_option_usage(Argument *argument, UsageStyle usage_style, const bool brackets, const char *style_sep);
 
 // Order
 Argument arguments[] = {
@@ -500,7 +500,7 @@ void print_short_help(void)
     printf(" [<file> ...]\n");
 }
 
-int print_option_usage(Argument *argument, UsageStyle usage_style, bool brackets, char *style_sep)
+int print_option_usage(Argument *argument, UsageStyle usage_style, const bool brackets, const char *style_sep)
 {
     const char *arg_sep = "";
     const char *arg = "";
