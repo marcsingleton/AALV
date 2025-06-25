@@ -8,7 +8,7 @@ SRC_OBJS := $(patsubst $(SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(SRCS))
 SRC_TARGET := $(BUILD_DIR)/aalv
 
 TESTS := $(wildcard $(TESTS_DIR)/*.c)
-TESTS_DEPS := array.c fasta.c sequences.c
+TESTS_DEPS := array.c fasta.c sequences.c str.c
 TESTS_OBJS := $(TESTS_DEPS:%.c=$(BUILD_DIR)/%.o)
 TESTS_TARGETS := $(TESTS:$(TESTS_DIR)/%.c=$(BUILD_DIR)/%)
 

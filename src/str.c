@@ -1,0 +1,71 @@
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
+#include "str.h"
+
+#include <stdio.h>
+
+static int copy_field(char **field_ptr, const char *s, const size_t len)
+{
+    char *field = malloc((len + 1) * sizeof(char));
+    if (field == NULL)
+        return 1;
+    memcpy(field, s, len * sizeof(char));
+    field[len] = '\0';
+    *field_ptr = field;
+    return 0;
+}
+
+unsigned int str_count(const char *s, const char c)
+{
+    if (s == NULL)
+        return 0;
+
+    unsigned int n = 0;
+    for (; *s != '\0'; s++)
+        if (*s == c)
+            n++;
+    return n;
+}
+
+int str_split(char ***fields_ptr, const char *s, const char d)
+{
+    if (s == NULL)
+        return -1;
+
+    unsigned int n = str_count(s, d) + 1;
+    char **fields = malloc(n * sizeof(char *));
+    if (fields == NULL)
+        return -1;
+    *fields_ptr = fields;
+
+    size_t i, j, k;
+    i = j = k = 0;
+    for (; s[j] != '\0'; j++)
+        if (s[j] == d)
+        {
+            if (copy_field(fields + k, s + i, j - i) != 0)
+                goto cleanup;
+            i = j + 1;
+            k++;
+        }
+    if (copy_field(fields + k, s + i, j - i) != 0)
+        goto cleanup;
+
+    return n;
+
+cleanup:
+    for (unsigned int i = 0; i < k; i++)
+        free(fields[k]);
+    free(fields);
+
+    return -1;
+}
+
+void str_free_split(char **fields, const unsigned int n)
+{
+    for (unsigned int i = 0; i < n; i++)
+        free(fields[i]);
+    free(fields);
+}
