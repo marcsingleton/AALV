@@ -57,6 +57,11 @@ typedef struct
 } SeqType;
 
 void cleanup(void);
+void parse_options(int argc, char *argv[],
+                   const char *short_options, const struct option *long_options,
+                   char ***format_args_ptr, unsigned int *n_format_args,
+                   char ***type_args_ptr, unsigned int *n_type_args);
+void prepare_options(char **short_options, struct option *long_options);
 void print_long_help(void);
 void print_short_help(void);
 int print_option_usage(Argument *argument, UsageStyle usage_style, const bool brackets, const char *style_sep);
@@ -124,140 +129,20 @@ int main(int argc, char *argv[])
 {
     atexit(&cleanup);
 
-    // Prepare arguments
+    // Prepare options
     struct option long_options[NARGUMENTS + 1]; // Extra struct of 0s to mark end
-    Array short_options_array;
-    array_init(&short_options_array, sizeof(char));
-    for (unsigned int i = 0; i < NARGUMENTS; i++)
-    {
-        Argument *argument = arguments + i;
+    char *short_options = NULL;
+    prepare_options(&short_options, long_options);
 
-        // Fill struct for long options
-        struct option *long_option = long_options + i;
-        long_option->name = argument->long_name;
-        long_option->has_arg = argument->has_arg;
-        long_option->flag = 0;
-        long_option->val = 0;
-
-        // Fill array for short options syntax
-        if (!argument->short_name)
-            continue;
-        char s = argument->short_name;
-        array_append(&short_options_array, &s);
-        switch (argument->has_arg)
-        {
-        case required_argument:
-        {
-            char s[] = ":";
-            array_extend(&short_options_array, &s, sizeof(s) - 1);
-            break;
-        }
-        case optional_argument:
-        {
-            char s[] = "::";
-            array_extend(&short_options_array, &s, sizeof(s) - 1);
-            break;
-        }
-        }
-    }
-    char s[] = "\0"; // Null terminate
-    array_extend(&short_options_array, &s, sizeof(s) - 1);
-
-    // Convert array of short options to string
-    char *short_options = malloc(short_options_array.len * short_options_array.size);
-    if (short_options == NULL)
-    {
-        strncpy(error_message, PROGRAM_NAME ": Failed to allocate memory to create options string\n", ERROR_MESSAGE_LEN);
-        return 1;
-    }
-    memcpy(short_options, short_options_array.data, short_options_array.len * short_options_array.size);
-    array_free(&short_options_array);
-
-    // Parse arguments
+    // Parse options
     char **format_args = NULL;
     unsigned int n_format_args = 0;
     char **type_args = NULL;
     unsigned int n_type_args = 0;
-    while (1)
-    {
-        // Check if next argument is a known option
-        int option_index = -1;
-        int c = getopt_long(argc, argv, short_options, long_options, &option_index);
-        if (c == -1)
-            break;
-        else if (c == '?')
-        {
-            print_short_help();
-            return 1;
-        }
-
-        // Process option
-        const char *name = "";
-        if (option_index != -1)
-            name = arguments[option_index].long_name;
-        if (c == 'f' || strcmp(name, "format") == 0)
-        {
-            int code = str_split(&format_args, argv[optind - 1], ',');
-            if (code < 0)
-            {
-                strncpy(error_message, PROGRAM_NAME ": Failed to parse formats\n", ERROR_MESSAGE_LEN);
-                return 1;
-            }
-            n_format_args = code;
-            printf("Identified the following formats:\n");
-            for (unsigned int i = 0; i < n_format_args; i++)
-                printf("    %s\n", format_args[i]);
-        }
-        else if (c == 'h')
-        {
-            print_short_help();
-            return 0;
-        }
-        else if (strcmp(name, "help") == 0)
-        {
-            print_long_help();
-            return 0;
-        }
-        else if (strcmp(name, "list-formats") == 0)
-        {
-            printf("Format\tExtensions\n");
-            for (unsigned int i = 0; i < NFORMATS; i++)
-            {
-                Format *format = formats + i;
-                printf("%s\t%s\n", format->name, format->exts);
-            }
-            return 0;
-        }
-        else if (strcmp(name, "list-types") == 0)
-        {
-            printf("Type\tIdentifiers\n");
-            for (unsigned int i = 0; i < NTYPES; i++)
-            {
-                SeqType *type = types + i;
-                printf("%s\t%s\n", type->name, type->identifiers);
-            }
-            return 0;
-        }
-        else if (c == 't' || strcmp(name, "type") == 0)
-        {
-            int code = str_split(&type_args, argv[optind - 1], ',');
-            if (code < 0)
-            {
-                strncpy(error_message, PROGRAM_NAME ": Failed to parse types\n", ERROR_MESSAGE_LEN);
-                return 1;
-            }
-            n_type_args = code;
-            printf("Identified the following types:\n");
-            for (unsigned int i = 0; i < n_type_args; i++)
-                printf("    %s\n", type_args[i]);
-        }
-        else if (c == 'v' || strcmp(name, "version") == 0)
-        {
-            printf("aalv 0.1.0 dev\n");
-            return 0;
-        }
-    }
-
+    parse_options(argc, argv,
+                  short_options, long_options,
+                  &format_args, &n_format_args,
+                  &type_args, &n_type_args);
     free(short_options);
 
     // Check for positional arguments
@@ -432,6 +317,143 @@ void cleanup(void)
     // Print error
     if (error_message[0] != '\0')
         fputs(error_message, stderr);
+}
+
+void parse_options(int argc, char *argv[],
+                   const char *short_options, const struct option *long_options,
+                   char ***format_args_ptr, unsigned int *n_format_args,
+                   char ***type_args_ptr, unsigned int *n_type_args)
+{
+    while (1)
+    {
+        // Check if next argument is a known option
+        int option_index = -1;
+        int c = getopt_long(argc, argv, short_options, long_options, &option_index);
+        if (c == -1)
+            break;
+        else if (c == '?')
+        {
+            print_short_help();
+            exit(1);
+        }
+
+        // Process option
+        const char *name = "";
+        if (option_index != -1)
+            name = arguments[option_index].long_name;
+        if (c == 'f' || strcmp(name, "format") == 0)
+        {
+            int code = str_split(format_args_ptr, argv[optind - 1], ',');
+            if (code < 0)
+            {
+                strncpy(error_message, PROGRAM_NAME ": Failed to parse formats\n", ERROR_MESSAGE_LEN);
+                exit(1);
+            }
+            *n_format_args = code;
+            printf("Identified the following formats:\n");
+            for (unsigned int i = 0; i < *n_format_args; i++)
+                printf("    %s\n", (*format_args_ptr)[i]);
+        }
+        else if (c == 'h')
+        {
+            print_short_help();
+            exit(0);
+        }
+        else if (strcmp(name, "help") == 0)
+        {
+            print_long_help();
+            exit(0);
+        }
+        else if (strcmp(name, "list-formats") == 0)
+        {
+            printf("Format\tExtensions\n");
+            for (unsigned int i = 0; i < NFORMATS; i++)
+            {
+                Format *format = formats + i;
+                printf("%s\t%s\n", format->name, format->exts);
+            }
+            exit(0);
+        }
+        else if (strcmp(name, "list-types") == 0)
+        {
+            printf("Type\tIdentifiers\n");
+            for (unsigned int i = 0; i < NTYPES; i++)
+            {
+                SeqType *type = types + i;
+                printf("%s\t%s\n", type->name, type->identifiers);
+            }
+            exit(0);
+        }
+        else if (c == 't' || strcmp(name, "type") == 0)
+        {
+            int code = str_split(type_args_ptr, argv[optind - 1], ',');
+            if (code < 0)
+            {
+                strncpy(error_message, PROGRAM_NAME ": Failed to parse types\n", ERROR_MESSAGE_LEN);
+                exit(1);
+            }
+            *n_type_args = code;
+            printf("Identified the following types:\n");
+            for (unsigned int i = 0; i < *n_type_args; i++)
+                printf("    %s\n", (*type_args_ptr)[i]);
+        }
+        else if (c == 'v' || strcmp(name, "version") == 0)
+        {
+            printf("aalv 0.1.0 dev\n");
+            exit(0);
+        }
+    }
+}
+
+void prepare_options(char **short_options_ptr, struct option *long_options)
+{
+    Array short_options_array;
+    array_init(&short_options_array, sizeof(char));
+    for (unsigned int i = 0; i < NARGUMENTS; i++)
+    {
+        Argument *argument = arguments + i;
+
+        // Fill struct for long options
+        struct option *long_option = long_options + i;
+        long_option->name = argument->long_name;
+        long_option->has_arg = argument->has_arg;
+        long_option->flag = 0;
+        long_option->val = 0;
+
+        // Fill array for short options syntax
+        if (!argument->short_name)
+            continue;
+        char s = argument->short_name;
+        array_append(&short_options_array, &s);
+        switch (argument->has_arg)
+        {
+        case required_argument:
+        {
+            char s[] = ":";
+            array_extend(&short_options_array, &s, sizeof(s) - 1);
+            break;
+        }
+        case optional_argument:
+        {
+            char s[] = "::";
+            array_extend(&short_options_array, &s, sizeof(s) - 1);
+            break;
+        }
+        }
+    }
+    char s[] = "\0"; // Null terminate
+    array_extend(&short_options_array, &s, sizeof(s) - 1);
+
+    // Convert array of short options to string
+    char *short_options = malloc(short_options_array.len * short_options_array.size);
+    if (short_options == NULL)
+    {
+        strncpy(error_message, PROGRAM_NAME ": Failed to allocate memory to create options string\n", ERROR_MESSAGE_LEN);
+        exit(1);
+    }
+    memcpy(short_options, short_options_array.data, short_options_array.len * short_options_array.size);
+    *short_options_ptr = short_options;
+    array_free(&short_options_array);
 }
 
 void print_long_help(void)
