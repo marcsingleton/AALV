@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/errno.h>
 #include <unistd.h>
 
 #include "array.h"
@@ -47,7 +48,7 @@ typedef struct
 {
     const char *name;
     const char *exts;
-    int (*reader)(const char *, SeqRecord **);
+    int (*reader)(FILE *, SeqRecord **);
 } Format;
 
 typedef struct
@@ -62,6 +63,7 @@ int parse_options(int argc, char *argv[],
                   char ***format_args_ptr, unsigned int *n_format_args,
                   char ***type_args_ptr, unsigned int *n_type_args);
 int prepare_options(char **short_options, struct option *long_options);
+int read_files(State *state, char **file_paths, char **format_args, unsigned int n_format_args);
 void print_long_help(void);
 void print_short_help(void);
 int print_option_usage(Argument *argument, UsageStyle usage_style, const bool brackets, const char *style_sep);
@@ -109,7 +111,7 @@ Argument arguments[] = {
 #define NARGUMENTS sizeof(arguments) / sizeof(Argument)
 
 Format formats[] = {
-    {"FASTA", "fasta,fa,faa,fna,afa", &fasta_read},
+    {"FASTA", "fasta,fa,faa,fna,afa", &fasta_fread},
     // CLUSTAL
     // PHYLIP
     // STOCKHOLM
@@ -173,53 +175,9 @@ int main(int argc, char *argv[])
     state.active_file = files;
     state.active_file_index = 0;
 
-    for (unsigned int i = 0; i < state.nfiles; i++)
-    {
-        // Iterate over provided arguments following options
-        // - File path is "loop" variable
-        // - Special case: If a tty, consider - as implicit first path
-        //      - malloc call assign extra slot as well
-
-        // Parser selection logic: takes the input arguments and selects a parser
-        // - Attempt to extract format from formats
-        //      - Exit if no match
-        // - Attempt to extract format from path
-        //      - Special case: - (stdin) needs a format
-        //      - If no match, infer with sniffer
-        //          - Exit if no sniffer is successful
-        // - Exit if an explicit or inferred format is malformed
-
-        // Parsing logic
-        // - Open file from path
-        //      - Special case: - provide stdin
-        // - Call parser
-
-        char *file_path = argv[optind + file_index];
-
-        SeqRecord *records = NULL;
-        int len = fasta_read(file_path, &records);
-        if (len < 0)
-        {
-            snprintf(error_message, ERROR_MESSAGE_LEN, PROGRAM_NAME ": %s: Error processing file (code %d)\n", file_path, len);
-            return 1;
-        }
-
-        // Set sequence type
-        // - Types: protein,nucleic,mixed,unknown
-        // - For each sequence
-        //      - Get possible sequence types
-        //      - If types is given, extract type
-        //          - If given type is compatible with inferred type, use given type
-        //          - Otherwise, use inferred type
-
-        FileState *file = state.files + file_index;
-        file->record_array.records = records;
-        file->record_array.len = len;
-        file->record_array.offset = 990;
-        file->header_pane_width = 30;
-        file->ruler_pane_height = 5;
-        file->tick_spacing = 10;
-    }
+    code = read_files(&state, argv + optind, format_args, n_format_args);
+    if (code > 0)
+        return code - 1;
 
     if (n_format_args > 0)
         str_free_split(format_args, n_format_args);
@@ -324,6 +282,7 @@ void cleanup(void)
         fputs(error_message, stderr);
 }
 
+// Argument parsing
 int parse_options(int argc, char *argv[],
                   const char *short_options, const struct option *long_options,
                   char ***format_args_ptr, unsigned int *n_format_args,
@@ -466,6 +425,116 @@ cleanup:
     return code;
 }
 
+int read_files(State *state, char **file_paths, char **format_args, unsigned int n_format_args)
+{
+    StrArray *formats_exts = malloc(NFORMATS * sizeof(StrArray));
+    if (formats_exts == NULL)
+    {
+        strncpy(error_message, PROGRAM_NAME ": Failed to allocate memory to split format extensions\n", ERROR_MESSAGE_LEN);
+        return 1;
+    }
+    for (unsigned int i = 0; i < NFORMATS; i++)
+    {
+        Format *format = formats + i;
+        StrArray *format_exts = formats_exts + i;
+        format_exts->len = str_split((char ***)&format_exts->data, format->exts, ',');
+    }
+
+    for (unsigned int file_index = 0; file_index < state->nfiles; file_index++)
+    {
+        // Infer reader from extension
+        const char *file_path, *file_ext;
+        file_path = file_paths[file_index];
+
+        int (*reader)(FILE *, SeqRecord **) = NULL;
+        if (file_index < n_format_args)
+        {
+            char *format_arg = format_args[file_index];
+            for (unsigned int i = 0; i < NFORMATS; i++)
+            {
+                Format *format = formats + i;
+                StrArray *format_exts = formats_exts + i;
+                char **exts = (char **)format_exts->data;
+                for (unsigned int j = 0; j < format_exts->len; j++)
+                {
+                    if (strcmp(format_arg, exts[j]) == 0)
+                    {
+                        reader = format->reader;
+                        break;
+                    }
+                }
+                if (reader != NULL)
+                    break;
+                snprintf(error_message, ERROR_MESSAGE_LEN, PROGRAM_NAME ": %s: Error identifying format\n", format_arg);
+                return 2;
+            }
+        }
+        else if ((file_ext = strrchr(file_path, '.')) != NULL)
+        {
+            file_ext++; // Exclude dot from comparison
+            for (unsigned int i = 0; i < NFORMATS; i++)
+            {
+                Format *format = formats + i;
+                StrArray *format_exts = formats_exts + i;
+                char **exts = (char **)format_exts->data;
+                for (unsigned int j = 0; j < format_exts->len; j++)
+                {
+                    if (strcmp(file_ext, exts[j]) == 0)
+                    {
+                        reader = format->reader;
+                        break;
+                    }
+                }
+                if (reader != NULL)
+                    break;
+                snprintf(error_message, ERROR_MESSAGE_LEN, PROGRAM_NAME ": %s: Unknown extension\n", file_path);
+                return 2;
+            }
+        }
+        else
+        {
+            snprintf(error_message, ERROR_MESSAGE_LEN, PROGRAM_NAME ": %s: No format or known extension\n", file_path);
+            return 2;
+        }
+
+        // Read file
+        FILE *fp;
+        if (strcmp(file_path, "-") == 0)
+            fp = stdin;
+        else if ((fp = fopen(file_path, "r")) == NULL)
+        {
+            snprintf(error_message, ERROR_MESSAGE_LEN, PROGRAM_NAME ": %s: %s\n", file_path, strerror(errno));
+            return 1;
+        }
+        SeqRecord *records = NULL;
+        int len = reader(fp, &records);
+        if (len < 0)
+        {
+            snprintf(error_message, ERROR_MESSAGE_LEN, PROGRAM_NAME ": %s: Error processing file (code %d)\n", file_path, len);
+            return 1;
+        }
+
+        // Set sequence type
+        // - Types: protein,nucleic,mixed,unknown
+        // - For each sequence
+        //      - Get possible sequence types
+        //      - If types is given, extract type
+        //          - If given type is compatible with inferred type, use given type
+        //          - Otherwise, use inferred type
+
+        FileState *file = state->files + file_index;
+        file->record_array.records = records;
+        file->record_array.len = len;
+        file->record_array.offset = 1;
+        file->header_pane_width = 30;
+        file->ruler_pane_height = 5;
+        file->tick_spacing = 10;
+    }
+
+    return 0;
+}
+
+// CLI output
 void print_long_help(void)
 {
     unsigned int nmax;
