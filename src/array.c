@@ -13,7 +13,7 @@ int array_init(Array *array, size_t size)
     void *ptr = malloc(INIT_CAPACITY * size);
     if (ptr == NULL)
         return 1;
-    array->data = malloc(INIT_CAPACITY * size);
+    array->data = ptr;
     array->size = size;
     array->capacity = INIT_CAPACITY;
     array->max_capacity = SIZE_MAX / size;
