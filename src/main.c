@@ -427,6 +427,9 @@ cleanup:
 
 int read_files(State *state, char **file_paths, char **format_args, unsigned int n_format_args)
 {
+    int code = 0;
+
+    // Split format extensions
     StrArray *formats_exts = malloc(NFORMATS * sizeof(StrArray));
     if (formats_exts == NULL)
     {
@@ -435,66 +438,65 @@ int read_files(State *state, char **file_paths, char **format_args, unsigned int
     }
     for (unsigned int i = 0; i < NFORMATS; i++)
     {
+        StrArray *format_exts = formats_exts + i;
+        format_exts->data = NULL;
+        format_exts->len = 0;
+    }
+    for (unsigned int i = 0; i < NFORMATS; i++)
+    {
         Format *format = formats + i;
         StrArray *format_exts = formats_exts + i;
-        format_exts->len = str_split((char ***)&format_exts->data, format->exts, ',');
+        format_exts->len = str_split(&format_exts->data, format->exts, ',');
     }
 
+    // Main loop
     for (unsigned int file_index = 0; file_index < state->nfiles; file_index++)
     {
-        // Infer reader from extension
         const char *file_path, *file_ext;
         file_path = file_paths[file_index];
 
+        // Infer reader
         int (*reader)(FILE *, SeqRecord **) = NULL;
-        if (file_index < n_format_args)
+
+        if (file_index < n_format_args && format_args[file_index][0] != '\0') // From format argument
         {
             char *format_arg = format_args[file_index];
             for (unsigned int i = 0; i < NFORMATS; i++)
             {
                 Format *format = formats + i;
                 StrArray *format_exts = formats_exts + i;
-                char **exts = (char **)format_exts->data;
-                for (unsigned int j = 0; j < format_exts->len; j++)
+                if (str_is_in((const char **)format_exts->data, format_exts->len, format_arg)) // Cast to silence warning
                 {
-                    if (strcmp(format_arg, exts[j]) == 0)
-                    {
-                        reader = format->reader;
-                        break;
-                    }
-                }
-                if (reader != NULL)
+                    reader = format->reader;
                     break;
+                }
                 snprintf(error_message, ERROR_MESSAGE_LEN, PROGRAM_NAME ": %s: Error identifying format\n", format_arg);
-                return 2;
+                code = 2;
+                goto cleanup;
             }
         }
-        else if ((file_ext = strrchr(file_path, '.')) != NULL)
+        else if ((file_ext = strrchr(file_path, '.')) != NULL) // From path extension
         {
             file_ext++; // Exclude dot from comparison
             for (unsigned int i = 0; i < NFORMATS; i++)
             {
                 Format *format = formats + i;
                 StrArray *format_exts = formats_exts + i;
-                char **exts = (char **)format_exts->data;
-                for (unsigned int j = 0; j < format_exts->len; j++)
+                if (str_is_in((const char **)format_exts->data, format_exts->len, file_ext)) // Cast to silence warning
                 {
-                    if (strcmp(file_ext, exts[j]) == 0)
-                    {
-                        reader = format->reader;
-                        break;
-                    }
-                }
-                if (reader != NULL)
+                    reader = format->reader;
                     break;
+                }
                 snprintf(error_message, ERROR_MESSAGE_LEN, PROGRAM_NAME ": %s: Unknown extension\n", file_path);
-                return 2;
+                code = 2;
+                goto cleanup;
             }
         }
         else
         {
             snprintf(error_message, ERROR_MESSAGE_LEN, PROGRAM_NAME ": %s: No format or known extension\n", file_path);
-            return 2;
+            code = 2;
+            goto cleanup;
         }
 
         // Read file
@@ -504,14 +506,16 @@ int read_files(State *state, char **file_paths, char **format_args, unsigned int
         else if ((fp = fopen(file_path, "r")) == NULL)
         {
             snprintf(error_message, ERROR_MESSAGE_LEN, PROGRAM_NAME ": %s: %s\n", file_path, strerror(errno));
-            return 1;
+            code = 1;
+            goto cleanup;
         }
         SeqRecord *records = NULL;
         int len = reader(fp, &records);
         if (len < 0)
         {
             snprintf(error_message, ERROR_MESSAGE_LEN, PROGRAM_NAME ": %s: Error processing file (code %d)\n", file_path, len);
-            return 1;
+            code = 1;
+            goto cleanup;
         }
 
         // Set sequence type
@@ -531,7 +535,15 @@ int read_files(State *state, char **file_paths, char **format_args, unsigned int
         file->tick_spacing = 10;
     }
 
-    return 0;
+cleanup:
+    for (unsigned int i = 0; i < NFORMATS; i++)
+    {
+        StrArray *format_exts = formats_exts + i;
+        free(format_exts->data);
+        format_exts->data = NULL;
+        format_exts->len = 0;
+    }
+    return code;
 }
 
 // CLI output
