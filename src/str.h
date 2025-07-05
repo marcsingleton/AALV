@@ -11,7 +11,7 @@ typedef struct
     unsigned int len;
 } StrArray;
 
-unsigned int str_count(const char *s, const char c);
+size_t str_count(const char *s, const char c);
 int str_is_in(const char **ss, unsigned int n, const char *t);
 int str_split(char ***fields_ptr, const char *s, const char d);
 void str_free_split(char **fields, const unsigned int n);

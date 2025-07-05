@@ -17,15 +17,19 @@ static int copy_field(char **field_ptr, const char *s, const size_t len)
     return 0;
 }
 
-unsigned int str_count(const char *s, const char c)
+size_t str_count(const char *s, const char c)
 {
     if (s == NULL)
         return 0;
 
-    unsigned int n = 0;
+    size_t n = 0;
     for (; *s != '\0'; s++)
+    {
         if (*s == c)
             n++;
+        if (n == SIZE_MAX)
+            break;
+    }
     return n;
 }
 
@@ -42,7 +46,9 @@ int str_split(char ***fields_ptr, const char *s, const char d)
     if (s == NULL)
         return -1;
 
-    unsigned int n = str_count(s, d) + 1;
+    size_t n = str_count(s, d) + 1;
+    if (n >= SIZE_MAX / sizeof(char *))
+        return -1;
     char **fields = malloc(n * sizeof(char *));
     if (fields == NULL)
         return -1;
