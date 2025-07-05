@@ -49,13 +49,13 @@ typedef struct
     const char *name;
     const char *exts;
     int (*reader)(FILE *, SeqRecord **);
-} Format;
+} FormatOption;
 
 typedef struct
 {
     const char *name;
     const char *identifiers;
-} SeqType;
+} SeqTypeOption;
 
 void cleanup(void);
 int parse_options(int argc, char *argv[],
@@ -110,21 +110,21 @@ Argument arguments[] = {
 
 #define NARGUMENTS sizeof(arguments) / sizeof(Argument)
 
-Format formats[] = {
+FormatOption formats[] = {
     {"FASTA", "fasta,fa,faa,fna,afa", &fasta_fread},
     // CLUSTAL
     // PHYLIP
     // STOCKHOLM
 };
 
-#define NFORMATS sizeof(formats) / sizeof(Format)
+#define NFORMATS sizeof(formats) / sizeof(FormatOption)
 
-SeqType types[] = {
+SeqTypeOption types[] = {
     {"nucleic", "nucleic,nt"},
     {"protein", "protein,aa"},
 };
 
-#define NTYPES sizeof(types) / sizeof(SeqType)
+#define NTYPES sizeof(types) / sizeof(SeqTypeOption)
 
 // Main
 int main(int argc, char *argv[])
@@ -333,7 +333,7 @@ int parse_options(int argc, char *argv[],
             printf("Format\tExtensions\n");
             for (unsigned int i = 0; i < NFORMATS; i++)
             {
-                Format *format = formats + i;
+                FormatOption *format = formats + i;
                 printf("%s\t%s\n", format->name, format->exts);
             }
             return 1;
@@ -343,7 +343,7 @@ int parse_options(int argc, char *argv[],
             printf("Type\tIdentifiers\n");
             for (unsigned int i = 0; i < NTYPES; i++)
             {
-                SeqType *type = types + i;
+                SeqTypeOption *type = types + i;
                 printf("%s\t%s\n", type->name, type->identifiers);
             }
             return 1;
@@ -444,7 +444,7 @@ int read_files(State *state, char **file_paths, char **format_args, unsigned int
     }
     for (unsigned int i = 0; i < NFORMATS; i++)
     {
-        Format *format = formats + i;
+        FormatOption *format = formats + i;
         StrArray *format_exts = formats_exts + i;
         format_exts->len = str_split(&format_exts->data, format->exts, ',');
     }
@@ -463,7 +463,7 @@ int read_files(State *state, char **file_paths, char **format_args, unsigned int
             char *format_arg = format_args[file_index];
             for (unsigned int i = 0; i < NFORMATS; i++)
             {
-                Format *format = formats + i;
+                FormatOption *format = formats + i;
                 StrArray *format_exts = formats_exts + i;
                 if (str_is_in((const char **)format_exts->data, format_exts->len, format_arg)) // Cast to silence warning
                 {
@@ -480,7 +480,7 @@ int read_files(State *state, char **file_paths, char **format_args, unsigned int
             file_ext++; // Exclude dot from comparison
             for (unsigned int i = 0; i < NFORMATS; i++)
             {
-                Format *format = formats + i;
+                FormatOption *format = formats + i;
                 StrArray *format_exts = formats_exts + i;
                 if (str_is_in((const char **)format_exts->data, format_exts->len, file_ext)) // Cast to silence warning
                 {
