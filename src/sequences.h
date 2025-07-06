@@ -46,8 +46,6 @@ typedef struct
 Alphabet NUCLEIC_ALPHABET;
 Alphabet PROTEIN_ALPHABET;
 
-#define NALPHABETS sizeof(BASE_ALPHABETS) / sizeof(Alphabet *)
-
 void sequences_free_seq_records(SeqRecord *records, int nrecords);
 void sequences_free_seq_record_array(SeqRecordArray *record_array);
 int sequences_init_alphabet(Alphabet *alphabet, char *name, char *syms);
