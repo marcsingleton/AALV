@@ -62,12 +62,13 @@ typedef struct
 void cleanup(void);
 int parse_options(int argc, char *argv[],
                   const char *short_options, const struct option *long_options,
-                  char ***format_args_ptr, unsigned int *n_format_args,
-                  char ***type_args_ptr, unsigned int *n_type_args);
+                  unsigned int *n_format_args, char ***format_args_ptr,
+                  unsigned int *n_type_args, char ***type_args_ptr);
 int prepare_options(char **short_options, struct option *long_options);
-int read_files(State *state, char **file_paths,
-               char **format_args, unsigned int n_format_args,
-               char **type_args, unsigned int n_type_args);
+int read_files(State *state,
+               unsigned int n_positional_args, char **positional_args,
+               unsigned int n_format_args, char **format_args,
+               unsigned int n_type_args, char **type_args);
 void print_long_help(void);
 void print_short_help(void);
 int print_option_usage(Argument *argument, UsageStyle usage_style, const bool brackets, const char *style_sep);
@@ -147,17 +148,19 @@ int main(int argc, char *argv[])
         return code;
 
     // Parse options
-    char **format_args = NULL;
     unsigned int n_format_args = 0;
-    char **type_args = NULL;
+    char **format_args = NULL;
     unsigned int n_type_args = 0;
+    char **type_args = NULL;
     code = parse_options(argc, argv,
                          short_options, long_options,
-                         &format_args, &n_format_args,
-                         &type_args, &n_type_args);
+                         &n_format_args, &format_args,
+                         &n_type_args, &type_args);
     free(short_options);
     if (code > 0) // "Expected" exit == 1 and "unexpected" exit > 1; shift -1 for CLI convention
         return code - 1;
+    unsigned int n_positional_args = argc - optind;
+    char **positional_args = argv + optind;
 
     // Check for positional arguments
     if (isatty(STDIN_FILENO) && optind == argc)
@@ -167,11 +170,11 @@ int main(int argc, char *argv[])
     }
 
     // Handle special cases for piped input
-    unsigned int nfiles = argc - optind;
+    unsigned int nfiles = n_positional_args;
     int input_fd;
     if (!isatty(STDIN_FILENO))
     {
-        if (nfiles == 0)
+        if (n_positional_args == 0)
             nfiles++; // If not a tty, treat stdin as an implicit first file
         input_fd = open("/dev/tty", O_RDONLY);
         if (input_fd == -1)
@@ -196,9 +199,10 @@ int main(int argc, char *argv[])
     state.active_file = files;
     state.active_file_index = 0;
 
-    code = read_files(&state, argv + optind,
-                      format_args, n_format_args,
-                      type_args, n_type_args);
+    code = read_files(&state,
+                      n_positional_args, positional_args,
+                      n_format_args, format_args,
+                      n_type_args, type_args);
     if (code > 0)
         return code - 1;
 
@@ -307,8 +311,8 @@ void cleanup(void)
 // Argument parsing
 int parse_options(int argc, char *argv[],
                   const char *short_options, const struct option *long_options,
-                  char ***format_args_ptr, unsigned int *n_format_args,
-                  char ***type_args_ptr, unsigned int *n_type_args)
+                  unsigned int *n_format_args, char ***format_args_ptr,
+                  unsigned int *n_type_args, char ***type_args_ptr)
 {
     while (1)
     {
@@ -447,9 +451,10 @@ cleanup:
     return code;
 }
 
-int read_files(State *state, char **file_paths,
-               char **format_args, unsigned int n_format_args,
-               char **type_args, unsigned int n_type_args)
+int read_files(State *state,
+               unsigned int n_positional_args, char **positional_args,
+               unsigned int n_format_args, char **format_args,
+               unsigned int n_type_args, char **type_args)
 {
     int code = 0;
 
@@ -499,10 +504,10 @@ int read_files(State *state, char **file_paths,
     for (unsigned int file_index = 0; file_index < state->nfiles; file_index++)
     {
         const char *file_path, *file_ext;
-        if (!isatty(STDIN_FILENO) && *file_paths[0] == '\0')
+        if (!isatty(STDIN_FILENO) && n_positional_args == 0)
             file_path = "-";
         else
-            file_path = file_paths[file_index];
+            file_path = positional_args[file_index];
 
         // Infer reader
         char *format_arg = "";
