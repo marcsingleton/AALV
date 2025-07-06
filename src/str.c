@@ -60,16 +60,16 @@ int str_split(char ***fields_ptr, const char *s, const char d)
         if (s[j] == d)
         {
             if (copy_field(fields + k, s + i, j - i) != 0)
-                goto cleanup;
+                goto error;
             i = j + 1;
             k++;
         }
     if (copy_field(fields + k, s + i, j - i) != 0)
-        goto cleanup;
+        goto error;
 
     return n;
 
-cleanup:
+error:
     for (unsigned int i = 0; i < k; i++)
         free(fields[k]);
     free(fields);
