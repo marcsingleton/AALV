@@ -146,13 +146,21 @@ int fasta_fread(FILE *fp, SeqRecord **records_ptr)
             .seq = seq,
             .len = seqlen,
         };
-        array_append(&new_records, &new_record); // TODO: Add checks
+        if (array_append(&new_records, &new_record) != 0)
+        {
+            code = FASTA_ERROR_RECORD_OVERFLOW;
+            goto error;
+        };
     }
 
     free(line);
     free(buffer);
 
-    array_shrink(&new_records); // TODO: Add checks
+    if (array_shrink(&new_records) != 0)
+    {
+        code = FASTA_ERROR_MEMORY_ALLOCATION;
+        goto error;
+    }
     *records_ptr = new_records.data;
     nrecords = new_records.len;
     return nrecords;
