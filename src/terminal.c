@@ -3,22 +3,23 @@
 #include <stdio.h>
 #include <sys/ioctl.h>
 #include <termios.h>
-#include <unistd.h>
 
 #include "array.h"
 #include "terminal.h"
 
 #define UINT_STR_MAX 3 * sizeof(UINT_MAX)
 
+int TERMINAL_FILENO = STDIN_FILENO;
+
 int terminal_get_termios(struct termios *termios_p)
 {
-    return tcgetattr(STDIN_FILENO, termios_p);
+    return tcgetattr(TERMINAL_FILENO, termios_p);
 }
 
 int terminal_get_window_size(unsigned int *rows, unsigned int *cols)
 {
     struct winsize ws;
-    if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) == -1 || ws.ws_col == 0)
+    if (ioctl(TERMINAL_FILENO, TIOCGWINSZ, &ws) == -1 || ws.ws_col == 0)
         return -1;
     else
     {
@@ -32,12 +33,12 @@ int terminal_enable_raw_mode(struct termios *old_termios, struct termios *raw_te
 {
     *raw_termios = *old_termios;
     cfmakeraw(raw_termios);
-    return tcsetattr(STDIN_FILENO, TCSAFLUSH, raw_termios);
+    return tcsetattr(TERMINAL_FILENO, TCSAFLUSH, raw_termios);
 }
 
 int terminal_disable_raw_mode(struct termios *old_termios)
 {
-    return tcsetattr(STDIN_FILENO, TCSAFLUSH, old_termios);
+    return tcsetattr(TERMINAL_FILENO, TCSAFLUSH, old_termios);
 }
 
 void terminal_use_alternate_buffer(void)

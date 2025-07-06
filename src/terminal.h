@@ -2,6 +2,9 @@
 #define TERMINAL_H
 
 #include <termios.h>
+#include <unistd.h>
+
+extern int TERMINAL_FILENO;
 
 int terminal_get_termios(struct termios *termios_p);
 int terminal_get_window_size(unsigned int *rows, unsigned int *cols);
