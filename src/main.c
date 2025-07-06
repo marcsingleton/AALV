@@ -505,12 +505,13 @@ int read_files(State *state, char **file_paths,
             file_path = file_paths[file_index];
 
         // Infer reader
+        char *format_arg = "";
+        if (file_index < n_format_args)
+            format_arg = format_args[file_index];
         int (*reader)(FILE *, SeqRecord **) = NULL;
 
-        // TODO: Fix potential out of bounds access
-        if (file_index < n_format_args && format_args[file_index][0] != '\0') // From format argument
+        if (format_arg[0] != '\0') // From format argument
         {
-            char *format_arg = format_args[file_index];
             for (unsigned int i = 0; i < NFORMATS; i++)
             {
                 FormatOption *format_option = format_options + i;
@@ -569,6 +570,9 @@ int read_files(State *state, char **file_paths,
         }
 
         // Set sequence type
+        char *type_arg = "";
+        if (file_index < n_type_args)
+            type_arg = type_args[file_index];
         for (unsigned int i = 0; i < (unsigned int)len; i++)
         {
             SeqRecord *record = records + i;
@@ -578,9 +582,8 @@ int read_files(State *state, char **file_paths,
                 code = 1;
                 goto cleanup;
             };
-            if (file_index < n_type_args && type_args[file_index][0] != '\0')
+            if (type_arg[0] != '\0')
             {
-                char *type_arg = type_args[file_index];
                 for (unsigned int j = 0; j < NTYPES; j++)
                 {
                     SeqTypeOption *type_option = type_options + j;
