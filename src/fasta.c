@@ -146,13 +146,13 @@ int fasta_fread(FILE *fp, SeqRecord **records_ptr)
             .seq = seq,
             .len = seqlen,
         };
-        array_append(&new_records, &new_record);
+        array_append(&new_records, &new_record); // TODO: Add checks
     }
 
     free(line);
     free(buffer);
 
-    array_shrink(&new_records);
+    array_shrink(&new_records); // TODO: Add checks
     *records_ptr = new_records.data;
     nrecords = new_records.len;
     return nrecords;

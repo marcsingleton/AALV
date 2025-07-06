@@ -69,7 +69,7 @@ void print_long_help(void);
 void print_short_help(void);
 int print_option_usage(Argument *argument, UsageStyle usage_style, const bool brackets, const char *style_sep);
 
-// Order
+// --help option shows in given order (alphabetical except help and version)
 Argument arguments[] = {
     {"help",
      'h',
@@ -108,6 +108,7 @@ Argument arguments[] = {
      SHORT_NAME,
      required_argument},
 };
+// TODO: Possible --no-ascii option?
 
 #define NARGUMENTS sizeof(arguments) / sizeof(Argument)
 
@@ -216,9 +217,6 @@ int main(int argc, char *argv[])
     setlocale(LC_ALL, ""); // Necessary for wcswidth calls
 
     // Main loop
-    // Display current file
-    // Read input
-    // Process input
     int action;
     Array buffer;
     array_init(&buffer, sizeof(char));
