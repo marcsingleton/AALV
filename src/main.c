@@ -128,6 +128,8 @@ SeqTypeOption types[] = {
 
 #define NTYPES sizeof(types) / sizeof(SeqTypeOption)
 
+#define NUCLEIC_TIEBREAK_LEN 10 // Arbitrary threshold for when indeterminate sequences are called nucleic
+
 // Main
 int main(int argc, char *argv[])
 {
@@ -464,6 +466,8 @@ int read_files(State *state, char **file_paths, char **format_args, unsigned int
         format_exts->len = str_split(&format_exts->data, format->exts, ',');
     }
 
+    sequences_init_base_alphabets();
+
     // Main loop
     for (unsigned int file_index = 0; file_index < state->nfiles; file_index++)
     {
@@ -543,6 +547,13 @@ int read_files(State *state, char **file_paths, char **format_args, unsigned int
         //      - If types is given, extract type
         //          - If given type is compatible with inferred type, use given type
         //          - Otherwise, use inferred type
+        for (int i = 0; i < len; i++)
+        {
+            SeqRecord *record = records + i;
+            sequences_infer_seq_type(record);
+            if (record->type == INDETERMINATE && record->len >= NUCLEIC_TIEBREAK_LEN)
+                record->type = NUCLEIC;
+        }
 
         FileState *file = state->files + file_index;
         file->record_array.records = records;
