@@ -1,3 +1,4 @@
+#include <fcntl.h>
 #include <getopt.h>
 #include <locale.h>
 #include <stdio.h>
@@ -159,11 +160,25 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    // Read files
+    // Handle special cases for piped input
     unsigned int nfiles = argc - optind;
+    int input_fd;
     if (!isatty(STDIN_FILENO))
-        nfiles++; // If not a tty, treat stdin as an implicit first file
+    {
+        if (nfiles == 0)
+            nfiles++; // If not a tty, treat stdin as an implicit first file
+        input_fd = open("/dev/tty", O_RDONLY);
+        if (input_fd == -1)
+        {
+            strncpy(error_message, PROGRAM_NAME ": Failed to open /dev/tty for reading commands\n", ERROR_MESSAGE_LEN);
+            return 1;
+        }
+        TERMINAL_FILENO = input_fd;
+    }
+    else
+        input_fd = STDIN_FILENO;
 
+    // Read files
     FileState *files = malloc(nfiles * sizeof(FileState));
     if (files == NULL)
     {
@@ -210,7 +225,7 @@ int main(int argc, char *argv[])
 
     while (1)
     {
-        action = input_get_action();
+        action = input_get_action(input_fd);
         input_process_action(action, &buffer);
 
         // Re-paint screen if necessary
@@ -276,6 +291,8 @@ void cleanup(void)
         terminal_use_normal_buffer();
         terminal_disable_raw_mode(&old_termios);
     }
+    if (TERMINAL_FILENO != STDIN_FILENO)
+        close(TERMINAL_FILENO);
 
     // Print error
     if (error_message[0] != '\0')
@@ -453,7 +470,10 @@ int read_files(State *state, char **file_paths, char **format_args, unsigned int
     for (unsigned int file_index = 0; file_index < state->nfiles; file_index++)
     {
         const char *file_path, *file_ext;
-        file_path = file_paths[file_index];
+        if (!isatty(STDIN_FILENO) && *file_paths[0] == '\0')
+            file_path = "-";
+        else
+            file_path = file_paths[file_index];
 
         // Infer reader
         int (*reader)(FILE *, SeqRecord **) = NULL;
