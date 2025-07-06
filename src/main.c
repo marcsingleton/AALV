@@ -12,6 +12,7 @@
 #include "error.h"
 #include "fasta.h"
 #include "input.h"
+#include "rcparams.h"
 #include "sequences.h"
 #include "state.h"
 #include "str.h"
@@ -131,8 +132,6 @@ SeqTypeOption type_options[] = {
 };
 
 #define NTYPES sizeof(type_options) / sizeof(SeqTypeOption)
-
-#define NUCLEIC_TIEBREAK_LEN 10 // Arbitrary threshold for when indeterminate sequences are called nucleic
 
 // Main
 int main(int argc, char *argv[])
@@ -558,7 +557,7 @@ int read_files(State *state,
                     }
                 }
             }
-            else if (record->type == SEQ_TYPE_INDETERMINATE && record->len >= NUCLEIC_TIEBREAK_LEN)
+            else if (record->type == SEQ_TYPE_INDETERMINATE && record->len >= rc_params_nucleic_tiebreak_len)
                 record->type = SEQ_TYPE_NUCLEIC;
         }
 
@@ -566,9 +565,9 @@ int read_files(State *state,
         file->record_array.records = records;
         file->record_array.len = len;
         file->record_array.offset = 1;
-        file->header_pane_width = 30;
-        file->ruler_pane_height = 5;
-        file->tick_spacing = 10;
+        file->header_pane_width = rcparams_header_pane_width;
+        file->ruler_pane_height = rcparams_ruler_pane_height;
+        file->tick_spacing = rcparams_tick_spacing;
     }
 
 cleanup:
