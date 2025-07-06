@@ -56,6 +56,7 @@ typedef struct
 {
     const char *name;
     const char *identifiers;
+    const SeqType type;
 } SeqTypeOption;
 
 void cleanup(void);
@@ -64,7 +65,9 @@ int parse_options(int argc, char *argv[],
                   char ***format_args_ptr, unsigned int *n_format_args,
                   char ***type_args_ptr, unsigned int *n_type_args);
 int prepare_options(char **short_options, struct option *long_options);
-int read_files(State *state, char **file_paths, char **format_args, unsigned int n_format_args);
+int read_files(State *state, char **file_paths,
+               char **format_args, unsigned int n_format_args,
+               char **type_args, unsigned int n_type_args);
 void print_long_help(void);
 void print_short_help(void);
 int print_option_usage(Argument *argument, UsageStyle usage_style, const bool brackets, const char *style_sep);
@@ -122,8 +125,8 @@ FormatOption formats[] = {
 #define NFORMATS sizeof(formats) / sizeof(FormatOption)
 
 SeqTypeOption types[] = {
-    {"nucleic", "nucleic,nt"},
-    {"protein", "protein,aa"},
+    {"nucleic", "nucleic,nt", NUCLEIC},
+    {"protein", "protein,aa", PROTEIN},
 };
 
 #define NTYPES sizeof(types) / sizeof(SeqTypeOption)
@@ -193,7 +196,9 @@ int main(int argc, char *argv[])
     state.active_file = files;
     state.active_file_index = 0;
 
-    code = read_files(&state, argv + optind, format_args, n_format_args);
+    code = read_files(&state, argv + optind,
+                      format_args, n_format_args,
+                      type_args, n_type_args);
     if (code > 0)
         return code - 1;
 
@@ -442,7 +447,9 @@ cleanup:
     return code;
 }
 
-int read_files(State *state, char **file_paths, char **format_args, unsigned int n_format_args)
+int read_files(State *state, char **file_paths,
+               char **format_args, unsigned int n_format_args,
+               char **type_args, unsigned int n_type_args)
 {
     int code = 0;
 
@@ -464,6 +471,26 @@ int read_files(State *state, char **file_paths, char **format_args, unsigned int
         FormatOption *format = formats + i;
         StrArray *format_exts = formats_exts + i;
         format_exts->len = str_split(&format_exts->data, format->exts, ',');
+    }
+
+    // Split type identifiers
+    StrArray *types_identifiers = malloc(NTYPES * sizeof(StrArray));
+    if (formats_exts == NULL)
+    {
+        strncpy(error_message, PROGRAM_NAME ": Failed to allocate memory to split type identifiers\n", ERROR_MESSAGE_LEN);
+        return 1;
+    }
+    for (unsigned int i = 0; i < NTYPES; i++)
+    {
+        StrArray *type_identifier = types_identifiers + i;
+        type_identifier->data = NULL;
+        type_identifier->len = 0;
+    }
+    for (unsigned int i = 0; i < NTYPES; i++)
+    {
+        SeqTypeOption *type = types + i;
+        StrArray *type_identifiers = types_identifiers + i;
+        type_identifiers->len = str_split(&type_identifiers->data, type->identifiers, ',');
     }
 
     sequences_init_base_alphabets();
@@ -541,17 +568,32 @@ int read_files(State *state, char **file_paths, char **format_args, unsigned int
         }
 
         // Set sequence type
-        // - Types: protein,nucleic,mixed,unknown
-        // - For each sequence
-        //      - Get possible sequence types
-        //      - If types is given, extract type
-        //          - If given type is compatible with inferred type, use given type
-        //          - Otherwise, use inferred type
-        for (int i = 0; i < len; i++)
+        for (unsigned int i = 0; i < (unsigned int)len; i++)
         {
             SeqRecord *record = records + i;
-            sequences_infer_seq_type(record);
-            if (record->type == INDETERMINATE && record->len >= NUCLEIC_TIEBREAK_LEN)
+            if (sequences_infer_seq_type(record) != 0)
+            {
+                snprintf(error_message, ERROR_MESSAGE_LEN, PROGRAM_NAME ": %s: Error identifying sequence types\n", file_path);
+                code = 1;
+                goto cleanup;
+            };
+            if (file_index < n_type_args && type_args[file_index][0] != '\0')
+            {
+                char *type_arg = type_args[file_index];
+                for (unsigned int j = 0; j < NTYPES; j++)
+                {
+                    SeqTypeOption *type = types + j;
+                    StrArray *type_identifiers = types_identifiers + j;
+                    if (str_is_in((const char **)type_identifiers->data, type_identifiers->len, type_arg)) // Cast to silence warning
+                    {
+                        SeqType type_code = type->type;
+                        if (record->type == INDETERMINATE && type_code == PROTEIN)
+                            record->type = PROTEIN;
+                        break;
+                    }
+                }
+            }
+            else if (record->type == INDETERMINATE && record->len >= NUCLEIC_TIEBREAK_LEN)
                 record->type = NUCLEIC;
         }
 
@@ -571,6 +613,13 @@ cleanup:
         free(format_exts->data);
         format_exts->data = NULL;
         format_exts->len = 0;
+    }
+    for (unsigned int i = 0; i < NTYPES; i++)
+    {
+        StrArray *type_identifiers = types_identifiers + i;
+        free(type_identifiers->data);
+        type_identifiers->data = NULL;
+        type_identifiers->len = 0;
     }
     return code;
 }
