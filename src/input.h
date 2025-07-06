@@ -16,7 +16,7 @@ typedef enum
     HALF
 } PageSize;
 
-int input_get_action(void);
+int input_get_action(int fd);
 int input_process_action(int action, Array *buffer);
 void input_buffer_flush(Array *buffer);
 void input_next_file(void);

@@ -11,21 +11,21 @@
 
 extern State state;
 
-int input_get_action(void)
+int input_get_action(int fd)
 {
     fd_set readfds;
     FD_ZERO(&readfds);
-    FD_SET(STDIN_FILENO, &readfds);
+    FD_SET(fd, &readfds);
 
     struct timeval tv;
     tv.tv_sec = 0;
     tv.tv_usec = 100000;
 
-    int nready = select(STDIN_FILENO + 1, &readfds, NULL, NULL, &tv);
+    int nready = select(fd + 1, &readfds, NULL, NULL, &tv);
 
     char c = '\0';
-    if (nready > 0 && FD_ISSET(STDIN_FILENO, &readfds))
-        read(STDIN_FILENO, &c, 1);
+    if (nready > 0 && FD_ISSET(fd, &readfds))
+        read(fd, &c, 1);
 
     return (int)c;
 }
