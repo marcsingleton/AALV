@@ -115,21 +115,21 @@ Argument arguments[] = {
 
 #define NARGUMENTS sizeof(arguments) / sizeof(Argument)
 
-FormatOption formats[] = {
+FormatOption format_options[] = {
     {"FASTA", "fasta,fa,faa,fna,afa", &fasta_fread},
     // CLUSTAL
     // PHYLIP
     // STOCKHOLM
 };
 
-#define NFORMATS sizeof(formats) / sizeof(FormatOption)
+#define NFORMATS sizeof(format_options) / sizeof(FormatOption)
 
-SeqTypeOption types[] = {
-    {"nucleic", "nucleic,nt", NUCLEIC},
-    {"protein", "protein,aa", PROTEIN},
+SeqTypeOption type_options[] = {
+    {"nucleic", "nucleic,nt", SEQ_TYPE_NUCLEIC},
+    {"protein", "protein,aa", SEQ_TYPE_PROTEIN},
 };
 
-#define NTYPES sizeof(types) / sizeof(SeqTypeOption)
+#define NTYPES sizeof(type_options) / sizeof(SeqTypeOption)
 
 #define NUCLEIC_TIEBREAK_LEN 10 // Arbitrary threshold for when indeterminate sequences are called nucleic
 
@@ -355,8 +355,8 @@ int parse_options(int argc, char *argv[],
             printf("Format\tExtensions\n");
             for (unsigned int i = 0; i < NFORMATS; i++)
             {
-                FormatOption *format = formats + i;
-                printf("%s\t%s\n", format->name, format->exts);
+                FormatOption *format_option = format_options + i;
+                printf("%s\t%s\n", format_option->name, format_option->exts);
             }
             return 1;
         }
@@ -365,8 +365,8 @@ int parse_options(int argc, char *argv[],
             printf("Type\tIdentifiers\n");
             for (unsigned int i = 0; i < NTYPES; i++)
             {
-                SeqTypeOption *type = types + i;
-                printf("%s\t%s\n", type->name, type->identifiers);
+                SeqTypeOption *type_option = type_options + i;
+                printf("%s\t%s\n", type_option->name, type_option->identifiers);
             }
             return 1;
         }
@@ -468,9 +468,9 @@ int read_files(State *state, char **file_paths,
     }
     for (unsigned int i = 0; i < NFORMATS; i++)
     {
-        FormatOption *format = formats + i;
+        FormatOption *format_option = format_options + i;
         StrArray *format_exts = formats_exts + i;
-        format_exts->len = str_split(&format_exts->data, format->exts, ',');
+        format_exts->len = str_split(&format_exts->data, format_option->exts, ',');
     }
 
     // Split type identifiers
@@ -488,9 +488,9 @@ int read_files(State *state, char **file_paths,
     }
     for (unsigned int i = 0; i < NTYPES; i++)
     {
-        SeqTypeOption *type = types + i;
+        SeqTypeOption *type_option = type_options + i;
         StrArray *type_identifiers = types_identifiers + i;
-        type_identifiers->len = str_split(&type_identifiers->data, type->identifiers, ',');
+        type_identifiers->len = str_split(&type_identifiers->data, type_option->identifiers, ',');
     }
 
     sequences_init_base_alphabets();
@@ -507,16 +507,17 @@ int read_files(State *state, char **file_paths,
         // Infer reader
         int (*reader)(FILE *, SeqRecord **) = NULL;
 
+        // TODO: Fix potential out of bounds access
         if (file_index < n_format_args && format_args[file_index][0] != '\0') // From format argument
         {
             char *format_arg = format_args[file_index];
             for (unsigned int i = 0; i < NFORMATS; i++)
             {
-                FormatOption *format = formats + i;
+                FormatOption *format_option = format_options + i;
                 StrArray *format_exts = formats_exts + i;
                 if (str_is_in((const char **)format_exts->data, format_exts->len, format_arg)) // Cast to silence warning
                 {
-                    reader = format->reader;
+                    reader = format_option->reader;
                     break;
                 }
                 snprintf(error_message, ERROR_MESSAGE_LEN, PROGRAM_NAME ": %s: Error identifying format\n", format_arg);
@@ -529,11 +530,11 @@ int read_files(State *state, char **file_paths,
             file_ext++; // Exclude dot from comparison
             for (unsigned int i = 0; i < NFORMATS; i++)
             {
-                FormatOption *format = formats + i;
+                FormatOption *format_option = format_options + i;
                 StrArray *format_exts = formats_exts + i;
                 if (str_is_in((const char **)format_exts->data, format_exts->len, file_ext)) // Cast to silence warning
                 {
-                    reader = format->reader;
+                    reader = format_option->reader;
                     break;
                 }
                 snprintf(error_message, ERROR_MESSAGE_LEN, PROGRAM_NAME ": %s: Unknown extension\n", file_path);
@@ -582,19 +583,19 @@ int read_files(State *state, char **file_paths,
                 char *type_arg = type_args[file_index];
                 for (unsigned int j = 0; j < NTYPES; j++)
                 {
-                    SeqTypeOption *type = types + j;
+                    SeqTypeOption *type_option = type_options + j;
                     StrArray *type_identifiers = types_identifiers + j;
                     if (str_is_in((const char **)type_identifiers->data, type_identifiers->len, type_arg)) // Cast to silence warning
                     {
-                        SeqType type_code = type->type;
-                        if (record->type == INDETERMINATE && type_code == PROTEIN)
-                            record->type = PROTEIN;
+                        SeqType type = type_option->type;
+                        if (record->type == SEQ_TYPE_INDETERMINATE && type == SEQ_TYPE_PROTEIN)
+                            record->type = SEQ_TYPE_PROTEIN;
                         break;
                     }
                 }
             }
-            else if (record->type == INDETERMINATE && record->len >= NUCLEIC_TIEBREAK_LEN)
-                record->type = NUCLEIC;
+            else if (record->type == SEQ_TYPE_INDETERMINATE && record->len >= NUCLEIC_TIEBREAK_LEN)
+                record->type = SEQ_TYPE_NUCLEIC;
         }
 
         FileState *file = state->files + file_index;

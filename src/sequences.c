@@ -93,14 +93,14 @@ int sequences_infer_seq_type(SeqRecord *record)
     int is_nucleic = sequences_is_nucleic(record);
     int is_protein = sequences_is_protein(record);
     if ((is_nucleic == 1) && (is_protein == 1))
-        record->type = INDETERMINATE;
+        record->type = SEQ_TYPE_INDETERMINATE;
     else if (is_nucleic == 1)
-        record->type = NUCLEIC;
+        record->type = SEQ_TYPE_NUCLEIC;
     else if (is_protein == 1)
-        record->type = PROTEIN;
+        record->type = SEQ_TYPE_PROTEIN;
     else
     {
-        record->type = ERROR;
+        record->type = SEQ_TYPE_ERROR;
         return 1;
     }
     return 0;

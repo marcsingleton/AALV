@@ -12,8 +12,8 @@
 
 typedef enum
 {
-    FULL,
-    HALF
+    PAGE_SIZE_FULL,
+    PAGE_SIZE_HALF
 } PageSize;
 
 int input_get_action(int fd);

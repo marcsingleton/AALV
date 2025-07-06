@@ -11,11 +11,11 @@
 
 typedef enum
 {
-    UNSPECIFIED = 0,
-    NUCLEIC,
-    PROTEIN,
-    INDETERMINATE,
-    ERROR,
+    SEQ_TYPE_UNSPECIFIED = 0,
+    SEQ_TYPE_NUCLEIC,
+    SEQ_TYPE_PROTEIN,
+    SEQ_TYPE_INDETERMINATE,
+    SEQ_TYPE_ERROR,
 } SeqType;
 
 typedef struct

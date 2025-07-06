@@ -65,28 +65,28 @@ int input_process_action(int action, Array *buffer)
         input_move_left(5);
         break;
     case 'U':
-        input_move_page_up(FULL);
+        input_move_page_up(PAGE_SIZE_FULL);
         break;
     case 'D':
-        input_move_page_down(FULL);
+        input_move_page_down(PAGE_SIZE_FULL);
         break;
     case 'M':
-        input_move_page_right(FULL);
+        input_move_page_right(PAGE_SIZE_FULL);
         break;
     case 'N':
-        input_move_page_left(FULL);
+        input_move_page_left(PAGE_SIZE_FULL);
         break;
     case 'u':
-        input_move_page_up(HALF);
+        input_move_page_up(PAGE_SIZE_HALF);
         break;
     case 'd':
-        input_move_page_down(HALF);
+        input_move_page_down(PAGE_SIZE_HALF);
         break;
     case 'm':
-        input_move_page_right(HALF);
+        input_move_page_right(PAGE_SIZE_HALF);
         break;
     case 'n':
-        input_move_page_left(HALF);
+        input_move_page_left(PAGE_SIZE_HALF);
         break;
     case '$':
         input_move_line_end();
@@ -297,7 +297,7 @@ void input_move_page_up(PageSize page_size)
         record_panes_height = 1; // Treat collapsed pane as single row
 
     unsigned int x = record_panes_height;
-    if (page_size == HALF)
+    if (page_size == PAGE_SIZE_HALF)
         x /= 2;
     if (active_file->offset_record == 0)
         return;
@@ -317,7 +317,7 @@ void input_move_page_down(PageSize page_size)
         record_panes_height = 1; // Treat collapsed pane as single row
 
     unsigned int x = record_panes_height;
-    if (page_size == HALF)
+    if (page_size == PAGE_SIZE_HALF)
         x /= 2;
     if (active_file->offset_record == active_file->record_array.len - 1)
         return;
@@ -342,7 +342,7 @@ void input_move_page_right(PageSize page_size)
     }
 
     unsigned int x = state_get_sequence_pane_width(&state);
-    if (page_size == HALF)
+    if (page_size == PAGE_SIZE_HALF)
         x /= 2;
     if (active_file->offset_sequence + x > max_len - 2) // Accounts for continuation symbol
         state_set_offset_sequence(&state, max_len - 2);
@@ -356,7 +356,7 @@ void input_move_page_left(PageSize page_size)
     input_cursor_clamp();
 
     unsigned int x = state_get_sequence_pane_width(&state);
-    if (page_size == HALF)
+    if (page_size == PAGE_SIZE_HALF)
         x /= 2;
     if (x > active_file->offset_sequence)
         state_set_offset_sequence(&state, 0);
