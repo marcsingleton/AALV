@@ -237,51 +237,7 @@ int main(int argc, char *argv[])
         action = input_get_action(input_fd);
         input_process_action(action, &buffer);
 
-        // Re-paint screen if necessary
-        terminal_cursor_hide(&buffer);
-        state.refresh_command_pane = true;
-
-        unsigned int rows, cols;
-        terminal_get_window_size(&rows, &cols);
-        if (state.terminal_rows != rows || state.terminal_cols != cols)
-        {
-            state.terminal_rows = rows;
-            state.terminal_cols = cols;
-            state.refresh_window = true;
-        }
-        if (state.refresh_window)
-        {
-            terminal_clear_screen(&buffer);
-            state_set_header_pane_width(&state, state.active_file->header_pane_width); // Triggers automatic re-sizes
-            state_set_ruler_pane_height(&state, state.active_file->ruler_pane_height);
-            state.refresh_ruler_pane = true;
-            state.refresh_header_pane = true;
-            state.refresh_sequence_pane = true;
-            state.refresh_command_pane = true;
-            state.refresh_window = false;
-        }
-        if (state.refresh_ruler_pane)
-        {
-            display_ruler_pane(&buffer);
-            display_ruler_pane_ticks(&buffer);
-            state.refresh_ruler_pane = false;
-        }
-        if (state.refresh_header_pane)
-        {
-            display_header_pane(&buffer);
-            state.refresh_header_pane = false;
-        }
-        if (state.refresh_sequence_pane)
-        {
-            display_sequence_pane(&buffer);
-            state.refresh_sequence_pane = false;
-        }
-        if (state.refresh_command_pane)
-        {
-            display_command_pane(&buffer);
-            state.refresh_command_pane = false;
-        }
-        display_cursor(&buffer);
+        display_refresh(&buffer);
 
         input_buffer_flush(&buffer);
     }

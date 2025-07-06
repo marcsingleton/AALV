@@ -13,6 +13,7 @@
 #define HEADER_PANE_ELLIPSES L"..."
 #define RULER_PANE_ELLIPSES L"···" // Re-oriented vertically
 
+void display_refresh(Array *buffer);
 void display_all_panes(Array *buffer);
 void display_header_pane(Array *buffer);
 void display_ruler_pane(Array *buffer);
