@@ -160,13 +160,11 @@ void print_long_help(unsigned int narguments, Argument *arguments)
     unsigned int nchars;
 
     // Usage section
-    char *prefix = "usage: " PROGRAM_NAME;
-    int prefix_size = (int)(sizeof(prefix) - 1);
-
+    int prefix_size = printf("usage: %s", PROGRAM_NAME) + 1; // +1 account for space added by first option
     nmax = 80;
     nchars = 0;
 
-    nchars += printf("%s", prefix);
+    nchars += prefix_size;
     for (unsigned int i = 0; i < narguments; i++)
     {
         Argument *argument = arguments + i;
@@ -192,7 +190,7 @@ void print_long_help(unsigned int narguments, Argument *arguments)
     printf("\n%*s[<file> ...]\n\n", prefix_size, "");
 
     // Synopsis section
-    printf("aalv is a vim-inspired alignment viewer\n\n");
+    printf("%s is a vim-inspired alignment viewer\n\n", PROGRAM_NAME);
 
     // Options section
     printf("options:\n");
@@ -220,9 +218,7 @@ void print_long_help(unsigned int narguments, Argument *arguments)
 
 void print_short_help(unsigned int narguments, Argument *arguments)
 {
-    char *prefix = "usage: " PROGRAM_NAME;
-
-    printf("%s", prefix);
+    printf("usage: %s", PROGRAM_NAME);
     for (unsigned int i = 0; i < narguments; i++)
     {
         Argument *argument = arguments + i;
