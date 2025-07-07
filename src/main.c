@@ -19,7 +19,7 @@
 #include "str.h"
 #include "terminal.h"
 
-#define PROGRAM_NAME "aalv" // TODO: Change to const
+const char *PROGRAM_NAME = "aalv";
 
 State state;
 
@@ -305,7 +305,8 @@ int read_files(State *state,
                     reader = format_option->reader;
                     break;
                 }
-                snprintf(error_message, ERROR_MESSAGE_LEN, PROGRAM_NAME ": %s: Error identifying format\n", format_arg);
+                snprintf(error_message, ERROR_MESSAGE_LEN,
+                         "%s: %s: Error identifying format\n", PROGRAM_NAME, format_arg);
                 code = 2;
                 goto cleanup;
             }
@@ -322,14 +323,15 @@ int read_files(State *state,
                     reader = format_option->reader;
                     break;
                 }
-                snprintf(error_message, ERROR_MESSAGE_LEN, PROGRAM_NAME ": %s: Unknown extension\n", file_path);
+                snprintf(error_message, ERROR_MESSAGE_LEN, "%s: %s: Unknown extension\n", PROGRAM_NAME, file_path);
                 code = 2;
                 goto cleanup;
             }
         }
         else
         {
-            snprintf(error_message, ERROR_MESSAGE_LEN, PROGRAM_NAME ": %s: No format or known extension\n", file_path);
+            snprintf(error_message, ERROR_MESSAGE_LEN,
+                     "%s: %s: No format or known extension\n", PROGRAM_NAME, file_path);
             code = 2;
             goto cleanup;
         }
@@ -340,7 +342,7 @@ int read_files(State *state,
             fp = stdin;
         else if ((fp = fopen(file_path, "r")) == NULL)
         {
-            snprintf(error_message, ERROR_MESSAGE_LEN, PROGRAM_NAME ": %s: %s\n", file_path, strerror(errno));
+            snprintf(error_message, ERROR_MESSAGE_LEN, "%s: %s: %s\n", PROGRAM_NAME, file_path, strerror(errno));
             code = 1;
             goto cleanup;
         }
@@ -348,7 +350,8 @@ int read_files(State *state,
         int len = reader(fp, &records);
         if (len < 0)
         {
-            snprintf(error_message, ERROR_MESSAGE_LEN, PROGRAM_NAME ": %s: Error processing file (code %d)\n", file_path, len);
+            snprintf(error_message, ERROR_MESSAGE_LEN,
+                     "%s: %s: Error processing file (code %d)\n", PROGRAM_NAME, file_path, len);
             code = 1;
             goto cleanup;
         }
@@ -362,7 +365,8 @@ int read_files(State *state,
             SeqRecord *record = records + i;
             if (sequences_infer_seq_type(record) != 0)
             {
-                snprintf(error_message, ERROR_MESSAGE_LEN, PROGRAM_NAME ": %s: Error identifying sequence types\n", file_path);
+                snprintf(error_message, ERROR_MESSAGE_LEN,
+                         "%s: %s: Error identifying sequence types\n", PROGRAM_NAME, file_path);
                 code = 1;
                 goto cleanup;
             };

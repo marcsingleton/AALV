@@ -5,7 +5,7 @@
 #include "error.h"
 #include "str.h"
 
-#define PROGRAM_NAME "aalv" // TODO: Change to const
+extern const char *PROGRAM_NAME;
 
 int parse_options(int argc, char *argv[],
                   unsigned int narguments, Argument *arguments,
