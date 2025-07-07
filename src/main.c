@@ -85,14 +85,14 @@ FormatOption format_options[] = {
     // STOCKHOLM
 };
 
-#define NFORMATS sizeof(format_options) / sizeof(FormatOption)
+#define N_FORMAT_OPTIONS sizeof(format_options) / sizeof(FormatOption)
 
 SeqTypeOption type_options[] = {
     {"nucleic", "nucleic,nt", SEQ_TYPE_NUCLEIC},
     {"protein", "protein,aa", SEQ_TYPE_PROTEIN},
 };
 
-#define NTYPES sizeof(type_options) / sizeof(SeqTypeOption)
+#define N_TYPE_OPTIONS sizeof(type_options) / sizeof(SeqTypeOption)
 
 // Main
 int main(int argc, char *argv[])
@@ -114,8 +114,8 @@ int main(int argc, char *argv[])
     char **type_args = NULL;
     code = parse_options(argc, argv,
                          NARGUMENTS, arguments,
-                         NFORMATS, format_options,
-                         NTYPES, type_options,
+                         N_FORMAT_OPTIONS, format_options,
+                         N_TYPE_OPTIONS, type_options,
                          short_options, long_options,
                          &n_format_args, &format_args,
                          &n_type_args, &type_args);
@@ -236,20 +236,20 @@ int read_files(State *state,
     int code = 0;
 
     // Split format extensions
-    StrArray *formats_exts = malloc(NFORMATS * sizeof(StrArray));
+    StrArray *formats_exts = malloc(N_FORMAT_OPTIONS * sizeof(StrArray));
     if (formats_exts == NULL)
     {
         snprintf(error_message, ERROR_MESSAGE_LEN,
                  "%s: Failed to allocate memory to split format extensions\n", PROGRAM_NAME);
         return 1;
     }
-    for (unsigned int i = 0; i < NFORMATS; i++)
+    for (unsigned int i = 0; i < N_FORMAT_OPTIONS; i++)
     {
         StrArray *format_exts = formats_exts + i;
         format_exts->data = NULL;
         format_exts->len = 0;
     }
-    for (unsigned int i = 0; i < NFORMATS; i++)
+    for (unsigned int i = 0; i < N_FORMAT_OPTIONS; i++)
     {
         FormatOption *format_option = format_options + i;
         StrArray *format_exts = formats_exts + i;
@@ -257,20 +257,20 @@ int read_files(State *state,
     }
 
     // Split type identifiers
-    StrArray *types_identifiers = malloc(NTYPES * sizeof(StrArray));
+    StrArray *types_identifiers = malloc(N_TYPE_OPTIONS * sizeof(StrArray));
     if (formats_exts == NULL)
     {
         snprintf(error_message, ERROR_MESSAGE_LEN,
                  "%s: Failed to allocate memory to split type identifiers\n", PROGRAM_NAME);
         return 1;
     }
-    for (unsigned int i = 0; i < NTYPES; i++)
+    for (unsigned int i = 0; i < N_TYPE_OPTIONS; i++)
     {
         StrArray *type_identifier = types_identifiers + i;
         type_identifier->data = NULL;
         type_identifier->len = 0;
     }
-    for (unsigned int i = 0; i < NTYPES; i++)
+    for (unsigned int i = 0; i < N_TYPE_OPTIONS; i++)
     {
         SeqTypeOption *type_option = type_options + i;
         StrArray *type_identifiers = types_identifiers + i;
@@ -296,7 +296,7 @@ int read_files(State *state,
 
         if (format_arg[0] != '\0') // From format argument
         {
-            for (unsigned int i = 0; i < NFORMATS; i++)
+            for (unsigned int i = 0; i < N_FORMAT_OPTIONS; i++)
             {
                 FormatOption *format_option = format_options + i;
                 StrArray *format_exts = formats_exts + i;
@@ -314,7 +314,7 @@ int read_files(State *state,
         else if ((file_ext = strrchr(file_path, '.')) != NULL) // From path extension
         {
             file_ext++; // Exclude dot from comparison
-            for (unsigned int i = 0; i < NFORMATS; i++)
+            for (unsigned int i = 0; i < N_FORMAT_OPTIONS; i++)
             {
                 FormatOption *format_option = format_options + i;
                 StrArray *format_exts = formats_exts + i;
@@ -372,7 +372,7 @@ int read_files(State *state,
             };
             if (type_arg[0] != '\0')
             {
-                for (unsigned int j = 0; j < NTYPES; j++)
+                for (unsigned int j = 0; j < N_TYPE_OPTIONS; j++)
                 {
                     SeqTypeOption *type_option = type_options + j;
                     StrArray *type_identifiers = types_identifiers + j;
@@ -399,14 +399,14 @@ int read_files(State *state,
     }
 
 cleanup:
-    for (unsigned int i = 0; i < NFORMATS; i++)
+    for (unsigned int i = 0; i < N_FORMAT_OPTIONS; i++)
     {
         StrArray *format_exts = formats_exts + i;
         free(format_exts->data);
         format_exts->data = NULL;
         format_exts->len = 0;
     }
-    for (unsigned int i = 0; i < NTYPES; i++)
+    for (unsigned int i = 0; i < N_TYPE_OPTIONS; i++)
     {
         StrArray *type_identifiers = types_identifiers + i;
         free(type_identifiers->data);
