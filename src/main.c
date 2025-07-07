@@ -36,7 +36,7 @@ int read_files(State *state,
                unsigned int n_type_args, char **type_args);
 
 // --help option shows in given order (alphabetical except help and version)
-Argument arguments[] = {
+Option options[] = {
     {"help",
      'h',
      "print usage and options then exit",
@@ -76,7 +76,7 @@ Argument arguments[] = {
 };
 // TODO: Possible --no-ascii option?
 
-#define NARGUMENTS sizeof(arguments) / sizeof(Argument)
+#define NOPTIONS sizeof(options) / sizeof(Option)
 
 FormatOption format_options[] = {
     {"FASTA", "fasta,fa,faa,fna,afa", &fasta_fread},
@@ -101,9 +101,9 @@ int main(int argc, char *argv[])
     atexit(&cleanup);
 
     // Prepare options
-    struct option long_options[NARGUMENTS + 1]; // Extra struct of 0s to mark end
+    struct option long_options[NOPTIONS + 1]; // Extra struct of 0s to mark end
     char *short_options = NULL;
-    code = prepare_options(NARGUMENTS, arguments, &short_options, long_options);
+    code = prepare_options(NOPTIONS, options, &short_options, long_options);
     if (code != 0)
         return code;
 
@@ -113,7 +113,7 @@ int main(int argc, char *argv[])
     unsigned int n_type_args = 0;
     char **type_args = NULL;
     code = parse_options(argc, argv,
-                         NARGUMENTS, arguments,
+                         NOPTIONS, options,
                          N_FORMAT_OPTIONS, format_options,
                          N_TYPE_OPTIONS, type_options,
                          short_options, long_options,
@@ -126,9 +126,9 @@ int main(int argc, char *argv[])
     char **positional_args = argv + optind;
 
     // Check for positional arguments
-    if (isatty(STDIN_FILENO) && optind == argc)
+    if (isatty(STDIN_FILENO) && n_positional_args == 0)
     {
-        print_short_help(NARGUMENTS, arguments);
+        print_short_help(NOPTIONS, options);
         return 1;
     }
 

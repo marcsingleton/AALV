@@ -8,7 +8,7 @@
 extern const char *PROGRAM_NAME;
 
 int parse_options(int argc, char *argv[],
-                  unsigned int narguments, Argument *arguments,
+                  unsigned int noptions, Option *options,
                   unsigned int n_format_options, FormatOption *format_options,
                   unsigned int n_type_options, SeqTypeOption *type_options,
                   const char *short_options, const struct option *long_options,
@@ -24,14 +24,14 @@ int parse_options(int argc, char *argv[],
             break;
         else if (c == '?')
         {
-            print_short_help(narguments, arguments);
+            print_short_help(noptions, options);
             return 2;
         }
 
         // Process option
         const char *name = "";
         if (option_index != -1)
-            name = arguments[option_index].long_name;
+            name = options[option_index].long_name;
         if (c == 'f' || strcmp(name, "format") == 0)
         {
             int code = str_split(format_args_ptr, argv[optind - 1], ',');
@@ -47,12 +47,12 @@ int parse_options(int argc, char *argv[],
         }
         else if (c == 'h')
         {
-            print_short_help(narguments, arguments);
+            print_short_help(noptions, options);
             return 1;
         }
         else if (strcmp(name, "help") == 0)
         {
-            print_long_help(narguments, arguments);
+            print_long_help(noptions, options);
             return 1;
         }
         else if (strcmp(name, "list-formats") == 0)
@@ -97,15 +97,15 @@ int parse_options(int argc, char *argv[],
     return 0;
 }
 
-int prepare_options(unsigned int narguments, Argument *arguments,
+int prepare_options(unsigned int noptions, Option *options,
                     char **short_options_ptr, struct option *long_options)
 {
     int code = 0;
     Array short_options_array;
     array_init(&short_options_array, sizeof(char));
-    for (unsigned int i = 0; i < narguments; i++)
+    for (unsigned int i = 0; i < noptions; i++)
     {
-        Argument *argument = arguments + i;
+        Option *argument = options + i;
 
         // Fill struct for long options
         struct option *long_option = long_options + i;
@@ -154,7 +154,7 @@ cleanup:
     return code;
 }
 
-void print_long_help(unsigned int narguments, Argument *arguments)
+void print_long_help(unsigned int noptions, Option *options)
 {
     unsigned int nmax;
     unsigned int nchars;
@@ -165,9 +165,9 @@ void print_long_help(unsigned int narguments, Argument *arguments)
     nchars = 0;
 
     nchars += prefix_size;
-    for (unsigned int i = 0; i < narguments; i++)
+    for (unsigned int i = 0; i < noptions; i++)
     {
-        Argument *argument = arguments + i;
+        Option *argument = options + i;
         UsageStyle usage_style = OMIT;
         if (argument->long_name && argument->short_name)
             usage_style = ALL_NAMES;
@@ -196,9 +196,9 @@ void print_long_help(unsigned int narguments, Argument *arguments)
     printf("options:\n");
 
     nmax = 24;
-    for (unsigned int i = 0; i < narguments; i++)
+    for (unsigned int i = 0; i < noptions; i++)
     {
-        Argument *argument = arguments + i;
+        Option *argument = options + i;
         UsageStyle usage_style = OMIT;
         if (argument->long_name && argument->short_name)
             usage_style = ALL_NAMES;
@@ -216,12 +216,12 @@ void print_long_help(unsigned int narguments, Argument *arguments)
     }
 }
 
-void print_short_help(unsigned int narguments, Argument *arguments)
+void print_short_help(unsigned int noptions, Option *options)
 {
     printf("usage: %s", PROGRAM_NAME);
-    for (unsigned int i = 0; i < narguments; i++)
+    for (unsigned int i = 0; i < noptions; i++)
     {
-        Argument *argument = arguments + i;
+        Option *argument = options + i;
         if (argument->usage_style == OMIT)
             continue;
         putchar(' ');
@@ -230,7 +230,7 @@ void print_short_help(unsigned int narguments, Argument *arguments)
     printf(" [<file> ...]\n");
 }
 
-int print_option_usage(Argument *argument, UsageStyle usage_style, const bool brackets, const char *style_sep)
+int print_option_usage(Option *argument, UsageStyle usage_style, const bool brackets, const char *style_sep)
 {
     const char *arg_sep = "";
     const char *arg = "";
@@ -246,7 +246,7 @@ int print_option_usage(Argument *argument, UsageStyle usage_style, const bool br
         lbracket = "[";
         rbracket = "]";
     }
-    switch (usage_style) // This can be poorly formatted if the usage_style does not match the arguments
+    switch (usage_style) // This can be poorly formatted if the usage_style does not match the option members
     {
     case OMIT:
         return 0;
