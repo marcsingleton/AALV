@@ -142,7 +142,8 @@ int main(int argc, char *argv[])
         input_fd = open("/dev/tty", O_RDONLY);
         if (input_fd == -1)
         {
-            strncpy(error_message, PROGRAM_NAME ": Failed to open /dev/tty for reading commands\n", ERROR_MESSAGE_LEN);
+            snprintf(error_message, ERROR_MESSAGE_LEN,
+                     "%s: Failed to open /dev/tty for reading commands\n", PROGRAM_NAME);
             return 1;
         }
         TERMINAL_FILENO = input_fd;
@@ -154,7 +155,7 @@ int main(int argc, char *argv[])
     FileState *files = malloc(nfiles * sizeof(FileState));
     if (files == NULL)
     {
-        strncpy(error_message, PROGRAM_NAME ": Failed to allocate memory to load files\n", ERROR_MESSAGE_LEN);
+        snprintf(error_message, ERROR_MESSAGE_LEN, "%s: Failed to allocate memory to load files\n", PROGRAM_NAME);
         return 1;
     }
     state.files = files;
@@ -177,12 +178,12 @@ int main(int argc, char *argv[])
     // Set screen and terminal options
     if (terminal_get_termios(&old_termios) != 0)
     {
-        strncpy(error_message, PROGRAM_NAME ": Failed to get current termios\n", ERROR_MESSAGE_LEN);
+        snprintf(error_message, ERROR_MESSAGE_LEN, "%s: Failed to get current termios\n", PROGRAM_NAME);
         return 1;
     }
     if (terminal_enable_raw_mode(&old_termios, &raw_termios) != 0)
     {
-        strncpy(error_message, PROGRAM_NAME ": Failed to set raw mode", ERROR_MESSAGE_LEN);
+        snprintf(error_message, ERROR_MESSAGE_LEN, "%s: Failed to set raw mode\n", PROGRAM_NAME);
         return 1;
     };
     raw_mode = true;
@@ -238,7 +239,8 @@ int read_files(State *state,
     StrArray *formats_exts = malloc(NFORMATS * sizeof(StrArray));
     if (formats_exts == NULL)
     {
-        strncpy(error_message, PROGRAM_NAME ": Failed to allocate memory to split format extensions\n", ERROR_MESSAGE_LEN);
+        snprintf(error_message, ERROR_MESSAGE_LEN,
+                 "%s: Failed to allocate memory to split format extensions\n", PROGRAM_NAME);
         return 1;
     }
     for (unsigned int i = 0; i < NFORMATS; i++)
@@ -258,7 +260,8 @@ int read_files(State *state,
     StrArray *types_identifiers = malloc(NTYPES * sizeof(StrArray));
     if (formats_exts == NULL)
     {
-        strncpy(error_message, PROGRAM_NAME ": Failed to allocate memory to split type identifiers\n", ERROR_MESSAGE_LEN);
+        snprintf(error_message, ERROR_MESSAGE_LEN,
+                 "%s: Failed to allocate memory to split type identifiers\n", PROGRAM_NAME);
         return 1;
     }
     for (unsigned int i = 0; i < NTYPES; i++)

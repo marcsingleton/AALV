@@ -37,7 +37,7 @@ int parse_options(int argc, char *argv[],
             int code = str_split(format_args_ptr, argv[optind - 1], ',');
             if (code < 0)
             {
-                strncpy(error_message, PROGRAM_NAME ": Failed to parse formats\n", ERROR_MESSAGE_LEN);
+                snprintf(error_message, ERROR_MESSAGE_LEN, "%s: Failed to parse formats\n", PROGRAM_NAME);
                 return 2;
             }
             *n_format_args = code;
@@ -80,7 +80,7 @@ int parse_options(int argc, char *argv[],
             int code = str_split(type_args_ptr, argv[optind - 1], ',');
             if (code < 0)
             {
-                strncpy(error_message, PROGRAM_NAME ": Failed to parse types\n", ERROR_MESSAGE_LEN);
+                snprintf(error_message, ERROR_MESSAGE_LEN, "%s: Failed to parse types\n", PROGRAM_NAME);
                 return 2;
             }
             *n_type_args = code;
@@ -143,7 +143,8 @@ int prepare_options(unsigned int narguments, Argument *arguments,
     if (short_options == NULL)
     {
         code = 1;
-        strncpy(error_message, PROGRAM_NAME ": Failed to allocate memory to create options string\n", ERROR_MESSAGE_LEN);
+        snprintf(error_message, ERROR_MESSAGE_LEN,
+                 "%s: Failed to allocate memory to create options string\n", PROGRAM_NAME);
         goto cleanup;
     }
     memcpy(short_options, short_options_array.data, short_options_array.len * short_options_array.size);
