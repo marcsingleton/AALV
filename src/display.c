@@ -182,23 +182,32 @@ void display_sequence_pane(Array *buffer)
         if (record_index < active_file->record_array.len)
         {
             SeqRecord record = active_file->record_array.records[record_index];
+            unsigned int left_continuation = 0;
+            unsigned int right_continuation = 0;
+            unsigned int start = active_file->offset_sequence;
+            unsigned int len = sequence_pane_width;
             if (active_file->offset_sequence > 0)
-                array_append(buffer, "<");
-            else
-                display_sequence(buffer, &record,
-                                 active_file->offset_sequence,
-                                 1);
-            if (record.len > active_file->offset_sequence + sequence_pane_width)
             {
-                display_sequence(buffer, &record,
-                                 active_file->offset_sequence + 1,
-                                 sequence_pane_width - 2);
-                array_append(buffer, ">");
+                left_continuation = 1;
+                start++;
+                len--;
             }
-            else if (record.len > active_file->offset_sequence)
-                display_sequence(buffer, &record,
-                                 active_file->offset_sequence + 1,
-                                 record.len - active_file->offset_sequence - 1);
+            if (record.len < active_file->offset_sequence)
+                len = 0;
+            else if ((record.len > active_file->offset_sequence + sequence_pane_width))
+            {
+                right_continuation = 1;
+                len--;
+            }
+            else
+                len = record.len - active_file->offset_sequence;
+
+            if (left_continuation)
+                array_append(buffer, "<");
+            if (len > 0)
+                display_sequence(buffer, &record, start, len);
+            if (right_continuation)
+                array_append(buffer, ">");
         }
     }
 }
