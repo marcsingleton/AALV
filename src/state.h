@@ -8,6 +8,7 @@
 #include <stdbool.h>
 
 #include "array.h"
+#include "color.h"
 #include "sequences.h"
 
 typedef struct
@@ -39,6 +40,12 @@ typedef struct
     unsigned int nfiles;
     FileState *active_file;
     unsigned int active_file_index;
+    // Color variables
+    ColorScheme *color_schemes;
+    unsigned int n_color_schemes;
+    ColorScheme **active_color_schemes;
+    unsigned int n_active_color_schemes;
+    bool use_color;
 } State;
 
 // FileState setters
