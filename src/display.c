@@ -2,6 +2,7 @@
 #include <string.h>
 #include <wchar.h>
 
+#include "color.h"
 #include "display.h"
 #include "state.h"
 #include "terminal.h"
@@ -184,16 +185,20 @@ void display_sequence_pane(Array *buffer)
             if (active_file->offset_sequence > 0)
                 array_append(buffer, "<");
             else
-                array_append(buffer, record.seq + active_file->offset_sequence);
+                display_sequence(buffer, &record,
+                                 active_file->offset_sequence,
+                                 1);
             if (record.len > active_file->offset_sequence + sequence_pane_width)
             {
-                array_extend(buffer, record.seq + active_file->offset_sequence + 1, sequence_pane_width - 2);
+                display_sequence(buffer, &record,
+                                 active_file->offset_sequence + 1,
+                                 sequence_pane_width - 2);
                 array_append(buffer, ">");
             }
             else if (record.len > active_file->offset_sequence)
-                array_extend(buffer,
-                             record.seq + active_file->offset_sequence + 1,
-                             record.len - active_file->offset_sequence - 1);
+                display_sequence(buffer, &record,
+                                 active_file->offset_sequence + 1,
+                                 record.len - active_file->offset_sequence - 1);
         }
     }
 }
@@ -248,4 +253,59 @@ void display_cursor(Array *buffer)
 
     terminal_cursor_ij(buffer, cursor_i, cursor_j);
     terminal_cursor_show(buffer);
+}
+
+void display_sequence(Array *buffer, SeqRecord *record, size_t start, size_t len)
+{
+    SeqType type = record->type;
+    ColorScheme *color_scheme = state.active_color_schemes[type]; // Must be non-negative
+    if (state.use_color && (type == SEQ_TYPE_NUCLEIC || type == SEQ_TYPE_PROTEIN) && color_scheme != NULL)
+    {
+        Alphabet alphabet;
+        switch (type)
+        {
+        case SEQ_TYPE_NUCLEIC:
+            alphabet = NUCLEIC_ALPHABET;
+            break;
+        case SEQ_TYPE_PROTEIN:
+            alphabet = PROTEIN_ALPHABET;
+            break;
+        case SEQ_TYPE_UNSPECIFIED:
+        case SEQ_TYPE_INDETERMINATE:
+        case SEQ_TYPE_ERROR:
+            break;
+        }
+        if (color_scheme->type == COLOR_4BIT)
+        {
+            for (size_t i = start; i < start + len; i++)
+            {
+                char sym = record->seq[i];
+                int index = alphabet.index_map[(unsigned int)sym]; // Skip negativity check b/c already checked type
+                if (color_scheme->b4.fg_mask[index] && color_scheme->b4.bg_mask[index])
+                {
+                    ForegroundColor4Bit fg_color = color_scheme->b4.fg_map[index];
+                    BackgroundColor4Bit bg_color = color_scheme->b4.bg_map[index];
+                    terminal_set_color_4bit(buffer, fg_color, bg_color);
+                }
+                else if (color_scheme->b4.fg_mask[index])
+                {
+                    ForegroundColor4Bit fg_color = color_scheme->b4.fg_map[index];
+                    terminal_set_foreground_color_4bit(buffer, fg_color);
+                }
+                else if (color_scheme->b4.bg_mask[index])
+                {
+                    BackgroundColor4Bit bg_color = color_scheme->b4.bg_map[index];
+                    terminal_set_background_color_4bit(buffer, bg_color);
+                }
+                else
+                    terminal_set_color_default(buffer);
+                array_append(buffer, &sym);
+            }
+            terminal_set_color_default(buffer);
+        }
+        else if (color_scheme->type == COLOR_8BIT)
+            ;
+    }
+    else
+        ;
 }

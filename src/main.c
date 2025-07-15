@@ -100,6 +100,40 @@ int main(int argc, char *argv[])
     int code = 0; // Generic return code for various functions
     atexit(&cleanup);
 
+    // Prepare alphabets and color schemes
+    ColorScheme color_schemes[2];
+
+    ColorScheme *color_scheme = color_schemes;
+    color_scheme->b4.name = "default_nucleic";
+    color_scheme->b4.fg_map = malloc(NUCLEIC_ALPHABET.len * sizeof(ForegroundColor4Bit));
+    color_scheme->b4.bg_map = malloc(NUCLEIC_ALPHABET.len * sizeof(BackgroundColor4Bit));
+    color_scheme->b4.fg_mask = malloc(NUCLEIC_ALPHABET.len * sizeof(bool));
+    color_scheme->b4.bg_mask = malloc(NUCLEIC_ALPHABET.len * sizeof(bool));
+    for (unsigned int i = 0; i < NUCLEIC_ALPHABET.len; i++)
+    {
+        color_scheme->b4.fg_mask[i] = false;
+        color_scheme->b4.bg_mask[i] = false;
+    }
+    color_scheme->type = COLOR_4BIT;
+    color_scheme->b4.fg_map[0] = FG_GREEN;
+    color_scheme->b4.fg_mask[0] = true;
+    color_scheme->b4.fg_map[1] = FG_BLUE;
+    color_scheme->b4.fg_mask[1] = true;
+    color_scheme->b4.fg_map[2] = FG_YELLOW;
+    color_scheme->b4.fg_mask[2] = true;
+    color_scheme->b4.fg_map[3] = FG_RED;
+    color_scheme->b4.fg_mask[3] = true;
+
+    ColorScheme *active_color_schemes[5];
+    active_color_schemes[SEQ_TYPE_NUCLEIC] = &color_schemes[0];
+    active_color_schemes[SEQ_TYPE_PROTEIN] = &color_schemes[1];
+
+    state.use_color = true;
+    state.color_schemes = color_scheme;
+    state.n_color_schemes = 2;
+    state.active_color_schemes = active_color_schemes;
+    state.n_active_color_schemes = 5;
+
     // Prepare options
     struct option long_options[NOPTIONS + 1]; // Extra struct of 0s to mark end
     char *short_options = NULL;
