@@ -419,7 +419,7 @@ int read_files(State *state,
                     }
                 }
             }
-            else if (record->type == SEQ_TYPE_INDETERMINATE && record->len >= rc_params_nucleic_tiebreak_len)
+            else if (record->type == SEQ_TYPE_INDETERMINATE && record->len >= rcparams_nucleic_tiebreak_len)
                 record->type = SEQ_TYPE_NUCLEIC;
         }
 
