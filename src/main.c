@@ -107,59 +107,39 @@ int main(int argc, char *argv[])
 
     // Nucleic
     color_scheme = color_schemes + 0;
-    color_scheme->b4.name = "default_nucleic";
-    color_scheme->b4.fg_map = malloc(NUCLEIC_ALPHABET.len * sizeof(ForegroundColor4Bit));
-    color_scheme->b4.bg_map = malloc(NUCLEIC_ALPHABET.len * sizeof(BackgroundColor4Bit));
-    color_scheme->b4.fg_mask = malloc(NUCLEIC_ALPHABET.len * sizeof(bool));
-    color_scheme->b4.bg_mask = malloc(NUCLEIC_ALPHABET.len * sizeof(bool));
-    for (unsigned int i = 0; i < NUCLEIC_ALPHABET.len; i++)
-    {
-        color_scheme->b4.fg_mask[i] = false;
-        color_scheme->b4.bg_mask[i] = false;
-    }
-    color_scheme->type = COLOR_4BIT;
-    color_scheme->b4.fg_map[0] = FG_GREEN;
-    color_scheme->b4.fg_mask[0] = true;
-    color_scheme->b4.fg_map[1] = FG_BLUE;
-    color_scheme->b4.fg_mask[1] = true;
-    color_scheme->b4.fg_map[2] = FG_YELLOW;
-    color_scheme->b4.fg_mask[2] = true;
-    color_scheme->b4.fg_map[3] = FG_RED;
-    color_scheme->b4.fg_mask[3] = true;
+    color_init_color_scheme(color_scheme, COLOR_4_BIT, "default_nucleic", NUCLEIC_ALPHABET.len);
+    color_scheme->map.b4.fg[0] = FG_GREEN;
+    color_scheme->mask.fg[0] = true;
+    color_scheme->map.b4.fg[1] = FG_BLUE;
+    color_scheme->mask.fg[1] = true;
+    color_scheme->map.b4.fg[2] = FG_YELLOW;
+    color_scheme->mask.fg[2] = true;
+    color_scheme->map.b4.fg[3] = FG_RED;
+    color_scheme->mask.fg[3] = true;
 
     // Protein
     color_scheme = color_schemes + 1;
-    color_scheme->b4.name = "default_protein";
-    color_scheme->b4.fg_map = malloc(PROTEIN_ALPHABET.len * sizeof(ForegroundColor4Bit));
-    color_scheme->b4.bg_map = malloc(PROTEIN_ALPHABET.len * sizeof(BackgroundColor4Bit));
-    color_scheme->b4.fg_mask = malloc(PROTEIN_ALPHABET.len * sizeof(bool));
-    color_scheme->b4.bg_mask = malloc(PROTEIN_ALPHABET.len * sizeof(bool));
-    for (unsigned int i = 0; i < PROTEIN_ALPHABET.len; i++)
-    {
-        color_scheme->b4.fg_mask[i] = false;
-        color_scheme->b4.bg_mask[i] = false;
-    }
-    color_scheme->type = COLOR_4BIT;
-    color_scheme->b4.fg_map[0] = FG_BRIGHT_GREEN;
-    color_scheme->b4.fg_mask[0] = true;
-    color_scheme->b4.fg_map[1] = FG_BRIGHT_YELLOW;
-    color_scheme->b4.fg_mask[1] = true;
-    color_scheme->b4.fg_map[2] = FG_RED;
-    color_scheme->b4.fg_mask[2] = true;
-    color_scheme->b4.fg_map[3] = FG_RED;
-    color_scheme->b4.fg_mask[3] = true;
-    color_scheme->b4.fg_map[4] = FG_BRIGHT_MAGENTA;
-    color_scheme->b4.fg_mask[4] = true;
-    color_scheme->b4.fg_map[5] = FG_BRIGHT_BLACK;
-    color_scheme->b4.fg_mask[5] = true;
-    color_scheme->b4.fg_map[6] = FG_BRIGHT_BLUE;
-    color_scheme->b4.fg_mask[6] = true;
-    color_scheme->b4.fg_map[7] = FG_GREEN;
-    color_scheme->b4.fg_mask[7] = true;
-    color_scheme->b4.fg_map[8] = FG_BLUE;
-    color_scheme->b4.fg_mask[8] = true;
-    color_scheme->b4.fg_map[9] = FG_GREEN;
-    color_scheme->b4.fg_mask[9] = true;
+    color_init_color_scheme(color_scheme, COLOR_4_BIT, "default_protein", PROTEIN_ALPHABET.len);
+    color_scheme->map.b4.fg[0] = FG_BRIGHT_GREEN;
+    color_scheme->mask.fg[0] = true;
+    color_scheme->map.b4.fg[1] = FG_BRIGHT_YELLOW;
+    color_scheme->mask.fg[1] = true;
+    color_scheme->map.b4.fg[2] = FG_RED;
+    color_scheme->mask.fg[2] = true;
+    color_scheme->map.b4.fg[3] = FG_RED;
+    color_scheme->mask.fg[3] = true;
+    color_scheme->map.b4.fg[4] = FG_BRIGHT_MAGENTA;
+    color_scheme->mask.fg[4] = true;
+    color_scheme->map.b4.fg[5] = FG_BRIGHT_BLACK;
+    color_scheme->mask.fg[5] = true;
+    color_scheme->map.b4.fg[6] = FG_BRIGHT_BLUE;
+    color_scheme->mask.fg[6] = true;
+    color_scheme->map.b4.fg[7] = FG_GREEN;
+    color_scheme->mask.fg[7] = true;
+    color_scheme->map.b4.fg[8] = FG_BLUE;
+    color_scheme->mask.fg[8] = true;
+    color_scheme->map.b4.fg[9] = FG_GREEN;
+    color_scheme->mask.fg[9] = true;
 
     state.use_color = true;
     state.color_schemes = color_schemes;

@@ -271,26 +271,26 @@ void display_sequence(Array *buffer, SeqRecord *record, size_t start, size_t len
     ColorScheme *color_scheme = type->color_scheme;
     if (state.use_color && color_scheme != NULL)
     {
-        if (color_scheme->type == COLOR_4BIT)
+        if (color_scheme->type == COLOR_4_BIT)
         {
             for (size_t i = start; i < start + len; i++)
             {
                 char sym = record->seq[i];
                 int index = alphabet->index_map[(unsigned int)sym]; // Skip negativity check b/c already checked type
-                if (color_scheme->b4.fg_mask[index] && color_scheme->b4.bg_mask[index])
+                if (color_scheme->mask.fg[index] && color_scheme->mask.bg[index])
                 {
-                    ForegroundColor4Bit fg_color = color_scheme->b4.fg_map[index];
-                    BackgroundColor4Bit bg_color = color_scheme->b4.bg_map[index];
+                    ForegroundColor4Bit fg_color = color_scheme->map.b4.fg[index];
+                    BackgroundColor4Bit bg_color = color_scheme->map.b4.bg[index];
                     terminal_set_color_4bit(buffer, fg_color, bg_color);
                 }
-                else if (color_scheme->b4.fg_mask[index])
+                else if (color_scheme->mask.fg[index])
                 {
-                    ForegroundColor4Bit fg_color = color_scheme->b4.fg_map[index];
+                    ForegroundColor4Bit fg_color = color_scheme->map.b4.fg[index];
                     terminal_set_foreground_color_4bit(buffer, fg_color);
                 }
-                else if (color_scheme->b4.bg_mask[index])
+                else if (color_scheme->mask.bg[index])
                 {
-                    BackgroundColor4Bit bg_color = color_scheme->b4.bg_map[index];
+                    BackgroundColor4Bit bg_color = color_scheme->map.b4.bg[index];
                     terminal_set_background_color_4bit(buffer, bg_color);
                 }
                 else
@@ -299,7 +299,7 @@ void display_sequence(Array *buffer, SeqRecord *record, size_t start, size_t len
             }
             terminal_set_color_default(buffer);
         }
-        else if (color_scheme->type == COLOR_8BIT)
+        else if (color_scheme->type == COLOR_8_BIT)
             ;
     }
     else

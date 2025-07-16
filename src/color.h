@@ -13,41 +13,44 @@
 
 typedef enum
 {
-    COLOR_4BIT,
-    COLOR_8BIT,
+    COLOR_4_BIT,
+    COLOR_8_BIT,
 } ColorType;
 
 typedef struct
 {
-    char *name;
-    ForegroundColor4Bit *fg_map;
-    BackgroundColor4Bit *bg_map;
-    bool *fg_mask;
-    bool *bg_mask;
-    unsigned int len;
-} ColorScheme4Bit;
+    ForegroundColor4Bit *fg;
+    BackgroundColor4Bit *bg;
+} ColorMap4Bit;
 
 typedef struct
 {
-    char *name;
-    uint8_t *fg_map;
-    uint8_t *bg_map;
-    bool *fg_mask;
-    bool *bg_mask;
-    unsigned int len;
-} ColorScheme8Bit;
+    uint8_t *fg;
+    uint8_t *bg;
+} ColorMap8Bit;
+
+typedef struct
+{
+    bool *fg;
+    bool *bg;
+} ColorMask;
 
 typedef union
 {
+    ColorMap4Bit b4;
+    ColorMap8Bit b8;
+} ColorMap;
+
+typedef struct
+{
+    const char *name;
     ColorType type;
-    ColorScheme4Bit b4;
-    ColorScheme8Bit b8;
+    ColorMap map;
+    ColorMask mask;
+    unsigned int len;
 } ColorScheme;
 
-ColorScheme default_nucleic_4bit; // Put somewhere more specific to sequences?
-ColorScheme default_protein_4bit;
-
-void color_init_color_scheme(ColorScheme *color_scheme, unsigned int len); // Allocate/deallocate maps and masks
+int color_init_color_scheme(ColorScheme *color_scheme, ColorType type, const char *name, unsigned int len);
 void color_free_color_scheme(ColorScheme *color_scheme);
 
 #endif // COLOR_H
