@@ -27,6 +27,12 @@ typedef struct
 
 typedef struct
 {
+    Alphabet *alphabet;
+    ColorScheme *color_scheme;
+} SeqTypeState;
+
+typedef struct
+{
     // Global state variables
     unsigned int terminal_rows;
     unsigned int terminal_cols;
@@ -43,9 +49,10 @@ typedef struct
     // Color variables
     ColorScheme *color_schemes;
     unsigned int n_color_schemes;
-    ColorScheme **active_color_schemes;
-    unsigned int n_active_color_schemes;
     bool use_color;
+    // Type variables
+    SeqTypeState *types;
+    unsigned int ntypes;
 } State;
 
 // FileState setters

@@ -266,30 +266,17 @@ void display_cursor(Array *buffer)
 
 void display_sequence(Array *buffer, SeqRecord *record, size_t start, size_t len)
 {
-    SeqType type = record->type;
-    ColorScheme *color_scheme = state.active_color_schemes[type]; // Must be non-negative
-    if (state.use_color && (type == SEQ_TYPE_NUCLEIC || type == SEQ_TYPE_PROTEIN) && color_scheme != NULL)
+    SeqTypeState *type = state.types + record->type;
+    Alphabet *alphabet = type->alphabet;
+    ColorScheme *color_scheme = type->color_scheme;
+    if (state.use_color && color_scheme != NULL)
     {
-        Alphabet alphabet;
-        switch (type)
-        {
-        case SEQ_TYPE_NUCLEIC:
-            alphabet = NUCLEIC_ALPHABET;
-            break;
-        case SEQ_TYPE_PROTEIN:
-            alphabet = PROTEIN_ALPHABET;
-            break;
-        case SEQ_TYPE_UNSPECIFIED:
-        case SEQ_TYPE_INDETERMINATE:
-        case SEQ_TYPE_ERROR:
-            break;
-        }
         if (color_scheme->type == COLOR_4BIT)
         {
             for (size_t i = start; i < start + len; i++)
             {
                 char sym = record->seq[i];
-                int index = alphabet.index_map[(unsigned int)sym]; // Skip negativity check b/c already checked type
+                int index = alphabet->index_map[(unsigned int)sym]; // Skip negativity check b/c already checked type
                 if (color_scheme->b4.fg_mask[index] && color_scheme->b4.bg_mask[index])
                 {
                     ForegroundColor4Bit fg_color = color_scheme->b4.fg_map[index];

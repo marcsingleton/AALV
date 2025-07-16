@@ -40,6 +40,7 @@ typedef struct
     const char *name;
     const char *identifiers;
     const SeqType type;
+    const Alphabet *alphabet;
 } SeqTypeOption;
 
 // Option parsing

@@ -88,8 +88,8 @@ FormatOption format_options[] = {
 #define N_FORMAT_OPTIONS sizeof(format_options) / sizeof(FormatOption)
 
 SeqTypeOption type_options[] = {
-    {"nucleic", "nucleic,nt", SEQ_TYPE_NUCLEIC},
-    {"protein", "protein,aa", SEQ_TYPE_PROTEIN},
+    {"nucleic", "nucleic,nt", SEQ_TYPE_NUCLEIC, &NUCLEIC_ALPHABET},
+    {"protein", "protein,aa", SEQ_TYPE_PROTEIN, &PROTEIN_ALPHABET},
 };
 
 #define N_TYPE_OPTIONS sizeof(type_options) / sizeof(SeqTypeOption)
@@ -99,11 +99,14 @@ int main(int argc, char *argv[])
 {
     int code = 0; // Generic return code for various functions
     atexit(&cleanup);
+    sequences_init_base_alphabets();
 
-    // Prepare alphabets and color schemes
+    // Prepare color schemes
     ColorScheme color_schemes[2];
+    ColorScheme *color_scheme;
 
-    ColorScheme *color_scheme = color_schemes;
+    // Nucleic
+    color_scheme = color_schemes + 0;
     color_scheme->b4.name = "default_nucleic";
     color_scheme->b4.fg_map = malloc(NUCLEIC_ALPHABET.len * sizeof(ForegroundColor4Bit));
     color_scheme->b4.bg_map = malloc(NUCLEIC_ALPHABET.len * sizeof(BackgroundColor4Bit));
@@ -124,15 +127,59 @@ int main(int argc, char *argv[])
     color_scheme->b4.fg_map[3] = FG_RED;
     color_scheme->b4.fg_mask[3] = true;
 
-    ColorScheme *active_color_schemes[5];
-    active_color_schemes[SEQ_TYPE_NUCLEIC] = &color_schemes[0];
-    active_color_schemes[SEQ_TYPE_PROTEIN] = &color_schemes[1];
+    // Protein
+    color_scheme = color_schemes + 1;
+    color_scheme->b4.name = "default_protein";
+    color_scheme->b4.fg_map = malloc(PROTEIN_ALPHABET.len * sizeof(ForegroundColor4Bit));
+    color_scheme->b4.bg_map = malloc(PROTEIN_ALPHABET.len * sizeof(BackgroundColor4Bit));
+    color_scheme->b4.fg_mask = malloc(PROTEIN_ALPHABET.len * sizeof(bool));
+    color_scheme->b4.bg_mask = malloc(PROTEIN_ALPHABET.len * sizeof(bool));
+    for (unsigned int i = 0; i < PROTEIN_ALPHABET.len; i++)
+    {
+        color_scheme->b4.fg_mask[i] = false;
+        color_scheme->b4.bg_mask[i] = false;
+    }
+    color_scheme->type = COLOR_4BIT;
+    color_scheme->b4.fg_map[0] = FG_BRIGHT_GREEN;
+    color_scheme->b4.fg_mask[0] = true;
+    color_scheme->b4.fg_map[1] = FG_BRIGHT_YELLOW;
+    color_scheme->b4.fg_mask[1] = true;
+    color_scheme->b4.fg_map[2] = FG_RED;
+    color_scheme->b4.fg_mask[2] = true;
+    color_scheme->b4.fg_map[3] = FG_RED;
+    color_scheme->b4.fg_mask[3] = true;
+    color_scheme->b4.fg_map[4] = FG_BRIGHT_MAGENTA;
+    color_scheme->b4.fg_mask[4] = true;
+    color_scheme->b4.fg_map[5] = FG_BRIGHT_BLACK;
+    color_scheme->b4.fg_mask[5] = true;
+    color_scheme->b4.fg_map[6] = FG_BRIGHT_BLUE;
+    color_scheme->b4.fg_mask[6] = true;
+    color_scheme->b4.fg_map[7] = FG_GREEN;
+    color_scheme->b4.fg_mask[7] = true;
+    color_scheme->b4.fg_map[8] = FG_BLUE;
+    color_scheme->b4.fg_mask[8] = true;
+    color_scheme->b4.fg_map[9] = FG_GREEN;
+    color_scheme->b4.fg_mask[9] = true;
 
     state.use_color = true;
-    state.color_schemes = color_scheme;
+    state.color_schemes = color_schemes;
     state.n_color_schemes = 2;
-    state.active_color_schemes = active_color_schemes;
-    state.n_active_color_schemes = 5;
+
+    // Prepare types
+    SeqTypeState types[SEQ_TYPE_ERROR + 1];
+
+    // Nucleic
+    SeqTypeState *nucleic_type = types + SEQ_TYPE_NUCLEIC;
+    nucleic_type->alphabet = &NUCLEIC_ALPHABET;
+    nucleic_type->color_scheme = state.color_schemes + 0;
+
+    // Protein
+    SeqTypeState *protein_type = types + SEQ_TYPE_PROTEIN;
+    protein_type->alphabet = &PROTEIN_ALPHABET;
+    protein_type->color_scheme = state.color_schemes + 1;
+
+    state.types = types;
+    state.ntypes = SEQ_TYPE_ERROR + 1;
 
     // Prepare options
     struct option long_options[NOPTIONS + 1]; // Extra struct of 0s to mark end
@@ -310,8 +357,6 @@ int read_files(State *state,
         StrArray *type_identifiers = types_identifiers + i;
         type_identifiers->len = str_split(&type_identifiers->data, type_option->identifiers, ',');
     }
-
-    sequences_init_base_alphabets();
 
     // Main loop
     for (unsigned int file_index = 0; file_index < state->nfiles; file_index++)
