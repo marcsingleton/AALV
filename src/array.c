@@ -10,6 +10,8 @@
 
 int array_init(Array *array, size_t size)
 {
+    if (array == NULL || size == 0)
+        return 1;
     void *ptr = malloc(INIT_CAPACITY * size);
     if (ptr == NULL)
         return 1;
@@ -23,6 +25,8 @@ int array_init(Array *array, size_t size)
 
 void array_free(Array *array)
 {
+    if (array == NULL)
+        return;
     free(array->data);
     array->data = NULL;
     array->size = 0;
