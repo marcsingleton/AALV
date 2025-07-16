@@ -24,7 +24,6 @@ typedef struct
     char *syms;
     unsigned int len;
     int index_map[128];
-    bool init;
 } Alphabet;
 
 typedef struct

@@ -2,11 +2,13 @@
 
 #include "sequences.h"
 
-Alphabet NUCLEIC_ALPHABET = {.name = "nucleic", .syms = "ACGTN.-", .init = false};
-Alphabet PROTEIN_ALPHABET = {.name = "protein", .syms = "ACDEFGHIKLMNPQRSTVWYX.-", .init = false};
+Alphabet NUCLEIC_ALPHABET = {.name = "nucleic", .syms = "ACGTN.-"};
+Alphabet PROTEIN_ALPHABET = {.name = "protein", .syms = "ACDEFGHIKLMNPQRSTVWYX.-"};
 
 void sequences_free_seq_records(SeqRecord *records, int nrecords)
 {
+    if (records == NULL)
+        return;
     for (int i = 0; i < nrecords; i++)
     {
         SeqRecord record = records[i];
@@ -25,13 +27,12 @@ void sequences_free_seq_record_array(SeqRecordArray *record_array)
 
 int sequences_init_alphabet(Alphabet *alphabet, char *name, char *syms)
 {
-    if (alphabet->init)
-        return 0;
+    if (!alphabet || !name || !syms)
+        return 1;
     alphabet->name = name;
     alphabet->syms = syms;
     for (unsigned int i = 0; i < 128; i++)
         alphabet->index_map[i] = -1;
-
     unsigned int len = 0;
     for (char *sym = alphabet->syms; *sym != '\0'; sym++)
     {
@@ -42,7 +43,6 @@ int sequences_init_alphabet(Alphabet *alphabet, char *name, char *syms)
         len++;
     }
     alphabet->len = len;
-    alphabet->init = true;
     return 0;
 }
 
@@ -65,8 +65,6 @@ int sequences_init_base_alphabets(void)
 int sequences_in_alphabet(Alphabet *alphabet, SeqRecord *record)
 {
     int code = 1;
-    if (!alphabet->init)
-        return -1;
     for (char *sym = record->seq; *sym != '\0'; sym++)
     {
         if (!isascii(*sym))
