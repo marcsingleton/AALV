@@ -15,14 +15,14 @@ int color_init_color_scheme(ColorScheme *color_scheme, ColorType type, const cha
     {
     case COLOR_4_BIT:
     {
-        fg_size = sizeof(ForegroundColor4Bit);
-        bg_size = sizeof(BackgroundColor4Bit);
+        fg_size = sizeof(Color4Bit);
+        bg_size = sizeof(Color4Bit);
         break;
     }
     case COLOR_8_BIT:
     {
-        fg_size = sizeof(uint8_t);
-        bg_size = sizeof(uint8_t);
+        fg_size = sizeof(Color8Bit);
+        bg_size = sizeof(Color8Bit);
         break;
     }
     default:
@@ -60,8 +60,8 @@ int color_init_color_scheme(ColorScheme *color_scheme, ColorType type, const cha
     {
     case COLOR_4_BIT:
     {
-        ForegroundColor4Bit *fg_map_b4 = fg_map;
-        BackgroundColor4Bit *bg_map_b4 = bg_map;
+        Color4Bit *fg_map_b4 = fg_map;
+        Color4Bit *bg_map_b4 = bg_map;
         for (unsigned int i = 0; i < len; i++)
         {
             fg_map_b4[i] = 0;

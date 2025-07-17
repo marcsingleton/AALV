@@ -19,8 +19,8 @@ typedef enum
 
 typedef struct
 {
-    ForegroundColor4Bit *fg;
-    BackgroundColor4Bit *bg;
+    Color4Bit *fg;
+    Color4Bit *bg;
 } ColorMap4Bit;
 
 typedef struct

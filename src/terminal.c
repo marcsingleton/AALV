@@ -126,21 +126,21 @@ void terminal_clear_line_right(Array *buffer)
     array_extend(buffer, s, sizeof(s) - 1);
 }
 
-void terminal_set_foreground_color_4bit(Array *buffer, ForegroundColor4Bit color)
+void terminal_set_foreground_color_4bit(Array *buffer, Color4Bit color)
 {
     char s[7];
     int len = sprintf(s, "\x1b[%dm", color);
     array_extend(buffer, s, len);
 }
 
-void terminal_set_background_color_4bit(Array *buffer, BackgroundColor4Bit color)
+void terminal_set_background_color_4bit(Array *buffer, Color4Bit color)
 {
     char s[7];
     int len = sprintf(s, "\x1b[%dm", color);
     array_extend(buffer, s, len);
 }
 
-void terminal_set_color_4bit(Array *buffer, ForegroundColor4Bit fg_color, BackgroundColor4Bit bg_color)
+void terminal_set_color_4bit(Array *buffer, Color4Bit fg_color, Color4Bit bg_color)
 
 {
     char s[11];
@@ -148,7 +148,7 @@ void terminal_set_color_4bit(Array *buffer, ForegroundColor4Bit fg_color, Backgr
     array_extend(buffer, s, len);
 }
 
-void terminal_set_foreground_color_8bit(Array *buffer, uint8_t n)
+void terminal_set_foreground_color_8bit(Array *buffer, Color8Bit n)
 {
 
     if (n > 255)
@@ -158,7 +158,7 @@ void terminal_set_foreground_color_8bit(Array *buffer, uint8_t n)
     array_extend(buffer, s, len);
 }
 
-void terminal_set_background_color_8bit(Array *buffer, uint8_t n)
+void terminal_set_background_color_8bit(Array *buffer, Color8Bit n)
 {
 
     if (n > 255)
@@ -168,7 +168,7 @@ void terminal_set_background_color_8bit(Array *buffer, uint8_t n)
     array_extend(buffer, s, len);
 }
 
-void terminal_set_color_8bit(Array *buffer, uint8_t fg_n, uint8_t bg_n)
+void terminal_set_color_8bit(Array *buffer, Color8Bit fg_n, Color8Bit bg_n)
 {
     char s[21];
     int len = sprintf(s, "\x1b[38;5;%d;48;5;%dm", fg_n, bg_n);
