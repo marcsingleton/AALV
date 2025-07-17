@@ -14,6 +14,7 @@
 #include "fasta.h"
 #include "input.h"
 #include "rcparams.h"
+#include "schemes.h"
 #include "sequences.h"
 #include "state.h"
 #include "str.h"
@@ -104,42 +105,29 @@ int main(int argc, char *argv[])
     // Prepare color schemes
     ColorScheme color_schemes[2];
     ColorScheme *color_scheme;
+    Alphabet *alphabet;
 
     // Nucleic
     color_scheme = color_schemes + 0;
+    alphabet = &NUCLEIC_ALPHABET;
     color_init_color_scheme(color_scheme, COLOR_4_BIT, "default_nucleic", NUCLEIC_ALPHABET.len);
-    color_scheme->map.b4.fg[0] = FG_GREEN;
-    color_scheme->mask.fg[0] = true;
-    color_scheme->map.b4.fg[1] = FG_BLUE;
-    color_scheme->mask.fg[1] = true;
-    color_scheme->map.b4.fg[2] = FG_YELLOW;
-    color_scheme->mask.fg[2] = true;
-    color_scheme->map.b4.fg[3] = FG_RED;
-    color_scheme->mask.fg[3] = true;
+    for (ForegroundColor4BitTuple *tuple = default_nucleic_4_bit; tuple->sym != 0; tuple++)
+    {
+        unsigned int index = alphabet->index_map[(unsigned int)tuple->sym];
+        color_scheme->map.b4.fg[index] = tuple->color;
+        color_scheme->mask.fg[index] = true;
+    }
 
     // Protein
     color_scheme = color_schemes + 1;
+    alphabet = &PROTEIN_ALPHABET;
     color_init_color_scheme(color_scheme, COLOR_4_BIT, "default_protein", PROTEIN_ALPHABET.len);
-    color_scheme->map.b4.fg[0] = FG_BRIGHT_GREEN;
-    color_scheme->mask.fg[0] = true;
-    color_scheme->map.b4.fg[1] = FG_BRIGHT_YELLOW;
-    color_scheme->mask.fg[1] = true;
-    color_scheme->map.b4.fg[2] = FG_RED;
-    color_scheme->mask.fg[2] = true;
-    color_scheme->map.b4.fg[3] = FG_RED;
-    color_scheme->mask.fg[3] = true;
-    color_scheme->map.b4.fg[4] = FG_BRIGHT_MAGENTA;
-    color_scheme->mask.fg[4] = true;
-    color_scheme->map.b4.fg[5] = FG_BRIGHT_BLACK;
-    color_scheme->mask.fg[5] = true;
-    color_scheme->map.b4.fg[6] = FG_BRIGHT_BLUE;
-    color_scheme->mask.fg[6] = true;
-    color_scheme->map.b4.fg[7] = FG_GREEN;
-    color_scheme->mask.fg[7] = true;
-    color_scheme->map.b4.fg[8] = FG_BLUE;
-    color_scheme->mask.fg[8] = true;
-    color_scheme->map.b4.fg[9] = FG_GREEN;
-    color_scheme->mask.fg[9] = true;
+    for (ForegroundColor4BitTuple *tuple = default_protein_4_bit; tuple->sym != 0; tuple++)
+    {
+        unsigned int index = alphabet->index_map[(unsigned int)tuple->sym];
+        color_scheme->map.b4.fg[index] = tuple->color;
+        color_scheme->mask.fg[index] = true;
+    }
 
     state.use_color = true;
     state.color_schemes = color_schemes;
