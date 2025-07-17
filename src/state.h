@@ -27,7 +27,7 @@ typedef struct
 
 typedef struct
 {
-    Alphabet *alphabet;
+    const Alphabet *alphabet;
     ColorScheme *color_scheme;
 } SeqTypeState;
 

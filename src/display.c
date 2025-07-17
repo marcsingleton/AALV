@@ -267,7 +267,7 @@ void display_cursor(Array *buffer)
 void display_sequence(Array *buffer, SeqRecord *record, size_t start, size_t len)
 {
     SeqTypeState *type = state.types + record->type;
-    Alphabet *alphabet = type->alphabet;
+    const Alphabet *alphabet = type->alphabet;
     ColorScheme *color_scheme = type->color_scheme;
     if (state.use_color && color_scheme != NULL)
     {
