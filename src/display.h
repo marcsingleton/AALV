@@ -11,8 +11,8 @@
 #include "array.h"
 #include "sequences.h"
 
-#define HEADER_PANE_ELLIPSES L"..."
-#define RULER_PANE_ELLIPSES L"···" // Re-oriented vertically
+#define DISPLAY_HEADER_PANE_ELLIPSES L"..."
+#define DISPLAY_RULER_PANE_ELLIPSES L"···" // Re-oriented vertically
 
 void display_refresh(Array *buffer);
 void display_all_panes(Array *buffer);

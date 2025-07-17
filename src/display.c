@@ -91,7 +91,7 @@ void display_header_pane(Array *buffer)
             else
             {
                 array_extend(buffer, record.header, active_file->header_pane_width - 4);
-                array_extend(buffer, HEADER_PANE_ELLIPSES, sizeof(HEADER_PANE_ELLIPSES) - 1);
+                array_extend(buffer, DISPLAY_HEADER_PANE_ELLIPSES, sizeof(DISPLAY_HEADER_PANE_ELLIPSES) - 1);
             }
         }
         else
@@ -153,7 +153,7 @@ void display_ruler_pane_ticks(Array *buffer)
             array_append(buffer, c); // Excludes null in c
             if (i == 0 && n != 0)
             {
-                unsigned int width = wcswidth(RULER_PANE_ELLIPSES, sizeof(RULER_PANE_ELLIPSES));
+                unsigned int width = wcswidth(DISPLAY_RULER_PANE_ELLIPSES, sizeof(DISPLAY_RULER_PANE_ELLIPSES));
                 for (i = 0; i < width; i++)
                 {
                     terminal_cursor_ij(buffer, i + 1, j + active_file->header_pane_width + 1);

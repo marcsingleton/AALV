@@ -8,7 +8,7 @@
 void state_set_header_pane_width(State *state, unsigned int header_pane_width)
 {
     FileState *active_file = state->active_file;
-    unsigned int min_width = wcswidth(HEADER_PANE_ELLIPSES, sizeof(HEADER_PANE_ELLIPSES)) + 1;
+    unsigned int min_width = wcswidth(DISPLAY_HEADER_PANE_ELLIPSES, sizeof(DISPLAY_HEADER_PANE_ELLIPSES)) + 1;
     if (header_pane_width > state->terminal_cols - 2)
         header_pane_width = state->terminal_cols - 2;
     if (header_pane_width < min_width)
@@ -26,7 +26,7 @@ void state_set_header_pane_width(State *state, unsigned int header_pane_width)
 void state_set_ruler_pane_height(State *state, unsigned int ruler_pane_height)
 {
     FileState *active_file = state->active_file;
-    unsigned int min_height = wcswidth(RULER_PANE_ELLIPSES, sizeof(RULER_PANE_ELLIPSES)) + 1;
+    unsigned int min_height = wcswidth(DISPLAY_RULER_PANE_ELLIPSES, sizeof(DISPLAY_RULER_PANE_ELLIPSES)) + 1;
     if (ruler_pane_height > state->terminal_rows - 2)
         ruler_pane_height = state->terminal_rows - 2;
     if (ruler_pane_height < min_height)
