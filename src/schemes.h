@@ -5,46 +5,86 @@
  * Color schemes
  */
 
+#include <stdbool.h>
+
+#include "color.h"
+#include "sequences.h"
 #include "terminal.h"
 
 typedef struct
 {
     char sym;
-    Color8Bit color;
-} ForegroundColor4BitTuple;
+    Color4Bit fg_color;
+    Color4Bit bg_color;
+    bool fg_mask;
+    bool bg_mask;
+} ColorMapRecord4Bit;
 
-ForegroundColor4BitTuple default_nucleic_4_bit[] = {
-    {'A', FG_GREEN},
-    {'C', FG_BLUE},
-    {'G', FG_YELLOW},
-    {'T', FG_RED},
-    {'N', FG_WHITE},
-    {0, 0},
+typedef struct
+{
+    ColorScheme *scheme;
+    const char *name;
+    const ColorMapRecord4Bit *map;
+    Alphabet *alphabet;
+} ColorSchemeRecord4Bit;
+
+const static ColorMapRecord4Bit schemes_default_nucleic_map_records_4_bit[] = {
+    {.sym = 'A', .fg_color = FG_GREEN, .fg_mask = true},
+    {.sym = 'C', .fg_color = FG_BLUE, .fg_mask = true},
+    {.sym = 'G', .fg_color = FG_YELLOW, .fg_mask = true},
+    {.sym = 'T', .fg_color = FG_RED, .fg_mask = true},
+    {.sym = 'N', .fg_color = FG_WHITE, .fg_mask = true},
+    {.sym = 0},
 };
 
-ForegroundColor4BitTuple default_protein_4_bit[] = {
-    {'A', FG_BRIGHT_GREEN},
-    {'C', FG_YELLOW},
-    {'D', FG_RED},
-    {'E', FG_RED},
-    {'F', FG_MAGENTA},
-    {'G', FG_BRIGHT_BLACK},
-    {'H', FG_BRIGHT_BLUE},
-    {'I', FG_GREEN},
-    {'K', FG_BLUE},
-    {'L', FG_GREEN},
-    {'M', FG_GREEN},
-    {'N', FG_BRIGHT_CYAN},
-    {'P', FG_BRIGHT_MAGENTA},
-    {'Q', FG_BRIGHT_CYAN},
-    {'R', FG_BLUE},
-    {'S', FG_BRIGHT_RED},
-    {'T', FG_BRIGHT_RED},
-    {'V', FG_GREEN},
-    {'W', FG_MAGENTA},
-    {'Y', FG_MAGENTA},
-    {'X', FG_WHITE},
-    {0, 0},
+ColorScheme schemes_default_nucleic_4_bit;
+
+const static ColorMapRecord4Bit schemes_default_protein_map_records_4_bit[] = {
+    {.sym = 'A', .fg_color = FG_BRIGHT_GREEN, .fg_mask = true},
+    {.sym = 'C', .fg_color = FG_YELLOW, .fg_mask = true},
+    {.sym = 'D', .fg_color = FG_RED, .fg_mask = true},
+    {.sym = 'E', .fg_color = FG_RED, .fg_mask = true},
+    {.sym = 'F', .fg_color = FG_MAGENTA, .fg_mask = true},
+    {.sym = 'G', .fg_color = FG_BRIGHT_BLACK, .fg_mask = true},
+    {.sym = 'H', .fg_color = FG_BRIGHT_BLUE, .fg_mask = true},
+    {.sym = 'I', .fg_color = FG_GREEN, .fg_mask = true},
+    {.sym = 'K', .fg_color = FG_BLUE, .fg_mask = true},
+    {.sym = 'L', .fg_color = FG_GREEN, .fg_mask = true},
+    {.sym = 'M', .fg_color = FG_GREEN, .fg_mask = true},
+    {.sym = 'N', .fg_color = FG_BRIGHT_CYAN, .fg_mask = true},
+    {.sym = 'P', .fg_color = FG_BRIGHT_MAGENTA, .fg_mask = true},
+    {.sym = 'Q', .fg_color = FG_BRIGHT_CYAN, .fg_mask = true},
+    {.sym = 'R', .fg_color = FG_BLUE, .fg_mask = true},
+    {.sym = 'S', .fg_color = FG_BRIGHT_RED, .fg_mask = true},
+    {.sym = 'T', .fg_color = FG_BRIGHT_RED, .fg_mask = true},
+    {.sym = 'V', .fg_color = FG_GREEN, .fg_mask = true},
+    {.sym = 'W', .fg_color = FG_MAGENTA, .fg_mask = true},
+    {.sym = 'Y', .fg_color = FG_MAGENTA, .fg_mask = true},
+    {.sym = 'X', .fg_color = FG_WHITE, .fg_mask = true},
+    {.sym = 0},
 };
+
+ColorScheme schemes_default_protein_4_bit;
+
+const static ColorSchemeRecord4Bit schemes_base_records_4_bit[] = {
+    {
+        .scheme = &schemes_default_nucleic_4_bit,
+        .name = "default_nucleic_4_bit",
+        .map = schemes_default_nucleic_map_records_4_bit,
+        .alphabet = &NUCLEIC_ALPHABET,
+    },
+    {
+        .scheme = &schemes_default_protein_4_bit,
+        .name = "default_protein_4_bit",
+        .map = schemes_default_protein_map_records_4_bit,
+        .alphabet = &PROTEIN_ALPHABET,
+    },
+};
+
+#define SCHEMES_N_BASE_4_BIT sizeof(schemes_base_records_4_bit) / sizeof(ColorSchemeRecord4Bit)
+
+ColorScheme schemes_base[SCHEMES_N_BASE_4_BIT];
+
+int schemes_init_base(void);
 
 #endif // SCHEMES_H

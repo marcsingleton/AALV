@@ -101,37 +101,12 @@ int main(int argc, char *argv[])
     int code = 0; // Generic return code for various functions
     atexit(&cleanup);
     sequences_init_base_alphabets();
+    schemes_init_base();
 
     // Prepare color schemes
-    ColorScheme color_schemes[2];
-    ColorScheme *color_scheme;
-    Alphabet *alphabet;
-
-    // Nucleic
-    color_scheme = color_schemes + 0;
-    alphabet = &NUCLEIC_ALPHABET;
-    color_init_color_scheme(color_scheme, COLOR_4_BIT, "default_nucleic", NUCLEIC_ALPHABET.len);
-    for (ForegroundColor4BitTuple *tuple = default_nucleic_4_bit; tuple->sym != 0; tuple++)
-    {
-        unsigned int index = alphabet->index_map[(unsigned int)tuple->sym];
-        color_scheme->map.b4.fg[index] = tuple->color;
-        color_scheme->mask.fg[index] = true;
-    }
-
-    // Protein
-    color_scheme = color_schemes + 1;
-    alphabet = &PROTEIN_ALPHABET;
-    color_init_color_scheme(color_scheme, COLOR_4_BIT, "default_protein", PROTEIN_ALPHABET.len);
-    for (ForegroundColor4BitTuple *tuple = default_protein_4_bit; tuple->sym != 0; tuple++)
-    {
-        unsigned int index = alphabet->index_map[(unsigned int)tuple->sym];
-        color_scheme->map.b4.fg[index] = tuple->color;
-        color_scheme->mask.fg[index] = true;
-    }
-
     state.use_color = true;
-    state.color_schemes = color_schemes;
-    state.n_color_schemes = 2;
+    state.color_schemes = schemes_base;
+    state.n_color_schemes = SCHEMES_N_BASE_4_BIT;
 
     // Prepare types
     SeqTypeState types[SEQ_TYPE_ERROR + 1];
@@ -139,12 +114,12 @@ int main(int argc, char *argv[])
     // Nucleic
     SeqTypeState *nucleic_type = types + SEQ_TYPE_NUCLEIC;
     nucleic_type->alphabet = &NUCLEIC_ALPHABET;
-    nucleic_type->color_scheme = state.color_schemes + 0;
+    nucleic_type->color_scheme = &schemes_default_nucleic_4_bit;
 
     // Protein
     SeqTypeState *protein_type = types + SEQ_TYPE_PROTEIN;
     protein_type->alphabet = &PROTEIN_ALPHABET;
-    protein_type->color_scheme = state.color_schemes + 1;
+    protein_type->color_scheme = &schemes_default_protein_4_bit;
 
     state.types = types;
     state.ntypes = SEQ_TYPE_ERROR + 1;
