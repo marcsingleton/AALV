@@ -95,6 +95,8 @@ SeqTypeOption type_options[] = {
 
 #define N_TYPE_OPTIONS sizeof(type_options) / sizeof(SeqTypeOption)
 
+SeqTypeState types[SEQ_TYPE_ERROR + 1];
+
 // Main
 int main(int argc, char *argv[])
 {
@@ -108,21 +110,19 @@ int main(int argc, char *argv[])
     state.color_schemes = schemes_base;
     state.n_color_schemes = SCHEMES_N_BASE_4_BIT;
 
-    // Prepare types
-    SeqTypeState types[SEQ_TYPE_ERROR + 1];
-
-    // Nucleic
-    SeqTypeState *nucleic_type = types + SEQ_TYPE_NUCLEIC;
-    nucleic_type->alphabet = &NUCLEIC_ALPHABET;
-    nucleic_type->color_scheme = &schemes_default_nucleic_4_bit;
-
-    // Protein
-    SeqTypeState *protein_type = types + SEQ_TYPE_PROTEIN;
-    protein_type->alphabet = &PROTEIN_ALPHABET;
-    protein_type->color_scheme = &schemes_default_protein_4_bit;
-
+    // Prepare known types
+    for (unsigned int i = 0; i < N_TYPE_OPTIONS; i++)
+    {
+        SeqTypeOption *type_option = type_options + i;
+        SeqTypeState *type = types + type_option->type;
+        type->alphabet = type_option->alphabet;
+    }
     state.types = types;
     state.ntypes = SEQ_TYPE_ERROR + 1;
+
+    // Manually set color schemes
+    state.types[SEQ_TYPE_NUCLEIC].color_scheme = &schemes_default_nucleic_4_bit;
+    state.types[SEQ_TYPE_PROTEIN].color_scheme = &schemes_default_protein_4_bit;
 
     // Prepare options
     struct option long_options[NOPTIONS + 1]; // Extra struct of 0s to mark end
