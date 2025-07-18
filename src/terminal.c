@@ -126,21 +126,21 @@ void terminal_clear_line_right(Array *buffer)
     array_extend(buffer, s, sizeof(s) - 1);
 }
 
-void terminal_set_foreground_color_4bit(Array *buffer, Color4Bit color)
+void terminal_set_foreground_color_4bit(Array *buffer, const Color4Bit color)
 {
     char s[7];
     int len = sprintf(s, "\x1b[%dm", color);
     array_extend(buffer, s, len);
 }
 
-void terminal_set_background_color_4bit(Array *buffer, Color4Bit color)
+void terminal_set_background_color_4bit(Array *buffer, const Color4Bit color)
 {
     char s[7];
     int len = sprintf(s, "\x1b[%dm", color);
     array_extend(buffer, s, len);
 }
 
-void terminal_set_color_4bit(Array *buffer, Color4Bit fg_color, Color4Bit bg_color)
+void terminal_set_color_4bit(Array *buffer, const Color4Bit fg_color, const Color4Bit bg_color)
 
 {
     char s[11];
@@ -148,30 +148,26 @@ void terminal_set_color_4bit(Array *buffer, Color4Bit fg_color, Color4Bit bg_col
     array_extend(buffer, s, len);
 }
 
-void terminal_set_foreground_color_8bit(Array *buffer, Color8Bit n)
+void terminal_set_foreground_color_8bit(Array *buffer, const Color8Bit color)
 {
 
-    if (n > 255)
-        return;
     char s[12];
-    int len = sprintf(s, "\x1b[38;5;%dm", n);
+    int len = sprintf(s, "\x1b[38;5;%dm", color);
     array_extend(buffer, s, len);
 }
 
-void terminal_set_background_color_8bit(Array *buffer, Color8Bit n)
+void terminal_set_background_color_8bit(Array *buffer, const Color8Bit color)
 {
 
-    if (n > 255)
-        return;
     char s[12];
-    int len = sprintf(s, "\x1b[48;5;%dm", n);
+    int len = sprintf(s, "\x1b[48;5;%dm", color);
     array_extend(buffer, s, len);
 }
 
-void terminal_set_color_8bit(Array *buffer, Color8Bit fg_n, Color8Bit bg_n)
+void terminal_set_color_8bit(Array *buffer, const Color8Bit fg_color, const Color8Bit bg_color)
 {
     char s[21];
-    int len = sprintf(s, "\x1b[38;5;%d;48;5;%dm", fg_n, bg_n);
+    int len = sprintf(s, "\x1b[38;5;%d;48;5;%dm", fg_color, bg_color);
     array_extend(buffer, s, len);
 }
 
