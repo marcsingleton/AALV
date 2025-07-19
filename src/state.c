@@ -106,10 +106,10 @@ unsigned int state_get_sequence_pane_width(State *state)
 }
 
 // State setters
-void state_set_active_file_index(State *state, unsigned int active_file_index)
+void state_set_active_file_index(State *state, unsigned int file_index)
 {
-    if (active_file_index > state->nfiles - 1)
-        active_file_index = state->nfiles - 1;
-    state->active_file_index = active_file_index;
-    state->active_file = state->files + active_file_index;
+    if (file_index > state->nfiles - 1)
+        file_index = state->nfiles - 1;
+    state->active_file_index = file_index;
+    state->active_file = state->files + file_index;
 }

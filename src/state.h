@@ -71,6 +71,6 @@ unsigned int state_get_record_panes_height(State *state);
 unsigned int state_get_sequence_pane_width(State *state);
 
 // State setters
-void state_set_active_file_index(State *state, unsigned int active_file_index);
+void state_set_active_file_index(State *state, unsigned int file_index);
 
 #endif // STATE_H
