@@ -145,6 +145,7 @@ int fasta_fread(FILE *fp, SeqRecord **records_ptr)
             .id = id,
             .seq = seq,
             .len = seqlen,
+            .type = SEQ_TYPE_UNSPECIFIED,
         };
         if (array_append(&new_records, &new_record) != 0)
         {

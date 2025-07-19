@@ -437,10 +437,15 @@ int read_files(State *state,
         file->record_array.records = records;
         file->record_array.len = len;
         file->record_array.offset = 1;
-        // TODO: Set positions
         file->header_pane_width = rcparams_header_pane_width;
         file->ruler_pane_height = rcparams_ruler_pane_height;
         file->tick_spacing = rcparams_tick_spacing;
+        file->offset_record = 0;
+        file->offset_header = 0;
+        file->offset_sequence = 0;
+        file->cursor_record_i = 0;
+        file->cursor_header_j = 0;
+        file->cursor_sequence_j = 0;
     }
 
 cleanup:
