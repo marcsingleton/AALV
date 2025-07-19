@@ -45,7 +45,7 @@ const static ColorMapRecord4Bit schemes_default_protein_map_records_4_bit[] = {
     {.sym = 'D', .fg_color = FG_RED, .fg_mask = true},
     {.sym = 'E', .fg_color = FG_RED, .fg_mask = true},
     {.sym = 'F', .fg_color = FG_MAGENTA, .fg_mask = true},
-    {.sym = 'G', .fg_color = FG_BRIGHT_BLACK, .fg_mask = true},
+    {.sym = 'G', .fg_color = FG_WHITE, .fg_mask = true},
     {.sym = 'H', .fg_color = FG_BRIGHT_BLUE, .fg_mask = true},
     {.sym = 'I', .fg_color = FG_GREEN, .fg_mask = true},
     {.sym = 'K', .fg_color = FG_BLUE, .fg_mask = true},
@@ -60,7 +60,7 @@ const static ColorMapRecord4Bit schemes_default_protein_map_records_4_bit[] = {
     {.sym = 'V', .fg_color = FG_GREEN, .fg_mask = true},
     {.sym = 'W', .fg_color = FG_MAGENTA, .fg_mask = true},
     {.sym = 'Y', .fg_color = FG_MAGENTA, .fg_mask = true},
-    {.sym = 'X', .fg_color = FG_WHITE, .fg_mask = true},
+    {.sym = 'X', .fg_color = FG_BRIGHT_BLACK, .fg_mask = true},
     {.sym = 0},
 };
 
