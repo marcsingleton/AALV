@@ -135,13 +135,13 @@ int main(int argc, char *argv[])
     // Set color schemes
     if (state.ncolors >= 256)
     {
-        state.types[SEQ_TYPE_NUCLEIC].color_scheme = &schemes_default_nucleic_8_bit;
-        state.types[SEQ_TYPE_PROTEIN].color_scheme = &schemes_default_protein_8_bit;
+        state_set_type_color_scheme(&state, SEQ_TYPE_NUCLEIC, &schemes_default_nucleic_8_bit);
+        state_set_type_color_scheme(&state, SEQ_TYPE_PROTEIN, &schemes_default_protein_8_bit);
     }
     else if (state.ncolors >= 16)
     {
-        state.types[SEQ_TYPE_NUCLEIC].color_scheme = &schemes_default_nucleic_4_bit;
-        state.types[SEQ_TYPE_PROTEIN].color_scheme = &schemes_default_protein_4_bit;
+        state_set_type_color_scheme(&state, SEQ_TYPE_NUCLEIC, &schemes_default_nucleic_4_bit);
+        state_set_type_color_scheme(&state, SEQ_TYPE_PROTEIN, &schemes_default_protein_4_bit);
     }
 
     // Prepare options

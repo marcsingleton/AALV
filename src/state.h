@@ -72,5 +72,6 @@ unsigned int state_get_sequence_pane_width(State *state);
 
 // State setters
 void state_set_active_file_index(State *state, unsigned int file_index);
+void state_set_type_color_scheme(State *state, unsigned int type_index, ColorScheme *color_scheme);
 
 #endif // STATE_H
