@@ -329,9 +329,5 @@ void display_sequence(Array *buffer, SeqRecord *record, size_t start, size_t len
         }
     }
     else
-        for (size_t i = start; i < start + len; i++)
-        {
-            char sym = record->seq[i];
-            array_append(buffer, &sym);
-        }
+        array_extend(buffer, record->seq + start, len);
 }
