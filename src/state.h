@@ -49,7 +49,7 @@ typedef struct
     // Color variables
     ColorScheme *color_schemes;
     unsigned int n_color_schemes;
-    bool use_color;
+    int ncolors;
     // Type variables
     SeqTypeState *types;
     unsigned int ntypes;

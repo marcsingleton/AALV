@@ -269,7 +269,7 @@ void display_sequence(Array *buffer, SeqRecord *record, size_t start, size_t len
     SeqTypeState *type = state.types + record->type;
     const Alphabet *alphabet = type->alphabet;
     ColorScheme *color_scheme = type->color_scheme;
-    if (state.use_color && color_scheme != NULL)
+    if (state.ncolors > 1 && color_scheme != NULL)
     {
         if (color_scheme->type == COLOR_4_BIT)
         {
@@ -300,8 +300,38 @@ void display_sequence(Array *buffer, SeqRecord *record, size_t start, size_t len
             terminal_set_color_default(buffer);
         }
         else if (color_scheme->type == COLOR_8_BIT)
-            ;
+        {
+            for (size_t i = start; i < start + len; i++)
+            {
+                char sym = record->seq[i];
+                int index = alphabet->index_map[(unsigned int)sym]; // Skip negativity check b/c already checked type
+                if (color_scheme->mask.fg[index] && color_scheme->mask.bg[index])
+                {
+                    Color8Bit fg_color = color_scheme->map.b8.fg[index];
+                    Color8Bit bg_color = color_scheme->map.b8.bg[index];
+                    terminal_set_color_8bit(buffer, fg_color, bg_color);
+                }
+                else if (color_scheme->mask.fg[index])
+                {
+                    Color8Bit fg_color = color_scheme->map.b8.fg[index];
+                    terminal_set_foreground_color_8bit(buffer, fg_color);
+                }
+                else if (color_scheme->mask.bg[index])
+                {
+                    Color8Bit bg_color = color_scheme->map.b8.bg[index];
+                    terminal_set_background_color_8bit(buffer, bg_color);
+                }
+                else
+                    terminal_set_color_default(buffer);
+                array_append(buffer, &sym);
+            }
+            terminal_set_color_default(buffer);
+        }
     }
     else
-        ;
+        for (size_t i = start; i < start + len; i++)
+        {
+            char sym = record->seq[i];
+            array_append(buffer, &sym);
+        }
 }
