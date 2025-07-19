@@ -254,6 +254,8 @@ int main(int argc, char *argv[])
 void cleanup(void)
 {
     // Free memory
+    for (unsigned int i = 0; i < state.n_color_schemes; i++)
+        color_free_color_scheme(state.color_schemes + i);
     for (unsigned int i = 0; i < state.nfiles; i++)
         sequences_free_seq_record_array(&state.files[i].record_array); // Null if unset, so always safe to free
     free(state.files);
@@ -445,16 +447,18 @@ cleanup:
     for (unsigned int i = 0; i < N_FORMAT_OPTIONS; i++)
     {
         StrArray *format_exts = formats_exts + i;
-        free(format_exts->data);
+        str_free_split(format_exts->data, format_exts->len);
         format_exts->data = NULL;
         format_exts->len = 0;
     }
+    free(formats_exts);
     for (unsigned int i = 0; i < N_TYPE_OPTIONS; i++)
     {
         StrArray *type_identifiers = types_identifiers + i;
-        free(type_identifiers->data);
+        str_free_split(type_identifiers->data, type_identifiers->len);
         type_identifiers->data = NULL;
         type_identifiers->len = 0;
     }
+    free(types_identifiers);
     return code;
 }
