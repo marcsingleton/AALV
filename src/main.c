@@ -7,6 +7,9 @@
 #include <sys/errno.h>
 #include <unistd.h>
 
+#include <curses.h>
+#include <term.h> // Must follow curses
+
 #include "argparse.h"
 #include "array.h"
 #include "display.h"
@@ -106,7 +109,6 @@ int main(int argc, char *argv[])
     schemes_init_base();
 
     // Prepare color schemes
-    state.use_color = true;
     state.color_schemes = schemes_base;
     state.n_color_schemes = SCHEMES_N_BASE_4_BIT;
 
@@ -120,9 +122,27 @@ int main(int argc, char *argv[])
     state.types = types;
     state.ntypes = SEQ_TYPE_ERROR + 1;
 
-    // Manually set color schemes
-    state.types[SEQ_TYPE_NUCLEIC].color_scheme = &schemes_default_nucleic_4_bit;
-    state.types[SEQ_TYPE_PROTEIN].color_scheme = &schemes_default_protein_4_bit;
+    // Get terminal color support
+    state.ncolors = 1;
+    int errret;
+    if (setupterm(NULL, STDOUT_FILENO, &errret) == OK) // Need to set a return code address; otherwise error will cause exit
+    {
+        int ncolors = tigetnum("colors");
+        if (ncolors > 0)
+            state.ncolors = ncolors;
+    }
+
+    // Set color schemes
+    if (state.ncolors >= 256)
+    {
+        state.types[SEQ_TYPE_NUCLEIC].color_scheme = &schemes_default_nucleic_8_bit;
+        state.types[SEQ_TYPE_PROTEIN].color_scheme = &schemes_default_protein_8_bit;
+    }
+    else if (state.ncolors >= 16)
+    {
+        state.types[SEQ_TYPE_NUCLEIC].color_scheme = &schemes_default_nucleic_4_bit;
+        state.types[SEQ_TYPE_PROTEIN].color_scheme = &schemes_default_protein_4_bit;
+    }
 
     // Prepare options
     struct option long_options[NOPTIONS + 1]; // Extra struct of 0s to mark end
@@ -415,6 +435,7 @@ int read_files(State *state,
         file->record_array.records = records;
         file->record_array.len = len;
         file->record_array.offset = 1;
+        // TODO: Set positions
         file->header_pane_width = rcparams_header_pane_width;
         file->ruler_pane_height = rcparams_ruler_pane_height;
         file->tick_spacing = rcparams_tick_spacing;

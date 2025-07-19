@@ -19,7 +19,7 @@ CFLAGS := -Wall -Wextra -pedantic -std=c99
 all: $(SRC_TARGET)
 
 $(SRC_TARGET): $(SRC_OBJS) $(SRC_DIR)/main.c
-	$(CC) $(CFLAGS) $^ -o $@
+	$(CC) $(CFLAGS) -lcurses $^ -o $@
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
