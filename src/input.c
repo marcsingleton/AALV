@@ -334,12 +334,16 @@ void input_move_page_right(PageSize page_size)
     FileState *active_file = state.active_file;
     input_cursor_clamp();
 
+    // TODO: Store pre-calculated max_len in FileState?
     unsigned int max_len = 0;
     for (unsigned int i = 0; i < active_file->record_array.len; i++)
     {
         if (active_file->record_array.records[i].len > max_len)
             max_len = active_file->record_array.records[i].len;
     }
+
+    if (active_file->offset_sequence >= max_len - 2) // Accounts for continuation symbol
+        return;
 
     unsigned int x = state_get_sequence_pane_width(&state);
     if (page_size == PAGE_SIZE_HALF)
@@ -354,6 +358,9 @@ void input_move_page_left(PageSize page_size)
 {
     FileState *active_file = state.active_file;
     input_cursor_clamp();
+
+    if (active_file->offset_sequence == 0)
+        return;
 
     unsigned int x = state_get_sequence_pane_width(&state);
     if (page_size == PAGE_SIZE_HALF)
