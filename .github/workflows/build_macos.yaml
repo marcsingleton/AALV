@@ -1,0 +1,21 @@
+name: Build MacOS
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Build project
+      run: |
+        make
+    
+    - uses: actions/upload-artifact@v4
+      with:
+        name: aalv-macos
+        path: build/aalv
