@@ -62,9 +62,9 @@ void state_set_tick_spacing(State *state, unsigned int tick_spacing);
 void state_set_offset_record(State *state, unsigned int offset_record);
 void state_set_offset_header(State *state, unsigned int offset_header);
 void state_set_offset_sequence(State *state, unsigned int offset_sequence);
-inline void state_set_cursor_record_i(State *state, unsigned int cursor_record_i);
-inline void state_set_cursor_header_j(State *state, unsigned int cursor_header_j);
-inline void state_set_cursor_sequence_j(State *state, unsigned int cursor_sequence_j);
+void state_set_cursor_record_i(State *state, unsigned int cursor_record_i);
+void state_set_cursor_header_j(State *state, unsigned int cursor_header_j);
+void state_set_cursor_sequence_j(State *state, unsigned int cursor_sequence_j);
 
 // FileState getters
 unsigned int state_get_record_panes_height(State *state);

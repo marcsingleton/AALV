@@ -42,8 +42,8 @@ typedef struct
     unsigned int offset;
 } SeqRecordArray;
 
-Alphabet NUCLEIC_ALPHABET;
-Alphabet PROTEIN_ALPHABET;
+extern Alphabet NUCLEIC_ALPHABET;
+extern Alphabet PROTEIN_ALPHABET;
 
 void sequences_free_seq_records(SeqRecord *records, int nrecords);
 void sequences_free_seq_record_array(SeqRecordArray *record_array);

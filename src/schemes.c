@@ -1,5 +1,11 @@
 #include "schemes.h"
 
+ColorScheme schemes_default_nucleic_4_bit;
+ColorScheme schemes_default_protein_4_bit;
+ColorScheme schemes_default_nucleic_8_bit;
+ColorScheme schemes_default_protein_8_bit;
+ColorScheme schemes_base[SCHEMES_N_BASE];
+
 int schemes_init_base(void)
 {
     unsigned int index = 0;

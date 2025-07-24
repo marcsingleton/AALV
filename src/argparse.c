@@ -275,5 +275,7 @@ int print_option_usage(Option *argument, UsageStyle usage_style, const bool brac
                       style_sep,
                       argument->short_name, arg_sep, arg,
                       rbracket);
+    default:
+        return 0;
     }
 }

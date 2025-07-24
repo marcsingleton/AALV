@@ -7,6 +7,6 @@
 
 #define ERROR_MESSAGE_LEN 256
 
-char error_message[ERROR_MESSAGE_LEN];
+extern char error_message[];
 
 #endif // ERROR_H

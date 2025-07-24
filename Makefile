@@ -13,13 +13,13 @@ TESTS_OBJS := $(TESTS_DEPS:%.c=$(BUILD_DIR)/%.o)
 TESTS_TARGETS := $(TESTS:$(TESTS_DIR)/%.c=$(BUILD_DIR)/%)
 
 CC := cc
-CFLAGS := -Wall -Wextra -pedantic -std=c99
+CFLAGS := -Wall -Wextra -pedantic -std=c99 -D _POSIX_C_SOURCE=200809L -D _XOPEN_SOURCE -D _DEFAULT_SOURCE
 
 # SRC rules
 all: $(SRC_TARGET)
 
 $(SRC_TARGET): $(SRC_OBJS) $(SRC_DIR)/main.c
-	$(CC) $(CFLAGS) -lcurses $^ -o $@
+	$(CC) $(CFLAGS) $^ -lcurses -o $@
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
