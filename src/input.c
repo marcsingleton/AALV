@@ -153,7 +153,7 @@ void input_buffer_flush(Array *buffer)
 
 void input_next_file(void)
 {
-    if (state.active_file_index == state.nfiles - 1)
+    if (state.active_file_index + 1 >= state.nfiles)
         return;
     state_set_active_file_index(&state, state.active_file_index + 1);
     state.refresh_window = true;
@@ -214,9 +214,9 @@ void input_move_down(unsigned int x)
         record_panes_height = 1; // Treat collapsed pane as single row
 
     unsigned int record_index = active_file->cursor_record_i + active_file->offset_record;
-    if (x + record_index >= active_file->record_array.len - 1)
-        x = active_file->record_array.len - 1 - record_index;
-    if (x + active_file->cursor_record_i > record_panes_height - 1)
+    if (x + record_index + 1 >= active_file->record_array.len)
+        x = active_file->record_array.len - record_index - 1;
+    if (x + active_file->cursor_record_i + 1 > record_panes_height)
     {
         x += active_file->cursor_record_i - record_panes_height + 1;
         active_file->cursor_record_i = record_panes_height - 1;
@@ -240,7 +240,7 @@ void input_move_right(unsigned int x)
     SeqRecord record = active_file->record_array.records[record_index];
     unsigned int sequence_index = active_file->cursor_sequence_j + active_file->offset_sequence;
 
-    if (sequence_index > record.len - 1)
+    if (sequence_index + 1 > record.len)
     {
         sequence_index = record.len - 1;
         if (sequence_index < active_file->offset_sequence)
@@ -252,9 +252,9 @@ void input_move_right(unsigned int x)
             active_file->cursor_sequence_j = sequence_index - active_file->offset_sequence;
     }
 
-    if (x + sequence_index >= record.len - 1)
-        x = record.len - 1 - sequence_index;
-    if (x + active_file->cursor_sequence_j > sequence_pane_width - 1)
+    if (x + sequence_index + 1 >= record.len)
+        x = record.len - sequence_index - 1;
+    if (x + active_file->cursor_sequence_j + 1 > sequence_pane_width)
     {
         x += active_file->cursor_sequence_j - sequence_pane_width + 1;
         active_file->cursor_sequence_j = sequence_pane_width - 1;
@@ -276,7 +276,7 @@ void input_move_left(unsigned int x)
     SeqRecord record = active_file->record_array.records[record_index];
     unsigned int sequence_index = active_file->cursor_sequence_j + active_file->offset_sequence;
 
-    if (sequence_index > record.len - 1)
+    if (sequence_index + 1 > record.len)
     {
         sequence_index = record.len - 1;
         if (sequence_index < active_file->offset_sequence)
@@ -337,13 +337,13 @@ void input_move_page_down(PageSize page_size)
     unsigned int x = record_panes_height;
     if (page_size == PAGE_SIZE_HALF)
         x /= 2;
-    if (active_file->offset_record == active_file->record_array.len - 1)
+    if (active_file->offset_record + 1 == active_file->record_array.len)
         return;
-    else if (active_file->offset_record + x > active_file->record_array.len - 1)
+    else if (active_file->offset_record + x + 1 > active_file->record_array.len)
         state_set_offset_record(&state, active_file->record_array.len - 1);
     else
         state_set_offset_record(&state, active_file->offset_record + x);
-    if (active_file->offset_record + active_file->cursor_record_i > active_file->record_array.len - 1)
+    if (active_file->offset_record + active_file->cursor_record_i + 1 > active_file->record_array.len)
         active_file->cursor_record_i = active_file->record_array.len - 1 - active_file->offset_record;
 }
 
@@ -363,13 +363,13 @@ void input_move_page_right(PageSize page_size)
             max_len = active_file->record_array.records[i].len;
     }
 
-    if (active_file->offset_sequence >= max_len - 2) // Accounts for continuation symbol
+    if (active_file->offset_sequence + 2 >= max_len) // Accounts for continuation symbol
         return;
 
     unsigned int x = state_get_sequence_pane_width(&state);
     if (page_size == PAGE_SIZE_HALF)
         x /= 2;
-    if (active_file->offset_sequence + x > max_len - 2) // Accounts for continuation symbol
+    if (active_file->offset_sequence + x + 2 > max_len) // Accounts for continuation symbol
         state_set_offset_sequence(&state, max_len - 2);
     else
         state_set_offset_sequence(&state, active_file->offset_sequence + x);
