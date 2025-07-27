@@ -70,6 +70,7 @@ void display_header_pane(Array *buffer)
     FileState *active_file = state.active_file;
     unsigned int record_panes_height = state_get_record_panes_height(&state);
 
+    unsigned int ellipses_width = wcswidth(DISPLAY_HEADER_PANE_ELLIPSES, sizeof(DISPLAY_HEADER_PANE_ELLIPSES));
     for (unsigned int i = 0; i < record_panes_height; i++)
     {
         unsigned int record_index = i + active_file->offset_record;
@@ -86,7 +87,7 @@ void display_header_pane(Array *buffer)
             }
             else
             {
-                array_extend(buffer, record.header, active_file->header_pane_width - 4);
+                array_extend(buffer, record.header, active_file->header_pane_width - ellipses_width - 1);
                 array_extend(buffer, DISPLAY_HEADER_PANE_ELLIPSES, sizeof(DISPLAY_HEADER_PANE_ELLIPSES) - 1);
             }
         }
@@ -138,6 +139,7 @@ void display_ruler_pane_ticks(Array *buffer)
     unsigned int x = q * tick_spacing;
     unsigned int j;
     unsigned int sequence_pane_width = state_get_sequence_pane_width(&state);
+    unsigned int ellipses_width = wcswidth(DISPLAY_RULER_PANE_ELLIPSES, sizeof(DISPLAY_RULER_PANE_ELLIPSES));
     while ((j = x - active_file->offset_sequence - active_file->record_array.offset) < sequence_pane_width)
     {
         terminal_cursor_ij(buffer, active_file->ruler_pane_height, j + active_file->header_pane_width + 1);
@@ -156,8 +158,7 @@ void display_ruler_pane_ticks(Array *buffer)
             array_append(buffer, c); // Excludes null in c
             if (i == 0 && n != 0)
             {
-                unsigned int width = wcswidth(DISPLAY_RULER_PANE_ELLIPSES, sizeof(DISPLAY_RULER_PANE_ELLIPSES));
-                for (i = 0; i < width; i++)
+                for (i = 0; i < ellipses_width; i++)
                 {
                     terminal_cursor_ij(buffer, i + 1, j + active_file->header_pane_width + 1);
                     array_extend(buffer, "·", sizeof("·"));
