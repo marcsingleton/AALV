@@ -12,17 +12,23 @@ TESTS_DEPS := array.c fasta.c sequences.c str.c
 TESTS_OBJS := $(TESTS_DEPS:%.c=$(BUILD_DIR)/%.o)
 TESTS_TARGETS := $(TESTS:$(TESTS_DIR)/%.c=$(BUILD_DIR)/%)
 
+OS := $(shell uname -s)
+
 CC := cc
-CFLAGS := -Wall -Wextra -pedantic -std=c99 -D _POSIX_C_SOURCE=200809L -D _XOPEN_SOURCE -D _DEFAULT_SOURCE
+CFLAGS := -Wall -Wextra -pedantic -std=c99
+CPPFLAGS :=
+ifeq ($(OS), Linux)
+	CPPFLAGS += -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE -D_DEFAULT_SOURCE
+endif
 
 # SRC rules
 all: $(SRC_TARGET)
 
 $(SRC_TARGET): $(SRC_OBJS) $(SRC_DIR)/main.c
-	$(CC) $(CFLAGS) $^ -lcurses -o $@
+	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -lcurses -o $@
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
 # TESTS rules
 .PHONY: test
