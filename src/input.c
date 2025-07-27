@@ -240,9 +240,10 @@ void input_move_right(unsigned int x)
     SeqRecord record = active_file->record_array.records[record_index];
     unsigned int sequence_index = active_file->cursor_sequence_j + active_file->offset_sequence;
 
+    // Snap to end
     if (sequence_index + 1 > record.len)
     {
-        sequence_index = record.len - 1;
+        sequence_index = (record.len > 0) ? record.len - 1 : 0;
         if (sequence_index < active_file->offset_sequence)
         {
             active_file->cursor_sequence_j = 0;
@@ -252,6 +253,9 @@ void input_move_right(unsigned int x)
             active_file->cursor_sequence_j = sequence_index - active_file->offset_sequence;
     }
 
+    // Move
+    if (record.len == 0)
+        return;
     if (x + sequence_index + 1 >= record.len)
         x = record.len - sequence_index - 1;
     if (x + active_file->cursor_sequence_j + 1 > sequence_pane_width)
@@ -276,9 +280,10 @@ void input_move_left(unsigned int x)
     SeqRecord record = active_file->record_array.records[record_index];
     unsigned int sequence_index = active_file->cursor_sequence_j + active_file->offset_sequence;
 
+    // Snap to end
     if (sequence_index + 1 > record.len)
     {
-        sequence_index = record.len - 1;
+        sequence_index = (record.len > 0) ? record.len - 1 : 0;
         if (sequence_index < active_file->offset_sequence)
         {
             active_file->cursor_sequence_j = 0;
@@ -288,6 +293,7 @@ void input_move_left(unsigned int x)
             active_file->cursor_sequence_j = sequence_index - active_file->offset_sequence;
     }
 
+    // Move
     if (x > sequence_index)
         x = sequence_index;
     if (x > active_file->cursor_sequence_j)
@@ -412,7 +418,8 @@ void input_move_line_end(void)
     unsigned int record_index = active_file->cursor_record_i + active_file->offset_record;
     SeqRecord record = active_file->record_array.records[record_index];
     unsigned int sequence_index = active_file->cursor_sequence_j + active_file->offset_sequence;
-    input_move_right(record.len - 1 - sequence_index);
+    unsigned int x = (record.len > 0) ? record.len - 1 - sequence_index : 0;
+    input_move_right(x);
 }
 
 void input_move_first_record(void)

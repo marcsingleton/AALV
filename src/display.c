@@ -252,15 +252,26 @@ void display_cursor(Array *buffer)
     unsigned int record_panes_height = state_get_record_panes_height(&state);
     if (record_panes_height == 0)
         return;
+    if (active_file->record_array.len == 0)
+        return;
 
-    unsigned render_index_i = (active_file->cursor_record_i >= record_panes_height) ? record_panes_height - 1
-                                                                                    : active_file->cursor_record_i;
+    unsigned render_index_i;
+    if (active_file->cursor_record_i >= record_panes_height)
+        render_index_i = record_panes_height - 1;
+    else
+        render_index_i = active_file->cursor_record_i;
     unsigned int cursor_i = render_index_i + active_file->ruler_pane_height + 1;
 
     unsigned int record_index = render_index_i + active_file->offset_record;
     unsigned int sequence_index = active_file->cursor_sequence_j + active_file->offset_sequence;
     SeqRecord record = active_file->record_array.records[record_index];
-    unsigned int render_index_j = (record.len > sequence_index) ? sequence_index : record.len - 1;
+    unsigned int render_index_j;
+    if (record.len > sequence_index)
+        render_index_j = sequence_index;
+    else if (record.len == 0)
+        render_index_j = 0;
+    else
+        render_index_j = record.len - 1;
     unsigned int cursor_j;
     if (render_index_j > active_file->offset_sequence)
         cursor_j = render_index_j - active_file->offset_sequence + active_file->header_pane_width + 1;
