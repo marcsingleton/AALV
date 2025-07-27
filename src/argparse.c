@@ -3,6 +3,7 @@
 #include "array.h"
 #include "argparse.h"
 #include "error.h"
+#include "macros.h"
 #include "str.h"
 
 extern char *INVOCATION_NAME;
@@ -90,7 +91,7 @@ int parse_options(int argc, char *argv[],
         }
         else if (c == 'v' || strcmp(name, "version") == 0)
         {
-            printf("aalv 0.1.0 dev\n");
+            printf(PROGRAM_NAME " " VERSION "\n");
             return 1;
         }
     }
@@ -160,7 +161,7 @@ void print_long_help(unsigned int noptions, Option *options)
     unsigned int nchars;
 
     // Usage section
-    int prefix_size = printf("usage: %s", INVOCATION_NAME) + 1; // +1 account for space added by first option
+    int prefix_size = printf("usage: %s", PROGRAM_NAME) + 1; // +1 account for space added by first option
     nmax = 80;
     nchars = 0;
 
@@ -190,7 +191,7 @@ void print_long_help(unsigned int noptions, Option *options)
     printf("\n%*s[<file> ...]\n\n", prefix_size, "");
 
     // Synopsis section
-    printf("%s is a vim-inspired alignment viewer\n\n", INVOCATION_NAME);
+    printf("%s is a vim-inspired alignment viewer\n\n", PROGRAM_NAME);
 
     // Options section
     printf("options:\n");
@@ -218,7 +219,7 @@ void print_long_help(unsigned int noptions, Option *options)
 
 void print_short_help(unsigned int noptions, Option *options)
 {
-    printf("usage: %s", INVOCATION_NAME);
+    printf("usage: %s", PROGRAM_NAME);
     for (unsigned int i = 0; i < noptions; i++)
     {
         Option *argument = options + i;
