@@ -72,10 +72,9 @@ int fasta_fread(FILE *fp, SeqRecord **records_ptr)
             continue;
         }
 
-        if (line[linelen - 1] == '\n')
-            trimlen = linelen - 1;
-        else
-            trimlen = linelen;
+        trimlen = linelen;
+        while (line[trimlen - 1] == '\n' || line[trimlen - 1] == '\r')
+            trimlen--;
 
         header = malloc(trimlen); // +1 for null; -1 for excluding >
         if (header == NULL)
@@ -99,10 +98,9 @@ int fasta_fread(FILE *fp, SeqRecord **records_ptr)
         while ((linelen = getline(&line, &capacity, fp)) > 0 && (line[0] != '>'))
         {
             // Trim line
-            if (line[linelen - 1] == '\n')
-                trimlen = linelen - 1;
-            else
-                trimlen = linelen;
+            trimlen = linelen;
+            while (line[trimlen - 1] == '\n' || line[trimlen - 1] == '\r')
+                trimlen--;
 
             // Check for sequence overflow
             if (seqlen >= SIZE_MAX - trimlen - 1)
