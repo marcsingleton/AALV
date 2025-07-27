@@ -54,17 +54,23 @@ void state_set_tick_spacing(State *state, unsigned int tick_spacing)
 void state_set_offset_record(State *state, unsigned int offset_record)
 {
     FileState *active_file = state->active_file;
-    active_file->offset_record = offset_record;
-    state->refresh_header_pane = true;
-    state->refresh_sequence_pane = true;
+    if (offset_record != active_file->offset_record)
+    {
+        active_file->offset_record = offset_record;
+        state->refresh_header_pane = true;
+        state->refresh_sequence_pane = true;
+    }
 }
 
 void state_set_offset_sequence(State *state, unsigned int offset_sequence)
 {
     FileState *active_file = state->active_file;
-    active_file->offset_sequence = offset_sequence;
-    state->refresh_ruler_pane = true;
-    state->refresh_sequence_pane = true;
+    if (offset_sequence != active_file->offset_sequence)
+    {
+        active_file->offset_sequence = offset_sequence;
+        state->refresh_ruler_pane = true;
+        state->refresh_sequence_pane = true;
+    }
 }
 
 inline void state_set_cursor_record_i(State *state, unsigned int cursor_record_i)
