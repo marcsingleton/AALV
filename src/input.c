@@ -355,22 +355,22 @@ void input_move_page_right(PageSize page_size)
     if (active_file->record_array.len == 0)
         return;
 
-    // TODO: Store pre-calculated max_len in FileState?
-    unsigned int max_len = 0;
+    // TODO: Store pre-calculated maxlen in FileState?
+    unsigned int maxlen = 0;
     for (unsigned int i = 0; i < active_file->record_array.len; i++)
     {
-        if (active_file->record_array.records[i].len > max_len)
-            max_len = active_file->record_array.records[i].len;
+        if (active_file->record_array.records[i].len > maxlen)
+            maxlen = active_file->record_array.records[i].len;
     }
 
-    if (active_file->offset_sequence + 2 >= max_len) // Accounts for continuation symbol
+    if (active_file->offset_sequence + 2 >= maxlen) // Accounts for continuation symbol
         return;
 
     unsigned int x = state_get_sequence_pane_width(&state);
     if (page_size == PAGE_SIZE_HALF)
         x /= 2;
-    if (active_file->offset_sequence + x + 2 > max_len) // Accounts for continuation symbol
-        state_set_offset_sequence(&state, max_len - 2);
+    if (active_file->offset_sequence + x + 2 > maxlen) // Accounts for continuation symbol
+        state_set_offset_sequence(&state, maxlen - 2);
     else
         state_set_offset_sequence(&state, active_file->offset_sequence + x);
 }
