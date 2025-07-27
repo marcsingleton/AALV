@@ -5,7 +5,7 @@
 #include "error.h"
 #include "str.h"
 
-extern const char *PROGRAM_NAME;
+extern char *INVOCATION_NAME;
 
 int parse_options(int argc, char *argv[],
                   unsigned int noptions, Option *options,
@@ -37,7 +37,7 @@ int parse_options(int argc, char *argv[],
             int code = str_split(format_args_ptr, argv[optind - 1], ',');
             if (code < 0)
             {
-                snprintf(error_message, ERROR_MESSAGE_LEN, "%s: Failed to parse formats\n", PROGRAM_NAME);
+                snprintf(error_message, ERROR_MESSAGE_LEN, "%s: Failed to parse formats\n", INVOCATION_NAME);
                 return 2;
             }
             *n_format_args = code;
@@ -80,7 +80,7 @@ int parse_options(int argc, char *argv[],
             int code = str_split(type_args_ptr, argv[optind - 1], ',');
             if (code < 0)
             {
-                snprintf(error_message, ERROR_MESSAGE_LEN, "%s: Failed to parse types\n", PROGRAM_NAME);
+                snprintf(error_message, ERROR_MESSAGE_LEN, "%s: Failed to parse types\n", INVOCATION_NAME);
                 return 2;
             }
             *n_type_args = code;
@@ -144,7 +144,7 @@ int prepare_options(unsigned int noptions, Option *options,
     {
         code = 1;
         snprintf(error_message, ERROR_MESSAGE_LEN,
-                 "%s: Failed to allocate memory to create options string\n", PROGRAM_NAME);
+                 "%s: Failed to allocate memory to create options string\n", INVOCATION_NAME);
         goto cleanup;
     }
     memcpy(short_options, short_options_array.data, short_options_array.len * short_options_array.size);
@@ -160,7 +160,7 @@ void print_long_help(unsigned int noptions, Option *options)
     unsigned int nchars;
 
     // Usage section
-    int prefix_size = printf("usage: %s", PROGRAM_NAME) + 1; // +1 account for space added by first option
+    int prefix_size = printf("usage: %s", INVOCATION_NAME) + 1; // +1 account for space added by first option
     nmax = 80;
     nchars = 0;
 
@@ -190,7 +190,7 @@ void print_long_help(unsigned int noptions, Option *options)
     printf("\n%*s[<file> ...]\n\n", prefix_size, "");
 
     // Synopsis section
-    printf("%s is a vim-inspired alignment viewer\n\n", PROGRAM_NAME);
+    printf("%s is a vim-inspired alignment viewer\n\n", INVOCATION_NAME);
 
     // Options section
     printf("options:\n");
@@ -218,7 +218,7 @@ void print_long_help(unsigned int noptions, Option *options)
 
 void print_short_help(unsigned int noptions, Option *options)
 {
-    printf("usage: %s", PROGRAM_NAME);
+    printf("usage: %s", INVOCATION_NAME);
     for (unsigned int i = 0; i < noptions; i++)
     {
         Option *argument = options + i;
