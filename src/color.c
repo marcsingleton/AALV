@@ -2,8 +2,6 @@
 
 #include "color.h"
 
-#include <stdio.h>
-
 int color_init_color_scheme(ColorScheme *color_scheme, ColorType type, const char *name, unsigned int len)
 {
     if (color_scheme == NULL || name == NULL || len == 0)

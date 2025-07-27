@@ -5,6 +5,8 @@
  * FASTA format IO
  */
 
+#include <stdio.h>
+
 #include "sequences.h"
 
 extern const int FASTA_ERROR_INVALID_FORMAT;
