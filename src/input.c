@@ -363,9 +363,6 @@ void input_move_page_right(PageSize page_size)
             maxlen = active_file->record_array.records[i].len;
     }
 
-    if (active_file->offset_sequence + 2 >= maxlen) // Accounts for continuation symbol
-        return;
-
     unsigned int x = state_get_sequence_pane_width(&state);
     if (page_size == PAGE_SIZE_HALF)
         x /= 2;
@@ -381,8 +378,6 @@ void input_move_page_left(PageSize page_size)
     FileState *active_file = state.active_file;
 
     if (active_file->record_array.len == 0)
-        return;
-    if (active_file->offset_sequence == 0)
         return;
 
     unsigned int x = state_get_sequence_pane_width(&state);
