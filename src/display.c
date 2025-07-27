@@ -178,29 +178,27 @@ void display_sequence_pane(Array *buffer)
         unsigned int record_index = i + active_file->offset_record;
 
         terminal_cursor_ij(buffer, i + active_file->ruler_pane_height + 1, active_file->header_pane_width + 1);
-        terminal_clear_line_right(buffer);
         if (record_index < active_file->record_array.len)
         {
             SeqRecord record = active_file->record_array.records[record_index];
             unsigned int left_continuation = 0;
             unsigned int right_continuation = 0;
             unsigned int start = active_file->offset_sequence;
-            unsigned int len = sequence_pane_width;
+            unsigned int len;
             if (active_file->offset_sequence > 0)
             {
                 left_continuation = 1;
                 start++;
-                len--;
             }
-            if (record.len < active_file->offset_sequence)
+            if (record.len <= active_file->offset_sequence)
                 len = 0;
             else if ((record.len > active_file->offset_sequence + sequence_pane_width))
             {
                 right_continuation = 1;
-                len--;
+                len = sequence_pane_width - left_continuation - right_continuation;
             }
             else
-                len = record.len - active_file->offset_sequence;
+                len = record.len - active_file->offset_sequence - left_continuation;
 
             if (left_continuation)
                 array_append(buffer, "<");
@@ -208,7 +206,12 @@ void display_sequence_pane(Array *buffer)
                 display_sequence(buffer, &record, start, len);
             if (right_continuation)
                 array_append(buffer, ">");
+            else
+                for (unsigned int j = left_continuation + len; j < sequence_pane_width; j++)
+                    array_append(buffer, " ");
         }
+        else
+            terminal_clear_line_right(buffer);
     }
 }
 
