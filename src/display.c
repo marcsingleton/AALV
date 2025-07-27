@@ -70,14 +70,6 @@ void display_header_pane(Array *buffer)
     FileState *active_file = state.active_file;
     unsigned int record_panes_height = state_get_record_panes_height(&state);
 
-    terminal_cursor_ij(buffer, active_file->ruler_pane_height + 1, active_file->header_pane_width);
-    for (unsigned int i = 0; i < record_panes_height; i++)
-    {
-        terminal_clear_line_left(buffer);
-        char s[] = "┃\n\b";
-        array_extend(buffer, s, sizeof(s) - 1);
-    }
-
     for (unsigned int i = 0; i < record_panes_height; i++)
     {
         unsigned int record_index = i + active_file->offset_record;
@@ -87,7 +79,11 @@ void display_header_pane(Array *buffer)
             SeqRecord record = active_file->record_array.records[record_index];
             unsigned int len = strnlen(record.header, active_file->header_pane_width);
             if (len < active_file->header_pane_width)
+            {
                 array_extend(buffer, record.header, len);
+                for (unsigned int j = len; j < active_file->header_pane_width - 1; j++)
+                    array_append(buffer, " ");
+            }
             else
             {
                 array_extend(buffer, record.header, active_file->header_pane_width - 4);
@@ -95,7 +91,14 @@ void display_header_pane(Array *buffer)
             }
         }
         else
+        {
             array_extend(buffer, "~", sizeof("~") - 1);
+            for (unsigned int j = 1; j < active_file->header_pane_width - 1; j++)
+                array_append(buffer, " ");
+        }
+
+        char s[] = "┃\n\b";
+        array_extend(buffer, s, sizeof(s) - 1);
     }
 }
 
