@@ -2,6 +2,7 @@
 SRC_DIR := src
 TESTS_DIR := tests
 BUILD_DIR := build
+PROGRAM_NAME := aalv
 
 # src targets
 SRC := $(wildcard $(SRC_DIR)/*.c)
@@ -15,12 +16,15 @@ TESTS_DEPS := array.c fasta.c sequences.c str.c
 TESTS_OBJS := $(TESTS_DEPS:%.c=$(BUILD_DIR)/%.o)
 TESTS_TARGETS := $(TESTS:$(TESTS_DIR)/%.c=$(BUILD_DIR)/%)
 
+# platform and program macros
 OS := $(shell uname -s)
+VERSION := 0.1.0
+MACROS := -DPROGRAM_NAME=\"$(PROGRAM_NAME)\" -DVERSION=\"$(VERSION)\" # See macros.h for default values
 
 # CC flags
 CC := cc
 CFLAGS := -Wall -Wextra -pedantic -std=c99
-CPPFLAGS :=
+CPPFLAGS := $(MACROS)
 ifeq ($(OS), Linux)
 	CPPFLAGS += -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE -D_DEFAULT_SOURCE
 endif
