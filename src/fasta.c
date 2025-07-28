@@ -217,21 +217,21 @@ int fasta_fwrite(FILE *fp, SeqRecord *records, const size_t nrecords, const int 
 int fasta_write(const char *path, SeqRecord *records, const size_t nrecords, const int maxlen)
 {
     FILE *fp = fopen(path, "w");
-    size_t code = fasta_fwrite(fp, records, nrecords, maxlen);
+    int code = fasta_fwrite(fp, records, nrecords, maxlen);
     fclose(fp);
     return code;
 }
 
-void fasta_wrap_string(FILE *fp, const char *s, const int len, const int maxlen)
+void fasta_wrap_string(FILE *fp, const char *s, const size_t len, const int maxlen)
 {
-    int nlines = len / maxlen;
-    int j;
+    size_t nlines = len / maxlen;
+    size_t j;
     for (j = 0; j < nlines; j++)
     {
         fwrite(s + j * maxlen, sizeof(char), maxlen, fp);
         fputc('\n', fp);
     }
-    int nchars = len % maxlen;
+    size_t nchars = len % maxlen;
     if (nchars > 0)
     {
         fwrite(s + j * maxlen, sizeof(char), nchars, fp);

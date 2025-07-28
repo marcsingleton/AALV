@@ -8,20 +8,17 @@ AALV attempts to mimic many aspects of Vim-style navigation, but for simplicity 
   - Paging motions don't shift the cursor; they only shift the offset, and the cursor is only moved to prevent it exceeding the last record
 
 ## TODO
-- Update read_fasta to strip newlines and returns
-- Add proper argument parsing
-  - Options
-    - Format
-      - Force using a specific format parser
-      - One flag per file
-      - Otherwise uses file extension; in absence of extension attempts to infer
-    - Sequence type
-      - Force sequence type
-      - Double check against sequences; if conflict, most expansive
+- More supported file formats
+- Status bar w/ file names, total rows and columns, and mechanism for displaying messages
+- Fix handling of empty files and empty sequence records
+- Allow alphabets to recognize lowercase variants
+  - Case-insensitive flag
+  - Map all letter-types to upper internally
 - Commands
-  - Set sequence type
-  - Set display options
-    - Color scheme
+  - Set sequence type?
+  - Display options
+    - Add color scheme
+    - Set color scheme
     - Identities as dots
   - Next/previous/index file
 - Simple compound keys

@@ -16,13 +16,16 @@ typedef struct
     unsigned int header_pane_width;
     unsigned int ruler_pane_height;
     unsigned int tick_spacing;
-    unsigned int offset_record;
-    unsigned int offset_header;
-    unsigned int offset_sequence;
+    size_t offset_record;
+    size_t offset_header;
+    size_t offset_sequence;
     unsigned int cursor_record_i;   // Row index in header/sequence panes
     unsigned int cursor_header_j;   // Column index in header pane
     unsigned int cursor_sequence_j; // Column index in sequence pane
-    SeqRecordArray record_array;
+    SeqRecord *records;
+    size_t nrecords;
+    size_t records_maxlen;
+    size_t records_offset;
 } FileState;
 
 typedef struct

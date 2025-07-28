@@ -38,14 +38,12 @@ typedef struct
 {
     SeqRecord *records;
     unsigned int len;
-    unsigned int offset;
-    size_t maxlen;
 } SeqRecordArray;
 
 extern Alphabet NUCLEIC_ALPHABET;
 extern Alphabet PROTEIN_ALPHABET;
 
-void sequences_free_seq_records(SeqRecord *records, int nrecords);
+void sequences_free_seq_records(SeqRecord *records, size_t nrecords);
 void sequences_free_seq_record_array(SeqRecordArray *record_array);
 int sequences_init_alphabet(Alphabet *alphabet, char *name, char *syms);
 int sequences_init_base_alphabets(void);

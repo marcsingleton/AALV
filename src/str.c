@@ -42,14 +42,15 @@ int str_is_in(const char **ss, unsigned int n, const char *t)
     return 0;
 }
 
-int str_split(char ***fields_ptr, const char *s, const char d)
+ssize_t str_split(char ***fields_ptr, const char *s, const char d)
 {
     if (s == NULL)
         return -1;
 
-    size_t n = str_count(s, d) + 1;
-    if (n >= SIZE_MAX / sizeof(char *))
+    size_t m = str_count(s, d) + 1;
+    if (m >= SIZE_MAX / sizeof(char *))
         return -1;
+    ssize_t n = m;
     char **fields = malloc(n * sizeof(char *));
     if (fields == NULL)
         return -1;

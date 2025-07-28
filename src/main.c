@@ -269,7 +269,7 @@ void cleanup(void)
     for (unsigned int i = 0; i < state.n_color_schemes; i++)
         color_free_color_scheme(state.color_schemes + i);
     for (unsigned int i = 0; i < state.nfiles; i++)
-        sequences_free_seq_record_array(&state.files[i].record_array); // Null if unset, so always safe to free
+        sequences_free_seq_records(state.files[i].records, state.files[i].nrecords); // Null if unset, so always safe to free
     free(state.files);
 
     // Restore terminal options
@@ -403,18 +403,18 @@ int read_files(State *state,
             goto cleanup;
         }
         SeqRecord *records = NULL;
-        int len = reader(fp, &records);
-        if (len < 0)
+        size_t nrecords = reader(fp, &records);
+        if (nrecords < 0)
         {
             snprintf(error_message, ERROR_MESSAGE_LEN,
-                     "%s: %s: Error processing file (code %d)\n", INVOCATION_NAME, file_path, len);
+                     "%s: %s: Error processing file (code %zu)\n", INVOCATION_NAME, file_path, nrecords);
             code = 1;
             goto cleanup;
         }
 
         // Get maxlen
-        unsigned int maxlen = 0;
-        for (unsigned int i = 0; i < (unsigned int)len; i++)
+        size_t maxlen = 0;
+        for (size_t i = 0; i < nrecords; i++)
         {
             SeqRecord *record = records + i;
             if (record->len > maxlen)
@@ -425,7 +425,7 @@ int read_files(State *state,
         char *type_arg = "";
         if (file_index < n_type_args)
             type_arg = type_args[file_index];
-        for (unsigned int i = 0; i < (unsigned int)len; i++)
+        for (size_t i = 0; i < nrecords; i++)
         {
             SeqRecord *record = records + i;
             if (sequences_infer_seq_type(record) != 0)
@@ -455,10 +455,10 @@ int read_files(State *state,
         }
 
         FileState *file = state->files + file_index;
-        file->record_array.records = records;
-        file->record_array.len = len;
-        file->record_array.offset = 1;
-        file->record_array.maxlen = maxlen;
+        file->records = records;
+        file->nrecords = nrecords;
+        file->records_offset = 1;
+        file->records_maxlen = maxlen;
         file->header_pane_width = rcparams_header_pane_width;
         file->ruler_pane_height = rcparams_ruler_pane_height;
         file->tick_spacing = rcparams_tick_spacing;

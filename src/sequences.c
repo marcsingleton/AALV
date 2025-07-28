@@ -5,11 +5,11 @@
 Alphabet NUCLEIC_ALPHABET = {.name = "nucleic", .syms = "ACGTN.-"};
 Alphabet PROTEIN_ALPHABET = {.name = "protein", .syms = "ACDEFGHIKLMNPQRSTVWYX.-"};
 
-void sequences_free_seq_records(SeqRecord *records, int nrecords)
+void sequences_free_seq_records(SeqRecord *records, size_t nrecords)
 {
     if (records == NULL)
         return;
-    for (int i = 0; i < nrecords; i++)
+    for (size_t i = 0; i < nrecords; i++)
     {
         SeqRecord record = records[i];
         free(record.header);
@@ -33,7 +33,7 @@ int sequences_init_alphabet(Alphabet *alphabet, char *name, char *syms)
     alphabet->syms = syms;
     for (unsigned int i = 0; i < 128; i++)
         alphabet->index_map[i] = -1;
-    unsigned int len = 0;
+    unsigned short len = 0;
     for (char *sym = alphabet->syms; *sym != '\0'; sym++)
     {
         if (!isascii(*sym))

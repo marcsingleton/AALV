@@ -73,12 +73,12 @@ void display_header_pane(Array *buffer)
     unsigned int ellipses_width = wcswidth(DISPLAY_HEADER_PANE_ELLIPSES, sizeof(DISPLAY_HEADER_PANE_ELLIPSES));
     for (unsigned int i = 0; i < record_panes_height; i++)
     {
-        unsigned int record_index = i + active_file->offset_record;
+        size_t record_index = i + active_file->offset_record;
         terminal_cursor_ij(buffer, i + active_file->ruler_pane_height + 1, 1);
-        if (record_index < active_file->record_array.len)
+        if (record_index < active_file->nrecords)
         {
-            SeqRecord record = active_file->record_array.records[record_index];
-            unsigned int len = strnlen(record.header, active_file->header_pane_width);
+            SeqRecord record = active_file->records[record_index];
+            size_t len = strnlen(record.header, active_file->header_pane_width);
             if (len < active_file->header_pane_width)
             {
                 array_extend(buffer, record.header, len);
@@ -130,23 +130,23 @@ void display_ruler_pane_ticks(Array *buffer)
 {
     FileState *active_file = state.active_file;
     unsigned int tick_spacing = active_file->tick_spacing;
-    unsigned int x0 = active_file->offset_sequence + active_file->record_array.offset;
-    unsigned int q = x0 / tick_spacing;
-    unsigned int r = x0 % tick_spacing;
+    size_t x0 = active_file->offset_sequence + active_file->records_offset;
+    size_t q = x0 / tick_spacing;
+    size_t r = x0 % tick_spacing;
     if (r > 0)
         q++;
 
-    unsigned int x = q * tick_spacing;
-    unsigned int j;
+    size_t x = q * tick_spacing;
+    size_t j;
     unsigned int sequence_pane_width = state_get_sequence_pane_width(&state);
     unsigned int ellipses_width = wcswidth(DISPLAY_RULER_PANE_ELLIPSES, sizeof(DISPLAY_RULER_PANE_ELLIPSES));
-    while ((j = x - active_file->offset_sequence - active_file->record_array.offset) < sequence_pane_width)
+    while ((j = x - active_file->offset_sequence - active_file->records_offset) < sequence_pane_width)
     {
         terminal_cursor_ij(buffer, active_file->ruler_pane_height, j + active_file->header_pane_width + 1);
         array_extend(buffer, "┷", sizeof("┷") - 1);
 
         char c[2];
-        unsigned int n = x;
+        size_t n = x;
         unsigned int d;
         unsigned int i = active_file->ruler_pane_height - 1;
         do
@@ -179,15 +179,15 @@ void display_sequence_pane(Array *buffer)
 
     for (unsigned int i = 0; i < record_panes_height; i++)
     {
-        unsigned int record_index = i + active_file->offset_record;
+        size_t record_index = i + active_file->offset_record;
 
         terminal_cursor_ij(buffer, i + active_file->ruler_pane_height + 1, active_file->header_pane_width + 1);
-        if (record_index < active_file->record_array.len)
+        if (record_index < active_file->nrecords)
         {
-            SeqRecord record = active_file->record_array.records[record_index];
+            SeqRecord record = active_file->records[record_index];
             unsigned int left_continuation = 0;
             unsigned int right_continuation = 0;
-            unsigned int start = active_file->offset_sequence;
+            size_t start = active_file->offset_sequence;
             unsigned int len;
             if (active_file->offset_sequence > 0)
             {
@@ -199,7 +199,7 @@ void display_sequence_pane(Array *buffer)
             else if ((record.len > active_file->offset_sequence + sequence_pane_width))
             {
                 right_continuation = 1;
-                len = sequence_pane_width - left_continuation - right_continuation;
+                len = sequence_pane_width - left_continuation - right_continuation; // Difference should always fit into int
             }
             else
                 len = record.len - active_file->offset_sequence - left_continuation;
@@ -238,11 +238,11 @@ void display_command_pane(Array *buffer)
         return;
     char text[256];
     int n = snprintf(text, sizeof(text),
-                     "ROW %d/%d  COL %d/%zu",
+                     "ROW %zu/%zu  COL %zu/%zu",
                      active_file->offset_record + active_file->cursor_record_i + 1, // 1-based indexing
-                     active_file->record_array.len,
-                     active_file->offset_sequence + active_file->cursor_sequence_j + active_file->record_array.offset,
-                     active_file->record_array.maxlen);
+                     active_file->nrecords,
+                     active_file->offset_sequence + active_file->cursor_sequence_j + active_file->records_offset,
+                     active_file->records_maxlen);
     terminal_cursor_ij(buffer, active_file->ruler_pane_height + record_panes_height + 2, state.terminal_cols - n + 1);
     terminal_clear_line(buffer);
     array_extend(buffer, text, n);
@@ -254,7 +254,7 @@ void display_cursor(Array *buffer)
     unsigned int record_panes_height = state_get_record_panes_height(&state);
     if (record_panes_height == 0)
         return;
-    if (active_file->record_array.len == 0)
+    if (active_file->nrecords == 0)
         return;
 
     unsigned render_index_i;
@@ -264,9 +264,9 @@ void display_cursor(Array *buffer)
         render_index_i = active_file->cursor_record_i;
     unsigned int cursor_i = render_index_i + active_file->ruler_pane_height + 1;
 
-    unsigned int record_index = render_index_i + active_file->offset_record;
-    unsigned int sequence_index = active_file->cursor_sequence_j + active_file->offset_sequence;
-    SeqRecord record = active_file->record_array.records[record_index];
+    size_t record_index = render_index_i + active_file->offset_record;
+    size_t sequence_index = active_file->cursor_sequence_j + active_file->offset_sequence;
+    SeqRecord record = active_file->records[record_index];
     unsigned int render_index_j;
     if (record.len > sequence_index)
         render_index_j = sequence_index;
