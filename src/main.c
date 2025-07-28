@@ -412,6 +412,15 @@ int read_files(State *state,
             goto cleanup;
         }
 
+        // Get maxlen
+        unsigned int maxlen = 0;
+        for (unsigned int i = 0; i < (unsigned int)len; i++)
+        {
+            SeqRecord *record = records + i;
+            if (record->len > maxlen)
+                maxlen = record->len;
+        }
+
         // Set sequence type
         char *type_arg = "";
         if (file_index < n_type_args)
@@ -449,6 +458,7 @@ int read_files(State *state,
         file->record_array.records = records;
         file->record_array.len = len;
         file->record_array.offset = 1;
+        file->record_array.maxlen = maxlen;
         file->header_pane_width = rcparams_header_pane_width;
         file->ruler_pane_height = rcparams_ruler_pane_height;
         file->tick_spacing = rcparams_tick_spacing;

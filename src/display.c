@@ -238,9 +238,11 @@ void display_command_pane(Array *buffer)
         return;
     char text[256];
     int n = snprintf(text, sizeof(text),
-                     "ROW %d COL %d",
-                     active_file->offset_record + active_file->cursor_record_i,
-                     active_file->offset_sequence + active_file->cursor_sequence_j + active_file->record_array.offset);
+                     "ROW %d/%d  COL %d/%zu",
+                     active_file->offset_record + active_file->cursor_record_i + 1, // 1-based indexing
+                     active_file->record_array.len,
+                     active_file->offset_sequence + active_file->cursor_sequence_j + active_file->record_array.offset,
+                     active_file->record_array.maxlen);
     terminal_cursor_ij(buffer, active_file->ruler_pane_height + record_panes_height + 2, state.terminal_cols - n + 1);
     terminal_clear_line(buffer);
     array_extend(buffer, text, n);

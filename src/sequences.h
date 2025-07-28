@@ -39,6 +39,7 @@ typedef struct
     SeqRecord *records;
     unsigned int len;
     unsigned int offset;
+    size_t maxlen;
 } SeqRecordArray;
 
 extern Alphabet NUCLEIC_ALPHABET;
