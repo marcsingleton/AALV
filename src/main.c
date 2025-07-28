@@ -348,7 +348,7 @@ int read_files(State *state,
         char *format_arg = "";
         if (file_index < n_format_args)
             format_arg = format_args[file_index];
-        int (*reader)(FILE *, SeqRecord **) = NULL;
+        size_t (*reader)(FILE *, SeqRecord **) = NULL;
 
         if (format_arg[0] != '\0') // From format argument
         {

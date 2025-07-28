@@ -14,14 +14,14 @@ const int FASTA_ERROR_SEQUENCE_OVERFLOW = -3;
 const int FASTA_ERROR_FILE_IO = -4;
 const int FASTA_ERROR_MEMORY_ALLOCATION = -5;
 
-int fasta_fread(FILE *fp, SeqRecord **records_ptr)
+size_t fasta_fread(FILE *fp, SeqRecord **records_ptr)
 {
     // Declarations
-    int code;
+    size_t code;
 
     void *ptr = NULL; // A generic temporary pointer for allocations
 
-    int nrecords = 0;
+    size_t nrecords = 0;
     Array new_records;
     array_init(&new_records, sizeof(SeqRecord));
 
@@ -186,14 +186,14 @@ error:
     return code;
 }
 
-int fasta_read(const char *path, SeqRecord **records_ptr)
+size_t fasta_read(const char *path, SeqRecord **records_ptr)
 {
     FILE *fp = fopen(path, "r");
     if (fp == NULL)
         return FASTA_ERROR_FILE_IO;
 
     SeqRecord *ptr = NULL;
-    int nrecords = fasta_fread(fp, &ptr);
+    size_t nrecords = fasta_fread(fp, &ptr);
 
     if (fclose(fp) != 0)
         return FASTA_ERROR_FILE_IO;
@@ -203,9 +203,9 @@ int fasta_read(const char *path, SeqRecord **records_ptr)
     return nrecords;
 }
 
-int fasta_fwrite(FILE *fp, SeqRecord *records, const int nrecords, const int maxlen)
+int fasta_fwrite(FILE *fp, SeqRecord *records, const size_t nrecords, const int maxlen)
 {
-    for (int i = 0; i < nrecords; i++)
+    for (size_t i = 0; i < nrecords; i++)
     {
         SeqRecord *record = records + i;
         fprintf(fp, ">%s\n", record->header);
@@ -214,10 +214,10 @@ int fasta_fwrite(FILE *fp, SeqRecord *records, const int nrecords, const int max
     return 0;
 }
 
-int fasta_write(const char *path, SeqRecord *records, const int nrecords, const int maxlen)
+int fasta_write(const char *path, SeqRecord *records, const size_t nrecords, const int maxlen)
 {
     FILE *fp = fopen(path, "w");
-    int code = fasta_fwrite(fp, records, nrecords, maxlen);
+    size_t code = fasta_fwrite(fp, records, nrecords, maxlen);
     fclose(fp);
     return code;
 }
