@@ -13,6 +13,7 @@
 
 typedef struct
 {
+    const char *file_path;
     unsigned int header_pane_width;
     unsigned int ruler_pane_height;
     unsigned int tick_spacing;

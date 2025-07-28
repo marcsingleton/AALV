@@ -455,6 +455,7 @@ int read_files(State *state,
         }
 
         FileState *file = state->files + file_index;
+        file->file_path = file_path;
         file->records = records;
         file->nrecords = nrecords;
         file->records_offset = 1;
