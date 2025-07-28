@@ -42,9 +42,6 @@ int parse_options(int argc, char *argv[],
                 return 2;
             }
             *n_format_args = code;
-            printf("Identified the following formats:\n");
-            for (unsigned int i = 0; i < *n_format_args; i++)
-                printf("    %s\n", (*format_args_ptr)[i]);
         }
         else if (c == 'h')
         {
@@ -85,9 +82,6 @@ int parse_options(int argc, char *argv[],
                 return 2;
             }
             *n_type_args = code;
-            printf("Identified the following types:\n");
-            for (unsigned int i = 0; i < *n_type_args; i++)
-                printf("    %s\n", (*type_args_ptr)[i]);
         }
         else if (c == 'v' || strcmp(name, "version") == 0)
         {
