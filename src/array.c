@@ -34,7 +34,7 @@ void array_free(Array *array)
     array->len = 0;
 }
 
-int array_append(Array *array, void *value)
+int array_append(Array *array, const void *value)
 {
     if (array->len >= array->capacity)
     {
@@ -53,7 +53,7 @@ int array_append(Array *array, void *value)
     return 0;
 }
 
-int array_extend(Array *array, void *values, size_t len)
+int array_extend(Array *array, const void *values, size_t len)
 {
     if (array->len > array->max_capacity - len)
         return 1;
