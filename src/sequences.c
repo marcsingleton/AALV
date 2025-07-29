@@ -3,7 +3,7 @@
 #include "sequences.h"
 
 Alphabet NUCLEIC_ALPHABET = {.name = "nucleic", .syms = "ACGTN.-", .case_sensitive = false};
-Alphabet PROTEIN_ALPHABET = {.name = "protein", .syms = "ACDEFGHIKLMNPQRSTVWYX.-", .case_sensitive = false};
+Alphabet PROTEIN_ALPHABET = {.name = "protein", .syms = "ACDEFGHIKLmNPQRSTVWYX.-", .case_sensitive = false};
 
 void sequences_free_seq_records(SeqRecord *records, size_t nrecords)
 {
@@ -88,16 +88,15 @@ int sequences_init_base_alphabets(void)
 
 int sequences_in_alphabet(Alphabet *alphabet, SeqRecord *record)
 {
-    int code = 1;
     for (char *sym = record->seq; *sym != '\0'; sym++)
     {
         if (!isascii(*sym))
             return -1;
         unsigned int index = *sym;
         if (alphabet->index_map[index] == -1)
-            code = 0;
+            return 0;
     }
-    return code;
+    return 1;
 }
 
 int sequences_is_nucleic(SeqRecord *record)

@@ -20,7 +20,9 @@ int schemes_init_base(void)
             return code;
         for (const ColorMapRecord4Bit *map_record = scheme_record->map; map_record->sym != 0; map_record++)
         {
-            unsigned int index = alphabet->index_map[(unsigned int)map_record->sym];
+            int index = alphabet->index_map[(unsigned int)map_record->sym];
+            if (index == -1)
+                return 1;
             if (map_record->fg_mask)
             {
                 scheme->map.b4.fg[index] = map_record->fg_color;
@@ -46,7 +48,9 @@ int schemes_init_base(void)
             return code;
         for (const ColorMapRecord8Bit *map_record = scheme_record->map; map_record->sym != 0; map_record++)
         {
-            unsigned int index = alphabet->index_map[(unsigned int)map_record->sym];
+            int index = alphabet->index_map[(unsigned int)map_record->sym];
+            if (index == -1)
+                return 1;
             if (map_record->fg_mask)
             {
                 scheme->map.b8.fg[index] = map_record->fg_color;

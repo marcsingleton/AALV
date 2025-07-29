@@ -103,10 +103,31 @@ SeqTypeState types[SEQ_TYPE_ERROR + 1];
 // Main
 int main(int argc, char *argv[])
 {
+    // Get invocation name
+    if (argv[0] != NULL)
+    {
+        char *s = strrchr(argv[0], '/');
+        if (s == NULL)
+            INVOCATION_NAME = argv[0];
+        else
+            INVOCATION_NAME = s + 1; // Exclude /
+    }
+    else
+        INVOCATION_NAME = "?";
+
+    // Initializations
     int code = 0; // Generic return code for various functions
     atexit(&cleanup);
-    sequences_init_base_alphabets();
-    schemes_init_base();
+    if (sequences_init_base_alphabets() != 0)
+    {
+        snprintf(error_message, ERROR_MESSAGE_LEN, "%s: Failed to initialize alphabets\n", INVOCATION_NAME);
+        return 1;
+    };
+    if (schemes_init_base() != 0)
+    {
+        snprintf(error_message, ERROR_MESSAGE_LEN, "%s: Failed to initialize color schemes\n", INVOCATION_NAME);
+        return 1;
+    }
 
     // Prepare color schemes
     state.color_schemes = schemes_base;
@@ -143,18 +164,6 @@ int main(int argc, char *argv[])
         state_set_type_color_scheme(&state, SEQ_TYPE_NUCLEIC, &schemes_default_nucleic_4_bit);
         state_set_type_color_scheme(&state, SEQ_TYPE_PROTEIN, &schemes_default_protein_4_bit);
     }
-
-    // Get invocation name
-    if (argv[0] != NULL)
-    {
-        char *s = strrchr(argv[0], '/');
-        if (s == NULL)
-            INVOCATION_NAME = argv[0];
-        else
-            INVOCATION_NAME = s + 1; // Exclude /
-    }
-    else
-        INVOCATION_NAME = "?";
 
     // Prepare options
     struct option long_options[NOPTIONS + 1]; // Extra struct of 0s to mark end
