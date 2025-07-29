@@ -3,6 +3,10 @@
 
 /*
  * Color schemes
+ *
+ * In case-insensitive alphabets, lowercase symbols are internally mapped to uppercase. As a result, color schemes given
+ * in uppercase are case-insensitive. However, "lowercase" color schemes are not.
+ *
  */
 
 #include <stdbool.h>

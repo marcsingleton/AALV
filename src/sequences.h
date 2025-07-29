@@ -5,6 +5,7 @@
  * Sequence data structures
  */
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
 
@@ -22,6 +23,7 @@ typedef struct
     char *name;
     char *syms;
     unsigned int len;
+    bool case_sensitive;
     int index_map[128];
 } Alphabet;
 
@@ -45,7 +47,7 @@ extern Alphabet PROTEIN_ALPHABET;
 
 void sequences_free_seq_records(SeqRecord *records, size_t nrecords);
 void sequences_free_seq_record_array(SeqRecordArray *record_array);
-int sequences_init_alphabet(Alphabet *alphabet, char *name, char *syms);
+int sequences_init_alphabet(Alphabet *alphabet, char *name, char *syms, bool case_sensitive);
 int sequences_init_base_alphabets(void);
 int sequences_in_alphabet(Alphabet *alphabet, SeqRecord *record);
 int sequences_is_nucleic(SeqRecord *record);

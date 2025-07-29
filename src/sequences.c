@@ -2,8 +2,8 @@
 
 #include "sequences.h"
 
-Alphabet NUCLEIC_ALPHABET = {.name = "nucleic", .syms = "ACGTN.-"};
-Alphabet PROTEIN_ALPHABET = {.name = "protein", .syms = "ACDEFGHIKLMNPQRSTVWYX.-"};
+Alphabet NUCLEIC_ALPHABET = {.name = "nucleic", .syms = "ACGTN.-", .case_sensitive = false};
+Alphabet PROTEIN_ALPHABET = {.name = "protein", .syms = "ACDEFGHIKLMNPQRSTVWYX.-", .case_sensitive = false};
 
 void sequences_free_seq_records(SeqRecord *records, size_t nrecords)
 {
@@ -25,7 +25,7 @@ void sequences_free_seq_record_array(SeqRecordArray *record_array)
     record_array->len = 0;
 }
 
-int sequences_init_alphabet(Alphabet *alphabet, char *name, char *syms)
+int sequences_init_alphabet(Alphabet *alphabet, char *name, char *syms, bool case_sensitive)
 {
     if (!alphabet || !name || !syms)
         return 1;
@@ -38,9 +38,33 @@ int sequences_init_alphabet(Alphabet *alphabet, char *name, char *syms)
     {
         if (!isascii(*sym))
             return 1;
-        unsigned int index = *sym;
-        alphabet->index_map[index] = len;
-        len++;
+        if (!case_sensitive && isalpha(*sym))
+        {
+            unsigned int index_0, index_1;
+            if (isupper(*sym))
+            {
+                index_0 = *sym;
+                index_1 = tolower(*sym);
+            }
+            else
+            {
+                index_0 = toupper(*sym);
+                index_1 = *sym;
+            }
+            if (alphabet->index_map[index_0] != -1)
+                continue;
+            alphabet->index_map[index_0] = len;
+            alphabet->index_map[index_1] = len;
+            len++;
+        }
+        else
+        {
+            unsigned int index = *sym;
+            if (alphabet->index_map[index] != -1)
+                continue;
+            alphabet->index_map[index] = len;
+            len++;
+        }
     }
     alphabet->len = len;
     return 0;
@@ -55,7 +79,7 @@ int sequences_init_base_alphabets(void)
     for (unsigned int i = 0; i < N_BASE_ALPHABETS; i++)
     {
         Alphabet *alphabet = BASE_ALPHABETS[i];
-        code = sequences_init_alphabet(alphabet, alphabet->name, alphabet->syms);
+        code = sequences_init_alphabet(alphabet, alphabet->name, alphabet->syms, alphabet->case_sensitive);
         if (code != 0)
             return code;
     }
