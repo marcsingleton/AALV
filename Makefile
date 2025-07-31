@@ -18,8 +18,8 @@ TESTS_TARGETS := $(TESTS:$(TESTS_DIR)/%.c=$(BUILD_DIR)/%)
 
 # platform and program macros
 OS := $(shell uname -s)
-VERSION := 0.1.0
-MACROS := -DPROGRAM_NAME=\"$(PROGRAM_NAME)\" -DVERSION=\"$(VERSION)\" # See macros.h for default values
+VERSION := 1.0.0 dev
+MACROS := '-DPROGRAM_NAME="$(PROGRAM_NAME)"' '-DVERSION="$(VERSION)"' # See macros.h for default values
 
 # CC flags
 CC := cc
