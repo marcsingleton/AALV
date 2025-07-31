@@ -99,7 +99,7 @@ size_t fasta_fread(FILE *fp, SeqRecord **records_ptr)
         {
             // Trim line
             trimlen = linelen;
-            while (line[trimlen - 1] == '\n' || line[trimlen - 1] == '\r')
+            while (trimlen > 0 && (line[trimlen - 1] == '\n' || line[trimlen - 1] == '\r'))
                 trimlen--;
 
             // Check for sequence overflow
