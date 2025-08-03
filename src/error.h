@@ -9,4 +9,6 @@
 
 extern char error_message[];
 
+void error_printf(const char *format, ...);
+
 #endif // ERROR_H

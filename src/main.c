@@ -120,12 +120,12 @@ int main(int argc, char *argv[])
     atexit(&cleanup);
     if (sequences_init_base_alphabets() != 0)
     {
-        snprintf(error_message, ERROR_MESSAGE_LEN, "%s: Failed to initialize alphabets\n", INVOCATION_NAME);
+        error_printf("%s: Failed to initialize alphabets\n", INVOCATION_NAME);
         return 1;
     };
     if (schemes_init_base() != 0)
     {
-        snprintf(error_message, ERROR_MESSAGE_LEN, "%s: Failed to initialize color schemes\n", INVOCATION_NAME);
+        error_printf("%s: Failed to initialize color schemes\n", INVOCATION_NAME);
         return 1;
     }
 
@@ -207,8 +207,7 @@ int main(int argc, char *argv[])
         input_fd = open("/dev/tty", O_RDONLY);
         if (input_fd == -1)
         {
-            snprintf(error_message, ERROR_MESSAGE_LEN,
-                     "%s: Failed to open /dev/tty for reading commands\n", INVOCATION_NAME);
+            error_printf("%s: Failed to open /dev/tty for reading commands\n", INVOCATION_NAME);
             return 1;
         }
         TERMINAL_FILENO = input_fd;
@@ -220,7 +219,7 @@ int main(int argc, char *argv[])
     FileState *files = malloc(nfiles * sizeof(FileState));
     if (files == NULL)
     {
-        snprintf(error_message, ERROR_MESSAGE_LEN, "%s: Failed to allocate memory to load files\n", INVOCATION_NAME);
+        error_printf("%s: Failed to allocate memory to load files\n", INVOCATION_NAME);
         return 1;
     }
     state.files = files;
@@ -243,12 +242,12 @@ int main(int argc, char *argv[])
     // Set screen and terminal options
     if (terminal_get_termios(&old_termios) != 0)
     {
-        snprintf(error_message, ERROR_MESSAGE_LEN, "%s: Failed to get current termios\n", INVOCATION_NAME);
+        error_printf("%s: Failed to get current termios\n", INVOCATION_NAME);
         return 1;
     }
     if (terminal_enable_raw_mode(&old_termios, &raw_termios) != 0)
     {
-        snprintf(error_message, ERROR_MESSAGE_LEN, "%s: Failed to set raw mode\n", INVOCATION_NAME);
+        error_printf("%s: Failed to set raw mode\n", INVOCATION_NAME);
         return 1;
     };
     raw_mode = true;
@@ -306,8 +305,7 @@ int read_files(State *state,
     StrArray *formats_exts = malloc(N_FORMAT_OPTIONS * sizeof(StrArray));
     if (formats_exts == NULL)
     {
-        snprintf(error_message, ERROR_MESSAGE_LEN,
-                 "%s: Failed to allocate memory to split format extensions\n", INVOCATION_NAME);
+        error_printf("%s: Failed to allocate memory to split format extensions\n", INVOCATION_NAME);
         return 1;
     }
     for (unsigned int i = 0; i < N_FORMAT_OPTIONS; i++)
@@ -327,8 +325,7 @@ int read_files(State *state,
     StrArray *types_identifiers = malloc(N_TYPE_OPTIONS * sizeof(StrArray));
     if (formats_exts == NULL)
     {
-        snprintf(error_message, ERROR_MESSAGE_LEN,
-                 "%s: Failed to allocate memory to split type identifiers\n", INVOCATION_NAME);
+        error_printf("%s: Failed to allocate memory to split type identifiers\n", INVOCATION_NAME);
         return 1;
     }
     for (unsigned int i = 0; i < N_TYPE_OPTIONS; i++)
@@ -370,8 +367,7 @@ int read_files(State *state,
                     reader = format_option->reader;
                     break;
                 }
-                snprintf(error_message, ERROR_MESSAGE_LEN,
-                         "%s: %s: Error identifying format\n", INVOCATION_NAME, format_arg);
+                error_printf("%s: %s: Error identifying format\n", INVOCATION_NAME, format_arg);
                 code = 2;
                 goto cleanup;
             }
@@ -388,15 +384,14 @@ int read_files(State *state,
                     reader = format_option->reader;
                     break;
                 }
-                snprintf(error_message, ERROR_MESSAGE_LEN, "%s: %s: Unknown extension\n", INVOCATION_NAME, file_path);
+                error_printf("%s: %s: Unknown extension\n", INVOCATION_NAME, file_path);
                 code = 2;
                 goto cleanup;
             }
         }
         else
         {
-            snprintf(error_message, ERROR_MESSAGE_LEN,
-                     "%s: %s: No format or known extension\n", INVOCATION_NAME, file_path);
+            error_printf("%s: %s: No format or known extension\n", INVOCATION_NAME, file_path);
             code = 2;
             goto cleanup;
         }
@@ -407,7 +402,7 @@ int read_files(State *state,
             fp = stdin;
         else if ((fp = fopen(file_path, "r")) == NULL)
         {
-            snprintf(error_message, ERROR_MESSAGE_LEN, "%s: %s: %s\n", INVOCATION_NAME, file_path, strerror(errno));
+            error_printf("%s: %s: %s\n", INVOCATION_NAME, file_path, strerror(errno));
             code = 1;
             goto cleanup;
         }
@@ -415,8 +410,7 @@ int read_files(State *state,
         size_t nrecords = reader(fp, &records);
         if (nrecords < 0)
         {
-            snprintf(error_message, ERROR_MESSAGE_LEN,
-                     "%s: %s: Error processing file (code %zu)\n", INVOCATION_NAME, file_path, nrecords);
+            error_printf("%s: %s: Error processing file (code %zu)\n", INVOCATION_NAME, file_path, nrecords);
             code = 1;
             goto cleanup;
         }
@@ -439,8 +433,7 @@ int read_files(State *state,
             SeqRecord *record = records + i;
             if (sequences_infer_seq_type(record) != 0)
             {
-                snprintf(error_message, ERROR_MESSAGE_LEN,
-                         "%s: %s: Error identifying sequence types\n", INVOCATION_NAME, file_path);
+                error_printf("%s: %s: Error identifying sequence types\n", INVOCATION_NAME, file_path);
                 code = 1;
                 goto cleanup;
             };
