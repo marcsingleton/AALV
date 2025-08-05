@@ -9,6 +9,7 @@
  */
 
 #include "array.h"
+#include "commands.h"
 
 typedef enum
 {
@@ -16,8 +17,9 @@ typedef enum
     PAGE_SIZE_HALF
 } PageSize;
 
-int input_get_action(int fd);
-int input_process_action(int action, Array *buffer);
+int input_read_key(Array *buffer, int fd);
+int input_parse_keys(Array *buffer, int *count, Command *cmd);
+int input_execute_command(int count, Command cmd);
 void input_buffer_flush(Array *buffer);
 void input_next_file(void);
 void input_previous_file(void);

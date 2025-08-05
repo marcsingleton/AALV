@@ -256,18 +256,33 @@ int main(int argc, char *argv[])
     setlocale(LC_ALL, ""); // Necessary for wcswidth calls
 
     // Main loop
-    int action;
-    Array buffer;
-    array_init(&buffer, sizeof(char));
+    int count;
+    Command cmd;
+
+    Array input_buffer, output_buffer;
+    array_init(&input_buffer, sizeof(char));
+    array_init(&output_buffer, sizeof(char));
 
     while (1)
     {
-        action = input_get_action(input_fd);
-        input_process_action(action, &buffer);
+        input_read_key(&input_buffer, STDIN_FILENO);
 
-        display_refresh(&buffer);
+        int code = input_parse_keys(&input_buffer, &count, &cmd);
+        switch (code)
+        {
+        case 0:
+            input_execute_command(count, cmd);
+            input_buffer.len = 0;
+            break;
+        case 1:
+            break;
+        case 2:
+            input_buffer.len = 0;
+            break;
+        }
 
-        input_buffer_flush(&buffer);
+        display_refresh(&output_buffer);
+        input_buffer_flush(&output_buffer);
     }
 }
 

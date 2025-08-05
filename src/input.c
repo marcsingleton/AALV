@@ -11,7 +11,7 @@
 
 extern State state;
 
-int input_get_action(int fd)
+int input_read_key(Array *buffer, int fd)
 {
     fd_set readfds;
     FD_ZERO(&readfds);
@@ -19,126 +19,279 @@ int input_get_action(int fd)
 
     struct timeval tv;
     tv.tv_sec = 0;
-    tv.tv_usec = 100000;
+    tv.tv_usec = 2500;
 
-    int nready = select(fd + 1, &readfds, NULL, NULL, &tv);
-
-    char c = '\0';
-    if (nready > 0 && FD_ISSET(fd, &readfds))
+    char c;
+    int n = 0;
+    while (select(fd + 1, &readfds, NULL, NULL, &tv) > 0 && FD_ISSET(fd, &readfds))
+    {
         read(fd, &c, 1);
+        array_append(buffer, &c);
+        n++;
+    }
 
-    return (int)c;
+    return n;
 }
 
-int input_process_action(int action, Array *buffer)
+int input_parse_keys(Array *buffer, int *count, Command *cmd)
 {
-    switch (action)
+    /* Return codes
+        0: success
+        1: incomplete
+        2: failure
+    */
+
+    size_t index = 0;
+    char *ptr, c;
+
+    // Parse digits
+    unsigned int a = 0;
+    while (index < buffer->len)
     {
+        ptr = array_get(buffer, index);
+        c = *ptr;
+        if (!isdigit(c))
+            break;
+        if (a == 0 && c == '0') // 0 is line start, so ignore at start of digits
+            break;
+        a = 10 * a + (c - '0'); // TODO: Check for overflow
+        index++;
+    }
+    if (index >= buffer->len)
+        return 1;
+
+    // Parse command
+    switch (c)
+    {
+    case 27: // ESC
+        if (index + 2 >= buffer->len)
+            return 2;
+        ptr = array_get(buffer, index + 1);
+        c = *ptr;
+        if (c != '[')
+            return 2;
+        ptr = array_get(buffer, index + 2);
+        c = *ptr;
+        switch (c)
+        {
+        case 'A':
+            *cmd = CMD_MOVE_UP;
+            break;
+        case 'B':
+            *cmd = CMD_MOVE_DOWN;
+            break;
+        case 'C':
+            *cmd = CMD_MOVE_RIGHT;
+            break;
+        case 'D':
+            *cmd = CMD_MOVE_LEFT;
+            break;
+        default:
+            return 2;
+        }
+        break;
+    case 'q':
+        *cmd = CMD_QUIT;
+        break;
     case '>':
-        input_next_file();
+        *cmd = CMD_NEXT_FILE;
         break;
     case '<':
-        input_previous_file();
-        break;
-    case 'j':
-        input_move_down(1);
-        break;
-    case 'J':
-        input_move_down(5);
+        *cmd = CMD_PREVIOUS_FILE;
         break;
     case 'k':
-        input_move_up(1);
+        *cmd = CMD_MOVE_UP;
         break;
-    case 'K':
-        input_move_up(5);
+    case 'j':
+        *cmd = CMD_MOVE_DOWN;
         break;
     case 'l':
-        input_move_right(1);
-        break;
-    case 'L':
-        input_move_right(5);
+        *cmd = CMD_MOVE_RIGHT;
         break;
     case 'h':
-        input_move_left(1);
-        break;
-    case 'H':
-        input_move_left(5);
+        *cmd = CMD_MOVE_LEFT;
         break;
     case CTRL('b'):
-        input_move_page_up(PAGE_SIZE_FULL);
+        *cmd = CMD_MOVE_FULL_PAGE_UP;
         break;
     case CTRL('f'):
-        input_move_page_down(PAGE_SIZE_FULL);
+        *cmd = CMD_MOVE_FULL_PAGE_DOWN;
         break;
     case 'M':
-        input_move_page_right(PAGE_SIZE_FULL);
+        *cmd = CMD_MOVE_FULL_PAGE_RIGHT;
         break;
     case 'N':
-        input_move_page_left(PAGE_SIZE_FULL);
+        *cmd = CMD_MOVE_FULL_PAGE_LEFT;
         break;
     case CTRL('u'):
-        input_move_page_up(PAGE_SIZE_HALF);
+        *cmd = CMD_MOVE_HALF_PAGE_UP;
         break;
     case CTRL('d'):
-        input_move_page_down(PAGE_SIZE_HALF);
+        *cmd = CMD_MOVE_HALF_PAGE_DOWN;
         break;
     case 'm':
-        input_move_page_right(PAGE_SIZE_HALF);
+        *cmd = CMD_MOVE_HALF_PAGE_RIGHT;
         break;
     case 'n':
-        input_move_page_left(PAGE_SIZE_HALF);
+        *cmd = CMD_MOVE_HALF_PAGE_LEFT;
         break;
     case '$':
-        input_move_line_end();
+        *cmd = CMD_MOVE_LINE_END;
         break;
     case '0':
     case '^':
-        input_move_line_start();
+        *cmd = CMD_MOVE_LINE_START;
         break;
-    case 'g':
-        input_move_first_record();
+    case 'g': // TODO: Make gg
+        *cmd = CMD_MOVE_FIRST_RECORD;
         break;
-    case 'G':
-        input_move_last_record();
+    case 'G': // TODO: Make jump to
+        *cmd = CMD_MOVE_LAST_RECORD;
         break;
     case 'w':
-        input_move_top_edge();
+        *cmd = CMD_MOVE_TOP_EDGE;
         break;
     case 's':
-        input_move_vertical_middle();
+        *cmd = CMD_MOVE_VERTICAL_MIDDLE;
         break;
     case 'x':
-        input_move_bottom_edge();
+        *cmd = CMD_MOVE_BOTTOM_EDGE;
         break;
     case 'e':
-        input_move_left_edge();
+        *cmd = CMD_MOVE_LEFT_EDGE;
         break;
     case 'r':
-        input_move_horizontal_middle();
+        *cmd = CMD_MOVE_VERTICAL_MIDDLE;
         break;
     case 't':
-        input_move_right_edge();
+        *cmd = CMD_MOVE_RIGHT;
         break;
     case ']':
-        input_increase_header_pane_width();
+        *cmd = CMD_INCREASE_HEADER_PANE_WIDTH;
         break;
     case '[':
-        input_decrease_header_pane_width();
+        *cmd = CMD_DECREASE_HEADER_PANE_WIDTH;
         break;
     case '}':
-        input_increase_ruler_pane_height();
+        *cmd = CMD_INCREASE_RULER_PANE_HEIGHT;
         break;
     case '{':
-        input_decrease_ruler_pane_height();
+        *cmd = CMD_DECREASE_RULER_PANE_HEIGHT;
         break;
     case '+':
-        input_increase_tick_spacing();
+        *cmd = CMD_INCREASE_TICK_SPACING;
         break;
     case '-':
-        input_decrease_tick_spacing();
+        *cmd = CMD_DECREASE_TICK_SPACING;
         break;
-    case 'q':
+    default:
+        return 2;
+    }
+
+    if (a != 0)
+        *count = a;
+    else
+        *count = 1;
+
+    return 0;
+}
+
+int input_execute_command(int count, Command cmd)
+{
+    switch (cmd)
+    {
+    case CMD_QUIT:
         exit(0);
+        break;
+    case CMD_NEXT_FILE:
+        input_next_file();
+        break;
+    case CMD_PREVIOUS_FILE:
+        input_previous_file();
+        break;
+    case CMD_MOVE_DOWN:
+        input_move_down(count);
+        break;
+    case CMD_MOVE_UP:
+        input_move_up(count);
+        break;
+    case CMD_MOVE_RIGHT:
+        input_move_right(count);
+        break;
+    case CMD_MOVE_LEFT:
+        input_move_left(count);
+        break;
+    case CMD_MOVE_FULL_PAGE_UP:
+        input_move_page_up(PAGE_SIZE_FULL);
+        break;
+    case CMD_MOVE_FULL_PAGE_DOWN:
+        input_move_page_down(PAGE_SIZE_FULL);
+        break;
+    case CMD_MOVE_FULL_PAGE_RIGHT:
+        input_move_page_right(PAGE_SIZE_FULL);
+        break;
+    case CMD_MOVE_FULL_PAGE_LEFT:
+        input_move_page_left(PAGE_SIZE_FULL);
+        break;
+    case CMD_MOVE_HALF_PAGE_UP:
+        input_move_page_up(PAGE_SIZE_HALF);
+        break;
+    case CMD_MOVE_HALF_PAGE_DOWN:
+        input_move_page_down(PAGE_SIZE_HALF);
+        break;
+    case CMD_MOVE_HALF_PAGE_RIGHT:
+        input_move_page_right(PAGE_SIZE_HALF);
+        break;
+    case CMD_MOVE_HALF_PAGE_LEFT:
+        input_move_page_left(PAGE_SIZE_HALF);
+        break;
+    case CMD_MOVE_LINE_END:
+        input_move_line_end();
+        break;
+    case CMD_MOVE_LINE_START:
+        input_move_line_start();
+        break;
+    case CMD_MOVE_FIRST_RECORD:
+        input_move_first_record();
+        break;
+    case CMD_MOVE_LAST_RECORD:
+        input_move_last_record();
+        break;
+    case CMD_MOVE_TOP_EDGE:
+        input_move_top_edge();
+        break;
+    case CMD_MOVE_VERTICAL_MIDDLE:
+        input_move_vertical_middle();
+        break;
+    case CMD_MOVE_BOTTOM_EDGE:
+        input_move_bottom_edge();
+        break;
+    case CMD_MOVE_LEFT_EDGE:
+        input_move_left_edge();
+        break;
+    case CMD_MOVE_HORIZONTAL_MIDDLE:
+        input_move_horizontal_middle();
+        break;
+    case CMD_MOVE_RIGHT_EDGE:
+        input_move_right_edge();
+        break;
+    case CMD_INCREASE_HEADER_PANE_WIDTH:
+        input_increase_header_pane_width();
+        break;
+    case CMD_DECREASE_HEADER_PANE_WIDTH:
+        input_decrease_header_pane_width();
+        break;
+    case CMD_INCREASE_RULER_PANE_HEIGHT:
+        input_increase_ruler_pane_height();
+        break;
+    case CMD_DECREASE_RULER_PANE_HEIGHT:
+        input_decrease_ruler_pane_height();
+        break;
+    case CMD_INCREASE_TICK_SPACING:
+        input_increase_tick_spacing();
+        break;
+    case CMD_DECREASE_TICK_SPACING:
+        input_decrease_tick_spacing();
         break;
     }
 
