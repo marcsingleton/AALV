@@ -31,8 +31,6 @@ struct termios old_termios;
 struct termios raw_termios;
 bool raw_mode = false;
 
-extern char error_message[ERROR_MESSAGE_LEN];
-
 void cleanup(void);
 int read_files(State *state,
                unsigned int n_positional_args, char **positional_args,
