@@ -101,15 +101,23 @@ int input_parse_keys(Array *buffer, int *count, Command *cmd)
         break;
     case 'k':
         *cmd = CMD_MOVE_UP;
+        if (a == 0)
+            a = 1;
         break;
     case 'j':
         *cmd = CMD_MOVE_DOWN;
+        if (a == 0)
+            a = 1;
         break;
     case 'l':
         *cmd = CMD_MOVE_RIGHT;
+        if (a == 0)
+            a = 1;
         break;
     case 'h':
         *cmd = CMD_MOVE_LEFT;
+        if (a == 0)
+            a = 1;
         break;
     case CTRL('b'):
         *cmd = CMD_MOVE_FULL_PAGE_UP;
@@ -142,11 +150,23 @@ int input_parse_keys(Array *buffer, int *count, Command *cmd)
     case '^':
         *cmd = CMD_MOVE_LINE_START;
         break;
-    case 'g': // TODO: Make gg
+    case 'g':
+        if (index + 1 >= buffer->len)
+            return 1;
+        ptr = array_get(buffer, index + 1);
+        c = *ptr;
+        if (c != 'g')
+            return 2;
         *cmd = CMD_MOVE_FIRST_RECORD;
         break;
-    case 'G': // TODO: Make jump to
-        *cmd = CMD_MOVE_LAST_RECORD;
+    case 'G':
+        if (a == 0)
+            *cmd = CMD_MOVE_LAST_RECORD;
+        else
+        {
+            *cmd = CMD_MOVE_TO_RECORD;
+            a--;
+        }
         break;
     case 'w':
         *cmd = CMD_MOVE_TOP_EDGE;
@@ -188,10 +208,7 @@ int input_parse_keys(Array *buffer, int *count, Command *cmd)
         return 2;
     }
 
-    if (a != 0)
-        *count = a;
-    else
-        *count = 1;
+    *count = a;
 
     return 0;
 }
@@ -256,6 +273,9 @@ int input_execute_command(int count, Command cmd)
         break;
     case CMD_MOVE_LAST_RECORD:
         input_move_last_record();
+        break;
+    case CMD_MOVE_TO_RECORD:
+        input_move_to_record(count);
         break;
     case CMD_MOVE_TOP_EDGE:
         input_move_top_edge();
@@ -590,6 +610,21 @@ void input_move_last_record(void)
     size_t record_index = active_file->cursor_record_i + active_file->offset_record;
     size_t x = active_file->nrecords - 1 - record_index;
     input_move_down(x);
+}
+
+void input_move_to_record(size_t x)
+{
+    input_cursor_clamp();
+    FileState *active_file = state.active_file;
+
+    if (active_file->nrecords == 0)
+        return;
+
+    size_t record_index = active_file->cursor_record_i + active_file->offset_record;
+    if (x > record_index)
+        input_move_down(x - record_index);
+    else if (x < record_index)
+        input_move_up(record_index - x);
 }
 
 void input_move_bottom_edge(void)

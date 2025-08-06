@@ -35,6 +35,7 @@ void input_move_line_start(void);
 void input_move_line_end(void);
 void input_move_first_record(void);
 void input_move_last_record(void);
+void input_move_to_record(size_t x);
 void input_move_bottom_edge(void);
 void input_move_top_edge(void);
 void input_move_left_edge(void);
