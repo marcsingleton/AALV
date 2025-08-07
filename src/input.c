@@ -46,6 +46,7 @@ int input_parse_keys(Array *buffer, int *count, Command *cmd)
 
     // Parse digits
     size_t a = 0;
+    int default_count = 0;
     while (index < buffer->len)
     {
         ptr = array_get(buffer, index);
@@ -61,6 +62,11 @@ int input_parse_keys(Array *buffer, int *count, Command *cmd)
     }
     if (index >= buffer->len)
         return 1;
+    if (a == 0)
+    {
+        a = 1;
+        default_count = 1;
+    }
 
     // Parse command
     switch (c)
@@ -103,23 +109,15 @@ int input_parse_keys(Array *buffer, int *count, Command *cmd)
         break;
     case 'k':
         *cmd = CMD_MOVE_UP;
-        if (a == 0)
-            a = 1;
         break;
     case 'j':
         *cmd = CMD_MOVE_DOWN;
-        if (a == 0)
-            a = 1;
         break;
     case 'l':
         *cmd = CMD_MOVE_RIGHT;
-        if (a == 0)
-            a = 1;
         break;
     case 'h':
         *cmd = CMD_MOVE_LEFT;
-        if (a == 0)
-            a = 1;
         break;
     case CTRL('b'):
         *cmd = CMD_MOVE_FULL_PAGE_UP;
@@ -162,7 +160,7 @@ int input_parse_keys(Array *buffer, int *count, Command *cmd)
         *cmd = CMD_MOVE_FIRST_RECORD;
         break;
     case 'G':
-        if (a == 0)
+        if (default_count == 1)
             *cmd = CMD_MOVE_LAST_RECORD;
         else
         {
