@@ -2,8 +2,8 @@
 
 #include "sequences.h"
 
-Alphabet NUCLEIC_ALPHABET = {.name = "nucleic", .syms = "ACGTN.-", .case_sensitive = false};
-Alphabet PROTEIN_ALPHABET = {.name = "protein", .syms = "ACDEFGHIKLmNPQRSTVWYX.-", .case_sensitive = false};
+Alphabet NUCLEIC_ALPHABET = {.name = "nucleic", .syms = "ACGTUN.-", .case_sensitive = false};
+Alphabet PROTEIN_ALPHABET = {.name = "protein", .syms = "ACDEFGHIKLMNPQRSTVWYX.-", .case_sensitive = false};
 
 void sequences_free_seq_records(SeqRecord *records, size_t nrecords)
 {

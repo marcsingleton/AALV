@@ -55,6 +55,7 @@ static const ColorMapRecord4Bit schemes_default_nucleic_map_records_4_bit[] = {
     {.sym = 'C', .fg_color = FG_BLUE, .fg_mask = true},
     {.sym = 'G', .fg_color = FG_YELLOW, .fg_mask = true},
     {.sym = 'T', .fg_color = FG_RED, .fg_mask = true},
+    {.sym = 'U', .fg_color = FG_BRIGHT_RED, .fg_mask = true},
     {.sym = 'N', .fg_color = FG_WHITE, .fg_mask = true},
     {.sym = 0},
 };
@@ -111,6 +112,7 @@ static const ColorMapRecord8Bit schemes_default_nucleic_map_records_8_bit[] = {
     {.sym = 'C', .fg_color = 4, .fg_mask = true},
     {.sym = 'G', .fg_color = 3, .fg_mask = true},
     {.sym = 'T', .fg_color = 1, .fg_mask = true},
+    {.sym = 'U', .fg_color = 9, .fg_mask = true},
     {.sym = 'N', .fg_color = 7, .fg_mask = true},
     {.sym = 0},
 };
