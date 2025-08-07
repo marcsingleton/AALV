@@ -112,7 +112,7 @@ size_t fasta_fread(FILE *fp, SeqRecord **records_ptr)
             // Check for buffer capacity
             while (bufferlen <= seqlen + trimlen + 1)
             {
-                if (bufferlen >= SIZE_MAX / 2)
+                if (bufferlen > SIZE_MAX / 2)
                 {
                     code = FASTA_ERROR_MEMORY_ALLOCATION;
                     goto error;

@@ -48,7 +48,7 @@ ssize_t str_split(char ***fields_ptr, const char *s, const char d)
         return -1;
 
     size_t m = str_count(s, d) + 1;
-    if (m >= SIZE_MAX / sizeof(char *))
+    if (m > SIZE_MAX / sizeof(char *))
         return -1;
     ssize_t n = m;
     char **fields = malloc(n * sizeof(char *));
