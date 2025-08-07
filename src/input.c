@@ -125,10 +125,10 @@ int input_parse_keys(Array *buffer, int *count, Command *cmd)
     case CTRL('f'):
         *cmd = CMD_MOVE_FULL_PAGE_DOWN;
         break;
-    case 'M':
+    case CTRL('n'):
         *cmd = CMD_MOVE_FULL_PAGE_RIGHT;
         break;
-    case 'N':
+    case CTRL('p'):
         *cmd = CMD_MOVE_FULL_PAGE_LEFT;
         break;
     case CTRL('u'):
@@ -137,10 +137,10 @@ int input_parse_keys(Array *buffer, int *count, Command *cmd)
     case CTRL('d'):
         *cmd = CMD_MOVE_HALF_PAGE_DOWN;
         break;
-    case 'm':
+    case CTRL('r'):
         *cmd = CMD_MOVE_HALF_PAGE_RIGHT;
         break;
-    case 'n':
+    case CTRL('l'):
         *cmd = CMD_MOVE_HALF_PAGE_LEFT;
         break;
     case '$':
@@ -168,23 +168,23 @@ int input_parse_keys(Array *buffer, int *count, Command *cmd)
             a--;
         }
         break;
-    case 'w':
+    case 'H':
         *cmd = CMD_MOVE_TOP_EDGE;
         break;
-    case 's':
+    case 'M':
         *cmd = CMD_MOVE_VERTICAL_MIDDLE;
         break;
-    case 'x':
+    case 'L':
         *cmd = CMD_MOVE_BOTTOM_EDGE;
         break;
-    case 'e':
+    case 'S':
         *cmd = CMD_MOVE_LEFT_EDGE;
         break;
-    case 'r':
-        *cmd = CMD_MOVE_VERTICAL_MIDDLE;
+    case 'C':
+        *cmd = CMD_MOVE_HORIZONTAL_MIDDLE;
         break;
-    case 't':
-        *cmd = CMD_MOVE_RIGHT;
+    case 'E':
+        *cmd = CMD_MOVE_RIGHT_EDGE;
         break;
     case ']':
         *cmd = CMD_INCREASE_HEADER_PANE_WIDTH;
