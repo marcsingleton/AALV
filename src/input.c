@@ -45,7 +45,7 @@ int input_parse_keys(Array *buffer, int *count, Command *cmd)
     char *ptr, c;
 
     // Parse digits
-    unsigned int a = 0;
+    size_t a = 0;
     while (index < buffer->len)
     {
         ptr = array_get(buffer, index);
@@ -54,7 +54,9 @@ int input_parse_keys(Array *buffer, int *count, Command *cmd)
             break;
         if (a == 0 && c == '0') // 0 is line start, so ignore at start of digits
             break;
-        a = 10 * a + (c - '0'); // TODO: Check for overflow
+        if (a > (SIZE_MAX - (c - '0')) / 10)
+            return 2;
+        a = 10 * a + (c - '0');
         index++;
     }
     if (index >= buffer->len)
