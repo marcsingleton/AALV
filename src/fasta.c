@@ -86,7 +86,7 @@ size_t fasta_fread(FILE *fp, SeqRecord **records_ptr)
         header[trimlen - 1] = '\0';
 
         // Get id
-        char *id = fasta_get_id(header);
+        id = fasta_get_id(header);
         if (id == NULL)
         {
             code = FASTA_ERROR_MEMORY_ALLOCATION;

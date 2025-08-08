@@ -73,7 +73,7 @@ ssize_t str_split(char ***fields_ptr, const char *s, const char d)
 
 error:
     for (unsigned int i = 0; i < k; i++)
-        free(fields[k]);
+        free(fields[i]);
     free(fields);
 
     return -1;

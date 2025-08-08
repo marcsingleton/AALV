@@ -8,7 +8,7 @@ ColorScheme schemes_base[SCHEMES_N_BASE];
 
 int schemes_init_base(void)
 {
-    unsigned int index = 0;
+    unsigned int scheme_index = 0;
 
     for (unsigned int i = 0; i < SCHEMES_N_BASE_4_BIT; i++)
     {
@@ -34,8 +34,8 @@ int schemes_init_base(void)
                 scheme->mask.bg[index] = true;
             }
         }
-        schemes_base[index] = *scheme;
-        index++;
+        schemes_base[scheme_index] = *scheme;
+        scheme_index++;
     }
 
     for (unsigned int i = 0; i < SCHEMES_N_BASE_8_BIT; i++)
@@ -62,8 +62,8 @@ int schemes_init_base(void)
                 scheme->mask.bg[index] = true;
             }
         }
-        schemes_base[index] = *scheme;
-        index++;
+        schemes_base[scheme_index] = *scheme;
+        scheme_index++;
     }
 
     return 0;

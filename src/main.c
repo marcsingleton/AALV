@@ -264,7 +264,7 @@ int main(int argc, char *argv[])
     {
         input_read_key(&input_buffer, STDIN_FILENO);
 
-        int code = input_parse_keys(&input_buffer, &count, &cmd);
+        code = input_parse_keys(&input_buffer, &count, &cmd);
         switch (code)
         {
         case 0:
