@@ -366,7 +366,7 @@ int read_files(State *state,
         char *format_arg = "";
         if (file_index < n_format_args)
             format_arg = format_args[file_index];
-        size_t (*reader)(FILE *, SeqRecord **) = NULL;
+        int (*reader)(FILE *, SeqRecord **) = NULL;
 
         if (format_arg[0] != '\0') // From format argument
         {
@@ -419,17 +419,18 @@ int read_files(State *state,
             goto cleanup;
         }
         SeqRecord *records = NULL;
-        size_t nrecords = reader(fp, &records);
-        if (nrecords < 0)
+        int reader_code = reader(fp, &records);
+        if (reader_code < 0)
         {
-            error_printf("%s: %s: Error processing file (code %zu)\n", INVOCATION_NAME, file_path, nrecords);
+            error_printf("%s: %s: Error processing file (code %d)\n", INVOCATION_NAME, file_path, reader_code);
             code = 1;
             goto cleanup;
         }
+        unsigned int nrecords = reader_code;
 
         // Get maxlen
         size_t maxlen = 0;
-        for (size_t i = 0; i < nrecords; i++)
+        for (unsigned int i = 0; i < nrecords; i++)
         {
             SeqRecord *record = records + i;
             if (record->len > maxlen)
@@ -440,7 +441,7 @@ int read_files(State *state,
         char *type_arg = "";
         if (file_index < n_type_args)
             type_arg = type_args[file_index];
-        for (size_t i = 0; i < nrecords; i++)
+        for (unsigned int i = 0; i < nrecords; i++)
         {
             SeqRecord *record = records + i;
             if (sequences_infer_seq_type(record) >= 2)

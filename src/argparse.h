@@ -33,7 +33,7 @@ typedef struct
 {
     const char *name;
     const char *exts;
-    size_t (*reader)(FILE *, SeqRecord **);
+    int (*reader)(FILE *, SeqRecord **);
 } FormatOption;
 
 typedef struct

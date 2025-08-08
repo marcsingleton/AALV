@@ -1,6 +1,7 @@
 #include <ctype.h>
-#include <stdlib.h>
+#include <limits.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
 
@@ -14,14 +15,14 @@ const int FASTA_ERROR_SEQUENCE_OVERFLOW = -3;
 const int FASTA_ERROR_FILE_IO = -4;
 const int FASTA_ERROR_MEMORY_ALLOCATION = -5;
 
-size_t fasta_fread(FILE *fp, SeqRecord **records_ptr)
+int fasta_fread(FILE *fp, SeqRecord **records_ptr)
 {
     // Declarations
-    size_t code;
+    int code;
 
     void *ptr = NULL; // A generic temporary pointer for allocations
 
-    size_t nrecords = 0;
+    int nrecords = 0;
     Array new_records;
     array_init(&new_records, sizeof(SeqRecord));
 
@@ -145,11 +146,16 @@ size_t fasta_fread(FILE *fp, SeqRecord **records_ptr)
             .len = seqlen,
             .type = SEQ_TYPE_UNSPECIFIED,
         };
+        if (new_records.len >= INT_MAX - 1) // Ensures fit into return type
+        {
+            code = FASTA_ERROR_RECORD_OVERFLOW;
+            goto error;
+        }
         if (array_append(&new_records, &new_record) != 0)
         {
             code = FASTA_ERROR_RECORD_OVERFLOW;
             goto error;
-        };
+        }
     }
 
     free(line);
@@ -161,7 +167,7 @@ size_t fasta_fread(FILE *fp, SeqRecord **records_ptr)
         goto error;
     }
     *records_ptr = new_records.data;
-    nrecords = new_records.len;
+    nrecords = new_records.len; // Will always fit--see check above
     return nrecords;
 
 error:
@@ -186,14 +192,14 @@ error:
     return code;
 }
 
-size_t fasta_read(const char *path, SeqRecord **records_ptr)
+int fasta_read(const char *path, SeqRecord **records_ptr)
 {
     FILE *fp = fopen(path, "r");
     if (fp == NULL)
         return FASTA_ERROR_FILE_IO;
 
     SeqRecord *ptr = NULL;
-    size_t nrecords = fasta_fread(fp, &ptr);
+    int nrecords = fasta_fread(fp, &ptr);
 
     if (fclose(fp) != 0)
         return FASTA_ERROR_FILE_IO;
@@ -203,9 +209,9 @@ size_t fasta_read(const char *path, SeqRecord **records_ptr)
     return nrecords;
 }
 
-int fasta_fwrite(FILE *fp, SeqRecord *records, const size_t nrecords, const int maxlen)
+int fasta_fwrite(FILE *fp, SeqRecord *records, const int nrecords, const int maxlen)
 {
-    for (size_t i = 0; i < nrecords; i++)
+    for (int i = 0; i < nrecords; i++)
     {
         SeqRecord *record = records + i;
         fprintf(fp, ">%s\n", record->header);
@@ -214,7 +220,7 @@ int fasta_fwrite(FILE *fp, SeqRecord *records, const size_t nrecords, const int 
     return 0;
 }
 
-int fasta_write(const char *path, SeqRecord *records, const size_t nrecords, const int maxlen)
+int fasta_write(const char *path, SeqRecord *records, const int nrecords, const int maxlen)
 {
     FILE *fp = fopen(path, "w");
     int code = fasta_fwrite(fp, records, nrecords, maxlen);
