@@ -449,7 +449,7 @@ int read_files(State *state,
                 printf("%s contains at least one non-ASCII symbol in its sequence(s). "
                        "The viewer may render incorrectly. Continue? (y/n): ",
                        file_path);
-                char c = getchar();
+                int c = getchar();
                 if (c != 'y' && c != 'Y')
                 {
                     code = 1;
