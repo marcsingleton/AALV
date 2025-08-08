@@ -76,7 +76,6 @@ Option options[] = {
      SHORT_NAME,
      required_argument},
 };
-// TODO: Possible --no-ascii option?
 
 #define NOPTIONS sizeof(options) / sizeof(Option)
 
@@ -444,11 +443,19 @@ int read_files(State *state,
         for (size_t i = 0; i < nrecords; i++)
         {
             SeqRecord *record = records + i;
-            if (sequences_infer_seq_type(record) != 0)
+            if (sequences_infer_seq_type(record) >= 2)
             {
-                error_printf("%s: %s: Error identifying sequence types\n", INVOCATION_NAME, file_path);
-                code = 1;
-                goto cleanup;
+                printf("%s contains at least one non-ASCII symbol in its sequence(s). "
+                       "The viewer may render incorrectly. Continue? (y/n): ",
+                       file_path);
+                char c = getchar();
+                if (c != 'y' && c != 'Y')
+                {
+                    code = 1;
+                    goto cleanup;
+                }
+                while ((c = getchar()) != '\n' && c != EOF)
+                    ; // Clear remaining input
             };
             if (type_arg[0] != '\0')
             {
@@ -459,8 +466,8 @@ int read_files(State *state,
                     if (str_is_in((const char **)type_identifiers->data, type_identifiers->len, type_arg)) // Cast to silence warning
                     {
                         SeqType type = type_option->type;
-                        if (record->type == SEQ_TYPE_INDETERMINATE && type == SEQ_TYPE_PROTEIN)
-                            record->type = SEQ_TYPE_PROTEIN;
+                        if (record->type != SEQ_TYPE_ERROR) // Allow forced type unless error
+                            record->type = type;
                         break;
                     }
                 }

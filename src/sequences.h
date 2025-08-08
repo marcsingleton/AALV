@@ -14,7 +14,8 @@ typedef enum
     SEQ_TYPE_UNSPECIFIED = 0,
     SEQ_TYPE_NUCLEIC,
     SEQ_TYPE_PROTEIN,
-    SEQ_TYPE_INDETERMINATE,
+    SEQ_TYPE_INDETERMINATE, // Nucleic or protein
+    SEQ_TYPE_UNKNOWN,       // ASCII with unregistered alphabet
     SEQ_TYPE_ERROR,
 } SeqType;
 

@@ -119,9 +119,14 @@ int sequences_infer_seq_type(SeqRecord *record)
         record->type = SEQ_TYPE_NUCLEIC;
     else if (is_protein == 1)
         record->type = SEQ_TYPE_PROTEIN;
-    else
+    else if ((is_nucleic == -1) || (is_protein == -1))
     {
         record->type = SEQ_TYPE_ERROR;
+        return 2;
+    }
+    else
+    {
+        record->type = SEQ_TYPE_UNKNOWN;
         return 1;
     }
     return 0;
