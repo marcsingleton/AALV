@@ -1,0 +1,14 @@
+## TODO
+- More supported file formats
+  - Format inference?
+- Read config and color schemes from .aalvrc
+- Mechanism for displaying messages
+  - Reserved buffer
+  - Cleared after keystroke or time-out
+- "Ex-style" commands
+  - Next/previous file
+  - Display options
+    - Add color scheme
+    - Set color scheme
+    - Identities as dots
+  - Set sequence type?
