@@ -1,8 +1,8 @@
-name: Build MacOS
+name: Build
 
 on:
-  push:
-    branches: [ main ]
+  release:
+    types: [ published ]
 
 jobs:
   build:
