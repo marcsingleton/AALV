@@ -262,7 +262,7 @@ int main(int argc, char *argv[])
 
     while (1)
     {
-        input_read_key(&input_buffer, STDIN_FILENO);
+        input_read_key(&input_buffer, input_fd);
 
         code = input_parse_keys(&input_buffer, &count, &cmd);
         switch (code)
