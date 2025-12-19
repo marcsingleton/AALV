@@ -170,7 +170,7 @@ int main(int argc, char *argv[])
     // Prepare options
     struct option long_options[NOPTIONS + 1]; // Extra struct of 0s to mark end
     char *short_options = NULL;
-    retcode = prepare_options(NOPTIONS, options, &short_options, long_options, INVOCATION_NAME);
+    retcode = cli_prepare_options(NOPTIONS, options, &short_options, long_options, INVOCATION_NAME);
     if (retcode != 0)
         return retcode;
 
@@ -179,14 +179,14 @@ int main(int argc, char *argv[])
     char **format_args = NULL;
     unsigned int n_type_args = 0;
     char **type_args = NULL;
-    retcode = parse_options(argc, argv,
-                            NOPTIONS, options,
-                            N_FORMAT_OPTIONS, format_options,
-                            N_TYPE_OPTIONS, type_options,
-                            short_options, long_options,
-                            &n_format_args, &format_args,
-                            &n_type_args, &type_args,
-                            PROGRAM_NAME, positional_usage, synopsis);
+    retcode = argparse_options(argc, argv,
+                               NOPTIONS, options,
+                               N_FORMAT_OPTIONS, format_options,
+                               N_TYPE_OPTIONS, type_options,
+                               short_options, long_options,
+                               &n_format_args, &format_args,
+                               &n_type_args, &type_args,
+                               PROGRAM_NAME, positional_usage, synopsis);
     free(short_options);
     if (retcode > 0) // "Expected" exit == 1 and "unexpected" exit > 1; shift -1 for CLI convention
         return retcode - 1;
@@ -196,7 +196,7 @@ int main(int argc, char *argv[])
     // Check for positional arguments
     if (isatty(STDIN_FILENO) && n_positional_args == 0)
     {
-        print_short_help(NOPTIONS, options, PROGRAM_NAME, positional_usage);
+        cli_print_short_help(NOPTIONS, options, PROGRAM_NAME, positional_usage);
         return 1;
     }
 

@@ -7,9 +7,9 @@
 #include "cli.h"
 #include "error.h"
 
-int prepare_options(unsigned int noptions, Option *options,
-                    char **short_options_ptr, struct option *long_options,
-                    const char *invocation_name)
+int cli_prepare_options(unsigned int noptions, Option *options,
+                        char **short_options_ptr, struct option *long_options,
+                        const char *invocation_name)
 {
     int retcode = 0;
     Array short_options_array;
@@ -64,7 +64,8 @@ cleanup:
     return retcode;
 }
 
-void print_long_help(unsigned int noptions, Option *options, char *program_name, char *positional_usage, char *synopsis)
+void cli_print_long_help(unsigned int noptions, Option *options,
+                         char *program_name, char *positional_usage, char *synopsis)
 {
     unsigned int nmax;
     unsigned int nchars;
@@ -95,7 +96,7 @@ void print_long_help(unsigned int noptions, Option *options, char *program_name,
             putchar(' ');
             nchars++;
         }
-        nchars += print_option_usage(argument, usage_style, true, " |");
+        nchars += cli_print_option_usage(argument, usage_style, true, " |");
     }
     printf("\n%*s%s\n\n", prefix_size, "", positional_usage);
 
@@ -117,7 +118,7 @@ void print_long_help(unsigned int noptions, Option *options, char *program_name,
         else if (argument->short_name)
             usage_style = SHORT_NAME;
         nchars = printf("    ");
-        nchars += print_option_usage(argument, usage_style, false, ",");
+        nchars += cli_print_option_usage(argument, usage_style, false, ",");
         if (nchars > nmax - 2) // Two spaces of buffer
             printf("\n%*s", nmax, "");
         else
@@ -126,7 +127,7 @@ void print_long_help(unsigned int noptions, Option *options, char *program_name,
     }
 }
 
-void print_short_help(unsigned int noptions, Option *options, char *program_name, char *positional_usage)
+void cli_print_short_help(unsigned int noptions, Option *options, char *program_name, char *positional_usage)
 {
     printf("usage: %s", program_name);
     for (unsigned int i = 0; i < noptions; i++)
@@ -135,12 +136,12 @@ void print_short_help(unsigned int noptions, Option *options, char *program_name
         if (argument->usage_style == OMIT)
             continue;
         putchar(' ');
-        print_option_usage(argument, argument->usage_style, true, " |");
+        cli_print_option_usage(argument, argument->usage_style, true, " |");
     }
     printf(" %s\n", positional_usage);
 }
 
-int print_option_usage(Option *argument, UsageStyle usage_style, const bool brackets, const char *style_sep)
+int cli_print_option_usage(Option *argument, UsageStyle usage_style, const bool brackets, const char *style_sep)
 {
     const char *arg_sep = "";
     const char *arg = "";

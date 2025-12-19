@@ -25,13 +25,12 @@ typedef struct
     const int has_arg; // getopt_long field
 } Option;
 
-int prepare_options(unsigned int noptions, Option *options,
-                    char **short_options_ptr, struct option *long_options,
-                    const char *invocation_name);
-
-// CLI output
-void print_long_help(unsigned int noptions, Option *options, char *program_name, char *positional_usage, char *synopsis);
-void print_short_help(unsigned int noptions, Option *options, char *program_name, char *positional_usage);
-int print_option_usage(Option *argument, UsageStyle usage_style, const bool brackets, const char *style_sep);
+int cli_prepare_options(unsigned int noptions, Option *options,
+                        char **short_options_ptr, struct option *long_options,
+                        const char *invocation_name);
+void cli_print_long_help(unsigned int noptions, Option *options,
+                         char *program_name, char *positional_usage, char *synopsis);
+void cli_print_short_help(unsigned int noptions, Option *options, char *program_name, char *positional_usage);
+int cli_print_option_usage(Option *argument, UsageStyle usage_style, const bool brackets, const char *style_sep);
 
 #endif // CLI_H
