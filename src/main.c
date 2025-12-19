@@ -170,7 +170,7 @@ int main(int argc, char *argv[])
     // Prepare options
     struct option long_options[NOPTIONS + 1]; // Extra struct of 0s to mark end
     char *short_options = NULL;
-    retcode = prepare_options(NOPTIONS, options, &short_options, long_options);
+    retcode = prepare_options(NOPTIONS, options, &short_options, long_options, INVOCATION_NAME);
     if (retcode != 0)
         return retcode;
 
