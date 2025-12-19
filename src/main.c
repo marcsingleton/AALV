@@ -16,6 +16,7 @@
 #include "error.h"
 #include "fasta.h"
 #include "input.h"
+#include "macros.h"
 #include "rcparams.h"
 #include "schemes.h"
 #include "sequences.h"
@@ -97,6 +98,9 @@ SeqTypeOption type_options[] = {
 #define N_TYPE_OPTIONS sizeof(type_options) / sizeof(SeqTypeOption)
 
 SeqTypeState types[SEQ_TYPE_ERROR + 1];
+
+char synopsis[] = PROGRAM_NAME " is a vim-inspired alignment viewer\n";
+char positional_usage[] = "[<file> ...]";
 
 // Main
 int main(int argc, char *argv[])
@@ -181,7 +185,8 @@ int main(int argc, char *argv[])
                             N_TYPE_OPTIONS, type_options,
                             short_options, long_options,
                             &n_format_args, &format_args,
-                            &n_type_args, &type_args);
+                            &n_type_args, &type_args,
+                            PROGRAM_NAME, positional_usage, synopsis);
     free(short_options);
     if (retcode > 0) // "Expected" exit == 1 and "unexpected" exit > 1; shift -1 for CLI convention
         return retcode - 1;
@@ -191,7 +196,7 @@ int main(int argc, char *argv[])
     // Check for positional arguments
     if (isatty(STDIN_FILENO) && n_positional_args == 0)
     {
-        print_short_help(NOPTIONS, options);
+        print_short_help(NOPTIONS, options, PROGRAM_NAME, positional_usage);
         return 1;
     }
 

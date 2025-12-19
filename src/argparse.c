@@ -14,7 +14,8 @@ int parse_options(int argc, char *argv[],
                   unsigned int n_type_options, SeqTypeOption *type_options,
                   const char *short_options, const struct option *long_options,
                   unsigned int *n_format_args, char ***format_args_ptr,
-                  unsigned int *n_type_args, char ***type_args_ptr)
+                  unsigned int *n_type_args, char ***type_args_ptr,
+                  char *program_name, char *positional_usage, char *synopsis)
 {
     while (1)
     {
@@ -25,7 +26,7 @@ int parse_options(int argc, char *argv[],
             break;
         else if (c == '?')
         {
-            print_short_help(noptions, options);
+            print_short_help(noptions, options, program_name, positional_usage);
             return 2;
         }
 
@@ -45,12 +46,12 @@ int parse_options(int argc, char *argv[],
         }
         else if (c == 'h')
         {
-            print_short_help(noptions, options);
+            print_short_help(noptions, options, program_name, positional_usage);
             return 1;
         }
         else if (strcmp(name, "help") == 0)
         {
-            print_long_help(noptions, options);
+            print_long_help(noptions, options, program_name, positional_usage, synopsis);
             return 1;
         }
         else if (strcmp(name, "list-formats") == 0)
@@ -148,13 +149,13 @@ cleanup:
     return retcode;
 }
 
-void print_long_help(unsigned int noptions, Option *options)
+void print_long_help(unsigned int noptions, Option *options, char *program_name, char *positional_usage, char *synopsis)
 {
     unsigned int nmax;
     unsigned int nchars;
 
     // Usage section
-    int prefix_size = printf("usage: %s", PROGRAM_NAME) + 1; // +1 account for space added by first option
+    int prefix_size = printf("usage: %s", program_name) + 1; // +1 account for space added by first option
     nmax = 80;
     nchars = 0;
 
@@ -181,10 +182,10 @@ void print_long_help(unsigned int noptions, Option *options)
         }
         nchars += print_option_usage(argument, usage_style, true, " |");
     }
-    printf("\n%*s[<file> ...]\n\n", prefix_size, "");
+    printf("\n%*s%s\n\n", prefix_size, "", positional_usage);
 
     // Synopsis section
-    printf("%s is a vim-inspired alignment viewer\n\n", PROGRAM_NAME);
+    printf("%s\n", synopsis);
 
     // Options section
     printf("options:\n");
@@ -210,9 +211,9 @@ void print_long_help(unsigned int noptions, Option *options)
     }
 }
 
-void print_short_help(unsigned int noptions, Option *options)
+void print_short_help(unsigned int noptions, Option *options, char *program_name, char *positional_usage)
 {
-    printf("usage: %s", PROGRAM_NAME);
+    printf("usage: %s", program_name);
     for (unsigned int i = 0; i < noptions; i++)
     {
         Option *argument = options + i;
@@ -221,7 +222,7 @@ void print_short_help(unsigned int noptions, Option *options)
         putchar(' ');
         print_option_usage(argument, argument->usage_style, true, " |");
     }
-    printf(" [<file> ...]\n");
+    printf(" %s\n", positional_usage);
 }
 
 int print_option_usage(Option *argument, UsageStyle usage_style, const bool brackets, const char *style_sep)
