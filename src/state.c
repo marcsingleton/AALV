@@ -119,7 +119,7 @@ void state_set_active_file_index(State *state, unsigned int file_index)
     state->active_file = state->files + file_index;
 }
 
-void state_set_type_color_scheme(State *state, unsigned int type_index, ColorScheme *color_scheme)
+void state_set_seq_type_color_scheme(State *state, unsigned int seq_type_index, ColorScheme *color_scheme)
 {
     if (color_scheme == NULL)
         return;
@@ -127,10 +127,10 @@ void state_set_type_color_scheme(State *state, unsigned int type_index, ColorSch
         return;
     if (color_scheme->type == COLOR_8_BIT && state->ncolors < 256)
         return;
-    if (type_index > state->ntypes)
+    if (seq_type_index > state->n_seq_types)
         return;
-    SeqTypeState *type = state->types + type_index;
-    if (type->alphabet->len != color_scheme->len)
+    SeqTypeState *seq_type = state->seq_types + seq_type_index;
+    if (seq_type->alphabet->len != color_scheme->len)
         return;
-    type->color_scheme = color_scheme;
+    seq_type->color_scheme = color_scheme;
 }

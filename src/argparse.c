@@ -12,10 +12,10 @@ extern char *INVOCATION_NAME;
 int argparse_options(int argc, char *argv[],
                      unsigned int noptions, Option *options,
                      unsigned int n_format_options, FormatOption *format_options,
-                     unsigned int n_type_options, SeqTypeOption *type_options,
+                     unsigned int n_seq_type_options, SeqTypeOption *seq_type_options,
                      const char *short_options, const struct option *long_options,
                      unsigned int *n_format_args, char ***format_args_ptr,
-                     unsigned int *n_type_args, char ***type_args_ptr,
+                     unsigned int *n_seq_type_args, char ***seq_type_args_ptr,
                      char *program_name, char *positional_usage, char *synopsis)
 {
     while (1)
@@ -68,22 +68,22 @@ int argparse_options(int argc, char *argv[],
         else if (strcmp(name, "list-types") == 0)
         {
             printf("Type\tIdentifiers\n");
-            for (unsigned int i = 0; i < n_type_options; i++)
+            for (unsigned int i = 0; i < n_seq_type_options; i++)
             {
-                SeqTypeOption *type_option = type_options + i;
-                printf("%s\t%s\n", type_option->name, type_option->identifiers);
+                SeqTypeOption *seq_type_option = seq_type_options + i;
+                printf("%s\t%s\n", seq_type_option->name, seq_type_option->identifiers);
             }
             return 1;
         }
         else if (c == 't' || strcmp(name, "type") == 0)
         {
-            ssize_t code = str_split(type_args_ptr, argv[optind - 1], ',');
+            ssize_t code = str_split(seq_type_args_ptr, argv[optind - 1], ',');
             if (code < 0)
             {
                 error_printf("%s: Failed to parse types\n", INVOCATION_NAME);
                 return 2;
             }
-            *n_type_args = code;
+            *n_seq_type_args = code;
         }
         else if (c == 'v' || strcmp(name, "version") == 0)
         {

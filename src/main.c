@@ -36,7 +36,7 @@ void cleanup(void);
 int read_files(State *state,
                unsigned int n_positional_args, char **positional_args,
                unsigned int n_format_args, char **format_args,
-               unsigned int n_type_args, char **type_args);
+               unsigned int n_seq_type_args, char **seq_type_args);
 
 // --help option shows in given order (alphabetical except help and version)
 Option options[] = {
@@ -90,14 +90,14 @@ FormatOption format_options[] = {
 
 #define N_FORMAT_OPTIONS sizeof(format_options) / sizeof(FormatOption)
 
-SeqTypeOption type_options[] = {
+SeqTypeOption seq_type_options[] = {
     {"nucleic", "nucleic,nt", SEQ_TYPE_NUCLEIC, &NUCLEIC_ALPHABET},
     {"protein", "protein,aa", SEQ_TYPE_PROTEIN, &PROTEIN_ALPHABET},
 };
 
-#define N_TYPE_OPTIONS sizeof(type_options) / sizeof(SeqTypeOption)
+#define N_SEQ_TYPE_OPTIONS sizeof(seq_type_options) / sizeof(SeqTypeOption)
 
-SeqTypeState types[SEQ_TYPE_ERROR + 1];
+SeqTypeState seq_types[SEQ_TYPE_ERROR + 1];
 
 char synopsis[] = PROGRAM_NAME " is a vim-inspired alignment viewer\n";
 char positional_usage[] = "[<file> ...]";
@@ -135,15 +135,15 @@ int main(int argc, char *argv[])
     state.color_schemes = schemes_base;
     state.n_color_schemes = SCHEMES_N_BASE_4_BIT;
 
-    // Prepare known types
-    for (unsigned int i = 0; i < N_TYPE_OPTIONS; i++)
+    // Prepare known sequence types
+    for (unsigned int i = 0; i < N_SEQ_TYPE_OPTIONS; i++)
     {
-        SeqTypeOption *type_option = type_options + i;
-        SeqTypeState *type = types + type_option->type;
-        type->alphabet = type_option->alphabet;
+        SeqTypeOption *seq_type_option = seq_type_options + i;
+        SeqTypeState *type = seq_types + seq_type_option->type;
+        type->alphabet = seq_type_option->alphabet;
     }
-    state.types = types;
-    state.ntypes = SEQ_TYPE_ERROR + 1;
+    state.seq_types = seq_types;
+    state.n_seq_types = SEQ_TYPE_ERROR + 1;
 
     // Get terminal color support
     state.ncolors = 1;
@@ -158,13 +158,13 @@ int main(int argc, char *argv[])
     // Set color schemes
     if (state.ncolors >= 256)
     {
-        state_set_type_color_scheme(&state, SEQ_TYPE_NUCLEIC, &schemes_default_nucleic_8_bit);
-        state_set_type_color_scheme(&state, SEQ_TYPE_PROTEIN, &schemes_default_protein_8_bit);
+        state_set_seq_type_color_scheme(&state, SEQ_TYPE_NUCLEIC, &schemes_default_nucleic_8_bit);
+        state_set_seq_type_color_scheme(&state, SEQ_TYPE_PROTEIN, &schemes_default_protein_8_bit);
     }
     else if (state.ncolors >= 16)
     {
-        state_set_type_color_scheme(&state, SEQ_TYPE_NUCLEIC, &schemes_default_nucleic_4_bit);
-        state_set_type_color_scheme(&state, SEQ_TYPE_PROTEIN, &schemes_default_protein_4_bit);
+        state_set_seq_type_color_scheme(&state, SEQ_TYPE_NUCLEIC, &schemes_default_nucleic_4_bit);
+        state_set_seq_type_color_scheme(&state, SEQ_TYPE_PROTEIN, &schemes_default_protein_4_bit);
     }
 
     // Prepare options
@@ -177,15 +177,15 @@ int main(int argc, char *argv[])
     // Parse options
     unsigned int n_format_args = 0;
     char **format_args = NULL;
-    unsigned int n_type_args = 0;
-    char **type_args = NULL;
+    unsigned int n_seq_type_args = 0;
+    char **seq_type_args = NULL;
     retcode = argparse_options(argc, argv,
                                NOPTIONS, options,
                                N_FORMAT_OPTIONS, format_options,
-                               N_TYPE_OPTIONS, type_options,
+                               N_SEQ_TYPE_OPTIONS, seq_type_options,
                                short_options, long_options,
                                &n_format_args, &format_args,
-                               &n_type_args, &type_args,
+                               &n_seq_type_args, &seq_type_args,
                                PROGRAM_NAME, positional_usage, synopsis);
     free(short_options);
     if (retcode > 0) // "Expected" exit == 1 and "unexpected" exit > 1; shift -1 for CLI convention
@@ -233,14 +233,14 @@ int main(int argc, char *argv[])
     retcode = read_files(&state,
                          n_positional_args, positional_args,
                          n_format_args, format_args,
-                         n_type_args, type_args);
+                         n_seq_type_args, seq_type_args);
     if (retcode > 0)
         return retcode - 1;
 
     if (n_format_args > 0)
         str_free_split(format_args, n_format_args);
-    if (n_type_args > 0)
-        str_free_split(type_args, n_type_args);
+    if (n_seq_type_args > 0)
+        str_free_split(seq_type_args, n_seq_type_args);
 
     // Set screen and terminal options
     if (terminal_get_termios(&old_termios) != 0)
@@ -315,7 +315,7 @@ void cleanup(void)
 int read_files(State *state,
                unsigned int n_positional_args, char **positional_args,
                unsigned int n_format_args, char **format_args,
-               unsigned int n_type_args, char **type_args)
+               unsigned int n_seq_type_args, char **seq_type_args)
 {
     int retcode = 0;
 
@@ -339,24 +339,24 @@ int read_files(State *state,
         format_exts->len = str_split(&format_exts->data, format_option->exts, ',');
     }
 
-    // Split type identifiers
-    StrArray *types_identifiers = malloc(N_TYPE_OPTIONS * sizeof(StrArray));
+    // Split sequence type identifiers
+    StrArray *seq_types_identifiers = malloc(N_SEQ_TYPE_OPTIONS * sizeof(StrArray));
     if (formats_exts == NULL)
     {
         error_printf("%s: Failed to allocate memory to split type identifiers\n", INVOCATION_NAME);
         return 1;
     }
-    for (unsigned int i = 0; i < N_TYPE_OPTIONS; i++)
+    for (unsigned int i = 0; i < N_SEQ_TYPE_OPTIONS; i++)
     {
-        StrArray *type_identifier = types_identifiers + i;
-        type_identifier->data = NULL;
-        type_identifier->len = 0;
+        StrArray *seq_type_identifier = seq_types_identifiers + i;
+        seq_type_identifier->data = NULL;
+        seq_type_identifier->len = 0;
     }
-    for (unsigned int i = 0; i < N_TYPE_OPTIONS; i++)
+    for (unsigned int i = 0; i < N_SEQ_TYPE_OPTIONS; i++)
     {
-        SeqTypeOption *type_option = type_options + i;
-        StrArray *type_identifiers = types_identifiers + i;
-        type_identifiers->len = str_split(&type_identifiers->data, type_option->identifiers, ',');
+        SeqTypeOption *seq_type_option = seq_type_options + i;
+        StrArray *seq_type_identifiers = seq_types_identifiers + i;
+        seq_type_identifiers->len = str_split(&seq_type_identifiers->data, seq_type_option->identifiers, ',');
     }
 
     // Main loop
@@ -444,9 +444,9 @@ int read_files(State *state,
         }
 
         // Set sequence type
-        char *type_arg = "";
-        if (file_index < n_type_args)
-            type_arg = type_args[file_index];
+        char *seq_type_arg = "";
+        if (file_index < n_seq_type_args)
+            seq_type_arg = seq_type_args[file_index];
         for (unsigned int i = 0; i < nrecords; i++)
         {
             SeqRecord *record = records + i;
@@ -464,17 +464,17 @@ int read_files(State *state,
                 while ((c = getchar()) != '\n' && c != EOF)
                     ; // Clear remaining input
             };
-            if (type_arg[0] != '\0')
+            if (seq_type_arg[0] != '\0')
             {
-                for (unsigned int j = 0; j < N_TYPE_OPTIONS; j++)
+                for (unsigned int j = 0; j < N_SEQ_TYPE_OPTIONS; j++)
                 {
-                    SeqTypeOption *type_option = type_options + j;
-                    StrArray *type_identifiers = types_identifiers + j;
-                    if (str_is_in((const char **)type_identifiers->data, type_identifiers->len, type_arg)) // Cast to silence warning
+                    SeqTypeOption *seq_type_option = seq_type_options + j;
+                    StrArray *seq_type_identifiers = seq_types_identifiers + j;
+                    if (str_is_in((const char **)seq_type_identifiers->data, seq_type_identifiers->len, seq_type_arg)) // Cast to silence warning
                     {
-                        SeqType type = type_option->type;
+                        SeqType seq_type = seq_type_option->type;
                         if (record->type != SEQ_TYPE_ERROR) // Allow forced type unless error
-                            record->type = type;
+                            record->type = seq_type;
                         break;
                     }
                 }
@@ -509,13 +509,13 @@ cleanup:
         format_exts->len = 0;
     }
     free(formats_exts);
-    for (unsigned int i = 0; i < N_TYPE_OPTIONS; i++)
+    for (unsigned int i = 0; i < N_SEQ_TYPE_OPTIONS; i++)
     {
-        StrArray *type_identifiers = types_identifiers + i;
-        str_free_split(type_identifiers->data, type_identifiers->len);
-        type_identifiers->data = NULL;
-        type_identifiers->len = 0;
+        StrArray *seq_type_identifiers = seq_types_identifiers + i;
+        str_free_split(seq_type_identifiers->data, seq_type_identifiers->len);
+        seq_type_identifiers->data = NULL;
+        seq_type_identifiers->len = 0;
     }
-    free(types_identifiers);
+    free(seq_types_identifiers);
     return retcode;
 }

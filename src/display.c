@@ -303,9 +303,9 @@ void display_cursor(Array *buffer)
 
 void display_sequence(Array *buffer, SeqRecord *record, size_t start, size_t len)
 {
-    SeqTypeState *type = state.types + record->type;
-    const Alphabet *alphabet = type->alphabet;
-    ColorScheme *color_scheme = type->color_scheme;
+    SeqTypeState *seq_type = state.seq_types + record->type;
+    const Alphabet *alphabet = seq_type->alphabet;
+    ColorScheme *color_scheme = seq_type->color_scheme;
     if (state.ncolors > 1 && color_scheme != NULL)
     {
         if (color_scheme->type == COLOR_4_BIT)

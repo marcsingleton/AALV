@@ -55,8 +55,8 @@ typedef struct
     unsigned int n_color_schemes;
     int ncolors;
     // Type variables
-    SeqTypeState *types;
-    unsigned int ntypes;
+    SeqTypeState *seq_types;
+    unsigned int n_seq_types;
 } State;
 
 // FileState setters
@@ -76,6 +76,6 @@ unsigned int state_get_sequence_pane_width(State *state);
 
 // State setters
 void state_set_active_file_index(State *state, unsigned int file_index);
-void state_set_type_color_scheme(State *state, unsigned int type_index, ColorScheme *color_scheme);
+void state_set_seq_type_color_scheme(State *state, unsigned int seq_type_index, ColorScheme *color_scheme);
 
 #endif // STATE_H
