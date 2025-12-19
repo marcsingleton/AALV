@@ -5,6 +5,9 @@
 Alphabet NUCLEIC_ALPHABET = {.name = "nucleic", .syms = "ACGTUN.-", .case_sensitive = false};
 Alphabet PROTEIN_ALPHABET = {.name = "protein", .syms = "ACDEFGHIKLMNPQRSTVWYX.-", .case_sensitive = false};
 
+Alphabet *BASE_ALPHABETS[] = {&NUCLEIC_ALPHABET, &PROTEIN_ALPHABET};
+size_t N_BASE_ALPHABETS = sizeof(BASE_ALPHABETS) / sizeof(Alphabet *);
+
 void sequences_free_seq_records(SeqRecord *records, size_t nrecords)
 {
     if (records == NULL)
@@ -72,9 +75,6 @@ int sequences_init_alphabet(Alphabet *alphabet, char *name, char *syms, bool cas
 
 int sequences_init_base_alphabets(void)
 {
-    Alphabet *BASE_ALPHABETS[] = {&NUCLEIC_ALPHABET, &PROTEIN_ALPHABET};
-    size_t N_BASE_ALPHABETS = sizeof(BASE_ALPHABETS) / sizeof(Alphabet *);
-
     int retcode = 0;
     for (unsigned int i = 0; i < N_BASE_ALPHABETS; i++)
     {

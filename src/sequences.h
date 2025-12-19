@@ -46,6 +46,9 @@ typedef struct
 extern Alphabet NUCLEIC_ALPHABET;
 extern Alphabet PROTEIN_ALPHABET;
 
+extern Alphabet *BASE_ALPHABETS[];
+extern size_t N_BASE_ALPHABETS;
+
 void sequences_free_seq_records(SeqRecord *records, size_t nrecords);
 void sequences_free_seq_record_array(SeqRecordArray *record_array);
 int sequences_init_alphabet(Alphabet *alphabet, char *name, char *syms, bool case_sensitive);
