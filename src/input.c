@@ -535,12 +535,18 @@ void input_move_page_right(PageSize page_size)
         return;
 
     unsigned int x = state_get_sequence_pane_width(&state);
+    size_t maxlen = active_file->records_maxlen;
     if (page_size == PAGE_SIZE_HALF)
         x /= 2;
-    if (active_file->offset_sequence + x + 2 > active_file->records_maxlen) // Accounts for continuation symbol
-        state_set_offset_sequence(&state, active_file->records_maxlen - 2);
+    if (active_file->offset_sequence + x + 2 > maxlen) // Accounts for continuation symbol
+        state_set_offset_sequence(&state, maxlen - 2);
     else
         state_set_offset_sequence(&state, active_file->offset_sequence + x);
+    if (active_file->cursor_sequence_j + active_file->offset_sequence + 1 > maxlen) // Check for cursor exceeding sequence end
+    {
+        size_t sequence_index = (maxlen > 0) ? maxlen - active_file->offset_sequence - 1 : 0;
+        active_file->cursor_sequence_j = sequence_index;
+    }
 }
 
 void input_move_page_left(PageSize page_size)
