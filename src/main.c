@@ -81,6 +81,7 @@ Option options[] = {
 
 FormatOption format_options[] = {
     {"FASTA", "fasta,fa,faa,fna,afa", &fasta_fread},
+    {"A2M/A3M", "a2m,a3m", &fasta_fread},
     // CLUSTAL
     // PHYLIP
     // STOCKHOLM
