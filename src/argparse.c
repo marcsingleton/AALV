@@ -95,7 +95,7 @@ int parse_options(int argc, char *argv[],
 int prepare_options(unsigned int noptions, Option *options,
                     char **short_options_ptr, struct option *long_options)
 {
-    int code = 0;
+    int retcode = 0;
     Array short_options_array;
     array_init(&short_options_array, sizeof(char));
     for (unsigned int i = 0; i < noptions; i++)
@@ -137,7 +137,7 @@ int prepare_options(unsigned int noptions, Option *options,
     char *short_options = malloc(short_options_array.len * short_options_array.size);
     if (short_options == NULL)
     {
-        code = 1;
+        retcode = 1;
         error_printf("%s: Failed to allocate memory to create options string\n", INVOCATION_NAME);
         goto cleanup;
     }
@@ -145,7 +145,7 @@ int prepare_options(unsigned int noptions, Option *options,
     *short_options_ptr = short_options;
 cleanup:
     array_free(&short_options_array);
-    return code;
+    return retcode;
 }
 
 void print_long_help(unsigned int noptions, Option *options)

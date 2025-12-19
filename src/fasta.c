@@ -223,9 +223,9 @@ int fasta_fwrite(FILE *fp, SeqRecord *records, const int nrecords, const int max
 int fasta_write(const char *path, SeqRecord *records, const int nrecords, const int maxlen)
 {
     FILE *fp = fopen(path, "w");
-    int code = fasta_fwrite(fp, records, nrecords, maxlen);
+    int retcode = fasta_fwrite(fp, records, nrecords, maxlen);
     fclose(fp);
-    return code;
+    return retcode;
 }
 
 void fasta_wrap_string(FILE *fp, const char *s, const size_t len, const int maxlen)

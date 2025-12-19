@@ -20,14 +20,14 @@ void run_tests(TestFunction *tests, int ntests, char *module_name)
     {
         TestFunction *test = tests + i;
         printf("Running %s...", test->func_name);
-        int code = (*test->func_ptr)();
-        if (code == 0)
+        int retcode = (*test->func_ptr)();
+        if (retcode == 0)
         {
             printf("passed!\n");
             npasses++;
         }
         else
-            printf("failed with code %d.\n", code);
+            printf("failed with code %d.\n", retcode);
     }
     printf("%d / %d tests passed in module %s\n", npasses, ntests, module_name);
 }

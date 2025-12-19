@@ -7,24 +7,24 @@
 
 int split_tester(char *s, char **expected_fields, int expected_n, const char d)
 {
-    int code = 0;
+    int retcode = 0;
     char **returned_fields = NULL;
     int returned_n = str_split(&returned_fields, s, d);
     if (returned_n != expected_n)
     {
-        code = 1;
+        retcode = 1;
         goto cleanup;
     }
     for (int i = 0; i < expected_n; i++)
         if (strcmp(expected_fields[i], returned_fields[i]) != 0)
         {
-            code = 2;
+            retcode = 2;
             goto cleanup;
         }
 cleanup:
     if (returned_n >= 0)
         str_free_split(returned_fields, returned_n);
-    return code;
+    return retcode;
 }
 
 int test_split_empty_input(void)

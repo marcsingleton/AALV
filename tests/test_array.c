@@ -7,29 +7,29 @@
 
 int test_init(void)
 {
-    int code = 0;
+    int retcode = 0;
     Array array;
     int value;
 
     value = array_init(&array, sizeof(int));
     if (value != 0 || array.size != sizeof(int) || array.capacity == 0 || array.len != 0)
-        code = 1;
+        retcode = 1;
     else
-        code = 0;
+        retcode = 0;
     array_free(&array);
-    return code;
+    return retcode;
 }
 
 int test_append_get(void)
 {
-    int code = 0;
+    int retcode = 0;
     Array array;
     int value;
 
     value = array_init(&array, sizeof(int));
     if (value != 0)
     {
-        code = 1;
+        retcode = 1;
         goto cleanup;
     }
     int n = 1024;
@@ -39,7 +39,7 @@ int test_append_get(void)
         value = array_append(&array, &x);
         if (value != 0)
         {
-            code = 2;
+            retcode = 2;
             goto cleanup;
         }
     }
@@ -48,31 +48,31 @@ int test_append_get(void)
         int *ptr = array_get(&array, i);
         if (ptr == NULL)
         {
-            code = 3;
+            retcode = 3;
             goto cleanup;
         }
         int actual_x = *ptr;
         int expected_x = 2 * i * i - 1;
         if (actual_x != expected_x)
         {
-            code = 4;
+            retcode = 4;
             goto cleanup;
         }
     }
 cleanup:
     array_free(&array);
-    return code;
+    return retcode;
 }
 
 int test_extend_get(void)
 {
-    int code = 0;
+    int retcode = 0;
     Array array_1, array_2;
     int value;
 
     if (array_init(&array_1, sizeof(int)) != 0 || array_init(&array_2, sizeof(int)) != 0)
     {
-        code = 1;
+        retcode = 1;
         goto cleanup;
     }
     int n_1 = 1024;
@@ -82,7 +82,7 @@ int test_extend_get(void)
         value = array_append(&array_1, &x);
         if (value != 0)
         {
-            code = 2;
+            retcode = 2;
             goto cleanup;
         }
     }
@@ -93,14 +93,14 @@ int test_extend_get(void)
         value = array_append(&array_2, &x);
         if (value != 0)
         {
-            code = 3;
+            retcode = 3;
             goto cleanup;
         }
     }
     value = array_extend(&array_1, array_2.data, array_2.len);
     if (value != 0)
     {
-        code = 4;
+        retcode = 4;
         goto cleanup;
     }
     for (int i = 0; i < n_1 + n_2; i++)
@@ -108,7 +108,7 @@ int test_extend_get(void)
         int *ptr = array_get(&array_1, i);
         if (ptr == NULL)
         {
-            code = 5;
+            retcode = 5;
             goto cleanup;
         }
         int actual_x = *ptr;
@@ -119,12 +119,12 @@ int test_extend_get(void)
             expected_x = (i - n_1) * (i - n_1) - 1;
         else
         {
-            code = 6;
+            retcode = 6;
             goto cleanup;
         }
         if (actual_x != expected_x)
         {
-            code = 7;
+            retcode = 7;
             goto cleanup;
         }
     }
@@ -132,19 +132,19 @@ int test_extend_get(void)
 cleanup:
     array_free(&array_1);
     array_free(&array_2);
-    return code;
+    return retcode;
 }
 
 int test_get_out_of_bounds(void)
 {
-    int code = 0;
+    int retcode = 0;
     Array array;
     int value;
 
     value = array_init(&array, sizeof(int));
     if (value != 0)
     {
-        code = 1;
+        retcode = 1;
         goto cleanup;
     }
     size_t len = 32;
@@ -153,44 +153,44 @@ int test_get_out_of_bounds(void)
         value = array_append(&array, &i);
         if (value != 0)
         {
-            code = 2;
+            retcode = 2;
             goto cleanup;
         }
     }
     int *ptr = array_get(&array, len - 1);
     if (ptr == NULL)
     {
-        code = 3;
+        retcode = 3;
         goto cleanup;
     }
     ptr = array_get(&array, len);
     if (ptr != NULL)
     {
-        code = 4;
+        retcode = 4;
         goto cleanup;
     }
 cleanup:
     array_free(&array);
-    return code;
+    return retcode;
 }
 
 int test_shrink(void)
 {
-    int code = 0;
+    int retcode = 0;
     Array array;
     int value;
 
     value = array_init(&array, sizeof(int));
     if (value != 0)
     {
-        code = 1;
+        retcode = 1;
         goto cleanup;
     }
     size_t capacity = array.capacity;
     array_shrink(&array);
     if (array.capacity != capacity)
     {
-        code = 2;
+        retcode = 2;
         goto cleanup;
     }
     for (size_t i = 0; i < capacity + 1; i++)
@@ -198,12 +198,12 @@ int test_shrink(void)
     array_shrink(&array);
     if (array.capacity != array.len)
     {
-        code = 3;
+        retcode = 3;
         goto cleanup;
     }
 cleanup:
     array_free(&array);
-    return code;
+    return retcode;
 }
 
 TestFunction tests[] = {

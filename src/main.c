@@ -114,7 +114,7 @@ int main(int argc, char *argv[])
         INVOCATION_NAME = "?";
 
     // Initializations
-    int code = 0; // Generic return code for various functions
+    int retcode = 0; // Generic return code for various functions
     atexit(&cleanup);
     if (sequences_init_base_alphabets() != 0)
     {
@@ -166,25 +166,25 @@ int main(int argc, char *argv[])
     // Prepare options
     struct option long_options[NOPTIONS + 1]; // Extra struct of 0s to mark end
     char *short_options = NULL;
-    code = prepare_options(NOPTIONS, options, &short_options, long_options);
-    if (code != 0)
-        return code;
+    retcode = prepare_options(NOPTIONS, options, &short_options, long_options);
+    if (retcode != 0)
+        return retcode;
 
     // Parse options
     unsigned int n_format_args = 0;
     char **format_args = NULL;
     unsigned int n_type_args = 0;
     char **type_args = NULL;
-    code = parse_options(argc, argv,
-                         NOPTIONS, options,
-                         N_FORMAT_OPTIONS, format_options,
-                         N_TYPE_OPTIONS, type_options,
-                         short_options, long_options,
-                         &n_format_args, &format_args,
-                         &n_type_args, &type_args);
+    retcode = parse_options(argc, argv,
+                            NOPTIONS, options,
+                            N_FORMAT_OPTIONS, format_options,
+                            N_TYPE_OPTIONS, type_options,
+                            short_options, long_options,
+                            &n_format_args, &format_args,
+                            &n_type_args, &type_args);
     free(short_options);
-    if (code > 0) // "Expected" exit == 1 and "unexpected" exit > 1; shift -1 for CLI convention
-        return code - 1;
+    if (retcode > 0) // "Expected" exit == 1 and "unexpected" exit > 1; shift -1 for CLI convention
+        return retcode - 1;
     unsigned int n_positional_args = argc - optind;
     char **positional_args = argv + optind;
 
@@ -225,12 +225,12 @@ int main(int argc, char *argv[])
     state.active_file = files;
     state.active_file_index = 0;
 
-    code = read_files(&state,
-                      n_positional_args, positional_args,
-                      n_format_args, format_args,
-                      n_type_args, type_args);
-    if (code > 0)
-        return code - 1;
+    retcode = read_files(&state,
+                         n_positional_args, positional_args,
+                         n_format_args, format_args,
+                         n_type_args, type_args);
+    if (retcode > 0)
+        return retcode - 1;
 
     if (n_format_args > 0)
         str_free_split(format_args, n_format_args);
@@ -265,8 +265,8 @@ int main(int argc, char *argv[])
     {
         input_read_key(&input_buffer, input_fd);
 
-        code = input_parse_keys(&input_buffer, &count, &cmd);
-        switch (code)
+        retcode = input_parse_keys(&input_buffer, &count, &cmd);
+        switch (retcode)
         {
         case 0:
             input_execute_command(count, cmd);
@@ -312,7 +312,7 @@ int read_files(State *state,
                unsigned int n_format_args, char **format_args,
                unsigned int n_type_args, char **type_args)
 {
-    int code = 0;
+    int retcode = 0;
 
     // Split format extensions
     StrArray *formats_exts = malloc(N_FORMAT_OPTIONS * sizeof(StrArray));
@@ -381,7 +381,7 @@ int read_files(State *state,
                     break;
                 }
                 error_printf("%s: %s: Error identifying format\n", INVOCATION_NAME, format_arg);
-                code = 2;
+                retcode = 2;
                 goto cleanup;
             }
         }
@@ -398,14 +398,14 @@ int read_files(State *state,
                     break;
                 }
                 error_printf("%s: %s: Unknown extension\n", INVOCATION_NAME, file_path);
-                code = 2;
+                retcode = 2;
                 goto cleanup;
             }
         }
         else
         {
             error_printf("%s: %s: No format or known extension\n", INVOCATION_NAME, file_path);
-            code = 2;
+            retcode = 2;
             goto cleanup;
         }
 
@@ -416,7 +416,7 @@ int read_files(State *state,
         else if ((fp = fopen(file_path, "r")) == NULL)
         {
             error_printf("%s: %s: %s\n", INVOCATION_NAME, file_path, strerror(errno));
-            code = 1;
+            retcode = 1;
             goto cleanup;
         }
         SeqRecord *records = NULL;
@@ -424,7 +424,7 @@ int read_files(State *state,
         if (reader_code < 0)
         {
             error_printf("%s: %s: Error processing file (code %d)\n", INVOCATION_NAME, file_path, reader_code);
-            code = 1;
+            retcode = 1;
             goto cleanup;
         }
         unsigned int nrecords = reader_code;
@@ -453,7 +453,7 @@ int read_files(State *state,
                 int c = getchar();
                 if (c != 'y' && c != 'Y')
                 {
-                    code = 1;
+                    retcode = 1;
                     goto cleanup;
                 }
                 while ((c = getchar()) != '\n' && c != EOF)
@@ -512,5 +512,5 @@ cleanup:
         type_identifiers->len = 0;
     }
     free(types_identifiers);
-    return code;
+    return retcode;
 }

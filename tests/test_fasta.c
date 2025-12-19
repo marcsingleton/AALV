@@ -54,7 +54,7 @@ void wrap_string_with_blanks(FILE *fp, const char *s, const int len, const int m
 
 int test_read_write(void)
 {
-    int code = 0;
+    int retcode = 0;
     char buffer[BUFFERLEN];
     FILE *fp = fmemopen(buffer, BUFFERLEN, "rw");
     fasta_fwrite(fp, records, NRECORDS, MAXLEN);
@@ -62,17 +62,17 @@ int test_read_write(void)
     SeqRecord *new_records = NULL;
     int nrecords = fasta_fread(fp, &new_records);
     if (nrecords != NRECORDS)
-        code = 1;
+        retcode = 1;
     else if (records_equal(records, new_records, NRECORDS) != 1)
-        code = 1;
+        retcode = 1;
     sequences_free_seq_records(new_records, nrecords);
     fclose(fp);
-    return code;
+    return retcode;
 }
 
 int test_no_header(void)
 {
-    int code = 0;
+    int retcode = 0;
     char buffer[BUFFERLEN];
     FILE *fp = fmemopen(buffer, BUFFERLEN, "rw");
     fasta_wrap_string(fp, records[0].seq, records[0].len, MAXLEN);
@@ -81,30 +81,30 @@ int test_no_header(void)
     SeqRecord *new_records = NULL;
     int nrecords = fasta_fread(fp, &new_records);
     if (nrecords != FASTA_ERROR_INVALID_FORMAT)
-        code = 1;
+        retcode = 1;
     sequences_free_seq_records(new_records, nrecords);
     fclose(fp);
-    return code;
+    return retcode;
 }
 
 int test_empty_file(void)
 {
-    int code = 0;
+    int retcode = 0;
     char buffer[BUFFERLEN];
     FILE *fp = fmemopen(buffer, 1, "rw");
     fgetc(fp); // Consume the single byte of buffer
     SeqRecord *new_records = NULL;
     int nrecords = fasta_fread(fp, &new_records);
     if (nrecords != 0)
-        code = 1;
+        retcode = 1;
     sequences_free_seq_records(new_records, nrecords);
     fclose(fp);
-    return code;
+    return retcode;
 }
 
 int test_blank_lines(void)
 {
-    int code = 0;
+    int retcode = 0;
     char buffer[BUFFERLEN];
     FILE *fp = fmemopen(buffer, BUFFERLEN, "rw");
     fputs("\n\n\n", fp);
@@ -118,17 +118,17 @@ int test_blank_lines(void)
     SeqRecord *new_records = NULL;
     int nrecords = fasta_fread(fp, &new_records);
     if (nrecords != NRECORDS)
-        code = 1;
+        retcode = 1;
     else if (records_equal(records, new_records, NRECORDS) != 1)
-        code = 1;
+        retcode = 1;
     sequences_free_seq_records(new_records, nrecords);
     fclose(fp);
-    return code;
+    return retcode;
 }
 
 int test_non_fasta(void)
 {
-    int code = 0;
+    int retcode = 0;
     char buffer[BUFFERLEN] =
         "Here's a multiline\n"
         "file that's definitely not\n"
@@ -137,10 +137,10 @@ int test_non_fasta(void)
     SeqRecord *new_records = NULL;
     int nrecords = fasta_fread(fp, &new_records);
     if (nrecords != FASTA_ERROR_INVALID_FORMAT)
-        code = 1;
+        retcode = 1;
     sequences_free_seq_records(new_records, nrecords);
     fclose(fp);
-    return code;
+    return retcode;
 }
 
 int test_get_id(void)
@@ -160,7 +160,7 @@ int test_get_id(void)
         {NULL, NULL},
     };
 
-    int code = 0;
+    int retcode = 0;
     char *expected_id = NULL;
     char *returned_id = NULL;
     for (IdTest *test = tests; test->header != NULL; test++)
@@ -168,11 +168,11 @@ int test_get_id(void)
         expected_id = test->id;
         returned_id = fasta_get_id(test->header);
         if (returned_id == NULL || strcmp(expected_id, returned_id) != 0)
-            code += 1;
+            retcode += 1;
         free(returned_id);
     }
 
-    return code;
+    return retcode;
 }
 
 TestFunction tests[] = {

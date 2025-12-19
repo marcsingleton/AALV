@@ -75,15 +75,15 @@ int sequences_init_base_alphabets(void)
     Alphabet *BASE_ALPHABETS[] = {&NUCLEIC_ALPHABET, &PROTEIN_ALPHABET};
     size_t N_BASE_ALPHABETS = sizeof(BASE_ALPHABETS) / sizeof(Alphabet *);
 
-    int code = 0;
+    int retcode = 0;
     for (unsigned int i = 0; i < N_BASE_ALPHABETS; i++)
     {
         Alphabet *alphabet = BASE_ALPHABETS[i];
-        code = sequences_init_alphabet(alphabet, alphabet->name, alphabet->syms, alphabet->case_sensitive);
-        if (code != 0)
-            return code;
+        retcode = sequences_init_alphabet(alphabet, alphabet->name, alphabet->syms, alphabet->case_sensitive);
+        if (retcode != 0)
+            return retcode;
     }
-    return code;
+    return retcode;
 }
 
 int sequences_in_alphabet(Alphabet *alphabet, SeqRecord *record)
