@@ -318,9 +318,11 @@ int read_files(State *state,
                unsigned int n_seq_type_args, char **seq_type_args)
 {
     int retcode = 0;
+    StrArray *formats_exts = NULL;
+    StrArray *seq_types_identifiers = NULL;
 
     // Split format extensions
-    StrArray *formats_exts = malloc(N_FORMAT_OPTIONS * sizeof(StrArray));
+    formats_exts = malloc(N_FORMAT_OPTIONS * sizeof(StrArray));
     if (formats_exts == NULL)
     {
         error_printf("%s: Failed to allocate memory to split format extensions\n", INVOCATION_NAME);
@@ -340,7 +342,7 @@ int read_files(State *state,
     }
 
     // Split sequence type identifiers
-    StrArray *seq_types_identifiers = malloc(N_SEQ_TYPE_OPTIONS * sizeof(StrArray));
+    seq_types_identifiers = malloc(N_SEQ_TYPE_OPTIONS * sizeof(StrArray));
     if (formats_exts == NULL)
     {
         error_printf("%s: Failed to allocate memory to split type identifiers\n", INVOCATION_NAME);
@@ -501,21 +503,27 @@ int read_files(State *state,
     }
 
 cleanup:
-    for (unsigned int i = 0; i < N_FORMAT_OPTIONS; i++)
+    if (formats_exts)
     {
-        StrArray *format_exts = formats_exts + i;
-        str_free_split(format_exts->data, format_exts->len);
-        format_exts->data = NULL;
-        format_exts->len = 0;
+        for (unsigned int i = 0; i < N_FORMAT_OPTIONS; i++)
+        {
+            StrArray *format_exts = formats_exts + i;
+            str_free_split(format_exts->data, format_exts->len);
+            format_exts->data = NULL;
+            format_exts->len = 0;
+        }
+        free(formats_exts);
     }
-    free(formats_exts);
-    for (unsigned int i = 0; i < N_SEQ_TYPE_OPTIONS; i++)
+    if (seq_types_identifiers)
     {
-        StrArray *seq_type_identifiers = seq_types_identifiers + i;
-        str_free_split(seq_type_identifiers->data, seq_type_identifiers->len);
-        seq_type_identifiers->data = NULL;
-        seq_type_identifiers->len = 0;
+        for (unsigned int i = 0; i < N_SEQ_TYPE_OPTIONS; i++)
+        {
+            StrArray *seq_type_identifiers = seq_types_identifiers + i;
+            str_free_split(seq_type_identifiers->data, seq_type_identifiers->len);
+            seq_type_identifiers->data = NULL;
+            seq_type_identifiers->len = 0;
+        }
+        free(seq_types_identifiers);
     }
-    free(seq_types_identifiers);
     return retcode;
 }
