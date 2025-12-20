@@ -2,8 +2,18 @@
 
 #include "sequences.h"
 
-Alphabet NUCLEIC_ALPHABET = {.name = "nucleic", .syms = "ACGTUN.-", .case_sensitive = false};
-Alphabet PROTEIN_ALPHABET = {.name = "protein", .syms = "ACDEFGHIKLMNPQRSTVWYX.-", .case_sensitive = false};
+Alphabet NUCLEIC_ALPHABET = {
+    .name = "nucleic",
+    .syms = "ACGTUN.-",
+    .gaps = ".-",
+    .case_sensitive = false,
+};
+Alphabet PROTEIN_ALPHABET = {
+    .name = "protein",
+    .syms = "ACDEFGHIKLMNPQRSTVWYX.-",
+    .gaps = ".-",
+    .case_sensitive = false,
+};
 
 Alphabet *BASE_ALPHABETS[] = {&NUCLEIC_ALPHABET, &PROTEIN_ALPHABET};
 size_t N_BASE_ALPHABETS = sizeof(BASE_ALPHABETS) / sizeof(Alphabet *);
@@ -28,7 +38,7 @@ void sequences_free_seq_record_array(SeqRecordArray *record_array)
     record_array->len = 0;
 }
 
-int sequences_init_alphabet(Alphabet *alphabet, char *name, char *syms, bool case_sensitive)
+int sequences_init_alphabet(Alphabet *alphabet, char *name, char *syms, char *gaps, bool case_sensitive)
 {
     if (!alphabet || !name || !syms)
         return 1;
@@ -70,6 +80,10 @@ int sequences_init_alphabet(Alphabet *alphabet, char *name, char *syms, bool cas
         }
     }
     alphabet->len = len;
+    for (char *sym = gaps; *sym != '\0'; sym++)
+        if (sequences_sym_in_alphabet(alphabet, *sym) < 1)
+            return 1;
+    alphabet->gaps = gaps;
     return 0;
 }
 
@@ -79,40 +93,61 @@ int sequences_init_base_alphabets(void)
     for (unsigned int i = 0; i < N_BASE_ALPHABETS; i++)
     {
         Alphabet *alphabet = BASE_ALPHABETS[i];
-        retcode = sequences_init_alphabet(alphabet, alphabet->name, alphabet->syms, alphabet->case_sensitive);
+        retcode = sequences_init_alphabet(alphabet, alphabet->name,
+                                          alphabet->syms, alphabet->gaps,
+                                          alphabet->case_sensitive);
         if (retcode != 0)
             return retcode;
     }
     return retcode;
 }
 
-int sequences_in_alphabet(Alphabet *alphabet, SeqRecord *record)
+int sequences_sym_in_alphabet(Alphabet *alphabet, char sym)
+{
+    if (!isascii(sym))
+        return -1;
+    unsigned int index = sym;
+    if (alphabet->index_map[index] == -1)
+        return 0;
+    return 1;
+}
+
+int sequences_sym_is_gap(Alphabet *alphabet, char sym)
+{
+    int retcode = sequences_sym_in_alphabet(alphabet, sym);
+    if (retcode < 1)
+        return retcode;
+    for (char *gap_sym = alphabet->gaps; *gap_sym != 0; gap_sym++)
+        if (*gap_sym == sym)
+            return 1;
+    return 0;
+}
+
+int sequences_seq_in_alphabet(Alphabet *alphabet, SeqRecord *record)
 {
     for (char *sym = record->seq; *sym != '\0'; sym++)
     {
-        if (!isascii(*sym))
-            return -1;
-        unsigned int index = *sym;
-        if (alphabet->index_map[index] == -1)
-            return 0;
+        int retcode = sequences_sym_in_alphabet(alphabet, *sym);
+        if (retcode < 1)
+            return retcode;
     }
     return 1;
 }
 
-int sequences_is_nucleic(SeqRecord *record)
+int sequences_seq_is_nucleic(SeqRecord *record)
 {
-    return sequences_in_alphabet(&NUCLEIC_ALPHABET, record);
+    return sequences_seq_in_alphabet(&NUCLEIC_ALPHABET, record);
 }
 
-int sequences_is_protein(SeqRecord *record)
+int sequences_seq_is_protein(SeqRecord *record)
 {
-    return sequences_in_alphabet(&PROTEIN_ALPHABET, record);
+    return sequences_seq_in_alphabet(&PROTEIN_ALPHABET, record);
 }
 
 int sequences_infer_seq_type(SeqRecord *record)
 {
-    int is_nucleic = sequences_is_nucleic(record);
-    int is_protein = sequences_is_protein(record);
+    int is_nucleic = sequences_seq_is_nucleic(record);
+    int is_protein = sequences_seq_is_protein(record);
     if ((is_nucleic == 1) && (is_protein == 1))
         record->type = SEQ_TYPE_INDETERMINATE;
     else if (is_nucleic == 1)

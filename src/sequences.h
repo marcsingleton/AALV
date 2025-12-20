@@ -23,6 +23,7 @@ typedef struct
 {
     char *name;
     char *syms;
+    char *gaps;
     unsigned int len;
     bool case_sensitive;
     int index_map[128];
@@ -51,10 +52,12 @@ extern size_t N_BASE_ALPHABETS;
 
 void sequences_free_seq_records(SeqRecord *records, size_t nrecords);
 void sequences_free_seq_record_array(SeqRecordArray *record_array);
-int sequences_init_alphabet(Alphabet *alphabet, char *name, char *syms, bool case_sensitive);
+int sequences_init_alphabet(Alphabet *alphabet, char *name, char *syms, char *gaps, bool case_sensitive);
 int sequences_init_base_alphabets(void);
-int sequences_in_alphabet(Alphabet *alphabet, SeqRecord *record);
-int sequences_is_nucleic(SeqRecord *record);
-int sequences_is_protein(SeqRecord *record);
+int sequences_sym_in_alphabet(Alphabet *alphabet, char sym);
+int sequences_sym_is_gap(Alphabet *alphabet, char sym);
+int sequences_seq_in_alphabet(Alphabet *alphabet, SeqRecord *record);
+int sequences_seq_is_nucleic(SeqRecord *record);
+int sequences_seq_is_protein(SeqRecord *record);
 int sequences_infer_seq_type(SeqRecord *record);
 #endif // SEQUENCES_H
