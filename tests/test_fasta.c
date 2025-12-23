@@ -167,7 +167,7 @@ int test_get_id(void)
     {
         expected_id = test->id;
         returned_id = fasta_get_id(test->header);
-        if (returned_id == NULL || strcmp(expected_id, returned_id) != 0)
+        if (!returned_id || strcmp(expected_id, returned_id) != 0)
             retcode += 1;
         free(returned_id);
     }

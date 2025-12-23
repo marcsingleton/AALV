@@ -121,7 +121,7 @@ void state_set_active_file_index(State *state, unsigned int file_index)
 
 void state_set_seq_type_color_scheme(State *state, unsigned int seq_type_index, ColorScheme *color_scheme)
 {
-    if (color_scheme == NULL)
+    if (!color_scheme)
         return;
     if (color_scheme->type == COLOR_4_BIT && state->ncolors < 16)
         return;

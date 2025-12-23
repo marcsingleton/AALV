@@ -9,12 +9,12 @@
 
 int array_init(Array *array, size_t size)
 {
-    if (array == NULL || size == 0)
+    if (!array || size == 0)
         return 1;
-    void *ptr = malloc(INIT_CAPACITY * size);
-    if (ptr == NULL)
+    void *data = malloc(INIT_CAPACITY * size);
+    if (!data)
         return 1;
-    array->data = ptr;
+    array->data = data;
     array->size = size;
     array->capacity = INIT_CAPACITY;
     array->max_capacity = SIZE_MAX / size;
@@ -24,7 +24,7 @@ int array_init(Array *array, size_t size)
 
 void array_free(Array *array)
 {
-    if (array == NULL)
+    if (!array)
         return;
     free(array->data);
     array->data = NULL;
@@ -42,7 +42,7 @@ int array_append(Array *array, const void *value)
             return 1;
         size_t new_capacity = EXPAND_FACTOR * array->capacity;
         void *ptr = realloc(array->data, new_capacity * array->size);
-        if (ptr == NULL)
+        if (!ptr)
             return 1;
         array->data = ptr;
         array->capacity = new_capacity;
@@ -68,7 +68,7 @@ int array_extend(Array *array, const void *values, size_t len)
             new_capacity *= EXPAND_FACTOR;
         }
         void *ptr = realloc(array->data, new_capacity * array->size);
-        if (ptr == NULL)
+        if (!ptr)
             return 1;
         array->data = ptr;
         array->capacity = new_capacity;
@@ -90,7 +90,7 @@ int array_shrink(Array *array)
 {
     size_t capacity = (array->len == 0) ? INIT_CAPACITY : array->len;
     void *ptr = realloc(array->data, capacity * array->size);
-    if (ptr == NULL)
+    if (!ptr)
         return 1;
     array->data = ptr;
     array->capacity = capacity;

@@ -106,10 +106,10 @@ char positional_usage[] = "[<file> ...]";
 int main(int argc, char *argv[])
 {
     // Get invocation name
-    if (argv[0] != NULL)
+    if (argv[0])
     {
         char *s = strrchr(argv[0], '/');
-        if (s == NULL)
+        if (!s)
             INVOCATION_NAME = argv[0];
         else
             INVOCATION_NAME = s + 1; // Exclude /
@@ -220,7 +220,7 @@ int main(int argc, char *argv[])
 
     // Read files
     FileState *files = malloc(nfiles * sizeof(FileState));
-    if (files == NULL)
+    if (!files)
     {
         error_printf("%s: Failed to allocate memory to load files\n", INVOCATION_NAME);
         return 1;
@@ -323,7 +323,7 @@ int read_files(State *state,
 
     // Split format extensions
     formats_exts = malloc(N_FORMAT_OPTIONS * sizeof(StrArray));
-    if (formats_exts == NULL)
+    if (!formats_exts)
     {
         error_printf("%s: Failed to allocate memory to split format extensions\n", INVOCATION_NAME);
         return 1;
@@ -343,7 +343,7 @@ int read_files(State *state,
 
     // Split sequence type identifiers
     seq_types_identifiers = malloc(N_SEQ_TYPE_OPTIONS * sizeof(StrArray));
-    if (formats_exts == NULL)
+    if (!formats_exts)
     {
         error_printf("%s: Failed to allocate memory to split type identifiers\n", INVOCATION_NAME);
         return 1;
@@ -392,7 +392,7 @@ int read_files(State *state,
                 goto cleanup;
             }
         }
-        else if ((file_ext = strrchr(file_path, '.')) != NULL) // From path extension
+        else if ((file_ext = strrchr(file_path, '.'))) // From path extension
         {
             file_ext++; // Exclude dot from comparison
             for (unsigned int i = 0; i < N_FORMAT_OPTIONS; i++)
@@ -420,7 +420,7 @@ int read_files(State *state,
         FILE *fp;
         if (strcmp(file_path, "-") == 0)
             fp = stdin;
-        else if ((fp = fopen(file_path, "r")) == NULL)
+        else if (!(fp = fopen(file_path, "r")))
         {
             error_printf("%s: %s: %s\n", INVOCATION_NAME, file_path, strerror(errno));
             retcode = 1;

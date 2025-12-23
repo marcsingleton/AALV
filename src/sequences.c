@@ -20,7 +20,7 @@ size_t N_BASE_ALPHABETS = sizeof(BASE_ALPHABETS) / sizeof(Alphabet *);
 
 void sequences_free_seq_records(SeqRecord *records, size_t nrecords)
 {
-    if (records == NULL)
+    if (!records)
         return;
     for (size_t i = 0; i < nrecords; i++)
     {

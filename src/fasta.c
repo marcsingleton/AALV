@@ -37,15 +37,12 @@ int fasta_fread(FILE *fp, SeqRecord **records_ptr)
     size_t seqlen = 0;
 
     size_t bufferlen = 256;
-    char *buffer = NULL;
-    ptr = malloc(bufferlen);
-
-    if (ptr == NULL)
+    char *buffer = malloc(bufferlen);
+    if (!buffer)
     {
         code = FASTA_ERROR_MEMORY_ALLOCATION;
         goto error;
     }
-    buffer = ptr;
 
     // Read until first non-empty line
     while ((linelen = getline(&line, &capacity, fp)) == 1 && line[0] == '\n')
@@ -78,7 +75,7 @@ int fasta_fread(FILE *fp, SeqRecord **records_ptr)
             trimlen--;
 
         header = malloc(trimlen); // +1 for null; -1 for excluding >
-        if (header == NULL)
+        if (!header)
         {
             code = FASTA_ERROR_MEMORY_ALLOCATION;
             goto error;
@@ -88,7 +85,7 @@ int fasta_fread(FILE *fp, SeqRecord **records_ptr)
 
         // Get id
         id = fasta_get_id(header);
-        if (id == NULL)
+        if (!id)
         {
             code = FASTA_ERROR_MEMORY_ALLOCATION;
             goto error;
@@ -119,7 +116,7 @@ int fasta_fread(FILE *fp, SeqRecord **records_ptr)
                     goto error;
                 }
                 ptr = realloc(buffer, 2 * bufferlen);
-                if (ptr == NULL)
+                if (!ptr)
                 {
                     code = FASTA_ERROR_MEMORY_ALLOCATION;
                     goto error;
@@ -132,7 +129,7 @@ int fasta_fread(FILE *fp, SeqRecord **records_ptr)
             buffer[seqlen] = '\0';
         }
         seq = malloc(seqlen + 1);
-        if (seq == NULL)
+        if (!seq)
         {
             code = FASTA_ERROR_MEMORY_ALLOCATION;
             goto error;
@@ -195,7 +192,7 @@ error:
 int fasta_read(const char *path, SeqRecord **records_ptr)
 {
     FILE *fp = fopen(path, "r");
-    if (fp == NULL)
+    if (!fp)
         return FASTA_ERROR_FILE_IO;
 
     SeqRecord *ptr = NULL;
@@ -275,7 +272,7 @@ char *fasta_get_id(const char *header)
 
     // Allocate memory
     char *id = malloc(len + 1);
-    if (id == NULL)
+    if (!id)
         return id;
     strncpy(id, header + start, len);
     *(id + len) = '\0';

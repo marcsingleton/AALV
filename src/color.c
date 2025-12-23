@@ -4,7 +4,7 @@
 
 int color_init_color_scheme(ColorScheme *color_scheme, ColorType type, const char *name, unsigned int len)
 {
-    if (color_scheme == NULL || name == NULL || len == 0)
+    if (!color_scheme || !name || len == 0)
         return 1;
 
     // Get allocation sizes
@@ -89,7 +89,7 @@ int color_init_color_scheme(ColorScheme *color_scheme, ColorType type, const cha
 
 void color_free_color_scheme(ColorScheme *color_scheme)
 {
-    if (color_scheme == NULL)
+    if (!color_scheme)
         return;
 
     free(color_scheme->mask.fg);

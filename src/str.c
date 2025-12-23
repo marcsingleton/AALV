@@ -10,7 +10,7 @@
 static int copy_field(char **field_ptr, const char *s, const size_t len)
 {
     char *field = malloc((len + 1) * sizeof(char));
-    if (field == NULL)
+    if (!field)
         return 1;
     memcpy(field, s, len * sizeof(char));
     field[len] = '\0';
@@ -20,7 +20,7 @@ static int copy_field(char **field_ptr, const char *s, const size_t len)
 
 size_t str_count(const char *s, const char c)
 {
-    if (s == NULL)
+    if (!s)
         return 0;
 
     size_t n = 0;
@@ -44,7 +44,7 @@ int str_is_in(const char **ss, unsigned int n, const char *t)
 
 ssize_t str_split(char ***fields_ptr, const char *s, const char d)
 {
-    if (s == NULL)
+    if (!s)
         return -1;
 
     size_t m = str_count(s, d) + 1;
@@ -52,7 +52,7 @@ ssize_t str_split(char ***fields_ptr, const char *s, const char d)
         return -1;
     ssize_t n = m;
     char **fields = malloc(n * sizeof(char *));
-    if (fields == NULL)
+    if (!fields)
         return -1;
     *fields_ptr = fields;
 
