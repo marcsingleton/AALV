@@ -46,7 +46,7 @@ int test_append_get(void)
     for (int i = 0; i < n; i++)
     {
         int *ptr = array_get(&array, i);
-        if (ptr == NULL)
+        if (!ptr)
         {
             retcode = 3;
             goto cleanup;
@@ -106,7 +106,7 @@ int test_extend_get(void)
     for (int i = 0; i < n_1 + n_2; i++)
     {
         int *ptr = array_get(&array_1, i);
-        if (ptr == NULL)
+        if (!ptr)
         {
             retcode = 5;
             goto cleanup;
@@ -158,13 +158,13 @@ int test_get_out_of_bounds(void)
         }
     }
     int *ptr = array_get(&array, len - 1);
-    if (ptr == NULL)
+    if (!ptr)
     {
         retcode = 3;
         goto cleanup;
     }
     ptr = array_get(&array, len);
-    if (ptr != NULL)
+    if (ptr)
     {
         retcode = 4;
         goto cleanup;

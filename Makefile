@@ -2,13 +2,13 @@
 SRC_DIR := src
 TESTS_DIR := tests
 BUILD_DIR := build
-PROGRAM_NAME := aalv
+EXE := aalv
 
 # src targets
 SRC := $(wildcard $(SRC_DIR)/*.c)
 SRC := $(filter-out $(SRC_DIR)/main.c, $(SRC))
 SRC_OBJS := $(patsubst $(SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(SRC))
-SRC_TARGET := $(BUILD_DIR)/$(PROGRAM_NAME)
+SRC_TARGET := $(BUILD_DIR)/$(EXE)
 
 # tests targets
 TESTS := $(wildcard $(TESTS_DIR)/*.c)
@@ -19,7 +19,7 @@ TESTS_TARGETS := $(TESTS:$(TESTS_DIR)/%.c=$(BUILD_DIR)/%)
 # platform and program macros
 OS := $(shell uname -s)
 VERSION := 1.0.0
-MACROS := '-DPROGRAM_NAME="$(PROGRAM_NAME)"' '-DVERSION="$(VERSION)"' # See macros.h for default values
+MACROS := '-DPROGRAM_NAME="$(EXE)"' '-DVERSION="$(VERSION)"' # See macros.h for default values
 
 # CC flags
 CC := cc
