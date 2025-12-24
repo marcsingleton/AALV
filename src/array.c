@@ -6,6 +6,7 @@
 
 #define INIT_CAPACITY 16
 #define EXPAND_FACTOR 2
+#define CONTRACT_FACTOR 4
 
 int array_init(Array *array, size_t size)
 {
@@ -89,6 +90,17 @@ void *array_get(Array *array, size_t index)
         return NULL;
     if (index >= array->len)
         return NULL;
+    return (char *)array->data + (index * array->size);
+}
+
+void *array_pop(Array *array)
+{
+    if (!array)
+        return NULL;
+    if (array->len == 0)
+        return NULL;
+    size_t index = array->len - 1;
+    array->len--;
     return (char *)array->data + (index * array->size);
 }
 
