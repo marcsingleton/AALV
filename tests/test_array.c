@@ -11,12 +11,90 @@ int test_init(void)
     Array array;
     int value;
 
+    // NULL array
+    value = array_init(NULL, sizeof(int));
+    if (value == 0)
+    {
+        retcode = 1;
+        goto cleanup;
+    }
+    // 0 size
+    value = array_init(&array, 0);
+    if (value == 0)
+    {
+        retcode = 2;
+        goto cleanup;
+    }
+    // Success
     value = array_init(&array, sizeof(int));
     if (value != 0 || array.size != sizeof(int) || array.capacity == 0 || array.len != 0)
-        retcode = 1;
-    else
-        retcode = 0;
+    {
+        retcode = 3;
+        goto cleanup;
+    }
+
+cleanup:
     array_free(&array);
+    return retcode;
+}
+
+int test_append_null(void)
+{
+    int retcode = 0;
+    int value;
+
+    // NULL array
+    int x = 0;
+    value = array_append(NULL, &x);
+    if (value == 0)
+    {
+        retcode = 1;
+        goto cleanup;
+    }
+
+cleanup:
+    return retcode;
+}
+
+int test_extend_null(void)
+{
+    int retcode = 0;
+    Array array;
+    int value;
+
+    // NULL array
+    int x[] = {0, 1, 2};
+    value = array_append(NULL, &x);
+    if (value == 0)
+    {
+        retcode = 1;
+        goto cleanup;
+    }
+    // NULL values
+    value = array_append(&array, NULL);
+    if (value == 0)
+    {
+        retcode = 2;
+        goto cleanup;
+    }
+
+cleanup:
+    return retcode;
+}
+
+int test_get_null(void)
+{
+    int retcode = 0;
+
+    // NULL array
+    int *ptr = array_get(NULL, 0);
+    if (ptr)
+    {
+        retcode = 1;
+        goto cleanup;
+    }
+
+cleanup:
     return retcode;
 }
 
@@ -222,6 +300,9 @@ cleanup:
 
 TestFunction tests[] = {
     {&test_init, "test_init"},
+    {&test_append_null, "append_null"},
+    {&test_extend_null, "extend_null"},
+    {&test_get_null, "get_null"},
     {&test_append_get, "test_append_get"},
     {&test_extend_get, "test_extend_get"},
     {&test_get_out_of_bounds, "test_get_out_of_bounds"},
