@@ -26,12 +26,14 @@ int test_append_get(void)
     Array array;
     int value;
 
+    // Initialize
     value = array_init(&array, sizeof(int));
     if (value != 0)
     {
         retcode = 1;
         goto cleanup;
     }
+    // Append
     int n = 1024;
     for (int i = 0; i < n; i++)
     {
@@ -43,6 +45,7 @@ int test_append_get(void)
             goto cleanup;
         }
     }
+    // Get
     for (int i = 0; i < n; i++)
     {
         int *ptr = array_get(&array, i);
@@ -59,6 +62,7 @@ int test_append_get(void)
             goto cleanup;
         }
     }
+
 cleanup:
     array_free(&array);
     return retcode;
@@ -70,11 +74,13 @@ int test_extend_get(void)
     Array array_1, array_2;
     int value;
 
+    // Initialize
     if (array_init(&array_1, sizeof(int)) != 0 || array_init(&array_2, sizeof(int)) != 0)
     {
         retcode = 1;
         goto cleanup;
     }
+    // Append
     int n_1 = 1024;
     for (int i = 0; i < n_1; i++)
     {
@@ -97,6 +103,7 @@ int test_extend_get(void)
             goto cleanup;
         }
     }
+    // Extend
     value = array_extend(&array_1, array_2.data, array_2.len);
     if (value != 0)
     {
@@ -141,12 +148,14 @@ int test_get_out_of_bounds(void)
     Array array;
     int value;
 
+    // Initialize
     value = array_init(&array, sizeof(int));
     if (value != 0)
     {
         retcode = 1;
         goto cleanup;
     }
+    // Append
     size_t len = 32;
     for (size_t i = 0; i < len; i++)
     {
@@ -157,6 +166,7 @@ int test_get_out_of_bounds(void)
             goto cleanup;
         }
     }
+    // Get
     int *ptr = array_get(&array, len - 1);
     if (!ptr)
     {
@@ -169,6 +179,7 @@ int test_get_out_of_bounds(void)
         retcode = 4;
         goto cleanup;
     }
+
 cleanup:
     array_free(&array);
     return retcode;
@@ -180,12 +191,14 @@ int test_shrink(void)
     Array array;
     int value;
 
+    // Initialize
     value = array_init(&array, sizeof(int));
     if (value != 0)
     {
         retcode = 1;
         goto cleanup;
     }
+    // Shrink
     size_t capacity = array.capacity;
     array_shrink(&array);
     if (array.capacity != capacity)
@@ -201,6 +214,7 @@ int test_shrink(void)
         retcode = 3;
         goto cleanup;
     }
+
 cleanup:
     array_free(&array);
     return retcode;
