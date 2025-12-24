@@ -220,6 +220,59 @@ cleanup:
     return retcode;
 }
 
+int test_append_pop(void)
+{
+    int retcode = 0;
+    Array array;
+    int value;
+
+    // Initialize
+    value = array_init(&array, sizeof(int));
+    if (value != 0)
+    {
+        retcode = 1;
+        goto cleanup;
+    }
+    // Append
+    int n = 1024;
+    for (int i = 0; i < n; i++)
+    {
+        int x = 2 * i * i - 1;
+        value = array_append(&array, &x);
+        if (value != 0)
+        {
+            retcode = 2;
+            goto cleanup;
+        }
+    }
+    // Pop
+    for (int i = n - 1; i > 0; i--)
+    {
+        int *ptr = array_pop(&array);
+        if (!ptr)
+        {
+            retcode = 3;
+            goto cleanup;
+        }
+        int actual_x = *ptr;
+        int expected_x = 2 * i * i - 1;
+        if (actual_x != expected_x)
+        {
+            retcode = 4;
+            goto cleanup;
+        }
+        if (array.len != (unsigned)i) // Silence sign mis-match
+        {
+            retcode = 5;
+            goto cleanup;
+        }
+    }
+
+cleanup:
+    array_free(&array);
+    return retcode;
+}
+
 int test_get_out_of_bounds(void)
 {
     int retcode = 0;
@@ -305,6 +358,7 @@ TestFunction tests[] = {
     {&test_get_null, "get_null"},
     {&test_append_get, "test_append_get"},
     {&test_extend_get, "test_extend_get"},
+    {&test_append_pop, "test_append_pop"},
     {&test_get_out_of_bounds, "test_get_out_of_bounds"},
     {&test_shrink, "test_shrink"},
 };
