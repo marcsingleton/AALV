@@ -208,8 +208,8 @@ cleanup:
 
 TestFunction tests[] = {
     {&test_init, "test_init"},
-    {&test_append_get, "test_append"},
-    {&test_extend_get, "test_extend"},
+    {&test_append_get, "test_append_get"},
+    {&test_extend_get, "test_extend_get"},
     {&test_get_out_of_bounds, "test_get_out_of_bounds"},
     {&test_shrink, "test_shrink"},
 };
