@@ -34,13 +34,15 @@ void sequences_free_seq_records(SeqRecord *records, size_t nrecords)
 
 void sequences_free_seq_record_array(SeqRecordArray *record_array)
 {
+    if (!record_array)
+        return;
     sequences_free_seq_records(record_array->records, record_array->len);
     record_array->len = 0;
 }
 
 int sequences_init_alphabet(Alphabet *alphabet, char *name, char *syms, char *gaps, bool case_sensitive)
 {
-    if (!alphabet || !name || !syms)
+    if (!alphabet || !name || !syms || !gaps)
         return 1;
     alphabet->name = name;
     alphabet->syms = syms;
@@ -104,6 +106,8 @@ int sequences_init_base_alphabets(void)
 
 int sequences_sym_in_alphabet(Alphabet *alphabet, char sym)
 {
+    if (!alphabet)
+        return -1;
     if (!isascii(sym))
         return -1;
     unsigned int index = sym;
@@ -114,6 +118,8 @@ int sequences_sym_in_alphabet(Alphabet *alphabet, char sym)
 
 int sequences_sym_is_gap(Alphabet *alphabet, char sym)
 {
+    if (!alphabet)
+        return -1;
     int retcode = sequences_sym_in_alphabet(alphabet, sym);
     if (retcode < 1)
         return retcode;
@@ -125,6 +131,8 @@ int sequences_sym_is_gap(Alphabet *alphabet, char sym)
 
 int sequences_seq_in_alphabet(Alphabet *alphabet, SeqRecord *record)
 {
+    if (!alphabet || !record)
+        return -1;
     for (char *sym = record->seq; *sym != '\0'; sym++)
     {
         int retcode = sequences_sym_in_alphabet(alphabet, *sym);
