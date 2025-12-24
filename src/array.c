@@ -36,6 +36,8 @@ void array_free(Array *array)
 
 int array_append(Array *array, const void *value)
 {
+    if (!array)
+        return 1;
     if (array->len >= array->capacity)
     {
         if (array->capacity > array->max_capacity / EXPAND_FACTOR)
@@ -55,6 +57,8 @@ int array_append(Array *array, const void *value)
 
 int array_extend(Array *array, const void *values, size_t len)
 {
+    if (!array || !values)
+        return 1;
     if (array->len > array->max_capacity - len)
         return 1;
     size_t new_len = array->len + len;
@@ -81,6 +85,8 @@ int array_extend(Array *array, const void *values, size_t len)
 
 void *array_get(Array *array, size_t index)
 {
+    if (!array)
+        return NULL;
     if (index >= array->len)
         return NULL;
     return (char *)array->data + (index * array->size);
@@ -88,6 +94,8 @@ void *array_get(Array *array, size_t index)
 
 int array_shrink(Array *array)
 {
+    if (!array)
+        return 1;
     size_t capacity = (array->len == 0) ? INIT_CAPACITY : array->len;
     void *ptr = realloc(array->data, capacity * array->size);
     if (!ptr)
