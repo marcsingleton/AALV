@@ -9,13 +9,7 @@
 #include "fasta.h"
 #include "sequences.h"
 
-const int FASTA_ERROR_INVALID_FORMAT = -1;
-const int FASTA_ERROR_RECORD_OVERFLOW = -2;
-const int FASTA_ERROR_SEQUENCE_OVERFLOW = -3;
-const int FASTA_ERROR_FILE_IO = -4;
-const int FASTA_ERROR_MEMORY_ALLOCATION = -5;
-
-int fasta_fread(FILE *fp, SeqRecord **records_ptr)
+int fasta_fread(FILE *fp, SeqRecordArray *record_array)
 {
     // Declarations
     int retcode = 0;
@@ -163,8 +157,9 @@ int fasta_fread(FILE *fp, SeqRecord **records_ptr)
         retcode = FASTA_ERROR_MEMORY_ALLOCATION;
         goto error;
     }
-    *records_ptr = new_records.data;
-    nrecords = new_records.len; // Will always fit--see check above
+
+    record_array->records = new_records.data;
+    record_array->len = new_records.len;
     return nrecords;
 
 error:
@@ -189,38 +184,35 @@ error:
     return retcode;
 }
 
-int fasta_read(const char *path, SeqRecord **records_ptr)
+int fasta_read(const char *path, SeqRecordArray *record_array)
 {
     FILE *fp = fopen(path, "r");
     if (!fp)
         return FASTA_ERROR_FILE_IO;
 
-    SeqRecord *ptr = NULL;
-    int nrecords = fasta_fread(fp, &ptr);
+    int retcode = fasta_fread(fp, record_array);
 
     if (fclose(fp) != 0)
         return FASTA_ERROR_FILE_IO;
 
-    *records_ptr = ptr;
-
-    return nrecords;
+    return retcode;
 }
 
-int fasta_fwrite(FILE *fp, SeqRecord *records, const int nrecords, const int maxlen)
+int fasta_fwrite(FILE *fp, SeqRecordArray *record_array, const int maxlen)
 {
-    for (int i = 0; i < nrecords; i++)
+    for (size_t i = 0; i < record_array->len; i++)
     {
-        SeqRecord *record = records + i;
+        SeqRecord *record = record_array->records + i;
         fprintf(fp, ">%s\n", record->header);
         fasta_wrap_string(fp, record->seq, record->len, maxlen);
     }
     return 0;
 }
 
-int fasta_write(const char *path, SeqRecord *records, const int nrecords, const int maxlen)
+int fasta_write(const char *path, SeqRecordArray *record_array, const int maxlen)
 {
     FILE *fp = fopen(path, "w");
-    int retcode = fasta_fwrite(fp, records, nrecords, maxlen);
+    int retcode = fasta_fwrite(fp, record_array, maxlen);
     fclose(fp);
     return retcode;
 }

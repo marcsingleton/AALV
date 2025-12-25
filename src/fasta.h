@@ -9,16 +9,20 @@
 
 #include "sequences.h"
 
-extern const int FASTA_ERROR_INVALID_FORMAT;
-extern const int FASTA_ERROR_RECORD_OVERFLOW;
-extern const int FASTA_ERROR_SEQUENCE_OVERFLOW;
-extern const int FASTA_ERROR_FILE_IO;
-extern const int FASTA_ERROR_MEMORY_ALLOCATION;
+typedef enum
+{
+    FASTA_ERROR_SUCCESS = 0,
+    FASTA_ERROR_INVALID_FORMAT,
+    FASTA_ERROR_RECORD_OVERFLOW,
+    FASTA_ERROR_SEQUENCE_OVERFLOW,
+    FASTA_ERROR_FILE_IO,
+    FASTA_ERROR_MEMORY_ALLOCATION,
+} FastaError;
 
-int fasta_fread(FILE *fp, SeqRecord **records_ptr);
-int fasta_read(const char *path, SeqRecord **records_ptr);
-int fasta_fwrite(FILE *fp, SeqRecord *records, const int nrecords, const int maxlen);
-int fasta_write(const char *path, SeqRecord *records, const int nrecords, const int maxlen);
+int fasta_fread(FILE *fp, SeqRecordArray *record_array);
+int fasta_read(const char *path, SeqRecordArray *record_array);
+int fasta_fwrite(FILE *fp, SeqRecordArray *record_array, const int maxlen);
+int fasta_write(const char *path, SeqRecordArray *record_array, const int maxlen);
 void fasta_wrap_string(FILE *fp, const char *s, const size_t len, const int maxlen);
 char *fasta_get_id(const char *header);
 
