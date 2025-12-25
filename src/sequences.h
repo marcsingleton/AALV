@@ -41,7 +41,7 @@ typedef struct
 typedef struct
 {
     SeqRecord *records;
-    unsigned int len;
+    size_t len;
 } SeqRecordArray;
 
 extern Alphabet NUCLEIC_ALPHABET;
