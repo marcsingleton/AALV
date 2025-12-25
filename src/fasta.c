@@ -185,7 +185,7 @@ error:
         free(new_record->seq);
     }
 
-    array_free(&new_records);
+    array_deinit(&new_records);
     return code;
 }
 

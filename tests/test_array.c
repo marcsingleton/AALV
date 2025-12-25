@@ -34,7 +34,7 @@ int test_init(void)
     }
 
 cleanup:
-    array_free(&array);
+    array_deinit(&array);
     return retcode;
 }
 
@@ -142,7 +142,7 @@ int test_append_get(void)
     }
 
 cleanup:
-    array_free(&array);
+    array_deinit(&array);
     return retcode;
 }
 
@@ -215,8 +215,8 @@ int test_extend_get(void)
     }
 
 cleanup:
-    array_free(&array_1);
-    array_free(&array_2);
+    array_deinit(&array_1);
+    array_deinit(&array_2);
     return retcode;
 }
 
@@ -269,7 +269,7 @@ int test_append_pop(void)
     }
 
 cleanup:
-    array_free(&array);
+    array_deinit(&array);
     return retcode;
 }
 
@@ -312,7 +312,7 @@ int test_get_out_of_bounds(void)
     }
 
 cleanup:
-    array_free(&array);
+    array_deinit(&array);
     return retcode;
 }
 
@@ -347,7 +347,7 @@ int test_shrink(void)
     }
 
 cleanup:
-    array_free(&array);
+    array_deinit(&array);
     return retcode;
 }
 

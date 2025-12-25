@@ -17,7 +17,7 @@ typedef struct
 } Array;
 
 int array_init(Array *array, size_t size);
-void array_free(Array *array);
+void array_deinit(Array *array);
 int array_append(Array *array, const void *value);
 int array_extend(Array *array, const void *values, size_t len);
 void *array_get(Array *array, size_t index);

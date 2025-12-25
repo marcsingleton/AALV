@@ -23,7 +23,7 @@ int array_init(Array *array, size_t size)
     return 0;
 }
 
-void array_free(Array *array)
+void array_deinit(Array *array)
 {
     if (!array)
         return;

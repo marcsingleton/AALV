@@ -60,7 +60,7 @@ int cli_prepare_options(unsigned int noptions, Option *options,
     memcpy(short_options, short_options_array.data, short_options_array.len * short_options_array.size);
     *short_options_ptr = short_options;
 cleanup:
-    array_free(&short_options_array);
+    array_deinit(&short_options_array);
     return retcode;
 }
 
