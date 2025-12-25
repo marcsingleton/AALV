@@ -35,6 +35,26 @@ void array_deinit(Array *array)
     array->len = 0;
 }
 
+Array *array_create(size_t size)
+{
+    Array *array = malloc(sizeof(Array));
+    if (!array)
+        return NULL;
+    int retcode = array_init(array, size);
+    if (retcode > 0)
+    {
+        free(array);
+        return NULL;
+    }
+    return array;
+}
+
+void array_destroy(Array *array)
+{
+    array_deinit(array);
+    free(array);
+}
+
 int array_append(Array *array, const void *value)
 {
     if (!array)
