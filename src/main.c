@@ -293,7 +293,7 @@ void cleanup(void)
 {
     // Free memory
     for (unsigned int i = 0; i < state.n_color_schemes; i++)
-        color_free_color_scheme(state.color_schemes + i);
+        color_deinit_color_scheme(state.color_schemes + i);
     for (unsigned int i = 0; i < state.nfiles; i++)
         sequences_free_seq_records(state.files[i].records, state.files[i].nrecords); // Null if unset, so always safe to free
     free(state.files);

@@ -51,6 +51,6 @@ typedef struct
 } ColorScheme;
 
 int color_init_color_scheme(ColorScheme *color_scheme, ColorType type, const char *name, unsigned int len);
-void color_free_color_scheme(ColorScheme *color_scheme);
+void color_deinit_color_scheme(ColorScheme *color_scheme);
 
 #endif // COLOR_H
