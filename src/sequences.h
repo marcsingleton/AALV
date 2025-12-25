@@ -50,8 +50,13 @@ extern Alphabet PROTEIN_ALPHABET;
 extern Alphabet *BASE_ALPHABETS[];
 extern size_t N_BASE_ALPHABETS;
 
+int sequences_init_seq_record(SeqRecord *record, char *header, char *seq, char *id);
+void sequences_deinit_seq_record(SeqRecord *record);
+SeqRecord *sequences_create_seq_record(char *header, char *seq, char *id);
+void sequences_destroy_seq_record(SeqRecord *record);
 void sequences_free_seq_records(SeqRecord *records, size_t nrecords);
-void sequences_free_seq_record_array(SeqRecordArray *record_array);
+int sequences_init_seq_record_array(SeqRecordArray *record_array, size_t len);
+void sequences_deinit_seq_record_array(SeqRecordArray *record_array);
 int sequences_init_alphabet(Alphabet *alphabet, char *name, char *syms, char *gaps, bool case_sensitive);
 int sequences_init_base_alphabets(void);
 int sequences_sym_in_alphabet(Alphabet *alphabet, char sym);

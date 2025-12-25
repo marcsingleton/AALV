@@ -1,4 +1,5 @@
 #include <ctype.h>
+#include <string.h>
 
 #include "sequences.h"
 
@@ -18,25 +19,83 @@ Alphabet PROTEIN_ALPHABET = {
 Alphabet *BASE_ALPHABETS[] = {&NUCLEIC_ALPHABET, &PROTEIN_ALPHABET};
 size_t N_BASE_ALPHABETS = sizeof(BASE_ALPHABETS) / sizeof(Alphabet *);
 
-void sequences_free_seq_records(SeqRecord *records, size_t nrecords)
+int sequences_init_seq_record(SeqRecord *record, char *header, char *seq, char *id)
 {
-    if (!records)
-        return;
-    for (size_t i = 0; i < nrecords; i++)
+    if (!record || !header || !seq || !id)
+        return 1;
+    char *new_header = NULL;
+    char *new_seq = NULL;
+    char *new_id = NULL;
+
+    new_header = strdup(header);
+    new_seq = strdup(seq);
+    new_id = strdup(id);
+    if (!new_header || !new_seq || !new_id)
     {
-        SeqRecord record = records[i];
-        free(record.header);
-        free(record.id);
-        free(record.seq);
+        free(new_header);
+        free(new_seq);
+        free(new_id);
+        return 1;
     }
-    free(records);
+    record->header = new_header;
+    record->seq = new_seq;
+    record->id = new_id;
+    record->type = SEQ_TYPE_UNSPECIFIED;
+    return 0;
 }
 
-void sequences_free_seq_record_array(SeqRecordArray *record_array)
+void sequences_deinit_seq_record(SeqRecord *record)
+{
+    if (!record)
+        return;
+    free(record->header);
+    free(record->seq);
+    free(record->id);
+    record->type = SEQ_TYPE_UNSPECIFIED;
+}
+
+SeqRecord *sequences_create_seq_record(char *header, char *seq, char *id)
+{
+    SeqRecord *record = malloc(sizeof(SeqRecord));
+    if (!record)
+        return NULL;
+    int retcode = sequences_init_seq_record(record, header, seq, id);
+    if (retcode > 0)
+    {
+        free(record);
+        return NULL;
+    }
+    return record;
+}
+
+void sequences_destroy_seq_record(SeqRecord *record)
+{
+    sequences_deinit_seq_record(record);
+    free(record);
+}
+
+int sequences_init_seq_record_array(SeqRecordArray *record_array, size_t len)
+{
+    if (!record_array)
+        return 1;
+
+    SeqRecord *records = calloc(len, sizeof(SeqRecord));
+    if (!records)
+        return 1;
+    record_array->records = records;
+    record_array->len = len;
+
+    return 0;
+}
+
+void sequences_deinit_seq_record_array(SeqRecordArray *record_array)
 {
     if (!record_array)
         return;
-    sequences_free_seq_records(record_array->records, record_array->len);
+
+    for (size_t i = 0; i < record_array->len; i++)
+        sequences_deinit_seq_record(record_array->records + i);
+    free(record_array->records);
     record_array->len = 0;
 }
 
