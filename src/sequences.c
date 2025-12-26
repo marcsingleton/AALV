@@ -99,15 +99,22 @@ int sequences_init_alphabet(Alphabet *alphabet, char *name, char *syms, char *ga
 {
     if (!alphabet || !name || !syms || !gaps)
         return 1;
-    alphabet->name = name;
-    alphabet->syms = syms;
+
+    Alphabet test_alphabet;
+    char *new_name = strdup(name);
+    char *new_syms = strdup(syms);
+    char *new_gaps = strdup(gaps);
+    if (!new_name || !new_syms || !new_gaps)
+        goto error;
+
+    // Check syms
     for (unsigned int i = 0; i < 128; i++)
-        alphabet->index_map[i] = -1;
+        test_alphabet.index_map[i] = -1;
     unsigned short len = 0;
-    for (char *sym = alphabet->syms; *sym != '\0'; sym++)
+    for (char *sym = syms; *sym != '\0'; sym++)
     {
         if (!isascii(*sym))
-            return 1;
+            goto error;
         if (!case_sensitive && isalpha(*sym))
         {
             unsigned int index_0, index_1;
@@ -121,27 +128,40 @@ int sequences_init_alphabet(Alphabet *alphabet, char *name, char *syms, char *ga
                 index_0 = toupper(*sym);
                 index_1 = *sym;
             }
-            if (alphabet->index_map[index_0] != -1)
+            if (test_alphabet.index_map[index_0] != -1)
                 continue;
-            alphabet->index_map[index_0] = len;
-            alphabet->index_map[index_1] = len;
+            test_alphabet.index_map[index_0] = len;
+            test_alphabet.index_map[index_1] = len;
             len++;
         }
         else
         {
             unsigned int index = *sym;
-            if (alphabet->index_map[index] != -1)
+            if (test_alphabet.index_map[index] != -1)
                 continue;
-            alphabet->index_map[index] = len;
+            test_alphabet.index_map[index] = len;
             len++;
         }
     }
-    alphabet->len = len;
+
+    // Check gaps
     for (char *sym = gaps; *sym != '\0'; sym++)
-        if (sequences_sym_in_alphabet(alphabet, *sym) < 1)
-            return 1;
-    alphabet->gaps = gaps;
+        if (sequences_sym_in_alphabet(&test_alphabet, *sym) < 1)
+            goto error;
+
+    alphabet->name = new_name;
+    alphabet->syms = new_syms;
+    alphabet->gaps = new_gaps;
+    alphabet->len = len;
+    alphabet->case_sensitive = case_sensitive;
+    memcpy(alphabet->index_map, test_alphabet.index_map, sizeof(test_alphabet.index_map));
     return 0;
+
+error:
+    free(new_name);
+    free(new_syms);
+    free(new_gaps);
+    return 1;
 }
 
 int sequences_init_base_alphabets(void)
