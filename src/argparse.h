@@ -14,7 +14,7 @@ typedef struct
 {
     const char *name;
     const char *exts;
-    int (*reader)(FILE *, SeqRecord **);
+    int (*reader)(FILE *, SeqRecordArray *);
 } FormatOption;
 
 typedef struct

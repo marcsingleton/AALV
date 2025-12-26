@@ -295,7 +295,7 @@ void cleanup(void)
     for (unsigned int i = 0; i < state.n_color_schemes; i++)
         color_deinit_color_scheme(state.color_schemes + i);
     for (unsigned int i = 0; i < state.nfiles; i++)
-        sequences_free_seq_records(state.files[i].records, state.files[i].nrecords); // Null if unset, so always safe to free
+        sequences_deinit_seq_record_array(&state.files[i].record_array);
     free(state.files);
 
     // Restore terminal options
@@ -364,6 +364,8 @@ int read_files(State *state,
     // Main loop
     for (unsigned int file_index = 0; file_index < state->nfiles; file_index++)
     {
+        FileState *file = state->files + file_index;
+
         const char *file_path, *file_ext;
         if (!isatty(STDIN_FILENO) && n_positional_args == 0)
             file_path = "-";
@@ -374,7 +376,7 @@ int read_files(State *state,
         char *format_arg = "";
         if (file_index < n_format_args)
             format_arg = format_args[file_index];
-        int (*reader)(FILE *, SeqRecord **) = NULL;
+        int (*reader)(FILE *, SeqRecordArray *) = NULL;
 
         if (format_arg[0] != '\0') // From format argument
         {
@@ -426,21 +428,20 @@ int read_files(State *state,
             retcode = 1;
             goto cleanup;
         }
-        SeqRecord *records = NULL;
-        int reader_code = reader(fp, &records);
+        SeqRecordArray *record_array = &file->record_array;
+        int reader_code = reader(fp, record_array);
         if (reader_code < 0)
         {
             error_printf("%s: %s: Error processing file (code %d)\n", INVOCATION_NAME, file_path, reader_code);
             retcode = 1;
             goto cleanup;
         }
-        unsigned int nrecords = reader_code;
 
         // Get maxlen
         size_t maxlen = 0;
-        for (unsigned int i = 0; i < nrecords; i++)
+        for (size_t i = 0; i < record_array->len; i++)
         {
-            SeqRecord *record = records + i;
+            SeqRecord *record = record_array->records + i;
             if (record->len > maxlen)
                 maxlen = record->len;
         }
@@ -449,9 +450,9 @@ int read_files(State *state,
         char *seq_type_arg = "";
         if (file_index < n_seq_type_args)
             seq_type_arg = seq_type_args[file_index];
-        for (unsigned int i = 0; i < nrecords; i++)
+        for (size_t i = 0; i < record_array->len; i++)
         {
-            SeqRecord *record = records + i;
+            SeqRecord *record = record_array->records + i;
             if (sequences_infer_seq_type(record) >= 2)
             {
                 printf("%s contains at least one non-ASCII symbol in its sequence(s). "
@@ -485,10 +486,7 @@ int read_files(State *state,
                 record->type = SEQ_TYPE_NUCLEIC;
         }
 
-        FileState *file = state->files + file_index;
         file->file_path = file_path;
-        file->records = records;
-        file->nrecords = nrecords;
         file->records_offset = 1;
         file->records_maxlen = maxlen;
         file->header_pane_width = rcparams_header_pane_width;

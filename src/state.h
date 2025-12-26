@@ -23,8 +23,7 @@ typedef struct
     unsigned int cursor_record_i;   // Row index in header/sequence panes
     unsigned int cursor_header_j;   // Column index in header pane
     unsigned int cursor_sequence_j; // Column index in sequence pane
-    SeqRecord *records;
-    size_t nrecords;
+    SeqRecordArray record_array;
     size_t records_maxlen;
     size_t records_offset;
 } FileState;

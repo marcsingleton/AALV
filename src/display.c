@@ -75,9 +75,9 @@ void display_header_pane(Array *buffer)
     {
         size_t record_index = i + active_file->offset_record;
         terminal_cursor_ij(buffer, i + active_file->ruler_pane_height + 1, 1);
-        if (record_index < active_file->nrecords)
+        if (record_index < active_file->record_array.len)
         {
-            SeqRecord record = active_file->records[record_index];
+            SeqRecord record = active_file->record_array.records[record_index];
             size_t len = strnlen(record.header, active_file->header_pane_width);
             if (len < active_file->header_pane_width)
             {
@@ -182,9 +182,9 @@ void display_sequence_pane(Array *buffer)
         size_t record_index = i + active_file->offset_record;
 
         terminal_cursor_ij(buffer, i + active_file->ruler_pane_height + 1, active_file->header_pane_width + 1);
-        if (record_index < active_file->nrecords)
+        if (record_index < active_file->record_array.len)
         {
-            SeqRecord record = active_file->records[record_index];
+            SeqRecord record = active_file->record_array.records[record_index];
             unsigned int left_continuation = 0;
             unsigned int right_continuation = 0;
             size_t start = active_file->offset_sequence;
@@ -241,7 +241,7 @@ void display_command_pane(Array *buffer)
     int n = snprintf(cursor_position, sizeof(cursor_position),
                      "ROW %zu/%zu  COL %zu/%zu",
                      active_file->offset_record + active_file->cursor_record_i + 1, // 1-based indexing
-                     active_file->nrecords,
+                     active_file->record_array.len,
                      active_file->offset_sequence + active_file->cursor_sequence_j + active_file->records_offset,
                      active_file->records_maxlen);
     if (n < 0)
@@ -271,7 +271,7 @@ void display_cursor(Array *buffer)
     unsigned int record_panes_height = state_get_record_panes_height(&state);
     if (record_panes_height == 0)
         return;
-    if (active_file->nrecords == 0)
+    if (active_file->record_array.len == 0)
         return;
 
     unsigned render_index_i;
@@ -283,7 +283,7 @@ void display_cursor(Array *buffer)
 
     size_t record_index = render_index_i + active_file->offset_record;
     size_t sequence_index = active_file->cursor_sequence_j + active_file->offset_sequence;
-    SeqRecord record = active_file->records[record_index];
+    SeqRecord record = active_file->record_array.records[record_index];
     unsigned int render_index_j;
     if (record.len > sequence_index)
         render_index_j = sequence_index;
