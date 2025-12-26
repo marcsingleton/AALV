@@ -23,13 +23,10 @@ int sequences_init_seq_record(SeqRecord *record, char *header, char *seq, char *
 {
     if (!record || !header || !seq || !id)
         return 1;
-    char *new_header = NULL;
-    char *new_seq = NULL;
-    char *new_id = NULL;
 
-    new_header = strdup(header);
-    new_seq = strdup(seq);
-    new_id = strdup(id);
+    char *new_header = strdup(header);
+    char *new_seq = strdup(seq);
+    char *new_id = strdup(id);
     if (!new_header || !new_seq || !new_id)
     {
         free(new_header);
@@ -84,7 +81,6 @@ int sequences_init_seq_record_array(SeqRecordArray *record_array, size_t len)
         return 1;
     record_array->records = records;
     record_array->len = len;
-
     return 0;
 }
 
