@@ -16,7 +16,6 @@ int fasta_fread(FILE *fp, SeqRecordArray *record_array)
 
     void *ptr = NULL; // A generic temporary pointer for allocations
 
-    int nrecords = 0;
     Array new_records;
     array_init(&new_records, sizeof(SeqRecord));
 
@@ -35,7 +34,7 @@ int fasta_fread(FILE *fp, SeqRecordArray *record_array)
     if (!buffer)
     {
         retcode = FASTA_ERROR_MEMORY_ALLOCATION;
-        goto error;
+        goto cleanup;
     }
 
     // Read until first non-empty line
@@ -45,13 +44,14 @@ int fasta_fread(FILE *fp, SeqRecordArray *record_array)
     // Check for empty files and improper formatting
     if (linelen <= 0)
     {
-        retcode = 0;
-        goto error;
+        record_array->records = NULL;
+        record_array->len = 0;
+        goto cleanup;
     }
     if (line[0] != '>')
     {
         retcode = FASTA_ERROR_INVALID_FORMAT;
-        goto error;
+        goto cleanup;
     }
 
     // Read records
@@ -72,7 +72,7 @@ int fasta_fread(FILE *fp, SeqRecordArray *record_array)
         if (!header)
         {
             retcode = FASTA_ERROR_MEMORY_ALLOCATION;
-            goto error;
+            goto cleanup;
         }
         memcpy(header, line + 1, trimlen - 1);
         header[trimlen - 1] = '\0';
@@ -82,7 +82,7 @@ int fasta_fread(FILE *fp, SeqRecordArray *record_array)
         if (!id)
         {
             retcode = FASTA_ERROR_MEMORY_ALLOCATION;
-            goto error;
+            goto cleanup;
         }
 
         // Get seq
@@ -98,7 +98,7 @@ int fasta_fread(FILE *fp, SeqRecordArray *record_array)
             if (seqlen >= SIZE_MAX - trimlen - 1)
             {
                 retcode = FASTA_ERROR_SEQUENCE_OVERFLOW;
-                goto error;
+                goto cleanup;
             }
 
             // Check for buffer capacity
@@ -107,13 +107,13 @@ int fasta_fread(FILE *fp, SeqRecordArray *record_array)
                 if (bufferlen > SIZE_MAX / 2)
                 {
                     retcode = FASTA_ERROR_MEMORY_ALLOCATION;
-                    goto error;
+                    goto cleanup;
                 }
                 ptr = realloc(buffer, 2 * bufferlen);
                 if (!ptr)
                 {
                     retcode = FASTA_ERROR_MEMORY_ALLOCATION;
-                    goto error;
+                    goto cleanup;
                 }
                 buffer = ptr;
                 bufferlen *= 2;
@@ -126,7 +126,7 @@ int fasta_fread(FILE *fp, SeqRecordArray *record_array)
         if (!seq)
         {
             retcode = FASTA_ERROR_MEMORY_ALLOCATION;
-            goto error;
+            goto cleanup;
         }
         memcpy(seq, buffer, seqlen + 1);
 
@@ -137,50 +137,48 @@ int fasta_fread(FILE *fp, SeqRecordArray *record_array)
             .len = seqlen,
             .type = SEQ_TYPE_UNSPECIFIED,
         };
-        if (new_records.len >= INT_MAX - 1) // Ensures fit into return type
+        if (new_records.len >= SIZE_MAX - 1) // Ensures fit into return type
         {
             retcode = FASTA_ERROR_RECORD_OVERFLOW;
-            goto error;
+            goto cleanup;
         }
         if (array_append(&new_records, &new_record) != 0)
         {
             retcode = FASTA_ERROR_RECORD_OVERFLOW;
-            goto error;
+            goto cleanup;
         }
+        header = NULL;
+        id = NULL;
+        seq = NULL;
     }
-
-    free(line);
-    free(buffer);
 
     if (array_shrink(&new_records) != 0)
     {
         retcode = FASTA_ERROR_MEMORY_ALLOCATION;
-        goto error;
+        goto cleanup;
     }
 
     record_array->records = new_records.data;
     record_array->len = new_records.len;
-    return nrecords;
 
-error:
+cleanup:
     free(line);
     free(buffer);
     free(header);
     free(id);
     free(seq);
 
-    header = NULL; // To guard against double frees
-    id = NULL;
-    seq = NULL;
-    for (size_t i = 0; i < new_records.len; i++)
+    if (retcode > 0)
     {
-        SeqRecord *new_record = array_get(&new_records, i);
-        free(new_record->header);
-        free(new_record->id);
-        free(new_record->seq);
+        for (size_t i = 0; i < new_records.len; i++)
+        {
+            SeqRecord *new_record = array_get(&new_records, i);
+            free(new_record->header);
+            free(new_record->id);
+            free(new_record->seq);
+        }
+        array_deinit(&new_records);
     }
-
-    array_deinit(&new_records);
     return retcode;
 }
 
