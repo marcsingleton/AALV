@@ -108,7 +108,7 @@ int sequences_init_alphabet(Alphabet *alphabet, char *name, char *syms, char *ga
         goto error;
 
     // Check syms
-    for (unsigned int i = 0; i < 128; i++)
+    for (unsigned int i = 0; i < CHAR_MAX; i++)
         test_alphabet.index_map[i] = -1;
     unsigned short len = 0;
     for (char *sym = syms; *sym != '\0'; sym++)

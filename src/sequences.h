@@ -5,6 +5,7 @@
  * Sequence data structures
  */
 
+#include <limits.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
@@ -26,7 +27,7 @@ typedef struct
     char *gaps;
     unsigned int len;
     bool case_sensitive;
-    int index_map[128];
+    int index_map[CHAR_MAX];
 } Alphabet;
 
 typedef struct
