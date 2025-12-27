@@ -33,10 +33,13 @@ struct termios raw_termios;
 bool raw_mode = false;
 
 void cleanup(void);
-int read_files(State *state,
+int load_files(State *state,
                unsigned int n_positional_args, char **positional_args,
                unsigned int n_format_args, char **format_args,
                unsigned int n_seq_type_args, char **seq_type_args);
+FileReader get_reader(const char *file_path, const char *format_arg, StrArray *formats_exts);
+int set_seq_types(SeqRecordArray *record_array,
+                  const char *file_path, const char *seq_type_arg, StrArray *seq_types_identifiers);
 
 // --help option shows in given order (alphabetical except help and version)
 Option options[] = {
@@ -230,7 +233,7 @@ int main(int argc, char *argv[])
     state.active_file = files;
     state.active_file_index = 0;
 
-    retcode = read_files(&state,
+    retcode = load_files(&state,
                          n_positional_args, positional_args,
                          n_format_args, format_args,
                          n_seq_type_args, seq_type_args);
@@ -312,7 +315,7 @@ void cleanup(void)
         fputs(error_message, stderr);
 }
 
-int read_files(State *state,
+int load_files(State *state,
                unsigned int n_positional_args, char **positional_args,
                unsigned int n_format_args, char **format_args,
                unsigned int n_seq_type_args, char **seq_type_args)
@@ -366,7 +369,7 @@ int read_files(State *state,
     {
         FileState *file = state->files + file_index;
 
-        const char *file_path, *file_ext;
+        const char *file_path;
         if (!isatty(STDIN_FILENO) && n_positional_args == 0)
             file_path = "-";
         else
@@ -376,45 +379,10 @@ int read_files(State *state,
         char *format_arg = "";
         if (file_index < n_format_args)
             format_arg = format_args[file_index];
-        FileReader reader = NULL;
-
-        if (format_arg[0] != '\0') // From format argument
+        FileReader reader = get_reader(file_path, format_arg, formats_exts);
+        if (!reader)
         {
-            for (unsigned int i = 0; i < N_FORMAT_OPTIONS; i++)
-            {
-                FormatOption *format_option = format_options + i;
-                StrArray *format_exts = formats_exts + i;
-                if (str_is_in((const char **)format_exts->data, format_exts->len, format_arg)) // Cast to silence warning
-                {
-                    reader = format_option->reader;
-                    break;
-                }
-                error_printf("%s: %s: Error identifying format\n", INVOCATION_NAME, format_arg);
-                retcode = 2;
-                goto cleanup;
-            }
-        }
-        else if ((file_ext = strrchr(file_path, '.'))) // From path extension
-        {
-            file_ext++; // Exclude dot from comparison
-            for (unsigned int i = 0; i < N_FORMAT_OPTIONS; i++)
-            {
-                FormatOption *format_option = format_options + i;
-                StrArray *format_exts = formats_exts + i;
-                if (str_is_in((const char **)format_exts->data, format_exts->len, file_ext)) // Cast to silence warning
-                {
-                    reader = format_option->reader;
-                    break;
-                }
-                error_printf("%s: %s: Unknown extension\n", INVOCATION_NAME, file_path);
-                retcode = 2;
-                goto cleanup;
-            }
-        }
-        else
-        {
-            error_printf("%s: %s: No format or known extension\n", INVOCATION_NAME, file_path);
-            retcode = 2;
+            retcode = 1;
             goto cleanup;
         }
 
@@ -450,40 +418,10 @@ int read_files(State *state,
         char *seq_type_arg = "";
         if (file_index < n_seq_type_args)
             seq_type_arg = seq_type_args[file_index];
-        for (size_t i = 0; i < record_array->len; i++)
+        if (set_seq_types(record_array, file_path, seq_type_arg, seq_types_identifiers) > 0)
         {
-            SeqRecord *record = record_array->records + i;
-            if (sequences_infer_seq_type(record) >= 2)
-            {
-                printf("%s contains at least one non-ASCII symbol in its sequence(s). "
-                       "The viewer may render incorrectly. Continue? (y/n): ",
-                       file_path);
-                int c = getchar();
-                if (c != 'y' && c != 'Y')
-                {
-                    retcode = 1;
-                    goto cleanup;
-                }
-                while ((c = getchar()) != '\n' && c != EOF)
-                    ; // Clear remaining input
-            };
-            if (seq_type_arg[0] != '\0')
-            {
-                for (unsigned int j = 0; j < N_SEQ_TYPE_OPTIONS; j++)
-                {
-                    SeqTypeOption *seq_type_option = seq_type_options + j;
-                    StrArray *seq_type_identifiers = seq_types_identifiers + j;
-                    if (str_is_in((const char **)seq_type_identifiers->data, seq_type_identifiers->len, seq_type_arg)) // Cast to silence warning
-                    {
-                        SeqType seq_type = seq_type_option->type;
-                        if (record->type != SEQ_TYPE_ERROR) // Allow forced type unless error
-                            record->type = seq_type;
-                        break;
-                    }
-                }
-            }
-            else if (record->type == SEQ_TYPE_INDETERMINATE && record->len >= rcparams_nucleic_tiebreak_len)
-                record->type = SEQ_TYPE_NUCLEIC;
+            retcode = 1;
+            goto cleanup;
         }
 
         file->file_path = file_path;
@@ -524,4 +462,75 @@ cleanup:
         free(seq_types_identifiers);
     }
     return retcode;
+}
+
+FileReader get_reader(const char *file_path, const char *format_arg, StrArray *formats_exts)
+{
+    const char *file_ext;
+    if (format_arg[0] != '\0') // From format argument
+    {
+        for (unsigned int i = 0; i < N_FORMAT_OPTIONS; i++)
+        {
+            FormatOption *format_option = format_options + i;
+            StrArray *format_exts = formats_exts + i;
+            if (str_is_in((const char **)format_exts->data, format_exts->len, format_arg)) // Cast to silence warning
+                return format_option->reader;
+            error_printf("%s: %s: Error identifying format\n", INVOCATION_NAME, format_arg);
+            return NULL;
+        }
+    }
+    else if ((file_ext = strrchr(file_path, '.'))) // From path extension
+    {
+        file_ext++; // Exclude dot from comparison
+        for (unsigned int i = 0; i < N_FORMAT_OPTIONS; i++)
+        {
+            FormatOption *format_option = format_options + i;
+            StrArray *format_exts = formats_exts + i;
+            if (str_is_in((const char **)format_exts->data, format_exts->len, file_ext)) // Cast to silence warning
+                return format_option->reader;
+            break;
+            error_printf("%s: %s: Unknown extension\n", INVOCATION_NAME, file_path);
+            return NULL;
+        }
+    }
+    error_printf("%s: %s: No format or known extension\n", INVOCATION_NAME, file_path);
+    return NULL;
+}
+
+int set_seq_types(SeqRecordArray *record_array,
+                  const char *file_path, const char *seq_type_arg, StrArray *seq_types_identifiers)
+{
+    for (size_t i = 0; i < record_array->len; i++)
+    {
+        SeqRecord *record = record_array->records + i;
+        if (sequences_infer_seq_type(record) >= 2)
+        {
+            printf("%s contains at least one non-ASCII symbol in its sequence(s). "
+                   "The viewer may render incorrectly. Continue? (y/n): ",
+                   file_path);
+            int c = getchar();
+            if (c != 'y' && c != 'Y')
+                return 1;
+            while ((c = getchar()) != '\n' && c != EOF)
+                ; // Clear remaining input
+        };
+        if (seq_type_arg[0] != '\0')
+        {
+            for (unsigned int j = 0; j < N_SEQ_TYPE_OPTIONS; j++)
+            {
+                SeqTypeOption *seq_type_option = seq_type_options + j;
+                StrArray *seq_type_identifiers = seq_types_identifiers + j;
+                if (str_is_in((const char **)seq_type_identifiers->data, seq_type_identifiers->len, seq_type_arg)) // Cast to silence warning
+                {
+                    SeqType seq_type = seq_type_option->type;
+                    if (record->type != SEQ_TYPE_ERROR) // Allow forced type unless error
+                        record->type = seq_type;
+                    break;
+                }
+            }
+        }
+        else if (record->type == SEQ_TYPE_INDETERMINATE && record->len >= rcparams_nucleic_tiebreak_len)
+            record->type = SEQ_TYPE_NUCLEIC;
+    }
+    return 0;
 }
