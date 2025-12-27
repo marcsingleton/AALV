@@ -18,7 +18,7 @@ static int copy_field(char **field_ptr, const char *s, const size_t len)
     return 0;
 }
 
-size_t str_count(const char *s, const char c)
+size_t str_count(const char *s, const char *t)
 {
     if (!s)
         return 0;
@@ -26,7 +26,8 @@ size_t str_count(const char *s, const char c)
     size_t n = 0;
     for (; *s != '\0'; s++)
     {
-        if (*s == c)
+        int c = *s;
+        if (strchr(t, c))
             n++;
         if (n == SIZE_MAX)
             break;
@@ -64,12 +65,12 @@ int str_is_in_strsep(const char *s, const char *delim, const char *t)
     return retcode;
 }
 
-ssize_t str_split(char ***fields_ptr, const char *s, const char d)
+ssize_t str_split(char ***fields_ptr, const char *s, const char *delim)
 {
     if (!s)
         return -1;
 
-    size_t m = str_count(s, d) + 1;
+    size_t m = str_count(s, delim) + 1;
     if (m > SIZE_MAX / sizeof(char *))
         return -1;
     ssize_t n = m;
@@ -81,7 +82,7 @@ ssize_t str_split(char ***fields_ptr, const char *s, const char d)
     size_t i, j, k;
     i = j = k = 0;
     for (; s[j] != '\0'; j++)
-        if (s[j] == d)
+        if (strchr(delim, s[j]))
         {
             if (copy_field(fields + k, s + i, j - i) != 0)
                 goto error;

@@ -5,11 +5,11 @@
 #include "str.h"
 #include "utils.h"
 
-int split_tester(char *s, char **expected_fields, int expected_n, const char d)
+int split_tester(char *s, char **expected_fields, int expected_n, const char *delim)
 {
     int retcode = 0;
     char **returned_fields = NULL;
-    int returned_n = str_split(&returned_fields, s, d);
+    int returned_n = str_split(&returned_fields, s, delim);
     if (returned_n != expected_n)
     {
         retcode = 1;
@@ -30,51 +30,51 @@ cleanup:
 int test_split_empty_input(void)
 {
     char *s = "";
-    char d = ',';
+    char *delim = ",";
     char *expected_fields[] = {""};
     int expected_n = sizeof(expected_fields) / sizeof(char *);
 
-    return split_tester(s, expected_fields, expected_n, d);
+    return split_tester(s, expected_fields, expected_n, delim);
 }
 
 int test_split_nonempty_fields(void)
 {
     char *s = "a,1234,!@,xyz";
-    char d = ',';
+    char *delim = ",";
     char *expected_fields[] = {"a", "1234", "!@", "xyz"};
     int expected_n = sizeof(expected_fields) / sizeof(char *);
 
-    return split_tester(s, expected_fields, expected_n, d);
+    return split_tester(s, expected_fields, expected_n, delim);
 }
 
 int test_split_empty_fields(void)
 {
     char *s = ",a,1234,,,!@,xyz,,,";
-    char d = ',';
+    char *delim = ",";
     char *expected_fields[] = {"", "a", "1234", "", "", "!@", "xyz", "", "", ""};
     int expected_n = sizeof(expected_fields) / sizeof(char *);
 
-    return split_tester(s, expected_fields, expected_n, d);
+    return split_tester(s, expected_fields, expected_n, delim);
 }
 
 int test_split_alternate_delimiter(void)
 {
     char *s = "a\t1234\t!@\txyz";
-    char d = '\t';
+    char *delim = "\t";
     char *expected_fields[] = {"a", "1234", "!@", "xyz"};
     int expected_n = sizeof(expected_fields) / sizeof(char *);
 
-    return split_tester(s, expected_fields, expected_n, d);
+    return split_tester(s, expected_fields, expected_n, delim);
 }
 
 int test_split_wrong_expected_n(void)
 {
     char *s = "a\t1234\t!@\txyz";
-    char d = '\t';
+    char *delim = "\t";
     char *expected_fields[] = {"a", "1234", "!@"};
     int expected_n = sizeof(expected_fields) / sizeof(char *);
 
-    if (split_tester(s, expected_fields, expected_n, d) != 0)
+    if (split_tester(s, expected_fields, expected_n, delim) != 0)
         return 0;
     else
         return 1;
@@ -83,11 +83,11 @@ int test_split_wrong_expected_n(void)
 int test_split_wrong_expected_fields(void)
 {
     char *s = "a\t1234\t!@\txyz";
-    char d = '\t';
+    char *delim = "\t";
     char *expected_fields[] = {"a", "1234", "!@", "xy"};
     int expected_n = sizeof(expected_fields) / sizeof(char *);
 
-    if (split_tester(s, expected_fields, expected_n, d) != 0)
+    if (split_tester(s, expected_fields, expected_n, delim) != 0)
         return 0;
     else
         return 1;
