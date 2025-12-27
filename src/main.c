@@ -34,7 +34,6 @@ bool raw_mode = false;
 
 void cleanup(void);
 int load_files(State *state,
-               unsigned int n_positional_args, char **positional_args,
                unsigned int n_format_args, char **format_args,
                unsigned int n_seq_type_args, char **seq_type_args);
 FileReader get_reader(const char *file_path, const char *format_arg);
@@ -223,7 +222,7 @@ int main(int argc, char *argv[])
     else
         input_fd = STDIN_FILENO;
 
-    // Read files
+    // Initialize file states
     FileState *files = malloc(nfiles * sizeof(FileState));
     if (!files)
     {
@@ -234,13 +233,30 @@ int main(int argc, char *argv[])
     state.nfiles = nfiles;
     state.active_file = files;
     state.active_file_index = 0;
+    for (unsigned int file_index = 0; file_index < state.nfiles; file_index++)
+    {
+        FileState *file = state.files + file_index;
+        if (!isatty(STDIN_FILENO) && n_positional_args == 0)
+            file->file_path = "-";
+        else
+            file->file_path = positional_args[file_index];
+
+        file->header_pane_width = rcparams_header_pane_width;
+        file->ruler_pane_height = rcparams_ruler_pane_height;
+        file->tick_spacing = rcparams_tick_spacing;
+        file->offset_record = 0;
+        file->offset_header = 0;
+        file->offset_sequence = 0;
+        file->cursor_record_i = 0;
+        file->cursor_header_j = 0;
+        file->cursor_sequence_j = 0;
+    }
 
     retcode = load_files(&state,
-                         n_positional_args, positional_args,
                          n_format_args, format_args,
                          n_seq_type_args, seq_type_args);
     if (retcode > 0)
-        return retcode - 1;
+        return 1;
 
     if (n_format_args > 0)
         str_free_split(format_args, n_format_args);
@@ -318,7 +334,6 @@ void cleanup(void)
 }
 
 int load_files(State *state,
-               unsigned int n_positional_args, char **positional_args,
                unsigned int n_format_args, char **format_args,
                unsigned int n_seq_type_args, char **seq_type_args)
 {
@@ -327,34 +342,28 @@ int load_files(State *state,
     {
         FileState *file = state->files + file_index;
 
-        const char *file_path;
-        if (!isatty(STDIN_FILENO) && n_positional_args == 0)
-            file_path = "-";
-        else
-            file_path = positional_args[file_index];
-
         // Infer reader
         char *format_arg = "";
         if (file_index < n_format_args)
             format_arg = format_args[file_index];
-        FileReader reader = get_reader(file_path, format_arg);
+        FileReader reader = get_reader(file->file_path, format_arg);
         if (!reader)
             return 1;
 
         // Read file
         FILE *fp;
-        if (strcmp(file_path, "-") == 0)
+        if (strcmp(file->file_path, "-") == 0)
             fp = stdin;
-        else if (!(fp = fopen(file_path, "r")))
+        else if (!(fp = fopen(file->file_path, "r")))
         {
-            error_printf("%s: %s: %s\n", INVOCATION_NAME, file_path, strerror(errno));
+            error_printf("%s: %s: %s\n", INVOCATION_NAME, file->file_path, strerror(errno));
             return 1;
         }
         SeqRecordArray *record_array = &file->record_array;
         int reader_code = reader(fp, record_array);
         if (reader_code < 0)
         {
-            error_printf("%s: %s: Error processing file (code %d)\n", INVOCATION_NAME, file_path, reader_code);
+            error_printf("%s: %s: Error processing file (code %d)\n", INVOCATION_NAME, file->file_path, reader_code);
             return 1;
         }
 
@@ -371,21 +380,11 @@ int load_files(State *state,
         char *seq_type_arg = "";
         if (file_index < n_seq_type_args)
             seq_type_arg = seq_type_args[file_index];
-        if (set_seq_types(record_array, file_path, seq_type_arg) > 0)
+        if (set_seq_types(record_array, file->file_path, seq_type_arg) > 0)
             return 1;
 
-        file->file_path = file_path;
         file->records_offset = 1;
         file->records_maxlen = maxlen;
-        file->header_pane_width = rcparams_header_pane_width;
-        file->ruler_pane_height = rcparams_ruler_pane_height;
-        file->tick_spacing = rcparams_tick_spacing;
-        file->offset_record = 0;
-        file->offset_header = 0;
-        file->offset_sequence = 0;
-        file->cursor_record_i = 0;
-        file->cursor_header_j = 0;
-        file->cursor_sequence_j = 0;
     }
 
     return 0;
