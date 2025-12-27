@@ -37,7 +37,7 @@ int argparse_options(int argc, char *argv[],
             name = options[option_index].long_name;
         if (c == 'f' || strcmp(name, "format") == 0)
         {
-            ssize_t code = str_split(format_args_ptr, argv[optind - 1], ',');
+            ssize_t code = str_split(format_args_ptr, argv[optind - 1], ",");
             if (code < 0)
             {
                 error_printf("%s: Failed to parse formats\n", INVOCATION_NAME);
@@ -77,7 +77,7 @@ int argparse_options(int argc, char *argv[],
         }
         else if (c == 't' || strcmp(name, "type") == 0)
         {
-            ssize_t code = str_split(seq_type_args_ptr, argv[optind - 1], ',');
+            ssize_t code = str_split(seq_type_args_ptr, argv[optind - 1], ",");
             if (code < 0)
             {
                 error_printf("%s: Failed to parse types\n", INVOCATION_NAME);
