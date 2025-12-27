@@ -33,12 +33,9 @@ struct termios raw_termios;
 bool raw_mode = false;
 
 void cleanup(void);
-int load_files(State *state,
-               unsigned int n_format_args, char **format_args,
-               unsigned int n_seq_type_args, char **seq_type_args);
-FileReader get_reader(const char *file_path, const char *format_arg);
-int set_seq_types(SeqRecordArray *record_array,
-                  const char *file_path, const char *seq_type_arg);
+int load_seqs(FileState *file, const char *format_arg, const char *seq_type_arg);
+FileReader get_reader(FileState *file, const char *format_arg);
+int set_seq_types(FileState *file, const char *seq_type_arg);
 
 // --help option shows in given order (alphabetical except help and version)
 Option options[] = {
@@ -222,7 +219,7 @@ int main(int argc, char *argv[])
     else
         input_fd = STDIN_FILENO;
 
-    // Initialize file states
+    // Allocate file states
     FileState *files = malloc(nfiles * sizeof(FileState));
     if (!files)
     {
@@ -233,6 +230,8 @@ int main(int argc, char *argv[])
     state.nfiles = nfiles;
     state.active_file = files;
     state.active_file_index = 0;
+
+    // Initialize file states
     for (unsigned int file_index = 0; file_index < state.nfiles; file_index++)
     {
         FileState *file = state.files + file_index;
@@ -250,13 +249,19 @@ int main(int argc, char *argv[])
         file->cursor_record_i = 0;
         file->cursor_header_j = 0;
         file->cursor_sequence_j = 0;
-    }
 
-    retcode = load_files(&state,
-                         n_format_args, format_args,
-                         n_seq_type_args, seq_type_args);
-    if (retcode > 0)
-        return 1;
+        char *format_arg = "";
+        if (file_index < n_format_args)
+            format_arg = format_args[file_index];
+
+        char *seq_type_arg = "";
+        if (file_index < n_seq_type_args)
+            seq_type_arg = seq_type_args[file_index];
+
+        retcode = load_seqs(file, format_arg, seq_type_arg);
+        if (retcode > 0)
+            return 1;
+    }
 
     if (n_format_args > 0)
         str_free_split(format_args, n_format_args);
@@ -333,64 +338,50 @@ void cleanup(void)
         fputs(error_message, stderr);
 }
 
-int load_files(State *state,
-               unsigned int n_format_args, char **format_args,
-               unsigned int n_seq_type_args, char **seq_type_args)
+int load_seqs(FileState *file, const char *format_arg, const char *seq_type_arg)
 {
-    // Main loop
-    for (unsigned int file_index = 0; file_index < state->nfiles; file_index++)
+    // Infer reader
+    FileReader reader = get_reader(file, format_arg);
+    if (!reader)
+        return 1;
+
+    // Read file
+    FILE *fp;
+    if (strcmp(file->file_path, "-") == 0)
+        fp = stdin;
+    else if (!(fp = fopen(file->file_path, "r")))
     {
-        FileState *file = state->files + file_index;
-
-        // Infer reader
-        char *format_arg = "";
-        if (file_index < n_format_args)
-            format_arg = format_args[file_index];
-        FileReader reader = get_reader(file->file_path, format_arg);
-        if (!reader)
-            return 1;
-
-        // Read file
-        FILE *fp;
-        if (strcmp(file->file_path, "-") == 0)
-            fp = stdin;
-        else if (!(fp = fopen(file->file_path, "r")))
-        {
-            error_printf("%s: %s: %s\n", INVOCATION_NAME, file->file_path, strerror(errno));
-            return 1;
-        }
-        SeqRecordArray *record_array = &file->record_array;
-        int reader_code = reader(fp, record_array);
-        if (reader_code < 0)
-        {
-            error_printf("%s: %s: Error processing file (code %d)\n", INVOCATION_NAME, file->file_path, reader_code);
-            return 1;
-        }
-
-        // Get maxlen
-        size_t maxlen = 0;
-        for (size_t i = 0; i < record_array->len; i++)
-        {
-            SeqRecord *record = record_array->records + i;
-            if (record->len > maxlen)
-                maxlen = record->len;
-        }
-
-        // Set sequence type
-        char *seq_type_arg = "";
-        if (file_index < n_seq_type_args)
-            seq_type_arg = seq_type_args[file_index];
-        if (set_seq_types(record_array, file->file_path, seq_type_arg) > 0)
-            return 1;
-
-        file->records_offset = 1;
-        file->records_maxlen = maxlen;
+        error_printf("%s: %s: %s\n", INVOCATION_NAME, file->file_path, strerror(errno));
+        return 1;
     }
+    SeqRecordArray *record_array = &file->record_array;
+    int retcode = reader(fp, record_array);
+    if (retcode < 0)
+    {
+        error_printf("%s: %s: Error processing file (code %d)\n", INVOCATION_NAME, file->file_path, retcode);
+        return 1;
+    }
+
+    // Get maxlen
+    size_t maxlen = 0;
+    for (size_t i = 0; i < record_array->len; i++)
+    {
+        SeqRecord *record = record_array->records + i;
+        if (record->len > maxlen)
+            maxlen = record->len;
+    }
+
+    // Set sequence type
+    if (set_seq_types(file, seq_type_arg) > 0)
+        return 1;
+
+    file->records_offset = 1;
+    file->records_maxlen = maxlen;
 
     return 0;
 }
 
-FileReader get_reader(const char *file_path, const char *format_arg)
+FileReader get_reader(FileState *file, const char *format_arg)
 {
     const char *file_ext;
     if (format_arg[0] != '\0') // From format argument
@@ -405,7 +396,7 @@ FileReader get_reader(const char *file_path, const char *format_arg)
             return NULL;
         }
     }
-    else if ((file_ext = strrchr(file_path, '.'))) // From path extension
+    else if ((file_ext = strrchr(file->file_path, '.'))) // From path extension
     {
         file_ext++; // Exclude dot from comparison
         for (unsigned int i = 0; i < N_FORMAT_OPTIONS; i++)
@@ -415,17 +406,17 @@ FileReader get_reader(const char *file_path, const char *format_arg)
             if (str_is_in_strsep(exts, option_delim, file_ext))
                 return format_option->reader;
             break;
-            error_printf("%s: %s: Unknown extension\n", INVOCATION_NAME, file_path);
+            error_printf("%s: %s: Unknown extension\n", INVOCATION_NAME, file->file_path);
             return NULL;
         }
     }
-    error_printf("%s: %s: No format or known extension\n", INVOCATION_NAME, file_path);
+    error_printf("%s: %s: No format or known extension\n", INVOCATION_NAME, file->file_path);
     return NULL;
 }
 
-int set_seq_types(SeqRecordArray *record_array,
-                  const char *file_path, const char *seq_type_arg)
+int set_seq_types(FileState *file, const char *seq_type_arg)
 {
+    SeqRecordArray *record_array = &(file->record_array);
     for (size_t i = 0; i < record_array->len; i++)
     {
         SeqRecord *record = record_array->records + i;
@@ -433,7 +424,7 @@ int set_seq_types(SeqRecordArray *record_array,
         {
             printf("%s contains at least one non-ASCII symbol in its sequence(s). "
                    "The viewer may render incorrectly. Continue? (y/n): ",
-                   file_path);
+                   file->file_path);
             int c = getchar();
             if (c != 'y' && c != 'Y')
                 return 1;
