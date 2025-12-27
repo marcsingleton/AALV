@@ -10,11 +10,13 @@
 #include "cli.h"
 #include "sequences.h"
 
+typedef int (*FileReader)(FILE *, SeqRecordArray *);
+
 typedef struct
 {
     const char *name;
     const char *exts;
-    int (*reader)(FILE *, SeqRecordArray *);
+    FileReader reader;
 } FormatOption;
 
 typedef struct
