@@ -34,12 +34,34 @@ size_t str_count(const char *s, const char c)
     return n;
 }
 
-int str_is_in(const char **ss, unsigned int n, const char *t)
+int str_is_in_split(const char **ss, unsigned int n, const char *t)
 {
     for (unsigned int i = 0; i < n; i++)
         if (strcmp(ss[i], t) == 0)
             return 1;
     return 0;
+}
+
+int str_is_in_strsep(const char *s, const char *delim, const char *t)
+{
+    char *s0, *s1;
+    s0 = strdup(s);
+    if (!s0)
+        return -1;
+    s1 = s0;
+
+    int retcode = 0;
+    char *token;
+    while ((token = strsep(&s1, delim)))
+        if (strcmp(token, t) == 0)
+        {
+            retcode = 1;
+            break;
+        }
+
+    free(s0);
+
+    return retcode;
 }
 
 ssize_t str_split(char ***fields_ptr, const char *s, const char d)

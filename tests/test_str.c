@@ -93,6 +93,34 @@ int test_split_wrong_expected_fields(void)
         return 1;
 }
 
+int test_is_in_strsep(void)
+{
+    char *s = "a\t1234\t!@\txyz";
+    char *delim = "\t";
+
+    // True
+    if (str_is_in_strsep(s, delim, "a") != 1)
+        return 1;
+    if (str_is_in_strsep(s, delim, "1234") != 1)
+        return 1;
+    if (str_is_in_strsep(s, delim, "!@") != 1)
+        return 1;
+    if (str_is_in_strsep(s, delim, "xyz") != 1)
+        return 1;
+    if (str_is_in_strsep("", delim, "") != 1) // Degenerate but consistent with empty set memberships
+        return 1;
+    // False
+    if (str_is_in_strsep(s, delim, "123") != 0)
+        return 1;
+    if (str_is_in_strsep(s, delim, "789") != 0)
+        return 1;
+    if (str_is_in_strsep(s, delim, "") != 0)
+        return 1;
+    if (str_is_in_strsep("", delim, "a") != 0)
+        return 1;
+    return 0;
+}
+
 TestFunction tests[] = {
     {&test_split_empty_input, "test_split_empty_input"},
     {&test_split_nonempty_fields, "test_split_nonempty_fields"},
@@ -100,6 +128,7 @@ TestFunction tests[] = {
     {&test_split_alternate_delimiter, "test_split_alternate_delimiter"},
     {&test_split_wrong_expected_n, "test_split_wrong_expected_n"},
     {&test_split_wrong_expected_fields, "test_split_wrong_expected_fields"},
+    {&test_is_in_strsep, "test_is_in_strsep"},
 };
 
 #define NTESTS sizeof(tests) / sizeof(TestFunction)
