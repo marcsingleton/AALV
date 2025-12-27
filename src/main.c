@@ -37,9 +37,9 @@ int load_files(State *state,
                unsigned int n_positional_args, char **positional_args,
                unsigned int n_format_args, char **format_args,
                unsigned int n_seq_type_args, char **seq_type_args);
-FileReader get_reader(const char *file_path, const char *format_arg, StrArray *formats_exts);
+FileReader get_reader(const char *file_path, const char *format_arg);
 int set_seq_types(SeqRecordArray *record_array,
-                  const char *file_path, const char *seq_type_arg, StrArray *seq_types_identifiers);
+                  const char *file_path, const char *seq_type_arg);
 
 // --help option shows in given order (alphabetical except help and version)
 Option options[] = {
@@ -99,6 +99,8 @@ SeqTypeOption seq_type_options[] = {
 };
 
 #define N_SEQ_TYPE_OPTIONS sizeof(seq_type_options) / sizeof(SeqTypeOption)
+
+char *option_delim = ",";
 
 SeqTypeState seq_types[SEQ_TYPE_ERROR + 1];
 
@@ -320,50 +322,6 @@ int load_files(State *state,
                unsigned int n_format_args, char **format_args,
                unsigned int n_seq_type_args, char **seq_type_args)
 {
-    int retcode = 0;
-    StrArray *formats_exts = NULL;
-    StrArray *seq_types_identifiers = NULL;
-
-    // Split format extensions
-    formats_exts = malloc(N_FORMAT_OPTIONS * sizeof(StrArray));
-    if (!formats_exts)
-    {
-        error_printf("%s: Failed to allocate memory to split format extensions\n", INVOCATION_NAME);
-        return 1;
-    }
-    for (unsigned int i = 0; i < N_FORMAT_OPTIONS; i++)
-    {
-        StrArray *format_exts = formats_exts + i;
-        format_exts->data = NULL;
-        format_exts->len = 0;
-    }
-    for (unsigned int i = 0; i < N_FORMAT_OPTIONS; i++)
-    {
-        FormatOption *format_option = format_options + i;
-        StrArray *format_exts = formats_exts + i;
-        format_exts->len = str_split(&format_exts->data, format_option->exts, ',');
-    }
-
-    // Split sequence type identifiers
-    seq_types_identifiers = malloc(N_SEQ_TYPE_OPTIONS * sizeof(StrArray));
-    if (!formats_exts)
-    {
-        error_printf("%s: Failed to allocate memory to split type identifiers\n", INVOCATION_NAME);
-        return 1;
-    }
-    for (unsigned int i = 0; i < N_SEQ_TYPE_OPTIONS; i++)
-    {
-        StrArray *seq_type_identifier = seq_types_identifiers + i;
-        seq_type_identifier->data = NULL;
-        seq_type_identifier->len = 0;
-    }
-    for (unsigned int i = 0; i < N_SEQ_TYPE_OPTIONS; i++)
-    {
-        SeqTypeOption *seq_type_option = seq_type_options + i;
-        StrArray *seq_type_identifiers = seq_types_identifiers + i;
-        seq_type_identifiers->len = str_split(&seq_type_identifiers->data, seq_type_option->identifiers, ',');
-    }
-
     // Main loop
     for (unsigned int file_index = 0; file_index < state->nfiles; file_index++)
     {
@@ -379,12 +337,9 @@ int load_files(State *state,
         char *format_arg = "";
         if (file_index < n_format_args)
             format_arg = format_args[file_index];
-        FileReader reader = get_reader(file_path, format_arg, formats_exts);
+        FileReader reader = get_reader(file_path, format_arg);
         if (!reader)
-        {
-            retcode = 1;
-            goto cleanup;
-        }
+            return 1;
 
         // Read file
         FILE *fp;
@@ -393,16 +348,14 @@ int load_files(State *state,
         else if (!(fp = fopen(file_path, "r")))
         {
             error_printf("%s: %s: %s\n", INVOCATION_NAME, file_path, strerror(errno));
-            retcode = 1;
-            goto cleanup;
+            return 1;
         }
         SeqRecordArray *record_array = &file->record_array;
         int reader_code = reader(fp, record_array);
         if (reader_code < 0)
         {
             error_printf("%s: %s: Error processing file (code %d)\n", INVOCATION_NAME, file_path, reader_code);
-            retcode = 1;
-            goto cleanup;
+            return 1;
         }
 
         // Get maxlen
@@ -418,11 +371,8 @@ int load_files(State *state,
         char *seq_type_arg = "";
         if (file_index < n_seq_type_args)
             seq_type_arg = seq_type_args[file_index];
-        if (set_seq_types(record_array, file_path, seq_type_arg, seq_types_identifiers) > 0)
-        {
-            retcode = 1;
-            goto cleanup;
-        }
+        if (set_seq_types(record_array, file_path, seq_type_arg) > 0)
+            return 1;
 
         file->file_path = file_path;
         file->records_offset = 1;
@@ -438,33 +388,10 @@ int load_files(State *state,
         file->cursor_sequence_j = 0;
     }
 
-cleanup:
-    if (formats_exts)
-    {
-        for (unsigned int i = 0; i < N_FORMAT_OPTIONS; i++)
-        {
-            StrArray *format_exts = formats_exts + i;
-            str_free_split(format_exts->data, format_exts->len);
-            format_exts->data = NULL;
-            format_exts->len = 0;
-        }
-        free(formats_exts);
-    }
-    if (seq_types_identifiers)
-    {
-        for (unsigned int i = 0; i < N_SEQ_TYPE_OPTIONS; i++)
-        {
-            StrArray *seq_type_identifiers = seq_types_identifiers + i;
-            str_free_split(seq_type_identifiers->data, seq_type_identifiers->len);
-            seq_type_identifiers->data = NULL;
-            seq_type_identifiers->len = 0;
-        }
-        free(seq_types_identifiers);
-    }
-    return retcode;
+    return 0;
 }
 
-FileReader get_reader(const char *file_path, const char *format_arg, StrArray *formats_exts)
+FileReader get_reader(const char *file_path, const char *format_arg)
 {
     const char *file_ext;
     if (format_arg[0] != '\0') // From format argument
@@ -472,8 +399,8 @@ FileReader get_reader(const char *file_path, const char *format_arg, StrArray *f
         for (unsigned int i = 0; i < N_FORMAT_OPTIONS; i++)
         {
             FormatOption *format_option = format_options + i;
-            StrArray *format_exts = formats_exts + i;
-            if (str_is_in((const char **)format_exts->data, format_exts->len, format_arg)) // Cast to silence warning
+            const char *exts = format_option->exts;
+            if (str_is_in_strsep(exts, option_delim, format_arg))
                 return format_option->reader;
             error_printf("%s: %s: Error identifying format\n", INVOCATION_NAME, format_arg);
             return NULL;
@@ -485,8 +412,8 @@ FileReader get_reader(const char *file_path, const char *format_arg, StrArray *f
         for (unsigned int i = 0; i < N_FORMAT_OPTIONS; i++)
         {
             FormatOption *format_option = format_options + i;
-            StrArray *format_exts = formats_exts + i;
-            if (str_is_in((const char **)format_exts->data, format_exts->len, file_ext)) // Cast to silence warning
+            const char *exts = format_option->exts;
+            if (str_is_in_strsep(exts, option_delim, file_ext))
                 return format_option->reader;
             break;
             error_printf("%s: %s: Unknown extension\n", INVOCATION_NAME, file_path);
@@ -498,7 +425,7 @@ FileReader get_reader(const char *file_path, const char *format_arg, StrArray *f
 }
 
 int set_seq_types(SeqRecordArray *record_array,
-                  const char *file_path, const char *seq_type_arg, StrArray *seq_types_identifiers)
+                  const char *file_path, const char *seq_type_arg)
 {
     for (size_t i = 0; i < record_array->len; i++)
     {
@@ -519,8 +446,8 @@ int set_seq_types(SeqRecordArray *record_array,
             for (unsigned int j = 0; j < N_SEQ_TYPE_OPTIONS; j++)
             {
                 SeqTypeOption *seq_type_option = seq_type_options + j;
-                StrArray *seq_type_identifiers = seq_types_identifiers + j;
-                if (str_is_in((const char **)seq_type_identifiers->data, seq_type_identifiers->len, seq_type_arg)) // Cast to silence warning
+                const char *identifiers = seq_type_option->identifiers;
+                if (str_is_in_strsep(identifiers, option_delim, seq_type_arg))
                 {
                     SeqType seq_type = seq_type_option->type;
                     if (record->type != SEQ_TYPE_ERROR) // Allow forced type unless error
