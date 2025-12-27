@@ -172,7 +172,7 @@ int main(int argc, char *argv[])
     struct option long_options[NOPTIONS + 1]; // Extra struct of 0s to mark end
     char *short_options = NULL;
     retcode = cli_prepare_options(NOPTIONS, options, &short_options, long_options, INVOCATION_NAME);
-    if (retcode != 0)
+    if (retcode > 0)
         return retcode;
 
     // Parse options
@@ -259,8 +259,8 @@ int main(int argc, char *argv[])
             seq_type_arg = seq_type_args[file_index];
 
         retcode = load_seqs(file, format_arg, seq_type_arg);
-        if (retcode > 0)
-            return 1;
+        if (retcode > 0) // "Expected" exit == 1 and "unexpected" exit > 1; shift -1 for CLI convention
+            return retcode - 1;
     }
 
     if (n_format_args > 0)
@@ -340,10 +340,12 @@ void cleanup(void)
 
 int load_seqs(FileState *file, const char *format_arg, const char *seq_type_arg)
 {
+    int retcode;
+
     // Infer reader
     FileReader reader = get_reader(file, format_arg);
     if (!reader)
-        return 1;
+        return 2;
 
     // Read file
     FILE *fp;
@@ -352,14 +354,14 @@ int load_seqs(FileState *file, const char *format_arg, const char *seq_type_arg)
     else if (!(fp = fopen(file->file_path, "r")))
     {
         error_printf("%s: %s: %s\n", INVOCATION_NAME, file->file_path, strerror(errno));
-        return 1;
+        return 2;
     }
     SeqRecordArray *record_array = &file->record_array;
-    int retcode = reader(fp, record_array);
-    if (retcode < 0)
+    retcode = reader(fp, record_array);
+    if (retcode > 0)
     {
         error_printf("%s: %s: Error processing file (code %d)\n", INVOCATION_NAME, file->file_path, retcode);
-        return 1;
+        return 2;
     }
 
     // Get maxlen
@@ -372,7 +374,8 @@ int load_seqs(FileState *file, const char *format_arg, const char *seq_type_arg)
     }
 
     // Set sequence type
-    if (set_seq_types(file, seq_type_arg) > 0)
+    retcode = set_seq_types(file, seq_type_arg);
+    if (retcode > 0)
         return 1;
 
     file->records_offset = 1;
