@@ -10,12 +10,12 @@
 #include <curses.h>
 #include <term.h> // Must follow curses
 
+#include "action.h"
 #include "argparse.h"
 #include "array.h"
 #include "display.h"
 #include "error.h"
 #include "fasta.h"
-#include "input.h"
 #include "macros.h"
 #include "rcparams.h"
 #include "schemes.h"

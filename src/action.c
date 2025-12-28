@@ -4,8 +4,8 @@
 #include <sys/select.h>
 #include <unistd.h>
 
+#include "action.h"
 #include "array.h"
-#include "input.h"
 #include "state.h"
 #include "terminal.h"
 
