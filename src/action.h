@@ -1,15 +1,14 @@
-#ifndef INPUT_H
-#define INPUT_H
+#ifndef ACTION_H
+#define ACTION_H
 
 /*
- * Input functions
+ * Action functions
  *
  * Functions in this module may modify the global State variable. They should refrain from displaying any changes and
  * should instead mark panes to be refreshed as necessary.
  */
 
-#include "array.h"
-#include "commands.h"
+#include <stddef.h>
 
 typedef enum
 {
@@ -17,10 +16,6 @@ typedef enum
     PAGE_SIZE_HALF
 } PageSize;
 
-int input_read_key(Array *buffer, int fd);
-int input_parse_keys(Array *buffer, int *count, Command *cmd);
-int input_execute_command(int count, Command cmd);
-void input_buffer_flush(Array *buffer);
 void action_next_file(void);
 void action_previous_file(void);
 void action_move_up(size_t x);
@@ -49,4 +44,4 @@ void action_decrease_ruler_pane_height(void);
 void action_increase_tick_spacing(void);
 void action_decrease_tick_spacing(void);
 
-#endif // INPUT_H
+#endif // ACTION_H

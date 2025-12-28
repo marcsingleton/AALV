@@ -16,6 +16,7 @@
 #include "display.h"
 #include "error.h"
 #include "fasta.h"
+#include "input.h"
 #include "macros.h"
 #include "rcparams.h"
 #include "schemes.h"
