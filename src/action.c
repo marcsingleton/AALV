@@ -221,97 +221,97 @@ int input_execute_command(int count, Command cmd)
         exit(0);
         break;
     case CMD_NEXT_FILE:
-        input_next_file();
+        action_next_file();
         break;
     case CMD_PREVIOUS_FILE:
-        input_previous_file();
+        action_previous_file();
         break;
     case CMD_MOVE_DOWN:
-        input_move_down(count);
+        action_move_down(count);
         break;
     case CMD_MOVE_UP:
-        input_move_up(count);
+        action_move_up(count);
         break;
     case CMD_MOVE_RIGHT:
-        input_move_right(count);
+        action_move_right(count);
         break;
     case CMD_MOVE_LEFT:
-        input_move_left(count);
+        action_move_left(count);
         break;
     case CMD_MOVE_FULL_PAGE_UP:
-        input_move_page_up(PAGE_SIZE_FULL);
+        action_move_page_up(PAGE_SIZE_FULL);
         break;
     case CMD_MOVE_FULL_PAGE_DOWN:
-        input_move_page_down(PAGE_SIZE_FULL);
+        action_move_page_down(PAGE_SIZE_FULL);
         break;
     case CMD_MOVE_FULL_PAGE_RIGHT:
-        input_move_page_right(PAGE_SIZE_FULL);
+        action_move_page_right(PAGE_SIZE_FULL);
         break;
     case CMD_MOVE_FULL_PAGE_LEFT:
-        input_move_page_left(PAGE_SIZE_FULL);
+        action_move_page_left(PAGE_SIZE_FULL);
         break;
     case CMD_MOVE_HALF_PAGE_UP:
-        input_move_page_up(PAGE_SIZE_HALF);
+        action_move_page_up(PAGE_SIZE_HALF);
         break;
     case CMD_MOVE_HALF_PAGE_DOWN:
-        input_move_page_down(PAGE_SIZE_HALF);
+        action_move_page_down(PAGE_SIZE_HALF);
         break;
     case CMD_MOVE_HALF_PAGE_RIGHT:
-        input_move_page_right(PAGE_SIZE_HALF);
+        action_move_page_right(PAGE_SIZE_HALF);
         break;
     case CMD_MOVE_HALF_PAGE_LEFT:
-        input_move_page_left(PAGE_SIZE_HALF);
+        action_move_page_left(PAGE_SIZE_HALF);
         break;
     case CMD_MOVE_LINE_END:
-        input_move_line_end();
+        action_move_line_end();
         break;
     case CMD_MOVE_LINE_START:
-        input_move_line_start();
+        action_move_line_start();
         break;
     case CMD_MOVE_FIRST_RECORD:
-        input_move_first_record();
+        action_move_first_record();
         break;
     case CMD_MOVE_LAST_RECORD:
-        input_move_last_record();
+        action_move_last_record();
         break;
     case CMD_MOVE_TO_RECORD:
-        input_move_to_record(count);
+        action_move_to_record(count);
         break;
     case CMD_MOVE_TOP_EDGE:
-        input_move_top_edge();
+        action_move_top_edge();
         break;
     case CMD_MOVE_VERTICAL_MIDDLE:
-        input_move_vertical_middle();
+        action_move_vertical_middle();
         break;
     case CMD_MOVE_BOTTOM_EDGE:
-        input_move_bottom_edge();
+        action_move_bottom_edge();
         break;
     case CMD_MOVE_LEFT_EDGE:
-        input_move_left_edge();
+        action_move_left_edge();
         break;
     case CMD_MOVE_HORIZONTAL_MIDDLE:
-        input_move_horizontal_middle();
+        action_move_horizontal_middle();
         break;
     case CMD_MOVE_RIGHT_EDGE:
-        input_move_right_edge();
+        action_move_right_edge();
         break;
     case CMD_INCREASE_HEADER_PANE_WIDTH:
-        input_increase_header_pane_width();
+        action_increase_header_pane_width();
         break;
     case CMD_DECREASE_HEADER_PANE_WIDTH:
-        input_decrease_header_pane_width();
+        action_decrease_header_pane_width();
         break;
     case CMD_INCREASE_RULER_PANE_HEIGHT:
-        input_increase_ruler_pane_height();
+        action_increase_ruler_pane_height();
         break;
     case CMD_DECREASE_RULER_PANE_HEIGHT:
-        input_decrease_ruler_pane_height();
+        action_decrease_ruler_pane_height();
         break;
     case CMD_INCREASE_TICK_SPACING:
-        input_increase_tick_spacing();
+        action_increase_tick_spacing();
         break;
     case CMD_DECREASE_TICK_SPACING:
-        input_decrease_tick_spacing();
+        action_decrease_tick_spacing();
         break;
     }
 
@@ -324,7 +324,7 @@ void input_buffer_flush(Array *buffer)
     buffer->len = 0;
 }
 
-void input_next_file(void)
+void action_next_file(void)
 {
     if (state.active_file_index + 1 >= state.nfiles)
         return;
@@ -332,7 +332,7 @@ void input_next_file(void)
     state.refresh_window = true;
 }
 
-void input_previous_file(void)
+void action_previous_file(void)
 {
     if (state.active_file_index == 0)
         return;
@@ -340,7 +340,7 @@ void input_previous_file(void)
     state.refresh_window = true;
 }
 
-void input_cursor_clamp(void)
+void action_cursor_clamp(void)
 {
     FileState *active_file = state.active_file;
     unsigned int record_panes_height = state_get_record_panes_height(&state);
@@ -354,9 +354,9 @@ void input_cursor_clamp(void)
         active_file->cursor_sequence_j = sequence_pane_width - 1;
 }
 
-void input_move_up(size_t x)
+void action_move_up(size_t x)
 {
-    input_cursor_clamp();
+    action_cursor_clamp();
     FileState *active_file = state.active_file;
 
     if (active_file->record_array.len == 0)
@@ -374,9 +374,9 @@ void input_move_up(size_t x)
         active_file->cursor_record_i -= x;
 }
 
-void input_move_down(size_t x)
+void action_move_down(size_t x)
 {
-    input_cursor_clamp();
+    action_cursor_clamp();
     FileState *active_file = state.active_file;
 
     if (active_file->record_array.len == 0)
@@ -399,9 +399,9 @@ void input_move_down(size_t x)
         active_file->cursor_record_i += x;
 }
 
-void input_move_right(size_t x)
+void action_move_right(size_t x)
 {
-    input_cursor_clamp();
+    action_cursor_clamp();
     FileState *active_file = state.active_file;
 
     if (active_file->record_array.len == 0)
@@ -441,9 +441,9 @@ void input_move_right(size_t x)
         active_file->cursor_sequence_j += x;
 }
 
-void input_move_left(size_t x)
+void action_move_left(size_t x)
 {
-    input_cursor_clamp();
+    action_cursor_clamp();
     FileState *active_file = state.active_file;
 
     if (active_file->record_array.len == 0)
@@ -478,9 +478,9 @@ void input_move_left(size_t x)
         active_file->cursor_sequence_j -= x;
 }
 
-void input_move_page_up(PageSize page_size)
+void action_move_page_up(PageSize page_size)
 {
-    input_cursor_clamp();
+    action_cursor_clamp();
     FileState *active_file = state.active_file;
 
     if (active_file->record_array.len == 0)
@@ -501,9 +501,9 @@ void input_move_page_up(PageSize page_size)
         state_set_offset_record(&state, active_file->offset_record - x);
 }
 
-void input_move_page_down(PageSize page_size)
+void action_move_page_down(PageSize page_size)
 {
-    input_cursor_clamp();
+    action_cursor_clamp();
     FileState *active_file = state.active_file;
 
     if (active_file->record_array.len == 0)
@@ -526,9 +526,9 @@ void input_move_page_down(PageSize page_size)
         active_file->cursor_record_i = active_file->record_array.len - 1 - active_file->offset_record;
 }
 
-void input_move_page_right(PageSize page_size)
+void action_move_page_right(PageSize page_size)
 {
-    input_cursor_clamp();
+    action_cursor_clamp();
     FileState *active_file = state.active_file;
 
     if (active_file->record_array.len == 0)
@@ -549,9 +549,9 @@ void input_move_page_right(PageSize page_size)
     }
 }
 
-void input_move_page_left(PageSize page_size)
+void action_move_page_left(PageSize page_size)
 {
-    input_cursor_clamp();
+    action_cursor_clamp();
     FileState *active_file = state.active_file;
 
     if (active_file->record_array.len == 0)
@@ -566,9 +566,9 @@ void input_move_page_left(PageSize page_size)
         state_set_offset_sequence(&state, active_file->offset_sequence - x);
 }
 
-void input_move_line_start(void)
+void action_move_line_start(void)
 {
-    input_cursor_clamp();
+    action_cursor_clamp();
     FileState *active_file = state.active_file;
 
     if (active_file->record_array.len == 0)
@@ -578,9 +578,9 @@ void input_move_line_start(void)
     active_file->cursor_sequence_j = 0;
 }
 
-void input_move_line_end(void)
+void action_move_line_end(void)
 {
-    input_cursor_clamp();
+    action_cursor_clamp();
     FileState *active_file = state.active_file;
 
     if (active_file->record_array.len == 0)
@@ -590,12 +590,12 @@ void input_move_line_end(void)
     SeqRecord record = active_file->record_array.records[record_index];
     size_t sequence_index = active_file->cursor_sequence_j + active_file->offset_sequence;
     size_t x = (record.len > 0) ? record.len - 1 - sequence_index : 0;
-    input_move_right(x);
+    action_move_right(x);
 }
 
-void input_move_first_record(void)
+void action_move_first_record(void)
 {
-    input_cursor_clamp();
+    action_cursor_clamp();
     FileState *active_file = state.active_file;
 
     if (active_file->record_array.len == 0)
@@ -605,9 +605,9 @@ void input_move_first_record(void)
     state_set_offset_record(&state, 0);
 }
 
-void input_move_last_record(void)
+void action_move_last_record(void)
 {
-    input_cursor_clamp();
+    action_cursor_clamp();
     FileState *active_file = state.active_file;
 
     if (active_file->record_array.len == 0)
@@ -615,12 +615,12 @@ void input_move_last_record(void)
 
     size_t record_index = active_file->cursor_record_i + active_file->offset_record;
     size_t x = active_file->record_array.len - 1 - record_index;
-    input_move_down(x);
+    action_move_down(x);
 }
 
-void input_move_to_record(size_t x)
+void action_move_to_record(size_t x)
 {
-    input_cursor_clamp();
+    action_cursor_clamp();
     FileState *active_file = state.active_file;
 
     if (active_file->record_array.len == 0)
@@ -628,14 +628,14 @@ void input_move_to_record(size_t x)
 
     size_t record_index = active_file->cursor_record_i + active_file->offset_record;
     if (x > record_index)
-        input_move_down(x - record_index);
+        action_move_down(x - record_index);
     else if (x < record_index)
-        input_move_up(record_index - x);
+        action_move_up(record_index - x);
 }
 
-void input_move_bottom_edge(void)
+void action_move_bottom_edge(void)
 {
-    input_cursor_clamp();
+    action_cursor_clamp();
     FileState *active_file = state.active_file;
 
     if (active_file->record_array.len == 0)
@@ -648,9 +648,9 @@ void input_move_bottom_edge(void)
         active_file->cursor_record_i = record_panes_height - 1;
 }
 
-void input_move_top_edge(void)
+void action_move_top_edge(void)
 {
-    input_cursor_clamp();
+    action_cursor_clamp();
     FileState *active_file = state.active_file;
 
     if (active_file->record_array.len == 0)
@@ -659,9 +659,9 @@ void input_move_top_edge(void)
     active_file->cursor_record_i = 0;
 }
 
-void input_move_left_edge(void)
+void action_move_left_edge(void)
 {
-    input_cursor_clamp();
+    action_cursor_clamp();
     FileState *active_file = state.active_file;
 
     if (active_file->record_array.len == 0)
@@ -670,9 +670,9 @@ void input_move_left_edge(void)
     active_file->cursor_sequence_j = 0;
 }
 
-void input_move_right_edge(void)
+void action_move_right_edge(void)
 {
-    input_cursor_clamp();
+    action_cursor_clamp();
     FileState *active_file = state.active_file;
 
     if (active_file->record_array.len == 0)
@@ -681,9 +681,9 @@ void input_move_right_edge(void)
     active_file->cursor_sequence_j = state_get_sequence_pane_width(&state) - 1;
 }
 
-void input_move_vertical_middle(void)
+void action_move_vertical_middle(void)
 {
-    input_cursor_clamp();
+    action_cursor_clamp();
     FileState *active_file = state.active_file;
 
     if (active_file->record_array.len == 0)
@@ -696,9 +696,9 @@ void input_move_vertical_middle(void)
         active_file->cursor_record_i = (record_panes_height - 1) / 2;
 }
 
-void input_move_horizontal_middle(void)
+void action_move_horizontal_middle(void)
 {
-    input_cursor_clamp();
+    action_cursor_clamp();
     FileState *active_file = state.active_file;
 
     if (active_file->record_array.len == 0)
@@ -708,37 +708,37 @@ void input_move_horizontal_middle(void)
     active_file->cursor_sequence_j = sequence_pane_width / 2;
 }
 
-void input_increase_header_pane_width(void)
+void action_increase_header_pane_width(void)
 {
     FileState *active_file = state.active_file;
     state_set_header_pane_width(&state, active_file->header_pane_width + 1);
 }
 
-void input_decrease_header_pane_width(void)
+void action_decrease_header_pane_width(void)
 {
     FileState *active_file = state.active_file;
     state_set_header_pane_width(&state, active_file->header_pane_width - 1);
 }
 
-void input_increase_ruler_pane_height(void)
+void action_increase_ruler_pane_height(void)
 {
     FileState *active_file = state.active_file;
     state_set_ruler_pane_height(&state, active_file->ruler_pane_height + 1);
 }
 
-void input_decrease_ruler_pane_height(void)
+void action_decrease_ruler_pane_height(void)
 {
     FileState *active_file = state.active_file;
     state_set_ruler_pane_height(&state, active_file->ruler_pane_height - 1);
 }
 
-void input_increase_tick_spacing(void)
+void action_increase_tick_spacing(void)
 {
     FileState *active_file = state.active_file;
     state_set_tick_spacing(&state, active_file->tick_spacing + 1);
 }
 
-void input_decrease_tick_spacing(void)
+void action_decrease_tick_spacing(void)
 {
     FileState *active_file = state.active_file;
     state_set_tick_spacing(&state, active_file->tick_spacing - 1);
