@@ -286,8 +286,8 @@ int main(int argc, char *argv[])
     setlocale(LC_ALL, ""); // Necessary for wcswidth calls
 
     // Main loop
-    int count;
-    Command cmd;
+    size_t count;
+    Action action;
 
     Array input_buffer, output_buffer;
     array_init(&input_buffer, sizeof(char));
@@ -297,11 +297,11 @@ int main(int argc, char *argv[])
     {
         input_read_key(&input_buffer, input_fd);
 
-        retcode = input_parse_keys(&input_buffer, &count, &cmd);
+        retcode = input_parse_keys(&input_buffer, &action, &count);
         switch (retcode)
         {
         case 0:
-            input_execute_command(count, cmd);
+            input_execute_action(&action, count);
             input_buffer.len = 0;
             break;
         case 1:

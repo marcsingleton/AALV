@@ -5,6 +5,11 @@
 
 extern State state;
 
+void action_quit(void)
+{
+    exit(0);
+}
+
 void action_next_file(void)
 {
     if (state.active_file_index + 1 >= state.nfiles)

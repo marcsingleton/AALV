@@ -12,10 +12,31 @@
 
 typedef enum
 {
-    PAGE_SIZE_FULL,
+    PAGE_SIZE_FULL = 0,
     PAGE_SIZE_HALF
 } PageSize;
 
+typedef union
+{
+    void (*void_arg)(void);
+    void (*size_t_arg)(size_t);
+    void (*page_size_arg)(PageSize);
+} ActionFunction;
+
+typedef enum
+{
+    VOID_ARG = 0,
+    SIZE_T_ARG,
+    PAGE_SIZE_ARG,
+} ActionArguments;
+
+typedef struct
+{
+    ActionFunction fn;
+    ActionArguments args;
+} Action;
+
+void action_quit(void);
 void action_next_file(void);
 void action_previous_file(void);
 void action_move_up(size_t x);

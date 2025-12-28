@@ -2,11 +2,11 @@
 #define INPUT_H
 
 #include "array.h"
-#include "commands.h"
+#include "action.h"
 
 int input_read_key(Array *buffer, int fd);
-int input_parse_keys(Array *buffer, int *count, Command *cmd);
-int input_execute_command(int count, Command cmd);
+int input_parse_keys(Array *buffer, Action *action, size_t *count);
+int input_execute_action(Action *action, size_t count);
 void input_buffer_flush(Array *buffer);
 
 #endif // INPUT_H
