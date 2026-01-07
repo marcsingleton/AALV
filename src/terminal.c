@@ -29,16 +29,15 @@ int terminal_get_window_size(unsigned int *rows, unsigned int *cols)
     }
 }
 
-int terminal_enable_raw_mode(struct termios *old_termios, struct termios *raw_termios)
+int terminal_enable_raw_mode(struct termios *termios_p)
 {
-    *raw_termios = *old_termios;
-    cfmakeraw(raw_termios);
-    return tcsetattr(TERMINAL_FILENO, TCSAFLUSH, raw_termios);
+    cfmakeraw(termios_p);
+    return tcsetattr(TERMINAL_FILENO, TCSAFLUSH, termios_p);
 }
 
-int terminal_disable_raw_mode(struct termios *old_termios)
+int terminal_disable_raw_mode(struct termios *termios_p)
 {
-    return tcsetattr(TERMINAL_FILENO, TCSAFLUSH, old_termios);
+    return tcsetattr(TERMINAL_FILENO, TCSAFLUSH, termios_p);
 }
 
 void terminal_use_alternate_buffer(void)

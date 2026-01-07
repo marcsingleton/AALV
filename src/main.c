@@ -275,7 +275,8 @@ int main(int argc, char *argv[])
         error_printf("%s: Failed to get current termios\n", INVOCATION_NAME);
         return 1;
     }
-    if (terminal_enable_raw_mode(&old_termios, &raw_termios) != 0)
+    raw_termios = old_termios; // Copy current settings to raw
+    if (terminal_enable_raw_mode(&raw_termios) != 0)
     {
         error_printf("%s: Failed to set raw mode\n", INVOCATION_NAME);
         return 1;
