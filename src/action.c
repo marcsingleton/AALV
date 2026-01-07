@@ -429,3 +429,9 @@ void action_decrease_tick_spacing(void)
     FileState *active_file = state.active_file;
     state_set_tick_spacing(&state, active_file->tick_spacing - 1);
 }
+
+void action_enter_command_mode(void)
+{
+    state.mode = COMMAND;
+    state.refresh_window = true;
+}

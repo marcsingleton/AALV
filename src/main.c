@@ -295,20 +295,33 @@ int main(int argc, char *argv[])
 
     while (1)
     {
-        input_read_key(&input_buffer, input_fd);
-
-        retcode = input_parse_keys(&input_buffer, &action, &count);
-        switch (retcode)
+        switch (state.mode)
         {
-        case 0:
-            input_execute_action(&action, count);
-            input_buffer.len = 0;
+        case NORMAL:
+        {
+            input_read_key(&input_buffer, input_fd);
+
+            retcode = input_parse_keys(&input_buffer, &action, &count);
+            switch (retcode)
+            {
+            case 0:
+                input_execute_action(&action, count);
+                input_buffer.len = 0;
+                break;
+            case 1:
+                break;
+            case 2:
+                input_buffer.len = 0;
+                break;
+            }
             break;
-        case 1:
+        }
+        case COMMAND:
+        {
+            state.mode = NORMAL;
+            state.refresh_command_pane = true;
             break;
-        case 2:
-            input_buffer.len = 0;
-            break;
+        }
         }
 
         display_refresh(&output_buffer);

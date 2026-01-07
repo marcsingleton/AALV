@@ -64,5 +64,6 @@ void action_increase_ruler_pane_height(void);
 void action_decrease_ruler_pane_height(void);
 void action_increase_tick_spacing(void);
 void action_decrease_tick_spacing(void);
+void action_enter_command_mode(void);
 
 #endif // ACTION_H

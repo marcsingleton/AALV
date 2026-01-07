@@ -245,6 +245,10 @@ int input_parse_keys(Array *buffer, Action *action, size_t *count)
         action->fn.void_arg = action_decrease_tick_spacing;
         action->args = VOID_ARG;
         break;
+    case ':':
+        action->fn.void_arg = action_enter_command_mode;
+        action->args = VOID_ARG;
+        break;
     default:
         return 2;
     }

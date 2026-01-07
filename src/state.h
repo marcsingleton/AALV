@@ -34,6 +34,12 @@ typedef struct
     ColorScheme *color_scheme;
 } SeqTypeState;
 
+typedef enum
+{
+    NORMAL = 0,
+    COMMAND,
+} Mode;
+
 typedef struct
 {
     // Global state variables
@@ -44,6 +50,7 @@ typedef struct
     bool refresh_sequence_pane;
     bool refresh_command_pane;
     bool refresh_window;
+    Mode mode;
     // File state variables
     FileState *files;
     unsigned int nfiles;

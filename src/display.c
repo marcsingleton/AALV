@@ -237,31 +237,40 @@ void display_command_pane(Array *buffer)
     if (state.terminal_rows <= active_file->ruler_pane_height + 1)
         return;
 
-    char cursor_position[256];
-    int n = snprintf(cursor_position, sizeof(cursor_position),
-                     "ROW %zu/%zu  COL %zu/%zu",
-                     active_file->offset_record + active_file->cursor_record_i + 1, // 1-based indexing
-                     active_file->record_array.len,
-                     active_file->offset_sequence + active_file->cursor_sequence_j + active_file->records_offset,
-                     active_file->records_maxlen);
-    if (n < 0)
-        return;
-    unsigned int n_file_name = strnlen(active_file->file_path, 256);
-    unsigned int n_cursor_position = n;
+    switch (state.mode)
+    {
+    case NORMAL:
+    {
+        char cursor_position[256];
+        int n = snprintf(cursor_position, sizeof(cursor_position),
+                         "ROW %zu/%zu  COL %zu/%zu",
+                         active_file->offset_record + active_file->cursor_record_i + 1, // 1-based indexing
+                         active_file->record_array.len,
+                         active_file->offset_sequence + active_file->cursor_sequence_j + active_file->records_offset,
+                         active_file->records_maxlen);
+        if (n < 0)
+            return;
+        unsigned int n_file_name = strnlen(active_file->file_path, 256);
+        unsigned int n_cursor_position = n;
 
-    terminal_cursor_ij(buffer, active_file->ruler_pane_height + record_panes_height + 2, 1);
-    if (n_file_name + n_cursor_position + 4 <= state.terminal_cols)
-    {
-        array_extend(buffer, active_file->file_path, n_file_name);
-        for (unsigned int i = n_file_name; i + n_cursor_position < state.terminal_cols; i++)
-            array_append(buffer, " ");
-        array_extend(buffer, cursor_position, n_cursor_position);
+        terminal_cursor_ij(buffer, active_file->ruler_pane_height + record_panes_height + 2, 1);
+        if (n_file_name + n_cursor_position + 4 <= state.terminal_cols)
+        {
+            array_extend(buffer, active_file->file_path, n_file_name);
+            for (unsigned int i = n_file_name; i + n_cursor_position < state.terminal_cols; i++)
+                array_append(buffer, " ");
+            array_extend(buffer, cursor_position, n_cursor_position);
+        }
+        else if (n_cursor_position <= state.terminal_cols)
+        {
+            for (unsigned int i = 0; i + n_cursor_position < state.terminal_cols; i++)
+                array_append(buffer, " ");
+            array_extend(buffer, cursor_position, n_cursor_position);
+        }
+        break;
     }
-    else if (n_cursor_position <= state.terminal_cols)
-    {
-        for (unsigned int i = 0; i + n_cursor_position < state.terminal_cols; i++)
-            array_append(buffer, " ");
-        array_extend(buffer, cursor_position, n_cursor_position);
+    case COMMAND:
+        break;
     }
 }
 
@@ -274,31 +283,43 @@ void display_cursor(Array *buffer)
     if (active_file->record_array.len == 0)
         return;
 
-    unsigned render_index_i;
-    if (active_file->cursor_record_i >= record_panes_height)
-        render_index_i = record_panes_height - 1;
-    else
-        render_index_i = active_file->cursor_record_i;
-    unsigned int cursor_i = render_index_i + active_file->ruler_pane_height + 1;
+    switch (state.mode)
+    {
+    case NORMAL:
+    {
+        unsigned render_index_i;
+        if (active_file->cursor_record_i >= record_panes_height)
+            render_index_i = record_panes_height - 1;
+        else
+            render_index_i = active_file->cursor_record_i;
+        unsigned int cursor_i = render_index_i + active_file->ruler_pane_height + 1;
 
-    size_t record_index = render_index_i + active_file->offset_record;
-    size_t sequence_index = active_file->cursor_sequence_j + active_file->offset_sequence;
-    SeqRecord record = active_file->record_array.records[record_index];
-    unsigned int render_index_j;
-    if (record.len > sequence_index)
-        render_index_j = sequence_index;
-    else if (record.len == 0)
-        render_index_j = 0;
-    else
-        render_index_j = record.len - 1;
-    unsigned int cursor_j;
-    if (render_index_j > active_file->offset_sequence)
-        cursor_j = render_index_j - active_file->offset_sequence + active_file->header_pane_width + 1;
-    else
-        cursor_j = active_file->header_pane_width + 1;
+        size_t record_index = render_index_i + active_file->offset_record;
+        size_t sequence_index = active_file->cursor_sequence_j + active_file->offset_sequence;
+        SeqRecord record = active_file->record_array.records[record_index];
+        unsigned int render_index_j;
+        if (record.len > sequence_index)
+            render_index_j = sequence_index;
+        else if (record.len == 0)
+            render_index_j = 0;
+        else
+            render_index_j = record.len - 1;
+        unsigned int cursor_j;
+        if (render_index_j > active_file->offset_sequence)
+            cursor_j = render_index_j - active_file->offset_sequence + active_file->header_pane_width + 1;
+        else
+            cursor_j = active_file->header_pane_width + 1;
 
-    terminal_cursor_ij(buffer, cursor_i, cursor_j);
-    terminal_cursor_show(buffer);
+        terminal_cursor_ij(buffer, cursor_i, cursor_j);
+        terminal_cursor_show(buffer);
+        break;
+    }
+    case COMMAND:
+    {
+        terminal_cursor_ij(buffer, active_file->ruler_pane_height + record_panes_height + 2, 1);
+        terminal_cursor_show(buffer);
+    }
+    }
 }
 
 void display_sequence(Array *buffer, SeqRecord *record, size_t start, size_t len)
