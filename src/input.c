@@ -30,12 +30,6 @@ int input_read_key(Array *buffer, int fd)
 
 int input_parse_keys(Array *buffer, Action *action, size_t *count)
 {
-    /* Return codes
-        0: success
-        1: incomplete
-        2: failure
-    */
-
     size_t index = 0;
     char *ptr, c;
 
@@ -51,12 +45,12 @@ int input_parse_keys(Array *buffer, Action *action, size_t *count)
         if (accum == 0 && c == '0') // 0 is line start, so ignore at start of digits
             break;
         if (accum > (SIZE_MAX - (c - '0')) / 10)
-            return 2;
+            return PARSE_FAIL;
         accum = 10 * accum + (c - '0');
         index++;
     }
     if (index >= buffer->len)
-        return 1;
+        return PARSE_INCOMPLETE;
     if (accum == 0)
     {
         accum = 1;
@@ -68,11 +62,11 @@ int input_parse_keys(Array *buffer, Action *action, size_t *count)
     {
     case 27: // ESC
         if (index + 2 >= buffer->len)
-            return 2;
+            return PARSE_FAIL;
         ptr = array_get(buffer, index + 1);
         c = *ptr;
         if (c != '[')
-            return 2;
+            return PARSE_FAIL;
         ptr = array_get(buffer, index + 2);
         c = *ptr;
         switch (c)
@@ -94,7 +88,7 @@ int input_parse_keys(Array *buffer, Action *action, size_t *count)
             action->args = SIZE_T_ARG;
             break;
         default:
-            return 2;
+            return PARSE_FAIL;
         }
         break;
     case 'q':
@@ -176,11 +170,11 @@ int input_parse_keys(Array *buffer, Action *action, size_t *count)
         break;
     case 'g':
         if (index + 1 >= buffer->len)
-            return 1;
+            return PARSE_INCOMPLETE;
         ptr = array_get(buffer, index + 1);
         c = *ptr;
         if (c != 'g')
-            return 2;
+            return PARSE_FAIL;
         action->fn.void_arg = action_move_first_record;
         action->args = VOID_ARG;
         break;
@@ -250,12 +244,12 @@ int input_parse_keys(Array *buffer, Action *action, size_t *count)
         action->args = VOID_ARG;
         break;
     default:
-        return 2;
+        return PARSE_FAIL;
     }
 
     *count = accum;
 
-    return 0;
+    return PARSE_SUCCESS;
 }
 
 int input_execute_action(Action *action, size_t count)

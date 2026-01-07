@@ -305,13 +305,13 @@ int main(int argc, char *argv[])
             retcode = input_parse_keys(&input_buffer, &action, &count);
             switch (retcode)
             {
-            case 0:
+            case PARSE_SUCCESS:
                 input_execute_action(&action, count);
                 input_buffer.len = 0;
                 break;
-            case 1:
+            case PARSE_INCOMPLETE:
                 break;
-            case 2:
+            case PARSE_FAIL:
                 input_buffer.len = 0;
                 break;
             }
