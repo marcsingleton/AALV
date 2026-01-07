@@ -76,10 +76,10 @@ int sequences_init_seq_record_array(SeqRecordArray *record_array, size_t len)
     if (!record_array)
         return 1;
 
-    SeqRecord *records = calloc(len, sizeof(SeqRecord));
-    if (!records)
+    SeqRecord *data = calloc(len, sizeof(SeqRecord));
+    if (!data)
         return 1;
-    record_array->records = records;
+    record_array->data = data;
     record_array->len = len;
     return 0;
 }
@@ -90,8 +90,8 @@ void sequences_deinit_seq_record_array(SeqRecordArray *record_array)
         return;
 
     for (size_t i = 0; i < record_array->len; i++)
-        sequences_deinit_seq_record(record_array->records + i);
-    free(record_array->records);
+        sequences_deinit_seq_record(record_array->data + i);
+    free(record_array->data);
     record_array->len = 0;
 }
 

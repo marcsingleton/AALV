@@ -96,7 +96,7 @@ void action_move_right(size_t x)
     unsigned int sequence_pane_width = state_get_sequence_pane_width(&state);
 
     size_t record_index = active_file->cursor_record_i + active_file->offset_record;
-    SeqRecord record = active_file->record_array.records[record_index];
+    SeqRecord record = active_file->record_array.data[record_index];
     size_t sequence_index = active_file->cursor_sequence_j + active_file->offset_sequence;
 
     // Snap to end
@@ -136,7 +136,7 @@ void action_move_left(size_t x)
         return;
 
     size_t record_index = active_file->cursor_record_i + active_file->offset_record;
-    SeqRecord record = active_file->record_array.records[record_index];
+    SeqRecord record = active_file->record_array.data[record_index];
     size_t sequence_index = active_file->cursor_sequence_j + active_file->offset_sequence;
 
     // Snap to end
@@ -273,7 +273,7 @@ void action_move_line_end(void)
         return;
 
     size_t record_index = active_file->cursor_record_i + active_file->offset_record;
-    SeqRecord record = active_file->record_array.records[record_index];
+    SeqRecord record = active_file->record_array.data[record_index];
     size_t sequence_index = active_file->cursor_sequence_j + active_file->offset_sequence;
     size_t x = (record.len > 0) ? record.len - 1 - sequence_index : 0;
     action_move_right(x);

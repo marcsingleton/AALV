@@ -77,7 +77,7 @@ void display_header_pane(Array *buffer)
         terminal_cursor_ij(buffer, i + active_file->ruler_pane_height + 1, 1);
         if (record_index < active_file->record_array.len)
         {
-            SeqRecord record = active_file->record_array.records[record_index];
+            SeqRecord record = active_file->record_array.data[record_index];
             size_t len = strnlen(record.header, active_file->header_pane_width);
             if (len < active_file->header_pane_width)
             {
@@ -184,7 +184,7 @@ void display_sequence_pane(Array *buffer)
         terminal_cursor_ij(buffer, i + active_file->ruler_pane_height + 1, active_file->header_pane_width + 1);
         if (record_index < active_file->record_array.len)
         {
-            SeqRecord record = active_file->record_array.records[record_index];
+            SeqRecord record = active_file->record_array.data[record_index];
             unsigned int left_continuation = 0;
             unsigned int right_continuation = 0;
             size_t start = active_file->offset_sequence;
@@ -296,7 +296,7 @@ void display_cursor(Array *buffer)
 
         size_t record_index = render_index_i + active_file->offset_record;
         size_t sequence_index = active_file->cursor_sequence_j + active_file->offset_sequence;
-        SeqRecord record = active_file->record_array.records[record_index];
+        SeqRecord record = active_file->record_array.data[record_index];
         unsigned int render_index_j;
         if (record.len > sequence_index)
             render_index_j = sequence_index;

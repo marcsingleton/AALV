@@ -44,7 +44,7 @@ int fasta_fread(FILE *fp, SeqRecordArray *record_array)
     // Check for empty files and improper formatting
     if (linelen <= 0)
     {
-        record_array->records = NULL;
+        record_array->data = NULL;
         record_array->len = 0;
         goto cleanup;
     }
@@ -158,7 +158,7 @@ int fasta_fread(FILE *fp, SeqRecordArray *record_array)
         goto cleanup;
     }
 
-    record_array->records = new_records.data;
+    record_array->data = new_records.data;
     record_array->len = new_records.len;
 
 cleanup:
@@ -200,7 +200,7 @@ int fasta_fwrite(FILE *fp, SeqRecordArray *record_array, const int maxlen)
 {
     for (size_t i = 0; i < record_array->len; i++)
     {
-        SeqRecord *record = record_array->records + i;
+        SeqRecord *record = record_array->data + i;
         fprintf(fp, ">%s\n", record->header);
         fasta_wrap_string(fp, record->seq, record->len, maxlen);
     }
