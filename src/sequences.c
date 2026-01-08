@@ -23,7 +23,6 @@ int sequences_init_seq_record(SeqRecord *record, char *header, char *seq, char *
 {
     if (!record || !header || !seq || !id)
         return 1;
-
     char *new_header = strdup(header);
     char *new_seq = strdup(seq);
     char *new_id = strdup(id);
@@ -75,7 +74,6 @@ int sequences_init_seq_record_array(SeqRecordArray *record_array, size_t len)
 {
     if (!record_array)
         return 1;
-
     SeqRecord *data = calloc(len, sizeof(SeqRecord));
     if (!data)
         return 1;
@@ -88,7 +86,6 @@ void sequences_deinit_seq_record_array(SeqRecordArray *record_array)
 {
     if (!record_array)
         return;
-
     for (size_t i = 0; i < record_array->len; i++)
         sequences_deinit_seq_record(record_array->data + i);
     free(record_array->data);
@@ -99,7 +96,6 @@ int sequences_init_alphabet(Alphabet *alphabet, char *name, char *syms, char *ga
 {
     if (!alphabet || !name || !syms || !gaps)
         return 1;
-
     Alphabet test_alphabet;
     char *new_name = strdup(name);
     char *new_syms = strdup(syms);
