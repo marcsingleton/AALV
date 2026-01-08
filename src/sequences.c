@@ -173,7 +173,7 @@ int sequences_init_base_alphabets(void)
         retcode = sequences_init_alphabet(alphabet, alphabet->name,
                                           alphabet->syms, alphabet->gaps,
                                           alphabet->case_sensitive);
-        if (retcode != 0)
+        if (retcode > 0)
             return retcode;
     }
     return retcode;
