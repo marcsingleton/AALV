@@ -44,6 +44,18 @@ typedef struct
     size_t len;
 } SeqRecordArray;
 
+typedef struct
+{
+    size_t *indices;
+    size_t len;
+} UnalignedIndices;
+
+typedef struct
+{
+    UnalignedIndices *data;
+    size_t len;
+} UnalignedIndicesArray;
+
 extern Alphabet NUCLEIC_ALPHABET;
 extern Alphabet PROTEIN_ALPHABET;
 
@@ -58,6 +70,11 @@ int sequences_init_seq_record_array(SeqRecordArray *record_array, size_t len);
 void sequences_deinit_seq_record_array(SeqRecordArray *record_array);
 int sequences_init_alphabet(Alphabet *alphabet, char *name, char *syms, char *gaps, bool case_sensitive);
 int sequences_init_base_alphabets(void);
+int sequences_init_unaligned_indices(UnalignedIndices *unaligned_indices, size_t len);
+void sequences_deinit_unaligned_indices(UnalignedIndices *unaligned_indices);
+int sequences_init_unaligned_indices_array(UnalignedIndicesArray *indices_array, size_t len);
+void sequences_deinit_unaligned_indices_array(UnalignedIndicesArray *indices_array);
+int sequences_index_nongap_syms(Alphabet *alphabet, SeqRecord *record, UnalignedIndices *unaligned_indices);
 int sequences_sym_in_alphabet(Alphabet *alphabet, char sym);
 int sequences_sym_is_gap(Alphabet *alphabet, char sym);
 int sequences_seq_in_alphabet(Alphabet *alphabet, SeqRecord *record);

@@ -241,31 +241,61 @@ void display_command_pane(Array *buffer)
     {
     case NORMAL:
     {
-        char cursor_position[256];
-        int n = snprintf(cursor_position, sizeof(cursor_position),
-                         "ROW %zu/%zu  COL %zu/%zu",
-                         active_file->offset_record + active_file->cursor_record_i + 1, // 1-based indexing
-                         active_file->record_array.len,
-                         active_file->offset_sequence + active_file->cursor_sequence_j + active_file->records_offset,
-                         active_file->records_maxlen);
+        char status[256];
+        unsigned int n_status = 0;
+        size_t record_index = active_file->offset_record + active_file->cursor_record_i;
+        size_t sequence_index = active_file->cursor_sequence_j + active_file->offset_sequence;
+        UnalignedIndices *unaligned_indices = active_file->indices_array.data + record_index;
+
+        int n = 0;
+
+        if (unaligned_indices->indices)
+        {
+            n = snprintf(status + n_status, sizeof(status) - n_status,
+                         "POS %zu/%zu  ",
+                         unaligned_indices->indices[sequence_index],
+                         unaligned_indices->indices[unaligned_indices->len - 1]);
+        }
+        else
+        {
+            n = snprintf(status + n_status, sizeof(status) - n_status,
+                         "POS ?/?  ");
+        }
         if (n < 0)
             return;
+        n_status += n;
+
+        n = snprintf(status + n_status, sizeof(status) - n_status,
+                     "ROW %zu/%zu  ",
+                     record_index + 1, // 1-based indexing
+                     active_file->record_array.len);
+        if (n < 0)
+            return;
+        n_status += n;
+
+        n = snprintf(status + n_status, sizeof(status) - n_status,
+                     "COL %zu/%zu",
+                     sequence_index + active_file->records_offset,
+                     active_file->records_maxlen);
+        if (n < 0)
+            return;
+        n_status += n;
+
         unsigned int n_file_name = strnlen(active_file->file_path, 256);
-        unsigned int n_cursor_position = n;
 
         terminal_cursor_ij(buffer, active_file->ruler_pane_height + record_panes_height + 2, 1);
-        if (n_file_name + n_cursor_position + 4 <= state.terminal_cols)
+        if (n_file_name + n_status + 4 <= state.terminal_cols)
         {
             array_extend(buffer, active_file->file_path, n_file_name);
-            for (unsigned int i = n_file_name; i + n_cursor_position < state.terminal_cols; i++)
+            for (unsigned int i = n_file_name; i + n_status < state.terminal_cols; i++)
                 array_append(buffer, " ");
-            array_extend(buffer, cursor_position, n_cursor_position);
+            array_extend(buffer, status, n_status);
         }
-        else if (n_cursor_position <= state.terminal_cols)
+        else if (n_status <= state.terminal_cols)
         {
-            for (unsigned int i = 0; i + n_cursor_position < state.terminal_cols; i++)
+            for (unsigned int i = 0; i + n_status < state.terminal_cols; i++)
                 array_append(buffer, " ");
-            array_extend(buffer, cursor_position, n_cursor_position);
+            array_extend(buffer, status, n_status);
         }
         break;
     }

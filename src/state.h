@@ -26,6 +26,7 @@ typedef struct
     SeqRecordArray record_array;
     size_t records_maxlen;
     size_t records_offset;
+    UnalignedIndicesArray indices_array;
 } FileState;
 
 typedef struct

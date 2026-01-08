@@ -175,6 +175,67 @@ int sequences_init_base_alphabets(void)
     return retcode;
 }
 
+int sequences_init_unaligned_indices(UnalignedIndices *unaligned_indices, size_t len)
+{
+    if (!unaligned_indices)
+        return 1;
+    size_t *indices = malloc(len * sizeof(size_t));
+    if (!indices)
+        return 1;
+    unaligned_indices->indices = indices;
+    unaligned_indices->len = len;
+    return 0;
+}
+
+void sequences_deinit_unaligned_indices(UnalignedIndices *unaligned_indices)
+{
+    if (!unaligned_indices)
+        return;
+    free(unaligned_indices->indices);
+    unaligned_indices->len = 0;
+}
+
+int sequences_init_unaligned_indices_array(UnalignedIndicesArray *indices_array, size_t len)
+{
+    if (!indices_array)
+        return 1;
+    UnalignedIndices *data = calloc(len, sizeof(UnalignedIndices));
+    if (!data)
+        return 1;
+    indices_array->data = data;
+    indices_array->len = len;
+    return 0;
+}
+
+void sequences_deinit_unaligned_indices_array(UnalignedIndicesArray *indices_array)
+{
+    if (!indices_array)
+        return;
+    for (size_t i = 0; i < indices_array->len; i++)
+        sequences_deinit_unaligned_indices(indices_array->data + i);
+    free(indices_array->data);
+    indices_array->len = 0;
+}
+
+int sequences_index_nongap_syms(Alphabet *alphabet, SeqRecord *record, UnalignedIndices *unaligned_indices)
+{
+    if (!alphabet || !record || !unaligned_indices)
+        return 1;
+    int retcode = sequences_init_unaligned_indices(unaligned_indices, record->len);
+    if (retcode > 0)
+        return 1;
+    size_t index = 0;
+    for (size_t i = 0; i < record->len; i++)
+    {
+        char sym = record->seq[i];
+        int is_gap = sequences_sym_is_gap(alphabet, sym);
+        if (!is_gap)
+            index++;
+        unaligned_indices->indices[i] = index;
+    }
+    return 0;
+}
+
 int sequences_sym_in_alphabet(Alphabet *alphabet, char sym)
 {
     if (!alphabet)

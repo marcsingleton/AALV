@@ -39,6 +39,7 @@ void handle_sigwinch(int signum);
 int load_seqs(FileState *file, const char *format_arg, const char *seq_type_arg);
 FileReader get_reader(FileState *file, const char *format_arg);
 int set_seq_types(FileState *file, const char *seq_type_arg);
+int set_unaligned_indices(FileState *file);
 
 // --help option shows in given order (alphabetical except help and version)
 Option options[] = {
@@ -275,7 +276,16 @@ int main(int argc, char *argv[])
 
         retcode = load_seqs(file, format_arg, seq_type_arg);
         if (retcode > 0) // "Expected" exit == 1 and "unexpected" exit > 1; shift -1 for CLI convention
+        {
+            error_printf("%s: Failed to load sequences in %s\n", INVOCATION_NAME, file->file_path);
             return retcode - 1;
+        }
+        retcode = set_unaligned_indices(file);
+        if (retcode > 0)
+        {
+            error_printf("%s: Failed to allocate unaligned indices in %s\n", INVOCATION_NAME, file->file_path);
+            return 1;
+        }
     }
 
     if (n_format_args > 0)
@@ -351,7 +361,10 @@ void cleanup(void)
     for (unsigned int i = 0; i < state.n_color_schemes; i++)
         color_deinit_color_scheme(state.color_schemes + i);
     for (unsigned int i = 0; i < state.nfiles; i++)
+    {
         sequences_deinit_seq_record_array(&state.files[i].record_array);
+        sequences_deinit_unaligned_indices_array(&state.files[i].indices_array);
+    }
     free(state.files);
 
     // Restore terminal options
@@ -487,6 +500,33 @@ int set_seq_types(FileState *file, const char *seq_type_arg)
         }
         else if (record->type == SEQ_TYPE_INDETERMINATE && record->len >= rcparams_nucleic_tiebreak_len)
             record->type = SEQ_TYPE_NUCLEIC;
+    }
+    return 0;
+}
+
+int set_unaligned_indices(FileState *file)
+{
+    int retcode = sequences_init_unaligned_indices_array(&file->indices_array, file->record_array.len);
+    if (retcode > 0)
+        return 1;
+    for (size_t i = 0; i < file->record_array.len; i++)
+    {
+        Alphabet *alphabet = NULL;
+        SeqRecord *record = file->record_array.data + i;
+        UnalignedIndices *unaligned_indices = file->indices_array.data + i;
+        switch (record->type)
+        {
+        case SEQ_TYPE_NUCLEIC:
+            alphabet = &NUCLEIC_ALPHABET;
+            break;
+        case SEQ_TYPE_PROTEIN:
+            alphabet = &PROTEIN_ALPHABET;
+            break;
+        default:
+            break;
+        }
+        if (alphabet)
+            sequences_index_nongap_syms(alphabet, record, unaligned_indices);
     }
     return 0;
 }
