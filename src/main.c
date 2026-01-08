@@ -1,6 +1,7 @@
 #include <fcntl.h>
 #include <getopt.h>
 #include <locale.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -34,6 +35,7 @@ struct termios raw_termios;
 bool raw_mode = false;
 
 void cleanup(void);
+void handle_sigwinch(int signum);
 int load_seqs(FileState *file, const char *format_arg, const char *seq_type_arg);
 FileReader get_reader(FileState *file, const char *format_arg);
 int set_seq_types(FileState *file, const char *seq_type_arg);
@@ -107,6 +109,9 @@ char positional_usage[] = "[<file> ...]";
 // Main
 int main(int argc, char *argv[])
 {
+    int retcode = 0; // Generic return code for various functions
+    atexit(&cleanup);
+
     // Get invocation name
     if (argv[0])
     {
@@ -119,9 +124,18 @@ int main(int argc, char *argv[])
     else
         INVOCATION_NAME = "?";
 
+    // Register window change handler
+    struct sigaction sa;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_handler = handle_sigwinch;
+    sa.sa_flags = 0; // No SA_RESTART--blocking read calls will return
+    if (sigaction(SIGWINCH, &sa, NULL) == -1)
+    {
+        error_printf("%s: Failed to register signal handler\n", INVOCATION_NAME);
+        return 1;
+    }
+
     // Initializations
-    int retcode = 0; // Generic return code for various functions
-    atexit(&cleanup);
     if (sequences_init_base_alphabets() != 0)
     {
         error_printf("%s: Failed to initialize alphabets\n", INVOCATION_NAME);
@@ -352,6 +366,12 @@ void cleanup(void)
     // Print error
     if (error_message[0] != '\0')
         fputs(error_message, stderr);
+}
+
+void handle_sigwinch(int signum)
+{
+    (void)signum; // Suppress unused parameter warning
+    state.refresh_window = true;
 }
 
 int load_seqs(FileState *file, const char *format_arg, const char *seq_type_arg)
