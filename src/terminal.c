@@ -29,15 +29,35 @@ int terminal_get_window_size(unsigned int *rows, unsigned int *cols)
     }
 }
 
-int terminal_enable_raw_mode(struct termios *termios_p)
+int terminal_enable_raw_mode(struct termios *raw_termios)
 {
-    cfmakeraw(termios_p);
-    return tcsetattr(TERMINAL_FILENO, TCSAFLUSH, termios_p);
+    cfmakeraw(raw_termios);
+    return tcsetattr(TERMINAL_FILENO, TCSAFLUSH, raw_termios);
 }
 
-int terminal_disable_raw_mode(struct termios *termios_p)
+int terminal_disable_raw_mode(struct termios *old_termios)
 {
-    return tcsetattr(TERMINAL_FILENO, TCSAFLUSH, termios_p);
+    return tcsetattr(TERMINAL_FILENO, TCSAFLUSH, old_termios);
+}
+
+int terminal_set_blocking_read(void)
+{
+    struct termios termios;
+    if (tcgetattr(TERMINAL_FILENO, &termios) == -1)
+        return -1;
+    termios.c_cc[VMIN] = 1;
+    termios.c_cc[VTIME] = 0;
+    return tcsetattr(TERMINAL_FILENO, TCSAFLUSH, &termios);
+}
+
+int terminal_set_nonblocking_read(void)
+{
+    struct termios termios;
+    if (tcgetattr(TERMINAL_FILENO, &termios) == -1)
+        return -1;
+    termios.c_cc[VMIN] = 0;
+    termios.c_cc[VTIME] = 0;
+    return tcsetattr(TERMINAL_FILENO, TCSAFLUSH, &termios);
 }
 
 void terminal_use_alternate_buffer(void)

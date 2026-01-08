@@ -1,26 +1,18 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/select.h>
 
 #include "input.h"
 #include "terminal.h"
 
+#define ESC 27
+
 int input_read_key(Array *buffer, int fd)
 {
-    fd_set readfds;
-    FD_ZERO(&readfds);
-    FD_SET(fd, &readfds);
-
-    struct timeval tv;
-    tv.tv_sec = 0;
-    tv.tv_usec = 2500;
-
     char c;
     int n = 0;
-    while (select(fd + 1, &readfds, NULL, NULL, &tv) > 0 && FD_ISSET(fd, &readfds))
+    if (read(fd, &c, 1) > 0)
     {
-        read(fd, &c, 1);
         array_append(buffer, &c);
         n++;
     }
@@ -60,15 +52,16 @@ int input_parse_keys(Array *buffer, Action *action, size_t *count)
     // Parse command
     switch (c)
     {
-    case 27: // ESC
-        if (index + 2 >= buffer->len)
+    case ESC:
+        if (index + 1 < buffer->len && *(char *)array_get(buffer, index + 1) == ESC) // Special case: Error on two escapes
             return PARSE_FAIL;
-        ptr = array_get(buffer, index + 1);
-        c = *ptr;
+        if (index + 2 >= buffer->len) // Otherwise wait for complete escape sequence
+            return PARSE_INCOMPLETE;
+
+        c = *(char *)array_get(buffer, index + 1);
         if (c != '[')
             return PARSE_FAIL;
-        ptr = array_get(buffer, index + 2);
-        c = *ptr;
+        c = *(char *)array_get(buffer, index + 2);
         switch (c)
         {
         case 'A':
@@ -281,8 +274,18 @@ int input_execute_action(Action *action, size_t count)
     return 0;
 }
 
-void input_buffer_flush(Array *buffer)
+void input_write_buffer_flush(Array *write_buffer)
 {
-    write(STDOUT_FILENO, buffer->data, buffer->len);
-    buffer->len = 0;
+    write(STDOUT_FILENO, write_buffer->data, write_buffer->len);
+    write_buffer->len = 0;
+}
+
+void input_read_buffer_flush(Array *read_buffer)
+{
+    char c;
+    terminal_set_nonblocking_read();
+    while (read(TERMINAL_FILENO, &c, 1) > 0)
+        ;
+    terminal_set_blocking_read();
+    read_buffer->len = 0;
 }

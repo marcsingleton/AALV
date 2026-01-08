@@ -282,6 +282,7 @@ int main(int argc, char *argv[])
         return 1;
     };
     raw_mode = true;
+    terminal_set_blocking_read();
     terminal_use_alternate_buffer();
 
     setlocale(LC_ALL, ""); // Necessary for wcswidth calls
@@ -290,29 +291,32 @@ int main(int argc, char *argv[])
     size_t count;
     Action action;
 
-    Array input_buffer, output_buffer;
-    array_init(&input_buffer, sizeof(char));
-    array_init(&output_buffer, sizeof(char));
+    Array read_buffer, write_buffer;
+    array_init(&read_buffer, sizeof(char));
+    array_init(&write_buffer, sizeof(char));
 
     while (1)
     {
+        display_refresh(&write_buffer);
+        input_write_buffer_flush(&write_buffer);
+
         switch (state.mode)
         {
         case NORMAL:
         {
-            input_read_key(&input_buffer, input_fd);
+            input_read_key(&read_buffer, input_fd);
 
-            retcode = input_parse_keys(&input_buffer, &action, &count);
+            retcode = input_parse_keys(&read_buffer, &action, &count);
             switch (retcode)
             {
             case PARSE_SUCCESS:
                 input_execute_action(&action, count);
-                input_buffer.len = 0;
+                input_read_buffer_flush(&read_buffer);
                 break;
             case PARSE_INCOMPLETE:
                 break;
             case PARSE_FAIL:
-                input_buffer.len = 0;
+                input_read_buffer_flush(&read_buffer);
                 break;
             }
             break;
@@ -324,9 +328,6 @@ int main(int argc, char *argv[])
             break;
         }
         }
-
-        display_refresh(&output_buffer);
-        input_buffer_flush(&output_buffer);
     }
 }
 
