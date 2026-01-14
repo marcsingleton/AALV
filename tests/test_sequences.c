@@ -146,9 +146,33 @@ int test_seq_in_alphabet(void)
     if (retcode > 0)
         return retcode;
 
-    if (sequences_seq_in_alphabet(&test_alphabet, &seq_1) != 1)
+    if (sequences_seq_in_alphabet(&test_alphabet, seq_1.seq) != 1)
         return 1;
-    if (sequences_seq_in_alphabet(&test_alphabet, &seq_2) == 1)
+    if (sequences_seq_in_alphabet(&test_alphabet, seq_2.seq) == 1)
+        return 1;
+
+    return 0;
+}
+
+int test_rna_nucleic_subset(void)
+{
+    int retcode = sequences_init_base_alphabets();
+    if (retcode > 0)
+        return retcode;
+
+    if (sequences_seq_in_alphabet(&NUCLEIC_ALPHABET, RNA_ALPHABET.syms) != 1)
+        return 1;
+
+    return 0;
+}
+
+int test_dna_nucleic_subset(void)
+{
+    int retcode = sequences_init_base_alphabets();
+    if (retcode > 0)
+        return retcode;
+
+    if (sequences_seq_in_alphabet(&NUCLEIC_ALPHABET, DNA_ALPHABET.syms) != 1)
         return 1;
 
     return 0;
@@ -162,6 +186,8 @@ TestFunction tests[] = {
     {&test_sym_in_alphabet, "test_sym_in_alphabet"},
     {&test_sym_is_gap, "test_sym_is_gap"},
     {&test_seq_in_alphabet, "test_seq_in_alphabet"},
+    {&test_rna_nucleic_subset, "test_rna_nucleic_subset"},
+    {&test_dna_nucleic_subset, "test_dna_nucleic_subset"},
 };
 
 #define NTESTS sizeof(tests) / sizeof(TestFunction)

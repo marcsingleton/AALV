@@ -498,6 +498,8 @@ int set_seq_types(FileState *file, const char *seq_type_arg)
                 }
             }
         }
+        else if (record->type == SEQ_TYPE_RNA || record->type == SEQ_TYPE_DNA)
+            record->type = SEQ_TYPE_NUCLEIC;
         else if (record->type == SEQ_TYPE_INDETERMINATE && record->len >= rcparams_nucleic_tiebreak_len)
             record->type = SEQ_TYPE_NUCLEIC;
     }

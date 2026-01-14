@@ -3,6 +3,18 @@
 
 #include "sequences.h"
 
+Alphabet RNA_ALPHABET = {
+    .name = "rna",
+    .syms = "ACGUN.-",
+    .gaps = ".-",
+    .case_sensitive = false,
+};
+Alphabet DNA_ALPHABET = {
+    .name = "dna",
+    .syms = "ACGTN.-",
+    .gaps = ".-",
+    .case_sensitive = false,
+};
 Alphabet NUCLEIC_ALPHABET = {
     .name = "nucleic",
     .syms = "ACGTUN.-",
@@ -16,7 +28,12 @@ Alphabet PROTEIN_ALPHABET = {
     .case_sensitive = false,
 };
 
-Alphabet *BASE_ALPHABETS[] = {&NUCLEIC_ALPHABET, &PROTEIN_ALPHABET};
+Alphabet *BASE_ALPHABETS[] = {
+    &RNA_ALPHABET,
+    &DNA_ALPHABET,
+    &NUCLEIC_ALPHABET,
+    &PROTEIN_ALPHABET,
+};
 size_t N_BASE_ALPHABETS = sizeof(BASE_ALPHABETS) / sizeof(Alphabet *);
 
 int sequences_init_seq_record(SeqRecord *record, char *header, char *seq, char *id)
@@ -261,11 +278,11 @@ int sequences_sym_is_gap(Alphabet *alphabet, char sym)
     return 0;
 }
 
-int sequences_seq_in_alphabet(Alphabet *alphabet, SeqRecord *record)
+int sequences_seq_in_alphabet(Alphabet *alphabet, char *seq)
 {
-    if (!alphabet || !record)
+    if (!alphabet || !seq)
         return -1;
-    for (char *sym = record->seq; *sym != '\0'; sym++)
+    for (char *sym = seq; *sym != '\0'; sym++)
     {
         int retcode = sequences_sym_in_alphabet(alphabet, *sym);
         if (retcode < 1)
@@ -274,31 +291,54 @@ int sequences_seq_in_alphabet(Alphabet *alphabet, SeqRecord *record)
     return 1;
 }
 
-int sequences_seq_is_nucleic(SeqRecord *record)
+int sequences_seq_is_rna(char *seq)
 {
-    return sequences_seq_in_alphabet(&NUCLEIC_ALPHABET, record);
+    return sequences_seq_in_alphabet(&RNA_ALPHABET, seq);
 }
 
-int sequences_seq_is_protein(SeqRecord *record)
+int sequences_seq_is_dna(char *seq)
 {
-    return sequences_seq_in_alphabet(&PROTEIN_ALPHABET, record);
+    return sequences_seq_in_alphabet(&DNA_ALPHABET, seq);
+}
+
+int sequences_seq_is_nucleic(char *seq)
+{
+    return sequences_seq_in_alphabet(&NUCLEIC_ALPHABET, seq);
+}
+
+int sequences_seq_is_protein(char *seq)
+{
+    return sequences_seq_in_alphabet(&PROTEIN_ALPHABET, seq);
 }
 
 int sequences_infer_seq_type(SeqRecord *record)
 {
-    int is_nucleic = sequences_seq_is_nucleic(record);
-    int is_protein = sequences_seq_is_protein(record);
-    if ((is_nucleic == 1) && (is_protein == 1))
-        record->type = SEQ_TYPE_INDETERMINATE;
-    else if (is_nucleic == 1)
-        record->type = SEQ_TYPE_NUCLEIC;
-    else if (is_protein == 1)
-        record->type = SEQ_TYPE_PROTEIN;
-    else if ((is_nucleic == -1) || (is_protein == -1))
+    int is_rna = sequences_seq_is_rna(record->seq);
+    int is_dna = sequences_seq_is_dna(record->seq);
+    int is_nucleic = sequences_seq_is_nucleic(record->seq);
+    int is_protein = sequences_seq_is_protein(record->seq);
+
+    if (is_rna == -1 || is_dna == -1 || is_nucleic == -1 || is_protein == -1)
     {
         record->type = SEQ_TYPE_ERROR;
         return 2;
     }
+
+    if ((is_nucleic == 1) && (is_protein == 1))
+        record->type = SEQ_TYPE_INDETERMINATE;
+    else if (is_nucleic == 1)
+    {
+        if (is_rna == 1 && is_dna == 0)
+            record->type = SEQ_TYPE_RNA;
+        else if (is_rna == 0 && is_dna == 1)
+            record->type = SEQ_TYPE_DNA;
+        else if (is_rna == 1 && is_dna == 1) // No T or U
+            record->type = SEQ_TYPE_NUCLEIC;
+        else // T and U
+            record->type = SEQ_TYPE_NUCLEIC;
+    }
+    else if (is_protein == 1)
+        record->type = SEQ_TYPE_PROTEIN;
     else
     {
         record->type = SEQ_TYPE_UNKNOWN;

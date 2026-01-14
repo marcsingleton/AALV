@@ -12,7 +12,9 @@
 typedef enum
 {
     SEQ_TYPE_UNSPECIFIED = 0,
-    SEQ_TYPE_NUCLEIC,
+    SEQ_TYPE_RNA,
+    SEQ_TYPE_DNA,
+    SEQ_TYPE_NUCLEIC, // RNA or DNA
     SEQ_TYPE_PROTEIN,
     SEQ_TYPE_INDETERMINATE, // Nucleic or protein
     SEQ_TYPE_UNKNOWN,       // ASCII with unregistered alphabet
@@ -56,6 +58,8 @@ typedef struct
     size_t len;
 } UnalignedIndicesArray;
 
+extern Alphabet RNA_ALPHABET;
+extern Alphabet DNA_ALPHABET;
 extern Alphabet NUCLEIC_ALPHABET;
 extern Alphabet PROTEIN_ALPHABET;
 
@@ -77,8 +81,10 @@ void sequences_deinit_unaligned_indices_array(UnalignedIndicesArray *indices_arr
 int sequences_index_nongap_syms(Alphabet *alphabet, SeqRecord *record, UnalignedIndices *unaligned_indices);
 int sequences_sym_in_alphabet(Alphabet *alphabet, char sym);
 int sequences_sym_is_gap(Alphabet *alphabet, char sym);
-int sequences_seq_in_alphabet(Alphabet *alphabet, SeqRecord *record);
-int sequences_seq_is_nucleic(SeqRecord *record);
-int sequences_seq_is_protein(SeqRecord *record);
+int sequences_seq_in_alphabet(Alphabet *alphabet, char *seq);
+int sequences_seq_is_rna(char *seq);
+int sequences_seq_is_dna(char *seq);
+int sequences_seq_is_nucleic(char *seq);
+int sequences_seq_is_protein(char *seq);
 int sequences_infer_seq_type(SeqRecord *record);
 #endif // SEQUENCES_H
