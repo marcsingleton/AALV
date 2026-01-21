@@ -209,19 +209,19 @@ int input_parse_keys(Array *buffer, Action *action, size_t *count)
         action->args = VOID_ARG;
         break;
     case ']':
-        action->fn.void_arg = action_increase_header_pane_width;
+        action->fn.void_arg = action_increase_header_sequence_divider;
         action->args = VOID_ARG;
         break;
     case '[':
-        action->fn.void_arg = action_decrease_header_pane_width;
+        action->fn.void_arg = action_decrease_header_sequence_divider;
         action->args = VOID_ARG;
         break;
     case '}':
-        action->fn.void_arg = action_increase_ruler_pane_height;
+        action->fn.void_arg = action_increase_ruler_records_divider;
         action->args = VOID_ARG;
         break;
     case '{':
-        action->fn.void_arg = action_decrease_ruler_pane_height;
+        action->fn.void_arg = action_decrease_ruler_records_divider;
         action->args = VOID_ARG;
         break;
     case '+':

@@ -9,13 +9,28 @@
 
 #include "array.h"
 #include "color.h"
+#include "panes.h"
 #include "sequences.h"
 
 typedef struct
 {
+    unsigned int ruler_records_divider_i;
+    unsigned int header_sequence_divider_j;
+    unsigned int records_command_divider_i;
+    unsigned int min_ruler_records_divider_i;
+    unsigned int min_header_sequence_divider_j;
+    unsigned int max_header_sequence_divider_j;
+    unsigned int max_records_command_divider_i;
+    Pane ruler_pane;
+    Pane header_pane;
+    Pane sequence_pane;
+    Pane command_pane;
+} Layout;
+
+typedef struct
+{
     const char *file_path;
-    unsigned int header_pane_width;
-    unsigned int ruler_pane_height;
+    Layout layout;
     unsigned int tick_spacing;
     size_t offset_record;
     size_t offset_header;
@@ -67,8 +82,12 @@ typedef struct
 } State;
 
 // FileState setters
-void state_set_header_pane_width(State *state, unsigned int header_pane_width);
-void state_set_ruler_pane_height(State *state, unsigned int ruler_pane_height);
+void state_set_ruler_records_divider_i(State *state, unsigned int i);
+void state_set_header_sequence_divider_j(State *state, unsigned int j);
+void state_set_records_command_divider_i(State *state, unsigned int i);
+void state_set_divider_limits(State *state);
+void state_set_terminal_size(State *state);
+void state_set_layout(State *state, unsigned int ruler_records_divider_i, unsigned int header_sequence_divider_j);
 void state_set_tick_spacing(State *state, unsigned int tick_spacing);
 void state_set_offset_record(State *state, unsigned int offset_record);
 void state_set_offset_header(State *state, unsigned int offset_header);

@@ -4,6 +4,7 @@
 
 #include "color.h"
 #include "display.h"
+#include "panes.h"
 #include "state.h"
 #include "terminal.h"
 
@@ -25,12 +26,13 @@ void display_refresh(Array *buffer)
     if (state.refresh_window)
     {
         terminal_clear_screen(buffer);
-        state_set_header_pane_width(&state, state.active_file->header_pane_width); // Triggers automatic re-sizes
-        state_set_ruler_pane_height(&state, state.active_file->ruler_pane_height);
-        state.refresh_ruler_pane = true;
-        state.refresh_header_pane = true;
-        state.refresh_sequence_pane = true;
-        state.refresh_command_pane = true;
+        state_set_divider_limits(&state);
+        state_set_records_command_divider_i(&state, state.terminal_rows - 2);
+        state_set_header_sequence_divider_j(&state, state.active_file->layout.header_sequence_divider_j); // Triggers automatic re-sizes
+        state_set_ruler_records_divider_i(&state, state.active_file->layout.ruler_records_divider_i);
+        state.active_file->layout.command_pane.w = state.terminal_cols;
+        state.active_file->layout.ruler_pane.w = state.terminal_cols;
+
         state.refresh_window = false;
     }
     if (state.refresh_ruler_pane)
@@ -68,33 +70,33 @@ void display_all_panes(Array *buffer)
 void display_header_pane(Array *buffer)
 {
     FileState *active_file = state.active_file;
-    unsigned int record_panes_height = state_get_record_panes_height(&state);
+    Pane *pane = &active_file->layout.header_pane;
 
     unsigned int ellipses_width = wcswidth(DISPLAY_HEADER_PANE_ELLIPSES, sizeof(DISPLAY_HEADER_PANE_ELLIPSES));
-    for (unsigned int i = 0; i < record_panes_height; i++)
+    for (unsigned int i = 0; i < pane->h; i++)
     {
         size_t record_index = i + active_file->offset_record;
-        terminal_cursor_ij(buffer, i + active_file->ruler_pane_height + 1, 1);
+        pane_cursor_ij(pane, buffer, i, 0);
         if (record_index < active_file->record_array.len)
         {
             SeqRecord record = active_file->record_array.data[record_index];
-            size_t len = strnlen(record.header, active_file->header_pane_width);
-            if (len < active_file->header_pane_width)
+            size_t len = strnlen(record.header, pane->w);
+            if (len < pane->w)
             {
                 array_extend(buffer, record.header, len);
-                for (unsigned int j = len; j < active_file->header_pane_width - 1; j++)
+                for (unsigned int j = len; j < pane->w - 1; j++)
                     array_append(buffer, " ");
             }
             else
             {
-                array_extend(buffer, record.header, active_file->header_pane_width - ellipses_width - 1);
+                array_extend(buffer, record.header, pane->w - ellipses_width - 1);
                 array_extend(buffer, DISPLAY_HEADER_PANE_ELLIPSES, sizeof(DISPLAY_HEADER_PANE_ELLIPSES) - 1);
             }
         }
         else
         {
             array_extend(buffer, "~", sizeof("~") - 1);
-            for (unsigned int j = 1; j < active_file->header_pane_width - 1; j++)
+            for (unsigned int j = 1; j < pane->w - 1; j++)
                 array_append(buffer, " ");
         }
 
@@ -106,29 +108,34 @@ void display_header_pane(Array *buffer)
 void display_ruler_pane(Array *buffer)
 {
     FileState *active_file = state.active_file;
-    terminal_cursor_ij(buffer, 1, active_file->header_pane_width);
-    for (unsigned int i = 0; i < active_file->ruler_pane_height; i++)
+    Pane *pane = &active_file->layout.ruler_pane;
+    unsigned int header_sequence_divider_j = active_file->layout.header_sequence_divider_j;
+
+    pane_cursor_ij(pane, buffer, 0, header_sequence_divider_j);
+    for (unsigned int i = 0; i < pane->h - 1; i++)
     {
         terminal_clear_line(buffer);
         char s[] = "┃\n\b";
         array_extend(buffer, s, sizeof(s) - 1);
     }
 
-    unsigned int sequence_pane_width = state_get_sequence_pane_width(&state);
-    terminal_cursor_ij(buffer, active_file->ruler_pane_height, 1);
-    for (unsigned int j = 0; j < active_file->header_pane_width - 1; j++)
+    pane_cursor_ij(pane, buffer, pane->h - 1, 0);
+    for (unsigned int j = 0; j < header_sequence_divider_j; j++)
         array_extend(buffer, "━", sizeof("━") - 1);
-    if (state.terminal_rows <= active_file->ruler_pane_height)
-        array_extend(buffer, "┻", sizeof("┻") - 1);
-    else
+    if (state.active_file->layout.ruler_records_divider_i < state.active_file->layout.records_command_divider_i)
         array_extend(buffer, "╋", sizeof("╋") - 1);
-    for (unsigned int j = 0; j < sequence_pane_width; j++)
+    else
+        array_extend(buffer, "┻", sizeof("┻") - 1);
+    for (unsigned int j = header_sequence_divider_j + 1; j < pane->w; j++)
         array_extend(buffer, "━", sizeof("━") - 1);
 }
 
 void display_ruler_pane_ticks(Array *buffer)
 {
     FileState *active_file = state.active_file;
+    Pane *pane = &active_file->layout.ruler_pane;
+    unsigned int header_sequence_divider_j = active_file->layout.header_sequence_divider_j;
+
     unsigned int tick_spacing = active_file->tick_spacing;
     size_t x0 = active_file->offset_sequence + active_file->records_offset;
     size_t q = x0 / tick_spacing;
@@ -138,20 +145,20 @@ void display_ruler_pane_ticks(Array *buffer)
 
     size_t x = q * tick_spacing;
     size_t j;
-    unsigned int sequence_pane_width = state_get_sequence_pane_width(&state);
+    unsigned int ruler_width = pane->w - header_sequence_divider_j - 1;
     unsigned int ellipses_width = wcswidth(DISPLAY_RULER_PANE_ELLIPSES, sizeof(DISPLAY_RULER_PANE_ELLIPSES));
-    while ((j = x - active_file->offset_sequence - active_file->records_offset) < sequence_pane_width)
+    while ((j = x - active_file->offset_sequence - active_file->records_offset) < ruler_width)
     {
-        terminal_cursor_ij(buffer, active_file->ruler_pane_height, j + active_file->header_pane_width + 1);
+        pane_cursor_ij(pane, buffer, pane->h - 1, j + header_sequence_divider_j + 1);
         array_extend(buffer, "┷", sizeof("┷") - 1);
 
         char c[2];
         size_t n = x;
         unsigned int d;
-        unsigned int i = active_file->ruler_pane_height - 1;
+        unsigned int i = pane->i + pane->h - 2;
         do
         {
-            terminal_cursor_ij(buffer, i--, j + active_file->header_pane_width + 1);
+            pane_cursor_ij(pane, buffer, i--, j + header_sequence_divider_j + 1);
             d = n % 10;
             n = n / 10;
             snprintf(c, 2, "%d", d);
@@ -160,8 +167,8 @@ void display_ruler_pane_ticks(Array *buffer)
             {
                 for (i = 0; i < ellipses_width; i++)
                 {
-                    terminal_cursor_ij(buffer, i + 1, j + active_file->header_pane_width + 1);
-                    array_extend(buffer, "·", sizeof("·"));
+                    pane_cursor_ij(pane, buffer, i, j + header_sequence_divider_j + 1);
+                    array_extend(buffer, "·", sizeof("·") - 1);
                 }
                 break;
             }
@@ -174,14 +181,13 @@ void display_ruler_pane_ticks(Array *buffer)
 void display_sequence_pane(Array *buffer)
 {
     FileState *active_file = state.active_file;
-    unsigned int record_panes_height = state_get_record_panes_height(&state);
-    unsigned int sequence_pane_width = state_get_sequence_pane_width(&state);
+    Pane *pane = &active_file->layout.sequence_pane;
 
-    for (unsigned int i = 0; i < record_panes_height; i++)
+    for (unsigned int i = 0; i < pane->h; i++)
     {
         size_t record_index = i + active_file->offset_record;
 
-        terminal_cursor_ij(buffer, i + active_file->ruler_pane_height + 1, active_file->header_pane_width + 1);
+        pane_cursor_ij(pane, buffer, i, 0);
         if (record_index < active_file->record_array.len)
         {
             SeqRecord record = active_file->record_array.data[record_index];
@@ -196,10 +202,10 @@ void display_sequence_pane(Array *buffer)
             }
             if (record.len <= active_file->offset_sequence)
                 len = 0;
-            else if ((record.len > active_file->offset_sequence + sequence_pane_width))
+            else if ((record.len > active_file->offset_sequence + pane->w))
             {
                 right_continuation = 1;
-                len = sequence_pane_width - left_continuation - right_continuation; // Difference should always fit into int
+                len = pane->w - left_continuation - right_continuation; // Difference should always fit into int
             }
             else
                 len = record.len - active_file->offset_sequence - left_continuation;
@@ -211,7 +217,7 @@ void display_sequence_pane(Array *buffer)
             if (right_continuation)
                 array_append(buffer, ">");
             else
-                for (unsigned int j = left_continuation + len; j < sequence_pane_width; j++)
+                for (unsigned int j = left_continuation + len; j < pane->w; j++)
                     array_append(buffer, " ");
         }
         else
@@ -222,19 +228,20 @@ void display_sequence_pane(Array *buffer)
 void display_command_pane(Array *buffer)
 {
     FileState *active_file = state.active_file;
-    unsigned int record_panes_height = state_get_record_panes_height(&state);
-    unsigned int sequence_pane_width = state_get_sequence_pane_width(&state);
+    Pane *pane = &active_file->layout.command_pane;
+    unsigned int header_sequence_divider_j = active_file->layout.header_sequence_divider_j;
 
-    if (state.terminal_rows <= active_file->ruler_pane_height)
-        return;
-    terminal_cursor_ij(buffer, active_file->ruler_pane_height + record_panes_height + 1, 1);
-    for (unsigned int j = 0; j < active_file->header_pane_width - 1; j++)
-        array_extend(buffer, "━", sizeof("━") - 1);
-    array_extend(buffer, "┻", sizeof("┻") - 1);
-    for (unsigned int j = 0; j < sequence_pane_width; j++)
-        array_extend(buffer, "━", sizeof("━") - 1);
+    if (state.active_file->layout.ruler_records_divider_i < state.active_file->layout.records_command_divider_i)
+    {
+        pane_cursor_ij(pane, buffer, 0, 0);
+        for (unsigned int j = 0; j < header_sequence_divider_j; j++)
+            array_extend(buffer, "━", sizeof("━") - 1);
+        array_extend(buffer, "┻", sizeof("┻") - 1);
+        for (unsigned int j = header_sequence_divider_j + 1; j < pane->w; j++)
+            array_extend(buffer, "━", sizeof("━") - 1);
+    }
 
-    if (state.terminal_rows <= active_file->ruler_pane_height + 1)
+    if (pane->h <= 1)
         return;
 
     switch (state.mode)
@@ -249,11 +256,13 @@ void display_command_pane(Array *buffer)
 
         int n = 0;
 
-        if (unaligned_indices->indices)
+        if (unaligned_indices->indices && unaligned_indices->len > 0)
         {
+            size_t unaligned_index = (sequence_index + 1 > unaligned_indices->len) ? unaligned_indices->len - 1
+                                                                                   : sequence_index;
             n = snprintf(status + n_status, sizeof(status) - n_status,
                          "POS %zu/%zu  ",
-                         unaligned_indices->indices[sequence_index],
+                         unaligned_indices->indices[unaligned_index],
                          unaligned_indices->indices[unaligned_indices->len - 1]);
         }
         else
@@ -283,17 +292,17 @@ void display_command_pane(Array *buffer)
 
         unsigned int n_file_name = strnlen(active_file->file_path, 256);
 
-        terminal_cursor_ij(buffer, active_file->ruler_pane_height + record_panes_height + 2, 1);
-        if (n_file_name + n_status + 4 <= state.terminal_cols)
+        pane_cursor_ij(pane, buffer, 1, 0);
+        if (n_file_name + n_status + 4 <= pane->w)
         {
             array_extend(buffer, active_file->file_path, n_file_name);
-            for (unsigned int i = n_file_name; i + n_status < state.terminal_cols; i++)
+            for (unsigned int i = n_file_name; i + n_status < pane->w; i++)
                 array_append(buffer, " ");
             array_extend(buffer, status, n_status);
         }
-        else if (n_status <= state.terminal_cols)
+        else if (n_status <= pane->w)
         {
-            for (unsigned int i = 0; i + n_status < state.terminal_cols; i++)
+            for (unsigned int i = 0; i + n_status < pane->w; i++)
                 array_append(buffer, " ");
             array_extend(buffer, status, n_status);
         }
@@ -307,8 +316,9 @@ void display_command_pane(Array *buffer)
 void display_cursor(Array *buffer)
 {
     FileState *active_file = state.active_file;
-    unsigned int record_panes_height = state_get_record_panes_height(&state);
-    if (record_panes_height == 0)
+    Pane *pane = &active_file->layout.sequence_pane;
+
+    if (pane->h == 0)
         return;
     if (active_file->record_array.len == 0)
         return;
@@ -317,36 +327,35 @@ void display_cursor(Array *buffer)
     {
     case NORMAL:
     {
-        unsigned render_index_i;
-        if (active_file->cursor_record_i >= record_panes_height)
-            render_index_i = record_panes_height - 1;
+        unsigned cursor_i;
+        if (active_file->cursor_record_i >= pane->h)
+            cursor_i = pane->h - 1;
         else
-            render_index_i = active_file->cursor_record_i;
-        unsigned int cursor_i = render_index_i + active_file->ruler_pane_height + 1;
+            cursor_i = active_file->cursor_record_i;
 
-        size_t record_index = render_index_i + active_file->offset_record;
+        size_t record_index = cursor_i + active_file->offset_record;
         size_t sequence_index = active_file->cursor_sequence_j + active_file->offset_sequence;
         SeqRecord record = active_file->record_array.data[record_index];
-        unsigned int render_index_j;
-        if (record.len > sequence_index)
-            render_index_j = sequence_index;
-        else if (record.len == 0)
-            render_index_j = 0;
-        else
-            render_index_j = record.len - 1;
         unsigned int cursor_j;
-        if (render_index_j > active_file->offset_sequence)
-            cursor_j = render_index_j - active_file->offset_sequence + active_file->header_pane_width + 1;
+        if (record.len > sequence_index)
+            cursor_j = sequence_index;
+        else if (record.len == 0)
+            cursor_j = 0;
         else
-            cursor_j = active_file->header_pane_width + 1;
+            cursor_j = record.len - 1;
+        if (cursor_j > active_file->offset_sequence)
+            cursor_j -= active_file->offset_sequence;
+        else
+            cursor_j = 0;
 
-        terminal_cursor_ij(buffer, cursor_i, cursor_j);
+        pane_cursor_ij(pane, buffer, cursor_i, cursor_j);
         terminal_cursor_show(buffer);
         break;
     }
     case COMMAND:
     {
-        terminal_cursor_ij(buffer, active_file->ruler_pane_height + record_panes_height + 2, 1);
+        pane = &active_file->layout.command_pane;
+        pane_cursor_ij(pane, buffer, 0, 0);
         terminal_cursor_show(buffer);
     }
     }

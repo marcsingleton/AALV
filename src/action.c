@@ -1,6 +1,7 @@
 #include <stdbool.h>
 
 #include "action.h"
+#include "panes.h"
 #include "state.h"
 
 extern State state;
@@ -29,15 +30,17 @@ void action_previous_file(void)
 void action_cursor_clamp(void)
 {
     FileState *active_file = state.active_file;
-    unsigned int record_panes_height = state_get_record_panes_height(&state);
-    unsigned int sequence_pane_width = state_get_sequence_pane_width(&state);
-    if (record_panes_height == 0)
-        record_panes_height = 1; // Treat collapsed pane as single row
+    Pane *pane = &active_file->layout.sequence_pane;
 
-    if (active_file->cursor_record_i + 1 > record_panes_height)
-        active_file->cursor_record_i = record_panes_height - 1;
-    if (active_file->cursor_sequence_j > sequence_pane_width)
-        active_file->cursor_sequence_j = sequence_pane_width - 1;
+    unsigned int pane_height = pane->h;
+    unsigned int pane_width = pane->w;
+    if (pane_height == 0)
+        pane_height = 1; // Treat collapsed pane as single row
+
+    if (active_file->cursor_record_i + 1 > pane_height)
+        active_file->cursor_record_i = pane_height - 1;
+    if (active_file->cursor_sequence_j > pane_width)
+        active_file->cursor_sequence_j = pane_width - 1;
 }
 
 void action_move_up(size_t x)
@@ -64,21 +67,22 @@ void action_move_down(size_t x)
 {
     action_cursor_clamp();
     FileState *active_file = state.active_file;
+    Pane *pane = &active_file->layout.sequence_pane;
 
     if (active_file->record_array.len == 0)
         return;
 
-    unsigned int record_panes_height = state_get_record_panes_height(&state);
-    if (record_panes_height == 0)
-        record_panes_height = 1; // Treat collapsed pane as single row
+    unsigned int pane_height = pane->h;
+    if (pane_height == 0)
+        pane_height = 1; // Treat collapsed pane as single row
 
     size_t record_index = active_file->cursor_record_i + active_file->offset_record;
     if (x + record_index + 1 >= active_file->record_array.len)
         x = active_file->record_array.len - record_index - 1;
-    if (x + active_file->cursor_record_i + 1 > record_panes_height)
+    if (x + active_file->cursor_record_i + 1 > pane_height)
     {
-        x += active_file->cursor_record_i - record_panes_height + 1;
-        active_file->cursor_record_i = record_panes_height - 1;
+        x += active_file->cursor_record_i - pane_height + 1;
+        active_file->cursor_record_i = pane_height - 1;
         state_set_offset_record(&state, active_file->offset_record + x);
     }
     else
@@ -89,11 +93,12 @@ void action_move_right(size_t x)
 {
     action_cursor_clamp();
     FileState *active_file = state.active_file;
+    Pane *pane = &active_file->layout.sequence_pane;
 
     if (active_file->record_array.len == 0)
         return;
 
-    unsigned int sequence_pane_width = state_get_sequence_pane_width(&state);
+    unsigned int pane_width = pane->w;
 
     size_t record_index = active_file->cursor_record_i + active_file->offset_record;
     SeqRecord record = active_file->record_array.data[record_index];
@@ -117,10 +122,10 @@ void action_move_right(size_t x)
         return;
     if (x + sequence_index + 1 >= record.len)
         x = record.len - sequence_index - 1;
-    if (x + active_file->cursor_sequence_j + 1 > sequence_pane_width)
+    if (x + active_file->cursor_sequence_j + 1 > pane_width)
     {
-        x += active_file->cursor_sequence_j - sequence_pane_width + 1;
-        active_file->cursor_sequence_j = sequence_pane_width - 1;
+        x += active_file->cursor_sequence_j - pane_width + 1;
+        active_file->cursor_sequence_j = pane_width - 1;
         state_set_offset_sequence(&state, active_file->offset_sequence + x);
     }
     else
@@ -168,15 +173,16 @@ void action_move_page_up(PageSize page_size)
 {
     action_cursor_clamp();
     FileState *active_file = state.active_file;
+    Pane *pane = &active_file->layout.sequence_pane;
 
     if (active_file->record_array.len == 0)
         return;
 
-    unsigned int record_panes_height = state_get_record_panes_height(&state);
-    if (record_panes_height == 0)
-        record_panes_height = 1; // Treat collapsed pane as single row
+    unsigned int pane_height = pane->h;
+    if (pane_height == 0)
+        pane_height = 1; // Treat collapsed pane as single row
 
-    size_t x = record_panes_height;
+    size_t x = pane_height;
     if (page_size == PAGE_SIZE_HALF)
         x /= 2;
     if (active_file->offset_record == 0)
@@ -191,15 +197,16 @@ void action_move_page_down(PageSize page_size)
 {
     action_cursor_clamp();
     FileState *active_file = state.active_file;
+    Pane *pane = &active_file->layout.sequence_pane;
 
     if (active_file->record_array.len == 0)
         return;
 
-    unsigned int record_panes_height = state_get_record_panes_height(&state);
-    if (record_panes_height == 0)
-        record_panes_height = 1; // Treat collapsed pane as single row
+    unsigned int pane_height = pane->h;
+    if (pane_height == 0)
+        pane_height = 1; // Treat collapsed pane as single row
 
-    unsigned int x = record_panes_height;
+    unsigned int x = pane_height;
     if (page_size == PAGE_SIZE_HALF)
         x /= 2;
     if (active_file->offset_record + 1 == active_file->record_array.len)
@@ -216,11 +223,12 @@ void action_move_page_right(PageSize page_size)
 {
     action_cursor_clamp();
     FileState *active_file = state.active_file;
+    Pane *pane = &active_file->layout.sequence_pane;
 
     if (active_file->record_array.len == 0)
         return;
 
-    unsigned int x = state_get_sequence_pane_width(&state);
+    unsigned int x = pane->w;
     size_t maxlen = active_file->records_maxlen;
     if (page_size == PAGE_SIZE_HALF)
         x /= 2;
@@ -239,11 +247,12 @@ void action_move_page_left(PageSize page_size)
 {
     action_cursor_clamp();
     FileState *active_file = state.active_file;
+    Pane *pane = &active_file->layout.sequence_pane;
 
     if (active_file->record_array.len == 0)
         return;
 
-    unsigned int x = state_get_sequence_pane_width(&state);
+    unsigned int x = pane->w;
     if (page_size == PAGE_SIZE_HALF)
         x /= 2;
     if (x > active_file->offset_sequence)
@@ -323,15 +332,16 @@ void action_move_bottom_edge(void)
 {
     action_cursor_clamp();
     FileState *active_file = state.active_file;
+    Pane *pane = &active_file->layout.sequence_pane;
 
     if (active_file->record_array.len == 0)
         return;
 
-    unsigned int record_panes_height = state_get_record_panes_height(&state);
-    if (active_file->offset_record + record_panes_height > active_file->record_array.len)
+    unsigned int pane_height = pane->h;
+    if (active_file->offset_record + pane_height > active_file->record_array.len)
         active_file->cursor_record_i = active_file->record_array.len - active_file->offset_record - 1;
     else
-        active_file->cursor_record_i = record_panes_height - 1;
+        active_file->cursor_record_i = pane_height - 1;
 }
 
 void action_move_top_edge(void)
@@ -360,62 +370,66 @@ void action_move_right_edge(void)
 {
     action_cursor_clamp();
     FileState *active_file = state.active_file;
+    Pane *pane = &active_file->layout.sequence_pane;
 
     if (active_file->record_array.len == 0)
         return;
 
-    active_file->cursor_sequence_j = state_get_sequence_pane_width(&state) - 1;
+    unsigned int pane_width = pane->w;
+    active_file->cursor_sequence_j = pane_width - 1;
 }
 
 void action_move_vertical_middle(void)
 {
     action_cursor_clamp();
     FileState *active_file = state.active_file;
+    Pane *pane = &active_file->layout.sequence_pane;
 
     if (active_file->record_array.len == 0)
         return;
 
-    unsigned int record_panes_height = state_get_record_panes_height(&state);
-    if (active_file->offset_record + record_panes_height > active_file->record_array.len)
+    unsigned int pane_height = pane->h;
+    if (active_file->offset_record + pane_height > active_file->record_array.len)
         active_file->cursor_record_i = (active_file->record_array.len - active_file->offset_record - 1) / 2;
     else
-        active_file->cursor_record_i = (record_panes_height - 1) / 2;
+        active_file->cursor_record_i = (pane_height - 1) / 2;
 }
 
 void action_move_horizontal_middle(void)
 {
     action_cursor_clamp();
     FileState *active_file = state.active_file;
+    Pane *pane = &active_file->layout.sequence_pane;
 
     if (active_file->record_array.len == 0)
         return;
 
-    unsigned int sequence_pane_width = state_get_sequence_pane_width(&state);
-    active_file->cursor_sequence_j = sequence_pane_width / 2;
+    unsigned int pane_width = pane->w;
+    active_file->cursor_sequence_j = pane_width / 2;
 }
 
-void action_increase_header_pane_width(void)
+void action_increase_header_sequence_divider(void)
 {
     FileState *active_file = state.active_file;
-    state_set_header_pane_width(&state, active_file->header_pane_width + 1);
+    state_set_header_sequence_divider_j(&state, active_file->layout.header_sequence_divider_j + 1);
 }
 
-void action_decrease_header_pane_width(void)
+void action_decrease_header_sequence_divider(void)
 {
     FileState *active_file = state.active_file;
-    state_set_header_pane_width(&state, active_file->header_pane_width - 1);
+    state_set_header_sequence_divider_j(&state, active_file->layout.header_sequence_divider_j - 1);
 }
 
-void action_increase_ruler_pane_height(void)
+void action_increase_ruler_records_divider(void)
 {
     FileState *active_file = state.active_file;
-    state_set_ruler_pane_height(&state, active_file->ruler_pane_height + 1);
+    state_set_ruler_records_divider_i(&state, active_file->layout.ruler_records_divider_i + 1);
 }
 
-void action_decrease_ruler_pane_height(void)
+void action_decrease_ruler_records_divider(void)
 {
     FileState *active_file = state.active_file;
-    state_set_ruler_pane_height(&state, active_file->ruler_pane_height - 1);
+    state_set_ruler_records_divider_i(&state, active_file->layout.ruler_records_divider_i - 1);
 }
 
 void action_increase_tick_spacing(void)

@@ -248,6 +248,9 @@ int main(int argc, char *argv[])
     state.active_file_index = 0;
 
     // Initialize file states
+    setlocale(LC_ALL, ""); // Necessary for wcswidth calls
+    state_set_terminal_size(&state);
+
     for (unsigned int file_index = 0; file_index < state.nfiles; file_index++)
     {
         FileState *file = state.files + file_index;
@@ -256,8 +259,7 @@ int main(int argc, char *argv[])
         else
             file->file_path = positional_args[file_index];
 
-        file->header_pane_width = rcparams_header_pane_width;
-        file->ruler_pane_height = rcparams_ruler_pane_height;
+        state_set_layout(&state, rcparams_ruler_records_divider_i, rcparams_header_sequence_divider_j);
         file->tick_spacing = rcparams_tick_spacing;
         file->offset_record = 0;
         file->offset_header = 0;
@@ -308,8 +310,6 @@ int main(int argc, char *argv[])
     raw_mode = true;
     terminal_set_blocking_read();
     terminal_use_alternate_buffer();
-
-    setlocale(LC_ALL, ""); // Necessary for wcswidth calls
 
     // Main loop
     size_t count;
