@@ -4,7 +4,7 @@
 
 #include "color.h"
 #include "display.h"
-#include "panes.h"
+#include "pane.h"
 #include "state.h"
 #include "terminal.h"
 

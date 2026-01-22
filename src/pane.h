@@ -1,5 +1,9 @@
-#ifndef PANES_H
-#define PANES_H
+#ifndef PANE_H
+#define PANE_H
+
+/*
+ * Panes
+ */
 
 #include "array.h"
 
@@ -13,4 +17,4 @@ typedef struct
 
 void pane_cursor_ij(Pane *pane, Array *buffer, unsigned int i, unsigned int j);
 
-#endif // PANES_H
+#endif // PANE_H

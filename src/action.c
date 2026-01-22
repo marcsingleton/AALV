@@ -1,7 +1,7 @@
 #include <stdbool.h>
 
 #include "action.h"
-#include "panes.h"
+#include "pane.h"
 #include "state.h"
 
 extern State state;

@@ -9,7 +9,7 @@
 
 #include "array.h"
 #include "color.h"
-#include "panes.h"
+#include "pane.h"
 #include "sequences.h"
 
 typedef struct

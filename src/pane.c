@@ -1,4 +1,4 @@
-#include "panes.h"
+#include "pane.h"
 #include "terminal.h"
 
 void pane_cursor_ij(Pane *pane, Array *buffer, unsigned int i, unsigned int j)
