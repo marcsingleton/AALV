@@ -140,6 +140,8 @@ void prefix_tree_node_deinit(PrefixTreeNode *node)
     free(node->prefix);
     free(node->value);
     node->children = NULL;
+    node->capacity = 0;
+    node->size = 0;
     node->prefix = NULL;
     node->value = NULL;
 }
