@@ -75,10 +75,12 @@ void display_header_pane(Array *buffer)
     unsigned int ellipses_width = wcswidth(DISPLAY_HEADER_PANE_ELLIPSES, sizeof(DISPLAY_HEADER_PANE_ELLIPSES));
     for (unsigned int i = 0; i < pane->h; i++)
     {
+        // Record
         size_t record_index = i + active_file->offset_record;
         pane_cursor_ij(pane, buffer, i, 0);
         if (record_index < active_file->record_array.len)
         {
+            // Has record
             SeqRecord record = active_file->record_array.data[record_index];
             size_t len = strnlen(record.header, pane->w);
             if (len < pane->w)
@@ -95,11 +97,13 @@ void display_header_pane(Array *buffer)
         }
         else
         {
+            // No record
             array_extend(buffer, "~", sizeof("~") - 1);
             for (unsigned int j = 1; j < pane->w - 1; j++)
                 array_append(buffer, " ");
         }
 
+        // Header-sequencer divider
         char s[] = "┃\n\b";
         array_extend(buffer, s, sizeof(s) - 1);
     }
@@ -111,6 +115,7 @@ void display_ruler_pane(Array *buffer)
     Pane *pane = &active_file->layout.ruler_pane;
     unsigned int header_sequence_divider_j = active_file->layout.header_sequence_divider_j;
 
+    // Header-sequence divider continuation
     pane_cursor_ij(pane, buffer, 0, header_sequence_divider_j);
     for (unsigned int i = 0; i < pane->h - 1; i++)
     {
@@ -119,6 +124,7 @@ void display_ruler_pane(Array *buffer)
         array_extend(buffer, s, sizeof(s) - 1);
     }
 
+    // Lower pane boundary
     pane_cursor_ij(pane, buffer, pane->h - 1, 0);
     for (unsigned int j = 0; j < header_sequence_divider_j; j++)
         array_extend(buffer, "━", sizeof("━") - 1);
@@ -144,12 +150,12 @@ void display_ruler_pane_ticks(Array *buffer)
         q++;
 
     size_t x = q * tick_spacing;
-    size_t j;
-    unsigned int ruler_width = pane->w - header_sequence_divider_j - 1;
+    size_t j = pane->j + header_sequence_divider_j + 1;
+    j += x - active_file->offset_sequence - active_file->records_offset;
     unsigned int ellipses_width = wcswidth(DISPLAY_RULER_PANE_ELLIPSES, sizeof(DISPLAY_RULER_PANE_ELLIPSES));
-    while ((j = x - active_file->offset_sequence - active_file->records_offset) < ruler_width)
+    while (j < pane->w)
     {
-        pane_cursor_ij(pane, buffer, pane->h - 1, j + header_sequence_divider_j + 1);
+        pane_cursor_ij(pane, buffer, pane->h - 1, j);
         array_extend(buffer, "┷", sizeof("┷") - 1);
 
         char c[2];
@@ -158,7 +164,8 @@ void display_ruler_pane_ticks(Array *buffer)
         unsigned int i = pane->i + pane->h - 2;
         do
         {
-            pane_cursor_ij(pane, buffer, i--, j + header_sequence_divider_j + 1);
+            // Write numbers from tick to top
+            pane_cursor_ij(pane, buffer, i--, j);
             d = n % 10;
             n = n / 10;
             snprintf(c, 2, "%d", d);
@@ -167,7 +174,7 @@ void display_ruler_pane_ticks(Array *buffer)
             {
                 for (i = 0; i < ellipses_width; i++)
                 {
-                    pane_cursor_ij(pane, buffer, i, j + header_sequence_divider_j + 1);
+                    pane_cursor_ij(pane, buffer, i, j);
                     array_extend(buffer, "·", sizeof("·") - 1);
                 }
                 break;
@@ -175,6 +182,7 @@ void display_ruler_pane_ticks(Array *buffer)
         } while (n != 0);
 
         x += tick_spacing;
+        j += tick_spacing;
     }
 }
 
@@ -221,7 +229,8 @@ void display_sequence_pane(Array *buffer)
                     array_append(buffer, " ");
         }
         else
-            terminal_clear_line_right(buffer);
+            for (unsigned int j = 0; j < pane->w; j++)
+                array_append(buffer, " ");
     }
 }
 
@@ -231,6 +240,7 @@ void display_command_pane(Array *buffer)
     Pane *pane = &active_file->layout.command_pane;
     unsigned int header_sequence_divider_j = active_file->layout.header_sequence_divider_j;
 
+    // Records-command divider
     if (state.active_file->layout.ruler_records_divider_i < state.active_file->layout.records_command_divider_i)
     {
         pane_cursor_ij(pane, buffer, 0, 0);
@@ -241,9 +251,10 @@ void display_command_pane(Array *buffer)
             array_extend(buffer, "━", sizeof("━") - 1);
     }
 
-    if (pane->h <= 1)
+    if (pane->h < 2)
         return;
 
+    // Status line
     switch (state.mode)
     {
     case NORMAL:
@@ -327,24 +338,27 @@ void display_cursor(Array *buffer)
     {
     case NORMAL:
     {
+        // Row
         unsigned cursor_i;
         if (active_file->cursor_record_i >= pane->h)
             cursor_i = pane->h - 1;
         else
             cursor_i = active_file->cursor_record_i;
 
+        // Column
         size_t record_index = cursor_i + active_file->offset_record;
         size_t sequence_index = active_file->cursor_sequence_j + active_file->offset_sequence;
         SeqRecord record = active_file->record_array.data[record_index];
-        unsigned int cursor_j;
-        if (record.len > sequence_index)
-            cursor_j = sequence_index;
-        else if (record.len == 0)
-            cursor_j = 0;
+        size_t display_index;
+        if (record.len == 0)
+            display_index = 0;
+        else if (sequence_index >= record.len)
+            display_index = record.len - 1;
         else
-            cursor_j = record.len - 1;
-        if (cursor_j > active_file->offset_sequence)
-            cursor_j -= active_file->offset_sequence;
+            display_index = sequence_index;
+        unsigned int cursor_j;
+        if (display_index > active_file->offset_sequence)
+            cursor_j = display_index - active_file->offset_sequence;
         else
             cursor_j = 0;
 
