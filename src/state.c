@@ -108,9 +108,9 @@ void state_set_tick_spacing(State *state, unsigned int tick_spacing)
     FileState *active_file = state->active_file;
     if (tick_spacing < 1)
         tick_spacing = 1;
-    if (tick_spacing != active_file->tick_spacing)
+    if (tick_spacing != active_file->layout.tick_spacing)
     {
-        active_file->tick_spacing = tick_spacing;
+        active_file->layout.tick_spacing = tick_spacing;
         state->refresh_ruler_pane = true;
     }
 }

@@ -21,6 +21,7 @@ typedef struct
     unsigned int min_header_sequence_divider_j;
     unsigned int max_header_sequence_divider_j;
     unsigned int max_records_command_divider_i;
+    unsigned int tick_spacing;
     Pane ruler_pane;
     Pane header_pane;
     Pane sequence_pane;
@@ -31,7 +32,6 @@ typedef struct
 {
     const char *file_path;
     Layout layout;
-    unsigned int tick_spacing;
     size_t offset_record;
     size_t offset_header;
     size_t offset_sequence;

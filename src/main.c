@@ -260,7 +260,7 @@ int main(int argc, char *argv[])
             file->file_path = positional_args[file_index];
 
         state_set_layout(&state, rcparams_ruler_records_divider_i, rcparams_header_sequence_divider_j);
-        file->tick_spacing = rcparams_tick_spacing;
+        file->layout.tick_spacing = rcparams_tick_spacing;
         file->offset_record = 0;
         file->offset_header = 0;
         file->offset_sequence = 0;
