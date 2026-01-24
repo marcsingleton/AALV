@@ -10,6 +10,7 @@
 #include "array.h"
 #include "color.h"
 #include "pane.h"
+#include "scroller.h"
 #include "sequences.h"
 
 typedef struct
@@ -21,26 +22,21 @@ typedef struct
     unsigned int min_header_sequence_divider_j;
     unsigned int max_header_sequence_divider_j;
     unsigned int max_records_command_divider_i;
-    unsigned int tick_spacing;
     Pane ruler_pane;
     Pane header_pane;
     Pane sequence_pane;
     Pane command_pane;
+    RowLinkedScroller scroller;
 } Layout;
 
 typedef struct
 {
     const char *file_path;
     Layout layout;
-    size_t offset_record;
-    size_t offset_header;
-    size_t offset_sequence;
-    unsigned int cursor_record_i;   // Row index in header/sequence panes
-    unsigned int cursor_header_j;   // Column index in header pane
-    unsigned int cursor_sequence_j; // Column index in sequence pane
+    unsigned int tick_offset;
+    unsigned int tick_spacing;
     SeqRecordArray record_array;
     size_t records_maxlen;
-    size_t records_offset;
     UnalignedIndicesArray indices_array;
 } FileState;
 
@@ -81,26 +77,20 @@ typedef struct
     unsigned int n_seq_types;
 } State;
 
+#define SCROLLER_NPANES 2
+#define SCROLLER_HEADER_PANE 0
+#define SCROLLER_SEQUENCE_PANE 1
+
 // FileState setters
 void state_set_ruler_records_divider_i(State *state, unsigned int i);
 void state_set_header_sequence_divider_j(State *state, unsigned int j);
 void state_set_records_command_divider_i(State *state, unsigned int i);
 void state_set_divider_limits(State *state);
-void state_set_terminal_size(State *state);
 void state_set_layout(State *state, unsigned int ruler_records_divider_i, unsigned int header_sequence_divider_j);
 void state_set_tick_spacing(State *state, unsigned int tick_spacing);
-void state_set_offset_record(State *state, unsigned int offset_record);
-void state_set_offset_header(State *state, unsigned int offset_header);
-void state_set_offset_sequence(State *state, unsigned int offset_sequence);
-void state_set_cursor_record_i(State *state, unsigned int cursor_record_i);
-void state_set_cursor_header_j(State *state, unsigned int cursor_header_j);
-void state_set_cursor_sequence_j(State *state, unsigned int cursor_sequence_j);
-
-// FileState getters
-unsigned int state_get_record_panes_height(State *state);
-unsigned int state_get_sequence_pane_width(State *state);
 
 // State setters
+void state_set_terminal_size(State *state);
 void state_set_active_file_index(State *state, unsigned int file_index);
 void state_set_seq_type_color_scheme(State *state, unsigned int seq_type_index, ColorScheme *color_scheme);
 

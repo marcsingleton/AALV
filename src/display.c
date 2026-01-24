@@ -5,6 +5,7 @@
 #include "color.h"
 #include "display.h"
 #include "pane.h"
+#include "scroller.h"
 #include "state.h"
 #include "terminal.h"
 
@@ -23,16 +24,25 @@ void display_refresh(Array *buffer)
         state.terminal_cols = cols;
         state.refresh_window = true;
     }
+    RowLinkedScroller *scroller = &state.active_file->layout.scroller;
+    if (scroller->refreshes[SCROLLER_HEADER_PANE])
+    {
+        state.refresh_header_pane = true;
+        scroller->refreshes[SCROLLER_HEADER_PANE] = false;
+    }
+    if (scroller->refreshes[SCROLLER_SEQUENCE_PANE])
+    {
+        state.refresh_sequence_pane = true;
+        state.refresh_ruler_pane = true;
+        scroller->refreshes[SCROLLER_SEQUENCE_PANE] = false;
+    }
+
     if (state.refresh_window)
     {
         terminal_clear_screen(buffer);
-        state_set_divider_limits(&state);
-        state_set_records_command_divider_i(&state, state.terminal_rows - 2);
-        state_set_header_sequence_divider_j(&state, state.active_file->layout.header_sequence_divider_j); // Triggers automatic re-sizes
-        state_set_ruler_records_divider_i(&state, state.active_file->layout.ruler_records_divider_i);
-        state.active_file->layout.command_pane.w = state.terminal_cols;
-        state.active_file->layout.ruler_pane.w = state.terminal_cols;
-
+        state_set_layout(&state,
+                         state.active_file->layout.ruler_records_divider_i,
+                         state.active_file->layout.header_sequence_divider_j);
         state.refresh_window = false;
     }
     if (state.refresh_ruler_pane)
@@ -71,12 +81,14 @@ void display_header_pane(Array *buffer)
 {
     FileState *active_file = state.active_file;
     Pane *pane = &active_file->layout.header_pane;
+    RowLinkedScroller *scroller = &active_file->layout.scroller;
+    size_t offset_record = scroller->offset_i;
 
     unsigned int ellipses_width = wcswidth(DISPLAY_HEADER_PANE_ELLIPSES, sizeof(DISPLAY_HEADER_PANE_ELLIPSES));
     for (unsigned int i = 0; i < pane->h; i++)
     {
         // Record
-        size_t record_index = i + active_file->offset_record;
+        size_t record_index = i + offset_record;
         pane_cursor_ij(pane, buffer, i, 0);
         if (record_index < active_file->record_array.len)
         {
@@ -141,9 +153,11 @@ void display_ruler_pane_ticks(Array *buffer)
     FileState *active_file = state.active_file;
     Pane *pane = &active_file->layout.ruler_pane;
     unsigned int header_sequence_divider_j = active_file->layout.header_sequence_divider_j;
+    RowLinkedScroller *scroller = &active_file->layout.scroller;
+    size_t offset_sequence = scroller->offsets_j[SCROLLER_SEQUENCE_PANE];
 
     unsigned int tick_spacing = active_file->tick_spacing;
-    size_t x0 = active_file->offset_sequence + active_file->records_offset;
+    size_t x0 = offset_sequence + active_file->tick_offset;
     size_t q = x0 / tick_spacing;
     size_t r = x0 % tick_spacing;
     if (r > 0)
@@ -151,7 +165,7 @@ void display_ruler_pane_ticks(Array *buffer)
 
     size_t x = q * tick_spacing;
     size_t j = pane->j + header_sequence_divider_j + 1;
-    j += x - active_file->offset_sequence - active_file->records_offset;
+    j += x - offset_sequence - active_file->tick_offset;
     unsigned int ellipses_width = wcswidth(DISPLAY_RULER_PANE_ELLIPSES, sizeof(DISPLAY_RULER_PANE_ELLIPSES));
     while (j < pane->w)
     {
@@ -190,10 +204,13 @@ void display_sequence_pane(Array *buffer)
 {
     FileState *active_file = state.active_file;
     Pane *pane = &active_file->layout.sequence_pane;
+    RowLinkedScroller *scroller = &active_file->layout.scroller;
+    size_t offset_record = scroller->offset_i;
+    size_t offset_sequence = scroller->offsets_j[SCROLLER_SEQUENCE_PANE];
 
     for (unsigned int i = 0; i < pane->h; i++)
     {
-        size_t record_index = i + active_file->offset_record;
+        size_t record_index = i + offset_record;
 
         pane_cursor_ij(pane, buffer, i, 0);
         if (record_index < active_file->record_array.len)
@@ -201,22 +218,22 @@ void display_sequence_pane(Array *buffer)
             SeqRecord record = active_file->record_array.data[record_index];
             unsigned int left_continuation = 0;
             unsigned int right_continuation = 0;
-            size_t start = active_file->offset_sequence;
+            size_t start = offset_sequence;
             unsigned int len;
-            if (active_file->offset_sequence > 0)
+            if (offset_sequence > 0)
             {
                 left_continuation = 1;
                 start++;
             }
-            if (record.len <= active_file->offset_sequence)
+            if (record.len <= offset_sequence)
                 len = 0;
-            else if ((record.len > active_file->offset_sequence + pane->w))
+            else if ((record.len > offset_sequence + pane->w))
             {
                 right_continuation = 1;
                 len = pane->w - left_continuation - right_continuation; // Difference should always fit into int
             }
             else
-                len = record.len - active_file->offset_sequence - left_continuation;
+                len = record.len - offset_sequence - left_continuation;
 
             if (left_continuation)
                 array_append(buffer, "<");
@@ -239,6 +256,9 @@ void display_command_pane(Array *buffer)
     FileState *active_file = state.active_file;
     Pane *pane = &active_file->layout.command_pane;
     unsigned int header_sequence_divider_j = active_file->layout.header_sequence_divider_j;
+    RowLinkedScroller *scroller = &active_file->layout.scroller;
+    size_t record_index = scroller->offset_i + scroller->cursor_i;
+    size_t sequence_index = scroller->offsets_j[SCROLLER_SEQUENCE_PANE] + scroller->cursors_j[SCROLLER_SEQUENCE_PANE];
 
     // Records-command divider
     if (state.active_file->layout.ruler_records_divider_i < state.active_file->layout.records_command_divider_i)
@@ -261,8 +281,6 @@ void display_command_pane(Array *buffer)
     {
         char status[256];
         unsigned int n_status = 0;
-        size_t record_index = active_file->offset_record + active_file->cursor_record_i;
-        size_t sequence_index = active_file->cursor_sequence_j + active_file->offset_sequence;
         UnalignedIndices *unaligned_indices = active_file->indices_array.data + record_index;
 
         int n = 0;
@@ -295,7 +313,7 @@ void display_command_pane(Array *buffer)
 
         n = snprintf(status + n_status, sizeof(status) - n_status,
                      "COL %zu/%zu",
-                     sequence_index + active_file->records_offset,
+                     sequence_index + active_file->tick_offset,
                      active_file->records_maxlen);
         if (n < 0)
             return;
@@ -328,6 +346,11 @@ void display_cursor(Array *buffer)
 {
     FileState *active_file = state.active_file;
     Pane *pane = &active_file->layout.sequence_pane;
+    RowLinkedScroller *scroller = &active_file->layout.scroller;
+    size_t offset_record = scroller->offset_i;
+    size_t cursor_record_i = scroller->cursor_i;
+    size_t offset_sequence = scroller->offsets_j[SCROLLER_SEQUENCE_PANE];
+    size_t cursor_sequence_j = scroller->cursors_j[SCROLLER_SEQUENCE_PANE];
 
     if (pane->h == 0)
         return;
@@ -340,14 +363,14 @@ void display_cursor(Array *buffer)
     {
         // Row
         unsigned cursor_i;
-        if (active_file->cursor_record_i >= pane->h)
+        if (cursor_record_i >= pane->h)
             cursor_i = pane->h - 1;
         else
-            cursor_i = active_file->cursor_record_i;
+            cursor_i = cursor_record_i;
 
         // Column
-        size_t record_index = cursor_i + active_file->offset_record;
-        size_t sequence_index = active_file->cursor_sequence_j + active_file->offset_sequence;
+        size_t record_index = cursor_i + offset_record;
+        size_t sequence_index = cursor_sequence_j + offset_sequence;
         SeqRecord record = active_file->record_array.data[record_index];
         size_t display_index;
         if (record.len == 0)
@@ -357,8 +380,8 @@ void display_cursor(Array *buffer)
         else
             display_index = sequence_index;
         unsigned int cursor_j;
-        if (display_index > active_file->offset_sequence)
-            cursor_j = display_index - active_file->offset_sequence;
+        if (display_index > offset_sequence)
+            cursor_j = display_index - offset_sequence;
         else
             cursor_j = 0;
 

@@ -21,6 +21,7 @@
 #include "macros.h"
 #include "rcparams.h"
 #include "schemes.h"
+#include "scroller.h"
 #include "sequences.h"
 #include "state.h"
 #include "str.h"
@@ -245,7 +246,7 @@ int main(int argc, char *argv[])
     state.files = files;
     state.nfiles = nfiles;
     state.active_file = files;
-    state.active_file_index = 0;
+    state_set_active_file_index(&state, 0);
 
     // Initialize file states
     setlocale(LC_ALL, ""); // Necessary for wcswidth calls
@@ -259,14 +260,10 @@ int main(int argc, char *argv[])
         else
             file->file_path = positional_args[file_index];
 
+        scroller_init(&file->layout.scroller, SCROLLER_NPANES);
+        scroller_set_active_pane(&file->layout.scroller, SCROLLER_SEQUENCE_PANE);
         state_set_layout(&state, rcparams_ruler_records_divider_i, rcparams_header_sequence_divider_j);
-        file->layout.tick_spacing = rcparams_tick_spacing;
-        file->offset_record = 0;
-        file->offset_header = 0;
-        file->offset_sequence = 0;
-        file->cursor_record_i = 0;
-        file->cursor_header_j = 0;
-        file->cursor_sequence_j = 0;
+        state_set_tick_spacing(&state, rcparams_tick_spacing);
 
         char *format_arg = "";
         if (file_index < n_format_args)
@@ -362,6 +359,7 @@ void cleanup(void)
         color_deinit_color_scheme(state.color_schemes + i);
     for (unsigned int i = 0; i < state.nfiles; i++)
     {
+        scroller_deinit(&state.files[i].layout.scroller);
         sequences_deinit_seq_record_array(&state.files[i].record_array);
         sequences_deinit_unaligned_indices_array(&state.files[i].indices_array);
     }
@@ -427,7 +425,7 @@ int load_seqs(FileState *file, const char *format_arg, const char *seq_type_arg)
     if (retcode > 0)
         return 1;
 
-    file->records_offset = 1;
+    file->tick_offset = 1;
     file->records_maxlen = maxlen;
 
     return 0;

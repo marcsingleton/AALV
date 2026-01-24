@@ -10,11 +10,7 @@
 
 #include <stddef.h>
 
-typedef enum
-{
-    PAGE_SIZE_FULL = 0,
-    PAGE_SIZE_HALF
-} PageSize;
+#include "scroller.h"
 
 typedef union
 {
@@ -47,8 +43,8 @@ void action_move_page_up(PageSize page_size);
 void action_move_page_down(PageSize page_size);
 void action_move_page_right(PageSize page_size);
 void action_move_page_left(PageSize page_size);
-void action_move_line_start(void);
-void action_move_line_end(void);
+void action_move_record_start(void);
+void action_move_record_end(void);
 void action_move_first_record(void);
 void action_move_last_record(void);
 void action_move_to_record(size_t x);

@@ -16,8 +16,9 @@ void state_set_ruler_records_divider_i(State *state, unsigned int i)
 
     layout->ruler_pane.h = layout->ruler_records_divider_i + 1;
 
-    unsigned h;
-    if (layout->records_command_divider_i > layout->ruler_records_divider_i)
+    unsigned int h, d;
+    d = layout->records_command_divider_i - layout->ruler_records_divider_i;
+    if (d > 0)
         h = layout->records_command_divider_i - layout->ruler_records_divider_i - 1;
     else
         h = 0;
@@ -27,6 +28,8 @@ void state_set_ruler_records_divider_i(State *state, unsigned int i)
 
     layout->sequence_pane.i = layout->ruler_records_divider_i + 1;
     layout->sequence_pane.h = h;
+
+    layout->scroller.h = h;
 
     state->refresh_ruler_pane = true;
     state->refresh_header_pane = true;
@@ -44,9 +47,11 @@ void state_set_header_sequence_divider_j(State *state, unsigned int j)
     layout->header_sequence_divider_j = j;
 
     layout->header_pane.w = layout->header_sequence_divider_j + 1;
+    layout->scroller.ws[SCROLLER_HEADER_PANE] = layout->header_sequence_divider_j + 1;
 
     layout->sequence_pane.j = layout->header_sequence_divider_j + 1;
     layout->sequence_pane.w = state->terminal_cols - layout->header_sequence_divider_j - 1;
+    layout->scroller.ws[SCROLLER_SEQUENCE_PANE] = state->terminal_cols - layout->header_sequence_divider_j - 1;
 
     state->refresh_ruler_pane = true;
     state->refresh_header_pane = true;
@@ -63,9 +68,16 @@ void state_set_records_command_divider_i(State *state, unsigned int i)
 
     layout->records_command_divider_i = i;
 
-    layout->header_pane.h = layout->records_command_divider_i - layout->ruler_records_divider_i;
+    unsigned int h, d;
+    d = layout->records_command_divider_i - layout->ruler_records_divider_i;
+    if (d > 0)
+        h = layout->records_command_divider_i - layout->ruler_records_divider_i - 1;
+    else
+        h = 0;
 
-    layout->sequence_pane.h = layout->records_command_divider_i - layout->ruler_records_divider_i;
+    layout->header_pane.h = h;
+    layout->sequence_pane.h = h;
+    layout->scroller.h = h;
 
     layout->command_pane.i = layout->records_command_divider_i;
     layout->command_pane.h = state->terminal_rows - layout->records_command_divider_i;
@@ -85,14 +97,6 @@ void state_set_divider_limits(State *state)
     layout->max_records_command_divider_i = state->terminal_rows - 2;
 }
 
-void state_set_terminal_size(State *state)
-{
-    unsigned int rows, cols;
-    terminal_get_window_size(&rows, &cols);
-    state->terminal_rows = rows;
-    state->terminal_cols = cols;
-}
-
 void state_set_layout(State *state, unsigned int ruler_records_divider_i, unsigned int header_sequence_divider_j)
 {
     state_set_divider_limits(state);
@@ -108,54 +112,22 @@ void state_set_tick_spacing(State *state, unsigned int tick_spacing)
     FileState *active_file = state->active_file;
     if (tick_spacing < 1)
         tick_spacing = 1;
-    if (tick_spacing != active_file->layout.tick_spacing)
+    if (tick_spacing != active_file->tick_spacing)
     {
-        active_file->layout.tick_spacing = tick_spacing;
+        active_file->tick_spacing = tick_spacing;
         state->refresh_ruler_pane = true;
     }
-}
-
-void state_set_offset_record(State *state, unsigned int offset_record)
-{
-    FileState *active_file = state->active_file;
-    if (offset_record != active_file->offset_record)
-    {
-        active_file->offset_record = offset_record;
-        state->refresh_header_pane = true;
-        state->refresh_sequence_pane = true;
-    }
-}
-
-void state_set_offset_sequence(State *state, unsigned int offset_sequence)
-{
-    FileState *active_file = state->active_file;
-    if (offset_sequence != active_file->offset_sequence)
-    {
-        active_file->offset_sequence = offset_sequence;
-        state->refresh_ruler_pane = true;
-        state->refresh_sequence_pane = true;
-    }
-}
-
-inline void state_set_cursor_record_i(State *state, unsigned int cursor_record_i)
-{
-    FileState *active_file = state->active_file;
-    active_file->cursor_record_i = cursor_record_i;
-}
-
-inline void state_set_cursor_header_j(State *state, unsigned int cursor_header_j)
-{
-    FileState *active_file = state->active_file;
-    active_file->cursor_header_j = cursor_header_j;
-}
-
-inline void state_set_cursor_sequence_j(State *state, unsigned int cursor_sequence_j)
-{
-    FileState *active_file = state->active_file;
-    active_file->cursor_sequence_j = cursor_sequence_j;
 }
 
 // State setters
+void state_set_terminal_size(State *state)
+{
+    unsigned int rows, cols;
+    terminal_get_window_size(&rows, &cols);
+    state->terminal_rows = rows;
+    state->terminal_cols = cols;
+}
+
 void state_set_active_file_index(State *state, unsigned int file_index)
 {
     if (file_index > state->nfiles - 1)
