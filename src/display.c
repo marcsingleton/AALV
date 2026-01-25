@@ -80,36 +80,24 @@ void display_all_panes(Array *buffer)
 void display_header_pane(Array *buffer)
 {
     FileState *active_file = state.active_file;
-    Pane *pane = &active_file->layout.header_pane;
-    RowLinkedScroller *scroller = &active_file->layout.scroller;
-    size_t offset_record = scroller->offset_i;
 
-    unsigned int ellipses_width = wcswidth(DISPLAY_HEADER_PANE_ELLIPSES, sizeof(DISPLAY_HEADER_PANE_ELLIPSES));
+    RowLinkedScroller *scroller = &active_file->layout.scroller;
+    size_t offset_i = scroller->offset_i;
+    size_t offset_j = scroller->offsets_j[SCROLLER_HEADER_PANE];
+
+    Pane *pane = &active_file->layout.header_pane;
+
     for (unsigned int i = 0; i < pane->h; i++)
     {
-        // Record
-        size_t record_index = i + offset_record;
+        size_t record_index = offset_i + i;
         pane_cursor_ij(pane, buffer, i, 0);
-        if (record_index < active_file->record_array.len)
+        if (record_index < active_file->record_array.len) // Has record
         {
-            // Has record
-            SeqRecord record = active_file->record_array.data[record_index];
-            size_t len = strnlen(record.header, pane->w);
-            if (len < pane->w)
-            {
-                array_extend(buffer, record.header, len);
-                for (unsigned int j = len; j < pane->w - 1; j++)
-                    array_append(buffer, " ");
-            }
-            else
-            {
-                array_extend(buffer, record.header, pane->w - ellipses_width - 1);
-                array_extend(buffer, DISPLAY_HEADER_PANE_ELLIPSES, sizeof(DISPLAY_HEADER_PANE_ELLIPSES) - 1);
-            }
+            SeqRecord *record = &active_file->record_array.data[record_index];
+            display_continued_line(buffer, record, offset_j, strlen(record->header), display_header, pane->w - 1);
         }
-        else
+        else // No record
         {
-            // No record
             array_extend(buffer, "~", sizeof("~") - 1);
             for (unsigned int j = 1; j < pane->w - 1; j++)
                 array_append(buffer, " ");
@@ -151,10 +139,12 @@ void display_ruler_pane(Array *buffer)
 void display_ruler_pane_ticks(Array *buffer)
 {
     FileState *active_file = state.active_file;
-    Pane *pane = &active_file->layout.ruler_pane;
-    unsigned int header_sequence_divider_j = active_file->layout.header_sequence_divider_j;
+
     RowLinkedScroller *scroller = &active_file->layout.scroller;
     size_t offset_sequence = scroller->offsets_j[SCROLLER_SEQUENCE_PANE];
+
+    Pane *pane = &active_file->layout.ruler_pane;
+    unsigned int header_sequence_divider_j = active_file->layout.header_sequence_divider_j;
 
     unsigned int tick_spacing = active_file->tick_spacing;
     size_t x0 = offset_sequence + active_file->tick_offset;
@@ -203,49 +193,24 @@ void display_ruler_pane_ticks(Array *buffer)
 void display_sequence_pane(Array *buffer)
 {
     FileState *active_file = state.active_file;
-    Pane *pane = &active_file->layout.sequence_pane;
+
     RowLinkedScroller *scroller = &active_file->layout.scroller;
-    size_t offset_record = scroller->offset_i;
-    size_t offset_sequence = scroller->offsets_j[SCROLLER_SEQUENCE_PANE];
+    size_t offset_i = scroller->offset_i;
+    size_t offset_j = scroller->offsets_j[SCROLLER_SEQUENCE_PANE];
+
+    Pane *pane = &active_file->layout.sequence_pane;
 
     for (unsigned int i = 0; i < pane->h; i++)
     {
-        size_t record_index = i + offset_record;
+        size_t record_index = offset_i + i;
 
         pane_cursor_ij(pane, buffer, i, 0);
-        if (record_index < active_file->record_array.len)
+        if (record_index < active_file->record_array.len) // Has record
         {
-            SeqRecord record = active_file->record_array.data[record_index];
-            unsigned int left_continuation = 0;
-            unsigned int right_continuation = 0;
-            size_t start = offset_sequence;
-            unsigned int len;
-            if (offset_sequence > 0)
-            {
-                left_continuation = 1;
-                start++;
-            }
-            if (record.len <= offset_sequence)
-                len = 0;
-            else if ((record.len > offset_sequence + pane->w))
-            {
-                right_continuation = 1;
-                len = pane->w - left_continuation - right_continuation; // Difference should always fit into int
-            }
-            else
-                len = record.len - offset_sequence - left_continuation;
-
-            if (left_continuation)
-                array_append(buffer, "<");
-            if (len > 0)
-                display_sequence(buffer, &record, start, len);
-            if (right_continuation)
-                array_append(buffer, ">");
-            else
-                for (unsigned int j = left_continuation + len; j < pane->w; j++)
-                    array_append(buffer, " ");
+            SeqRecord *record = &active_file->record_array.data[record_index];
+            display_continued_line(buffer, record, offset_j, record->len, &display_sequence, pane->w);
         }
-        else
+        else // No record
             for (unsigned int j = 0; j < pane->w; j++)
                 array_append(buffer, " ");
     }
@@ -345,60 +310,91 @@ void display_command_pane(Array *buffer)
 void display_cursor(Array *buffer)
 {
     FileState *active_file = state.active_file;
-    Pane *pane = &active_file->layout.sequence_pane;
-    RowLinkedScroller *scroller = &active_file->layout.scroller;
-    size_t offset_record = scroller->offset_i;
-    size_t cursor_record_i = scroller->cursor_i;
-    size_t offset_sequence = scroller->offsets_j[SCROLLER_SEQUENCE_PANE];
-    size_t cursor_sequence_j = scroller->cursors_j[SCROLLER_SEQUENCE_PANE];
-
-    if (pane->h == 0)
-        return;
-    if (active_file->record_array.len == 0)
-        return;
 
     switch (state.mode)
     {
     case NORMAL:
     {
-        // Row
-        unsigned cursor_i;
-        if (cursor_record_i >= pane->h)
-            cursor_i = pane->h - 1;
-        else
-            cursor_i = cursor_record_i;
+        if (active_file->record_array.len == 0)
+            return;
 
-        // Column
-        size_t record_index = cursor_i + offset_record;
-        size_t sequence_index = cursor_sequence_j + offset_sequence;
-        SeqRecord record = active_file->record_array.data[record_index];
-        size_t display_index;
-        if (record.len == 0)
-            display_index = 0;
-        else if (sequence_index >= record.len)
-            display_index = record.len - 1;
-        else
-            display_index = sequence_index;
-        unsigned int cursor_j;
-        if (display_index > offset_sequence)
-            cursor_j = display_index - offset_sequence;
-        else
-            cursor_j = 0;
+        RowLinkedScroller *scroller = &active_file->layout.scroller;
+        unsigned int active_index = scroller->active_pane_index;
 
-        pane_cursor_ij(pane, buffer, cursor_i, cursor_j);
+        Pane *pane;
+        switch (active_index)
+        {
+        case SCROLLER_HEADER_PANE:
+            pane = &active_file->layout.header_pane;
+            break;
+        case SCROLLER_SEQUENCE_PANE:
+            pane = &active_file->layout.sequence_pane;
+            break;
+        }
+        if (pane->h == 0)
+            return;
+
+        size_t offset_i = scroller->offset_i;
+        size_t cursor_i = scroller->cursor_i;
+        size_t offset_j = scroller->offsets_j[active_index];
+        size_t cursor_j = scroller->cursors_j[active_index];
+        unsigned int scroller_width = scroller->ws[active_index];
+
+        // Clamp display row to pane
+        unsigned display_i;
+        if (cursor_i >= scroller->h)
+            display_i = scroller->h - 1;
+        else
+            display_i = cursor_i;
+        size_t index_i = offset_i + display_i;
+        SeqRecord *record = &active_file->record_array.data[index_i];
+
+        // Set column parameters for active pane
+        size_t line_len;
+        switch (active_index)
+        {
+        case SCROLLER_HEADER_PANE:
+            line_len = strlen(record->header);
+            break;
+        case SCROLLER_SEQUENCE_PANE:
+            line_len = record->len;
+            break;
+        }
+
+        // Clamp column index to line end
+        size_t index_j = offset_j + cursor_j;
+        if (index_j >= line_len)
+            index_j = (line_len > 0) ? line_len - 1 : 0;
+
+        // Clamp display index to pane
+        unsigned int display_j;
+        if (index_j >= offset_j + scroller_width)
+            display_j = scroller_width - 1;
+        else if (index_j > offset_j)
+            display_j = index_j - offset_j;
+        else
+            display_j = 0;
+
+        pane_cursor_ij(pane, buffer, display_i, display_j);
         terminal_cursor_show(buffer);
         break;
     }
     case COMMAND:
     {
-        pane = &active_file->layout.command_pane;
+        Pane *pane = &active_file->layout.command_pane;
         pane_cursor_ij(pane, buffer, 0, 0);
         terminal_cursor_show(buffer);
+        break;
     }
     }
 }
 
-void display_sequence(Array *buffer, SeqRecord *record, size_t start, size_t len)
+void display_header(Array *buffer, SeqRecord *record, size_t offset, unsigned int display_len)
+{
+    array_extend(buffer, offset + record->header, display_len);
+}
+
+void display_sequence(Array *buffer, SeqRecord *record, size_t offset, unsigned int display_len)
 {
     SeqTypeState *seq_type = state.seq_types + record->type;
     const Alphabet *alphabet = seq_type->alphabet;
@@ -407,9 +403,9 @@ void display_sequence(Array *buffer, SeqRecord *record, size_t start, size_t len
     {
         if (color_scheme->type == COLOR_4_BIT)
         {
-            for (size_t i = start; i < start + len; i++)
+            for (unsigned int i = 0; i < display_len; i++)
             {
-                char sym = record->seq[i];
+                char sym = record->seq[offset + i];
                 int index = alphabet->index_map[(unsigned int)sym]; // Skip negativity check b/c already checked type
                 if (color_scheme->mask.fg[index] && color_scheme->mask.bg[index])
                 {
@@ -435,9 +431,9 @@ void display_sequence(Array *buffer, SeqRecord *record, size_t start, size_t len
         }
         else if (color_scheme->type == COLOR_8_BIT)
         {
-            for (size_t i = start; i < start + len; i++)
+            for (unsigned int i = 0; i < display_len; i++)
             {
-                char sym = record->seq[i];
+                char sym = record->seq[offset + i];
                 int index = alphabet->index_map[(unsigned int)sym]; // Skip negativity check b/c already checked type
                 if (color_scheme->mask.fg[index] && color_scheme->mask.bg[index])
                 {
@@ -463,5 +459,39 @@ void display_sequence(Array *buffer, SeqRecord *record, size_t start, size_t len
         }
     }
     else
-        array_extend(buffer, record->seq + start, len);
+        array_extend(buffer, offset + record->seq, display_len);
+}
+
+void display_continued_line(Array *buffer,
+                            SeqRecord *record, size_t offset, size_t len,
+                            DisplayFunction display_fn, unsigned int display_width)
+{
+    unsigned int left_continuation = 0;
+    unsigned int right_continuation = 0;
+    size_t display_offset = offset;
+    unsigned int display_len;
+    if (offset > 0)
+    {
+        left_continuation = 1;
+        display_offset++;
+    }
+    if (len <= offset)
+        display_len = 0;
+    else if ((len > offset + display_width))
+    {
+        right_continuation = 1;
+        display_len = display_width - left_continuation - right_continuation;
+    }
+    else
+        display_len = len - offset - left_continuation;
+
+    if (left_continuation)
+        array_append(buffer, "<");
+    if (display_len > 0)
+        display_fn(buffer, record, display_offset, display_len);
+    if (right_continuation)
+        array_append(buffer, ">");
+    else
+        for (unsigned int j = left_continuation + display_len; j < display_width; j++)
+            array_append(buffer, " ");
 }
