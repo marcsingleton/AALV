@@ -137,21 +137,21 @@ void scroller_cursor_clamp(RowLinkedScroller *scroller)
 {
     if (!scroller)
         return;
-    unsigned int pane_height = scroller->h;
-    if (pane_height == 0)
-        pane_height = 1; // Treat collapsed pane as single row
+    unsigned int scroller_height = scroller->h;
+    if (scroller_height == 0)
+        scroller_height = 1; // Treat collapsed scroller as single row
 
     unsigned int active_index = scroller->active_pane_index;
-    unsigned int pane_width = scroller->ws[active_index];
-    if (pane_width == 0)
-        pane_width = 1; // Treat collapsed pane as single column
+    unsigned int scroller_width = scroller->ws[active_index];
+    if (scroller_width == 0)
+        scroller_width = 1; // Treat collapsed scroller as single column
 
     size_t cursor_i = scroller->cursor_i;
     size_t cursor_j = scroller->cursors_j[active_index];
-    if (cursor_i + 1 > pane_height)
-        scroller_set_cursor_i(scroller, pane_height - 1);
-    if (cursor_j + 1 > pane_width)
-        scroller_set_cursor_j(scroller, pane_width - 1);
+    if (cursor_i + 1 > scroller_height)
+        scroller_set_cursor_i(scroller, scroller_height - 1);
+    if (cursor_j + 1 > scroller_width)
+        scroller_set_cursor_j(scroller, scroller_width - 1);
 }
 
 void scroller_move_up(RowLinkedScroller *scroller, size_t nlines, size_t x)
@@ -184,18 +184,18 @@ void scroller_move_down(RowLinkedScroller *scroller, size_t nlines, size_t x)
     if (nlines == 0)
         return;
 
-    unsigned int pane_height = scroller->h;
-    if (pane_height == 0)
-        pane_height = 1; // Treat collapsed pane as single row
+    unsigned int scroller_height = scroller->h;
+    if (scroller_height == 0)
+        scroller_height = 1; // Treat collapsed scroller as single row
 
     size_t index_i = scroller->cursor_i + scroller->offset_i;
     if (x + index_i + 1 >= nlines)
         x = nlines - index_i - 1;
-    if (x + scroller->cursor_i + 1 > pane_height)
+    if (x + scroller->cursor_i + 1 > scroller_height)
     {
-        x = (x + scroller->cursor_i + 1) - pane_height;
+        x = (x + scroller->cursor_i + 1) - scroller_height;
         scroller_set_offset_i(scroller, scroller->offset_i + x);
-        scroller_set_cursor_i(scroller, pane_height - 1);
+        scroller_set_cursor_i(scroller, scroller_height - 1);
     }
     else
         scroller_set_cursor_i(scroller, scroller->cursor_i + x);
@@ -211,9 +211,9 @@ void scroller_move_right(RowLinkedScroller *scroller, size_t nlines, size_t line
         return;
 
     unsigned int active_index = scroller->active_pane_index;
-    unsigned int pane_width = scroller->ws[active_index];
-    if (pane_width == 0)
-        pane_width = 1; // Treat collapsed pane as single column
+    unsigned int scroller_width = scroller->ws[active_index];
+    if (scroller_width == 0)
+        scroller_width = 1; // Treat collapsed scroller as single column
 
     size_t offset_j = scroller->offsets_j[active_index];
     size_t cursor_j = scroller->cursors_j[active_index];
@@ -240,11 +240,11 @@ void scroller_move_right(RowLinkedScroller *scroller, size_t nlines, size_t line
         return;
     if (x + index_j + 1 >= line_len)
         x = line_len - index_j - 1;
-    if (x + cursor_j + 1 > pane_width)
+    if (x + cursor_j + 1 > scroller_width)
     {
-        x = (x + cursor_j + 1) - pane_width;
+        x = (x + cursor_j + 1) - scroller_width;
         scroller_set_offset_j(scroller, offset_j + x);
-        scroller_set_cursor_j(scroller, pane_width - 1);
+        scroller_set_cursor_j(scroller, scroller_width - 1);
     }
     else
         scroller_set_cursor_j(scroller, cursor_j + x);
@@ -301,11 +301,11 @@ void scroller_move_page_up(RowLinkedScroller *scroller, size_t nlines, PageSize 
     if (nlines == 0)
         return;
 
-    unsigned int pane_height = scroller->h;
-    if (pane_height == 0)
-        pane_height = 1; // Treat collapsed pane as single row
+    unsigned int scroller_height = scroller->h;
+    if (scroller_height == 0)
+        scroller_height = 1; // Treat collapsed scroller as single row
 
-    size_t x = pane_height;
+    size_t x = scroller_height;
     if (page_size == PAGE_SIZE_HALF)
         x /= 2;
     if (scroller->offset_i == 0)
@@ -325,11 +325,11 @@ void scroller_move_page_down(RowLinkedScroller *scroller, size_t nlines, PageSiz
     if (nlines == 0)
         return;
 
-    unsigned int pane_height = scroller->h;
-    if (pane_height == 0)
-        pane_height = 1; // Treat collapsed pane as single row
+    unsigned int scroller_height = scroller->h;
+    if (scroller_height == 0)
+        scroller_height = 1; // Treat collapsed scroller as single row
 
-    unsigned int x = pane_height;
+    unsigned int x = scroller_height;
     if (page_size == PAGE_SIZE_HALF)
         x /= 2;
     if (scroller->offset_i + 1 == nlines)
@@ -352,14 +352,14 @@ void scroller_move_page_right(RowLinkedScroller *scroller, size_t nlines, size_t
         return;
 
     unsigned int active_index = scroller->active_pane_index;
-    unsigned int pane_width = scroller->ws[active_index];
-    if (pane_width == 0)
-        pane_width = 1; // Treat collapsed pane as single column
+    unsigned int scroller_width = scroller->ws[active_index];
+    if (scroller_width == 0)
+        scroller_width = 1; // Treat collapsed scroller as single column
 
     size_t offset_j = scroller->offsets_j[active_index];
     size_t cursor_j = scroller->cursors_j[active_index];
 
-    unsigned int x = pane_width;
+    unsigned int x = scroller_width;
     if (page_size == PAGE_SIZE_HALF)
         x /= 2;
     if (offset_j + x + 1 > maxlen)
@@ -383,13 +383,13 @@ void scroller_move_page_left(RowLinkedScroller *scroller, size_t nlines, PageSiz
         return;
 
     unsigned int active_index = scroller->active_pane_index;
-    unsigned int pane_width = scroller->ws[active_index];
-    if (pane_width == 0)
-        pane_width = 1; // Treat collapsed pane as single column
+    unsigned int scroller_width = scroller->ws[active_index];
+    if (scroller_width == 0)
+        scroller_width = 1; // Treat collapsed scroller as single column
 
     size_t offset_j = scroller->offsets_j[active_index];
 
-    unsigned int x = pane_width;
+    unsigned int x = scroller_width;
     if (page_size == PAGE_SIZE_HALF)
         x /= 2;
     if (x > offset_j)
@@ -480,14 +480,14 @@ void scroller_move_bottom_edge(RowLinkedScroller *scroller, size_t nlines)
     if (nlines == 0)
         return;
 
-    unsigned int pane_height = scroller->h;
-    if (pane_height == 0)
-        pane_height = 1; // Treat collapsed pane as single row
+    unsigned int scroller_height = scroller->h;
+    if (scroller_height == 0)
+        scroller_height = 1; // Treat collapsed scroller as single row
 
-    if (scroller->offset_i + pane_height > nlines)
+    if (scroller->offset_i + scroller_height > nlines)
         scroller_set_cursor_i(scroller, nlines - scroller->offset_i - 1);
     else
-        scroller_set_cursor_i(scroller, pane_height - 1);
+        scroller_set_cursor_i(scroller, scroller_height - 1);
 }
 
 void scroller_move_top_edge(RowLinkedScroller *scroller, size_t nlines)
@@ -524,11 +524,11 @@ void scroller_move_right_edge(RowLinkedScroller *scroller, size_t nlines)
         return;
 
     unsigned int active_index = scroller->active_pane_index;
-    unsigned int pane_width = scroller->ws[active_index];
-    if (pane_width == 0)
-        pane_width = 1; // Treat collapsed pane as single column
+    unsigned int scroller_width = scroller->ws[active_index];
+    if (scroller_width == 0)
+        scroller_width = 1; // Treat collapsed scroller as single column
 
-    scroller_set_cursor_j(scroller, pane_width - 1);
+    scroller_set_cursor_j(scroller, scroller_width - 1);
 }
 
 void scroller_move_vertical_middle(RowLinkedScroller *scroller, size_t nlines)
@@ -540,14 +540,14 @@ void scroller_move_vertical_middle(RowLinkedScroller *scroller, size_t nlines)
     if (nlines == 0)
         return;
 
-    unsigned int pane_height = scroller->h;
-    if (pane_height == 0)
-        pane_height = 1; // Treat collapsed pane as single row
+    unsigned int scroller_height = scroller->h;
+    if (scroller_height == 0)
+        scroller_height = 1; // Treat collapsed scroller as single row
 
-    if (scroller->offset_i + pane_height > nlines)
+    if (scroller->offset_i + scroller_height > nlines)
         scroller_set_cursor_i(scroller, (nlines - scroller->offset_i - 1) / 2);
     else
-        scroller_set_cursor_i(scroller, (pane_height - 1) / 2);
+        scroller_set_cursor_i(scroller, (scroller_height - 1) / 2);
 }
 
 void scroller_move_horizontal_middle(RowLinkedScroller *scroller, size_t nlines)
@@ -560,9 +560,9 @@ void scroller_move_horizontal_middle(RowLinkedScroller *scroller, size_t nlines)
         return;
 
     unsigned int active_index = scroller->active_pane_index;
-    unsigned int pane_width = scroller->ws[active_index];
-    if (pane_width == 0)
-        pane_width = 1; // Treat collapsed pane as single column
+    unsigned int scroller_width = scroller->ws[active_index];
+    if (scroller_width == 0)
+        scroller_width = 1; // Treat collapsed scroller as single column
 
-    scroller_set_cursor_j(scroller, pane_width / 2);
+    scroller_set_cursor_j(scroller, scroller_width / 2);
 }
