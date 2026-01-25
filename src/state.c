@@ -47,7 +47,7 @@ void state_set_header_sequence_divider_j(State *state, unsigned int j)
     layout->header_sequence_divider_j = j;
 
     layout->header_pane.w = layout->header_sequence_divider_j + 1;
-    layout->scroller.ws[SCROLLER_HEADER_PANE] = layout->header_sequence_divider_j + 1;
+    layout->scroller.ws[SCROLLER_HEADER_PANE] = layout->header_sequence_divider_j;
 
     layout->sequence_pane.j = layout->header_sequence_divider_j + 1;
     layout->sequence_pane.w = state->terminal_cols - layout->header_sequence_divider_j - 1;
@@ -92,7 +92,7 @@ void state_set_divider_limits(State *state)
     Layout *layout = &state->active_file->layout;
 
     layout->min_ruler_records_divider_i = wcswidth(DISPLAY_RULER_PANE_ELLIPSES, sizeof(DISPLAY_RULER_PANE_ELLIPSES));
-    layout->min_header_sequence_divider_j = wcswidth(DISPLAY_HEADER_PANE_ELLIPSES, sizeof(DISPLAY_HEADER_PANE_ELLIPSES));
+    layout->min_header_sequence_divider_j = 2;
     layout->max_header_sequence_divider_j = state->terminal_cols - 3;
     layout->max_records_command_divider_i = state->terminal_rows - 2;
 }
