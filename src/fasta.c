@@ -21,16 +21,16 @@ int fasta_fread(FILE *fp, SeqRecordArray *record_array)
 
     char *line = NULL;
     size_t capacity = 0;
-    ssize_t linelen = 0;
+    ssize_t line_len = 0;
 
-    ssize_t trimlen = 0;
+    ssize_t trim_len = 0;
     char *header = NULL;
     char *seq = NULL;
     char *id = NULL;
-    size_t seqlen = 0;
+    size_t seq_len = 0;
 
-    size_t bufferlen = 256;
-    char *buffer = malloc(bufferlen);
+    size_t buffer_len = 256;
+    char *buffer = malloc(buffer_len);
     if (!buffer)
     {
         retcode = FASTA_ERROR_MEMORY_ALLOCATION;
@@ -38,11 +38,11 @@ int fasta_fread(FILE *fp, SeqRecordArray *record_array)
     }
 
     // Read until first non-empty line
-    while ((linelen = getline(&line, &capacity, fp)) == 1 && line[0] == '\n')
+    while ((line_len = getline(&line, &capacity, fp)) == 1 && line[0] == '\n')
         ;
 
     // Check for empty files and improper formatting
-    if (linelen <= 0)
+    if (line_len <= 0)
     {
         record_array->data = NULL;
         record_array->len = 0;
@@ -55,27 +55,27 @@ int fasta_fread(FILE *fp, SeqRecordArray *record_array)
     }
 
     // Read records
-    while (linelen > 0)
+    while (line_len > 0)
     {
         // Get header
         if (line[0] == '\n')
         {
-            linelen = getline(&line, &capacity, fp);
+            line_len = getline(&line, &capacity, fp);
             continue;
         }
 
-        trimlen = linelen;
-        while (line[trimlen - 1] == '\n' || line[trimlen - 1] == '\r')
-            trimlen--;
+        trim_len = line_len;
+        while (line[trim_len - 1] == '\n' || line[trim_len - 1] == '\r')
+            trim_len--;
 
-        header = malloc(trimlen); // +1 for null; -1 for excluding >
+        header = malloc(trim_len); // +1 for null; -1 for excluding >
         if (!header)
         {
             retcode = FASTA_ERROR_MEMORY_ALLOCATION;
             goto cleanup;
         }
-        memcpy(header, line + 1, trimlen - 1);
-        header[trimlen - 1] = '\0';
+        memcpy(header, line + 1, trim_len - 1);
+        header[trim_len - 1] = '\0';
 
         // Get id
         id = fasta_get_id(header);
@@ -86,55 +86,55 @@ int fasta_fread(FILE *fp, SeqRecordArray *record_array)
         }
 
         // Get seq
-        seqlen = 0;
-        while ((linelen = getline(&line, &capacity, fp)) > 0 && (line[0] != '>'))
+        seq_len = 0;
+        while ((line_len = getline(&line, &capacity, fp)) > 0 && (line[0] != '>'))
         {
             // Trim line
-            trimlen = linelen;
-            while (trimlen > 0 && (line[trimlen - 1] == '\n' || line[trimlen - 1] == '\r'))
-                trimlen--;
+            trim_len = line_len;
+            while (trim_len > 0 && (line[trim_len - 1] == '\n' || line[trim_len - 1] == '\r'))
+                trim_len--;
 
             // Check for sequence overflow
-            if (seqlen >= SIZE_MAX - trimlen - 1)
+            if (seq_len >= SIZE_MAX - trim_len - 1)
             {
                 retcode = FASTA_ERROR_SEQUENCE_OVERFLOW;
                 goto cleanup;
             }
 
             // Check for buffer capacity
-            while (bufferlen <= seqlen + trimlen + 1)
+            while (buffer_len <= seq_len + trim_len + 1)
             {
-                if (bufferlen > SIZE_MAX / 2)
+                if (buffer_len > SIZE_MAX / 2)
                 {
                     retcode = FASTA_ERROR_MEMORY_ALLOCATION;
                     goto cleanup;
                 }
-                ptr = realloc(buffer, 2 * bufferlen);
+                ptr = realloc(buffer, 2 * buffer_len);
                 if (!ptr)
                 {
                     retcode = FASTA_ERROR_MEMORY_ALLOCATION;
                     goto cleanup;
                 }
                 buffer = ptr;
-                bufferlen *= 2;
+                buffer_len *= 2;
             }
-            memcpy(buffer + seqlen, line, trimlen);
-            seqlen += trimlen;
-            buffer[seqlen] = '\0';
+            memcpy(buffer + seq_len, line, trim_len);
+            seq_len += trim_len;
+            buffer[seq_len] = '\0';
         }
-        seq = malloc(seqlen + 1);
+        seq = malloc(seq_len + 1);
         if (!seq)
         {
             retcode = FASTA_ERROR_MEMORY_ALLOCATION;
             goto cleanup;
         }
-        memcpy(seq, buffer, seqlen + 1);
+        memcpy(seq, buffer, seq_len + 1);
 
         SeqRecord new_record = {
             .header = header,
             .id = id,
             .seq = seq,
-            .len = seqlen,
+            .len = seq_len,
             .type = SEQ_TYPE_UNSPECIFIED,
         };
         if (new_records.len >= SIZE_MAX - 1) // Ensures fit into return type
