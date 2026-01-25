@@ -249,7 +249,6 @@ int main(int argc, char *argv[])
     state_set_active_file_index(&state, 0);
 
     // Initialize file states
-    setlocale(LC_ALL, ""); // Necessary for wcswidth calls
     state_set_terminal_size(&state);
 
     for (unsigned int file_index = 0; file_index < state.nfiles; file_index++)

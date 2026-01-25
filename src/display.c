@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <string.h>
-#include <wchar.h>
 
 #include "color.h"
 #include "display.h"
@@ -156,7 +155,7 @@ void display_ruler_pane_ticks(Array *buffer)
     size_t x = q * tick_spacing;
     size_t j = pane->j + header_sequence_divider_j + 1;
     j += x - offset_sequence - active_file->tick_offset;
-    unsigned int ellipses_width = wcswidth(DISPLAY_RULER_PANE_ELLIPSES, sizeof(DISPLAY_RULER_PANE_ELLIPSES));
+    unsigned int ellipses_width = DISPLAY_RULER_PANE_ELLIPSES_NUM;
     while (j < pane->w)
     {
         pane_cursor_ij(pane, buffer, pane->h - 1, j);

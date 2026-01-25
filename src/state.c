@@ -1,5 +1,3 @@
-#include <wchar.h>
-
 #include "display.h"
 #include "state.h"
 
@@ -91,7 +89,7 @@ void state_set_divider_limits(State *state)
 {
     Layout *layout = &state->active_file->layout;
 
-    layout->min_ruler_records_divider_i = wcswidth(DISPLAY_RULER_PANE_ELLIPSES, sizeof(DISPLAY_RULER_PANE_ELLIPSES));
+    layout->min_ruler_records_divider_i = DISPLAY_RULER_PANE_ELLIPSES_NUM;
     layout->min_header_sequence_divider_j = 2;
     layout->max_header_sequence_divider_j = state->terminal_cols - 3;
     layout->max_records_command_divider_i = state->terminal_rows - 2;
