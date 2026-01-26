@@ -44,6 +44,8 @@ void display_refresh(Array *buffer)
                          state.active_file->layout.header_sequence_divider_j);
         state.refresh_window = false;
     }
+    if (!state.visible_window)
+        return;
     if (state.refresh_ruler_pane)
     {
         display_ruler_pane(buffer);
@@ -155,7 +157,6 @@ void display_ruler_pane_ticks(Array *buffer)
     size_t x = q * tick_spacing;
     size_t j = pane->j + header_sequence_divider_j + 1;
     j += x - offset_sequence - active_file->tick_offset;
-    unsigned int ellipses_width = DISPLAY_RULER_PANE_ELLIPSES_NUM;
     while (j < pane->w)
     {
         pane_cursor_ij(pane, buffer, pane->h - 1, j);
@@ -175,7 +176,7 @@ void display_ruler_pane_ticks(Array *buffer)
             array_append(buffer, c); // Excludes null in c
             if (i == 0 && n != 0)
             {
-                for (i = 0; i < ellipses_width; i++)
+                for (i = 0; i < RULER_PANE_ELLIPSES_NUM; i++)
                 {
                     pane_cursor_ij(pane, buffer, i, j);
                     array_extend(buffer, "·", sizeof("·") - 1);
@@ -225,7 +226,7 @@ void display_command_pane(Array *buffer)
     size_t sequence_index = scroller->offsets_j[SCROLLER_SEQUENCE_PANE] + scroller->cursors_j[SCROLLER_SEQUENCE_PANE];
 
     // Records-command divider
-    if (state.active_file->layout.ruler_records_divider_i < state.active_file->layout.records_command_divider_i)
+    if (state.active_file->layout.ruler_records_divider_i < state.active_file->layout.records_command_divider_i) // Checks for collapsed records pane
     {
         pane_cursor_ij(pane, buffer, 0, 0);
         for (unsigned int j = 0; j < header_sequence_divider_j; j++)
@@ -234,9 +235,6 @@ void display_command_pane(Array *buffer)
         for (unsigned int j = header_sequence_divider_j + 1; j < pane->w; j++)
             array_extend(buffer, "━", sizeof("━") - 1);
     }
-
-    if (pane->h < 2)
-        return;
 
     // Status line
     switch (state.mode)

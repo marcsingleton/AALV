@@ -88,11 +88,19 @@ void state_set_records_command_divider_i(State *state, unsigned int i)
 void state_set_divider_limits(State *state)
 {
     Layout *layout = &state->active_file->layout;
+    unsigned int min_height = RULER_PANE_MIN_HEIGHT + RECORDS_PANE_MIN_HEIGHT + COMMAND_PANE_MIN_HEIGHT;
+    unsigned int min_width = HEADER_PANE_MIN_WIDTH + SEQUENCE_PANE_MIN_WIDTH;
+    if (state->terminal_rows < min_height || state->terminal_cols < min_width)
+    {
+        state->visible_window = false;
+        return;
+    }
 
-    layout->min_ruler_records_divider_i = DISPLAY_RULER_PANE_ELLIPSES_NUM;
-    layout->min_header_sequence_divider_j = 2;
-    layout->max_header_sequence_divider_j = state->terminal_cols - 3;
-    layout->max_records_command_divider_i = state->terminal_rows - 2;
+    layout->min_ruler_records_divider_i = RULER_PANE_MIN_HEIGHT - 1;
+    layout->min_header_sequence_divider_j = HEADER_PANE_MIN_WIDTH;
+    layout->max_header_sequence_divider_j = state->terminal_cols - SEQUENCE_PANE_MIN_WIDTH - 1;
+    layout->max_records_command_divider_i = state->terminal_rows - COMMAND_PANE_MIN_HEIGHT;
+    state->visible_window = true;
 }
 
 void state_set_layout(State *state, unsigned int ruler_records_divider_i, unsigned int header_sequence_divider_j)

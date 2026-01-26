@@ -11,9 +11,6 @@
 #include "array.h"
 #include "sequences.h"
 
-#define DISPLAY_RULER_PANE_ELLIPSES_CHAR "·" // Re-oriented vertically
-#define DISPLAY_RULER_PANE_ELLIPSES_NUM 3
-
 typedef void (*DisplayFunction)(Array *buffer, SeqRecord *record, size_t start, unsigned int display_len);
 
 void display_refresh(Array *buffer);
