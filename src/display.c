@@ -380,7 +380,7 @@ void display_cursor(Array *buffer)
     case COMMAND:
     {
         Pane *pane = &active_file->layout.command_pane;
-        pane_cursor_ij(pane, buffer, 0, 0);
+        pane_cursor_ij(pane, buffer, 1, 0);
         terminal_cursor_show(buffer);
         break;
     }
