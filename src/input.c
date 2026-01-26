@@ -61,6 +61,7 @@ int input_parse_keys(Array *buffer, Action *action, size_t *count)
         c = *(char *)array_get(buffer, index + 1);
         if (c != '[')
             return PARSE_FAIL;
+
         c = *(char *)array_get(buffer, index + 2);
         switch (c)
         {
@@ -235,6 +236,37 @@ int input_parse_keys(Array *buffer, Action *action, size_t *count)
     case ':':
         action->fn.void_arg = action_enter_command_mode;
         action->args = VOID_ARG;
+        break;
+    case CTRL('w'):
+        // A little inelegant, but it's only twice
+        if (index + 1 >= buffer->len)
+            return PARSE_INCOMPLETE;
+        c = *(char *)array_get(buffer, index + 1);
+        if (c != ESC)
+            return PARSE_FAIL;
+
+        if (index + 2 >= buffer->len)
+            return PARSE_INCOMPLETE;
+        c = *(char *)array_get(buffer, index + 2);
+        if (c != '[')
+            return PARSE_FAIL;
+
+        if (index + 3 >= buffer->len)
+            return PARSE_INCOMPLETE;
+        c = *(char *)array_get(buffer, index + 3);
+        switch (c)
+        {
+        case 'C':
+            action->fn.void_arg = action_set_sequence_pane_active;
+            action->args = VOID_ARG;
+            break;
+        case 'D':
+            action->fn.void_arg = action_set_header_pane_active;
+            action->args = VOID_ARG;
+            break;
+        default:
+            return PARSE_FAIL;
+        }
         break;
     default:
         return PARSE_FAIL;

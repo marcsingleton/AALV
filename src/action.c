@@ -1,4 +1,5 @@
 #include <stdbool.h>
+#include <string.h>
 
 #include "action.h"
 #include "pane.h"
@@ -46,7 +47,17 @@ void action_move_right(size_t x)
     RowLinkedScroller *scroller = &active_file->layout.scroller;
     size_t record_index = scroller->offset_i + scroller->cursor_i;
     SeqRecord record = active_file->record_array.data[record_index];
-    scroller_move_right(&active_file->layout.scroller, active_file->record_array.len, record.len, x);
+    size_t line_len;
+    switch (scroller->active_pane_index)
+    {
+    case SCROLLER_HEADER_PANE:
+        line_len = strlen(record.header);
+        break;
+    case SCROLLER_SEQUENCE_PANE:
+        line_len = record.len;
+        break;
+    }
+    scroller_move_right(&active_file->layout.scroller, active_file->record_array.len, line_len, x);
 }
 
 void action_move_left(size_t x)
@@ -55,7 +66,17 @@ void action_move_left(size_t x)
     RowLinkedScroller *scroller = &active_file->layout.scroller;
     size_t record_index = scroller->offset_i + scroller->cursor_i;
     SeqRecord record = active_file->record_array.data[record_index];
-    scroller_move_left(&active_file->layout.scroller, active_file->record_array.len, record.len, x);
+    size_t line_len;
+    switch (scroller->active_pane_index)
+    {
+    case SCROLLER_HEADER_PANE:
+        line_len = strlen(record.header);
+        break;
+    case SCROLLER_SEQUENCE_PANE:
+        line_len = record.len;
+        break;
+    }
+    scroller_move_left(&active_file->layout.scroller, active_file->record_array.len, line_len, x);
 }
 
 void action_move_page_up(PageSize page_size)
@@ -205,4 +226,18 @@ void action_enter_command_mode(void)
 {
     state.mode = COMMAND;
     state.refresh_window = true;
+}
+
+void action_set_header_pane_active(void)
+{
+    FileState *active_file = state.active_file;
+    RowLinkedScroller *scroller = &active_file->layout.scroller;
+    scroller_set_active_pane(scroller, SCROLLER_HEADER_PANE);
+}
+
+void action_set_sequence_pane_active(void)
+{
+    FileState *active_file = state.active_file;
+    RowLinkedScroller *scroller = &active_file->layout.scroller;
+    scroller_set_active_pane(scroller, SCROLLER_SEQUENCE_PANE);
 }

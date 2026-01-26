@@ -61,5 +61,7 @@ void action_decrease_ruler_records_divider(void);
 void action_increase_tick_spacing(void);
 void action_decrease_tick_spacing(void);
 void action_enter_command_mode(void);
+void action_set_header_pane_active(void);
+void action_set_sequence_pane_active(void);
 
 #endif // ACTION_H
