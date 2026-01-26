@@ -153,12 +153,12 @@ int input_parse_keys(Array *buffer, Action *action, size_t *count)
         accum = PAGE_SIZE_HALF;
         break;
     case '$':
-        action->fn.void_arg = action_move_record_end;
+        action->fn.void_arg = action_move_line_end;
         action->args = VOID_ARG;
         break;
     case '0':
     case '^':
-        action->fn.void_arg = action_move_record_start;
+        action->fn.void_arg = action_move_line_start;
         action->args = VOID_ARG;
         break;
     case 'g':

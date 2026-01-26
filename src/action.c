@@ -86,14 +86,14 @@ void action_move_page_left(PageSize page_size)
     scroller_move_page_left(scroller, active_file->record_array.len, page_size);
 }
 
-void action_move_record_start(void)
+void action_move_line_start(void)
 {
     FileState *active_file = state.active_file;
     RowLinkedScroller *scroller = &active_file->layout.scroller;
     scroller_move_line_start(scroller, active_file->record_array.len);
 }
 
-void action_move_record_end(void)
+void action_move_line_end(void)
 {
     FileState *active_file = state.active_file;
     RowLinkedScroller *scroller = &active_file->layout.scroller;
