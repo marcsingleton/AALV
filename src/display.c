@@ -155,7 +155,7 @@ void display_ruler_pane_ticks(Array *buffer)
         q++;
 
     size_t x = q * tick_spacing;
-    size_t j = pane->j + header_sequence_divider_j + 1;
+    size_t j = header_sequence_divider_j + 1;
     j += x - offset_sequence - active_file->tick_offset;
     while (j < pane->w)
     {
@@ -165,11 +165,11 @@ void display_ruler_pane_ticks(Array *buffer)
         char c[2];
         size_t n = x;
         unsigned int d;
-        unsigned int i = pane->i + pane->h - 2;
+        unsigned int i = pane->h - 2;
         do
         {
             // Write numbers from tick to top
-            pane_cursor_ij(pane, buffer, i--, j);
+            pane_cursor_ij(pane, buffer, i, j);
             d = n % 10;
             n = n / 10;
             snprintf(c, 2, "%d", d);
@@ -183,6 +183,7 @@ void display_ruler_pane_ticks(Array *buffer)
                 }
                 break;
             }
+            i--;
         } while (n != 0);
 
         x += tick_spacing;
