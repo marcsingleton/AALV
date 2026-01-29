@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <stdbool.h>
 #include <string.h>
 
@@ -131,6 +132,88 @@ void action_move_line_end(void)
         break;
     }
     scroller_move_line_end(scroller, active_file->record_array.len, line_len);
+}
+
+void action_move_first_non_gap_or_non_whitespace(void)
+{
+    FileState *active_file = state.active_file;
+    RowLinkedScroller *scroller = &active_file->layout.scroller;
+    size_t record_index = scroller->offset_i + scroller->cursor_i;
+    SeqRecord record = active_file->record_array.data[record_index];
+    size_t line_len;
+    size_t new_index;
+    switch (scroller->active_pane_index)
+    {
+    case SCROLLER_HEADER_PANE:
+    {
+        line_len = strlen(record.header);
+        for (new_index = 0; new_index < line_len; new_index++)
+        {
+            if (!isspace(record.header[new_index]))
+                break;
+        }
+        break;
+    }
+    case SCROLLER_SEQUENCE_PANE:
+        line_len = record.len;
+        Alphabet *alphabet = sequences_seq_type_to_alphabet(record.type);
+        if (alphabet)
+        {
+            for (new_index = 0; new_index < line_len; new_index++)
+                if (!sequences_sym_is_gap(alphabet, record.seq[new_index]))
+                    break;
+        }
+        else
+            new_index = 0;
+    }
+    unsigned int active_index = scroller->active_pane_index;
+    size_t old_index = scroller->offsets_j[active_index] + scroller->cursors_j[active_index];
+    if (new_index > old_index)
+        scroller_move_right(scroller, active_file->record_array.len, line_len, new_index - old_index);
+    else if (old_index > new_index)
+        scroller_move_left(scroller, active_file->record_array.len, line_len, old_index - new_index);
+}
+
+void action_move_last_non_gap_or_non_whitespace(void)
+{
+    FileState *active_file = state.active_file;
+    RowLinkedScroller *scroller = &active_file->layout.scroller;
+    size_t record_index = scroller->offset_i + scroller->cursor_i;
+    SeqRecord record = active_file->record_array.data[record_index];
+    size_t line_len;
+    size_t new_index;
+    switch (scroller->active_pane_index)
+    {
+    case SCROLLER_HEADER_PANE:
+    {
+        line_len = strlen(record.header);
+        new_index = (line_len > 0) ? line_len - 1 : 0;
+        for (; 0 < new_index; new_index--)
+        {
+            if (!isspace(record.header[new_index]))
+                break;
+        }
+        break;
+    }
+    case SCROLLER_SEQUENCE_PANE:
+        line_len = record.len;
+        Alphabet *alphabet = sequences_seq_type_to_alphabet(record.type);
+        if (alphabet)
+        {
+            new_index = (line_len > 0) ? line_len - 1 : 0;
+            for (; 0 < new_index; new_index--)
+                if (!sequences_sym_is_gap(alphabet, record.seq[new_index]))
+                    break;
+        }
+        else
+            new_index = 0;
+    }
+    unsigned int active_index = scroller->active_pane_index;
+    size_t old_index = scroller->offsets_j[active_index] + scroller->cursors_j[active_index];
+    if (new_index > old_index)
+        scroller_move_right(scroller, active_file->record_array.len, line_len, new_index - old_index);
+    else if (old_index > new_index)
+        scroller_move_left(scroller, active_file->record_array.len, line_len, old_index - new_index);
 }
 
 void action_move_first_record(void)

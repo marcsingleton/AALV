@@ -45,6 +45,8 @@ void action_move_page_right(PageSize page_size);
 void action_move_page_left(PageSize page_size);
 void action_move_line_start(void);
 void action_move_line_end(void);
+void action_move_first_non_gap_or_non_whitespace(void);
+void action_move_last_non_gap_or_non_whitespace(void);
 void action_move_first_record(void);
 void action_move_last_record(void);
 void action_move_to_record(size_t x);

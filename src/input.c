@@ -158,8 +158,11 @@ int input_parse_keys(Array *buffer, Action *action, size_t *count)
         action->args = VOID_ARG;
         break;
     case '0':
-    case '^':
         action->fn.void_arg = action_move_line_start;
+        action->args = VOID_ARG;
+        break;
+    case '^':
+        action->fn.void_arg = action_move_first_non_gap_or_non_whitespace;
         action->args = VOID_ARG;
         break;
     case 'g':
@@ -167,10 +170,19 @@ int input_parse_keys(Array *buffer, Action *action, size_t *count)
             return PARSE_INCOMPLETE;
         ptr = array_get(buffer, index + 1);
         c = *ptr;
-        if (c != 'g')
+        switch (c)
+        {
+        case 'g':
+            action->fn.void_arg = action_move_first_record;
+            action->args = VOID_ARG;
+            break;
+        case '_':
+            action->fn.void_arg = action_move_last_non_gap_or_non_whitespace;
+            action->args = VOID_ARG;
+            break;
+        default:
             return PARSE_FAIL;
-        action->fn.void_arg = action_move_first_record;
-        action->args = VOID_ARG;
+        }
         break;
     case 'G':
         if (accum_default_set == 1)
