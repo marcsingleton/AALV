@@ -472,7 +472,8 @@ int set_seq_types(FileState *file, const char *seq_type_arg)
     for (size_t i = 0; i < record_array->len; i++)
     {
         SeqRecord *record = record_array->data + i;
-        if (sequences_infer_seq_type(record) >= 2)
+        SeqType seq_type = sequences_seq_to_seq_type(record->seq);
+        if (seq_type == SEQ_TYPE_ERROR)
         {
             printf("%s contains at least one non-ASCII symbol in its sequence(s). "
                    "The viewer may render incorrectly. Continue? (y/n): ",
@@ -491,17 +492,18 @@ int set_seq_types(FileState *file, const char *seq_type_arg)
                 const char *identifiers = seq_type_option->identifiers;
                 if (str_is_in_strsep(identifiers, option_delim, seq_type_arg))
                 {
-                    SeqType seq_type = seq_type_option->type;
-                    if (record->type != SEQ_TYPE_ERROR) // Allow forced type unless error
+                    if (seq_type != SEQ_TYPE_ERROR) // Allow forced type unless error
                         record->type = seq_type;
                     break;
                 }
             }
         }
-        else if (record->type == SEQ_TYPE_RNA || record->type == SEQ_TYPE_DNA)
+        else if (seq_type == SEQ_TYPE_RNA || seq_type == SEQ_TYPE_DNA)
             record->type = SEQ_TYPE_NUCLEIC;
-        else if (record->type == SEQ_TYPE_INDETERMINATE && record->len >= rcparams_nucleic_tiebreak_len)
+        else if (seq_type == SEQ_TYPE_INDETERMINATE && record->len >= rcparams_nucleic_tiebreak_len)
             record->type = SEQ_TYPE_NUCLEIC;
+        else
+            record->type = seq_type;
     }
     return 0;
 }
@@ -513,20 +515,9 @@ int set_unaligned_indices(FileState *file)
         return 1;
     for (size_t i = 0; i < file->record_array.len; i++)
     {
-        Alphabet *alphabet = NULL;
         SeqRecord *record = file->record_array.data + i;
         UnalignedIndices *unaligned_indices = file->indices_array.data + i;
-        switch (record->type)
-        {
-        case SEQ_TYPE_NUCLEIC:
-            alphabet = &NUCLEIC_ALPHABET;
-            break;
-        case SEQ_TYPE_PROTEIN:
-            alphabet = &PROTEIN_ALPHABET;
-            break;
-        default:
-            break;
-        }
+        Alphabet *alphabet = sequences_seq_type_to_alphabet(record->type);
         if (alphabet)
             sequences_index_nongap_syms(alphabet, record, unaligned_indices);
     }
