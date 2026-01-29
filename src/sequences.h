@@ -86,6 +86,6 @@ int sequences_seq_is_rna(char *seq);
 int sequences_seq_is_dna(char *seq);
 int sequences_seq_is_nucleic(char *seq);
 int sequences_seq_is_protein(char *seq);
-int sequences_infer_seq_type(SeqRecord *record);
+SeqType sequences_seq_to_seq_type(char *seq);
 Alphabet *sequences_seq_type_to_alphabet(SeqType type);
 #endif // SEQUENCES_H

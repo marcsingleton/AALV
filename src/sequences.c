@@ -311,40 +311,33 @@ int sequences_seq_is_protein(char *seq)
     return sequences_seq_in_alphabet(&PROTEIN_ALPHABET, seq);
 }
 
-int sequences_infer_seq_type(SeqRecord *record)
+SeqType sequences_seq_to_seq_type(char *seq)
 {
-    int is_rna = sequences_seq_is_rna(record->seq);
-    int is_dna = sequences_seq_is_dna(record->seq);
-    int is_nucleic = sequences_seq_is_nucleic(record->seq);
-    int is_protein = sequences_seq_is_protein(record->seq);
+    int is_rna = sequences_seq_is_rna(seq);
+    int is_dna = sequences_seq_is_dna(seq);
+    int is_nucleic = sequences_seq_is_nucleic(seq);
+    int is_protein = sequences_seq_is_protein(seq);
 
     if (is_rna == -1 || is_dna == -1 || is_nucleic == -1 || is_protein == -1)
-    {
-        record->type = SEQ_TYPE_ERROR;
-        return 2;
-    }
+        return SEQ_TYPE_ERROR;
 
     if ((is_nucleic == 1) && (is_protein == 1))
-        record->type = SEQ_TYPE_INDETERMINATE;
+        return SEQ_TYPE_INDETERMINATE;
     else if (is_nucleic == 1)
     {
         if (is_rna == 1 && is_dna == 0)
-            record->type = SEQ_TYPE_RNA;
+            return SEQ_TYPE_RNA;
         else if (is_rna == 0 && is_dna == 1)
-            record->type = SEQ_TYPE_DNA;
+            return SEQ_TYPE_DNA;
         else if (is_rna == 1 && is_dna == 1) // No T or U
-            record->type = SEQ_TYPE_NUCLEIC;
+            return SEQ_TYPE_NUCLEIC;
         else // T and U
-            record->type = SEQ_TYPE_NUCLEIC;
+            return SEQ_TYPE_NUCLEIC;
     }
     else if (is_protein == 1)
-        record->type = SEQ_TYPE_PROTEIN;
+        return SEQ_TYPE_PROTEIN;
     else
-    {
-        record->type = SEQ_TYPE_UNKNOWN;
-        return 1;
-    }
-    return 0;
+        return SEQ_TYPE_UNKNOWN;
 }
 
 Alphabet *sequences_seq_type_to_alphabet(SeqType type)
