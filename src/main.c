@@ -356,13 +356,16 @@ void cleanup(void)
     // Free memory
     for (unsigned int i = 0; i < state.n_color_schemes; i++)
         color_deinit_color_scheme(state.color_schemes + i);
-    for (unsigned int i = 0; i < state.nfiles; i++)
+    if (state.files)
     {
-        scroller_deinit(&state.files[i].layout.scroller);
-        sequences_deinit_seq_record_array(&state.files[i].record_array);
-        sequences_deinit_unaligned_indices_array(&state.files[i].indices_array);
+        for (unsigned int i = 0; i < state.nfiles; i++)
+        {
+            scroller_deinit(&state.files[i].layout.scroller);
+            sequences_deinit_seq_record_array(&state.files[i].record_array);
+            sequences_deinit_unaligned_indices_array(&state.files[i].indices_array);
+        }
+        free(state.files);
     }
-    free(state.files);
 
     // Restore terminal options
     if (raw_mode)
