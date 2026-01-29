@@ -129,7 +129,7 @@ void display_ruler_pane(Array *buffer)
     pane_cursor_ij(pane, buffer, pane->h - 1, 0);
     for (unsigned int j = 0; j < header_sequence_divider_j; j++)
         array_extend(buffer, "━", sizeof("━") - 1);
-    if (state.active_file->layout.ruler_records_divider_i < state.active_file->layout.records_command_divider_i)
+    if (state.active_file->layout.ruler_records_divider_i < state.active_file->layout.records_command_divider_i) // Checks for collapsed records pane
         array_extend(buffer, "╋", sizeof("╋") - 1);
     else
         array_extend(buffer, "┻", sizeof("┻") - 1);
@@ -147,8 +147,9 @@ void display_ruler_pane_ticks(Array *buffer)
     Pane *pane = &active_file->layout.ruler_pane;
     unsigned int header_sequence_divider_j = active_file->layout.header_sequence_divider_j;
 
+    unsigned int tick_offset = active_file->tick_offset;
     unsigned int tick_spacing = active_file->tick_spacing;
-    size_t x0 = offset_sequence + active_file->tick_offset;
+    size_t x0 = offset_sequence + tick_offset;
     size_t q = x0 / tick_spacing;
     size_t r = x0 % tick_spacing;
     if (r > 0)
@@ -156,7 +157,7 @@ void display_ruler_pane_ticks(Array *buffer)
 
     size_t x = q * tick_spacing;
     size_t j = header_sequence_divider_j + 1;
-    j += x - offset_sequence - active_file->tick_offset;
+    j += x - offset_sequence - tick_offset;
     while (j < pane->w)
     {
         pane_cursor_ij(pane, buffer, pane->h - 1, j);
