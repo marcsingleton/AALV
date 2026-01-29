@@ -346,3 +346,26 @@ int sequences_infer_seq_type(SeqRecord *record)
     }
     return 0;
 }
+
+Alphabet *sequences_seq_type_to_alphabet(SeqType type)
+{
+    Alphabet *alphabet;
+    switch (type)
+    {
+    case SEQ_TYPE_RNA:
+        alphabet = &RNA_ALPHABET;
+        break;
+    case SEQ_TYPE_DNA:
+        alphabet = &DNA_ALPHABET;
+        break;
+    case SEQ_TYPE_NUCLEIC:
+        alphabet = &NUCLEIC_ALPHABET;
+        break;
+    case SEQ_TYPE_PROTEIN:
+        alphabet = &PROTEIN_ALPHABET;
+        break;
+    default:
+        alphabet = NULL;
+    }
+    return alphabet;
+}
