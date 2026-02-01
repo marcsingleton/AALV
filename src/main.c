@@ -14,6 +14,7 @@
 #include "action.h"
 #include "argparse.h"
 #include "array.h"
+#include "cmd.h"
 #include "display.h"
 #include "error.h"
 #include "fasta.h"
@@ -345,7 +346,8 @@ int main(int argc, char *argv[])
         {
             state.mode = NORMAL;
             state.refresh_command_pane = true;
-            break;
+            char *command = cmd_read_command(":");
+            retcode = cmd_parse_and_execute_command(command);
         }
         }
     }
