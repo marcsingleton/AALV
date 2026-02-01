@@ -97,6 +97,7 @@ void state_set_header_sequence_divider_j(State *state, unsigned int j);
 void state_set_records_command_divider_i(State *state, unsigned int i);
 void state_set_divider_limits(State *state);
 void state_set_layout(State *state, unsigned int ruler_records_divider_i, unsigned int header_sequence_divider_j);
+void state_set_tick_offset(State *state, unsigned int tick_offset);
 void state_set_tick_spacing(State *state, unsigned int tick_spacing);
 
 // State setters
