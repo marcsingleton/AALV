@@ -168,6 +168,18 @@ int input_parse_keys(Array *buffer, Action *action, size_t *count)
             action->fn.void_arg = action_move_last_non_gap_or_non_whitespace;
             action->args = VOID_ARG;
             break;
+        case '0':
+            action->fn.void_arg = action_move_left_edge;
+            action->args = VOID_ARG;
+            break;
+        case 'm':
+            action->fn.void_arg = action_move_horizontal_middle;
+            action->args = VOID_ARG;
+            break;
+        case '$':
+            action->fn.void_arg = action_move_right_edge;
+            action->args = VOID_ARG;
+            break;
         default:
             return PARSE_FAIL;
         }
@@ -195,18 +207,6 @@ int input_parse_keys(Array *buffer, Action *action, size_t *count)
         break;
     case 'L':
         action->fn.void_arg = action_move_bottom_edge;
-        action->args = VOID_ARG;
-        break;
-    case 'S':
-        action->fn.void_arg = action_move_left_edge;
-        action->args = VOID_ARG;
-        break;
-    case 'C':
-        action->fn.void_arg = action_move_horizontal_middle;
-        action->args = VOID_ARG;
-        break;
-    case 'E':
-        action->fn.void_arg = action_move_right_edge;
         action->args = VOID_ARG;
         break;
     case ']':
