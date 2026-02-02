@@ -262,6 +262,7 @@ int main(int argc, char *argv[])
 
         scroller_init(&file->layout.scroller, SCROLLER_NPANES);
         scroller_set_active_pane(&file->layout.scroller, SCROLLER_SEQUENCE_PANE);
+        state_set_active_file_index(&state, file_index);
         state_set_layout(&state, rcparams_ruler_records_divider_i, rcparams_header_sequence_divider_j);
         state_set_tick_spacing(&state, rcparams_tick_spacing);
 
@@ -286,6 +287,7 @@ int main(int argc, char *argv[])
             return 1;
         }
     }
+    state_set_active_file_index(&state, 0);
 
     if (n_format_args > 0)
         str_free_split(format_args, n_format_args);
