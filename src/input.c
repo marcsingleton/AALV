@@ -85,18 +85,6 @@ int input_parse_keys(Array *buffer, Action *action, size_t *count)
             return PARSE_FAIL;
         }
         break;
-    case 'q':
-        action->fn.void_arg = action_quit;
-        action->args = VOID_ARG;
-        break;
-    case '>':
-        action->fn.void_arg = action_next_file;
-        action->args = VOID_ARG;
-        break;
-    case '<':
-        action->fn.void_arg = action_previous_file;
-        action->args = VOID_ARG;
-        break;
     case 'k':
         action->fn.size_t_arg = action_move_up;
         action->args = SIZE_T_ARG;

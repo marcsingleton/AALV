@@ -9,27 +9,6 @@
 
 extern State state;
 
-void action_quit(void)
-{
-    exit(0);
-}
-
-void action_next_file(void)
-{
-    if (state.active_file_index + 1 >= state.nfiles)
-        return;
-    state_set_active_file_index(&state, state.active_file_index + 1);
-    state.refresh_window = true;
-}
-
-void action_previous_file(void)
-{
-    if (state.active_file_index == 0)
-        return;
-    state_set_active_file_index(&state, state.active_file_index - 1);
-    state.refresh_window = true;
-}
-
 void action_move_up(size_t x)
 {
     FileState *active_file = state.active_file;

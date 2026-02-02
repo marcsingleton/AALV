@@ -32,9 +32,6 @@ typedef struct
     ActionArguments args;
 } Action;
 
-void action_quit(void);
-void action_next_file(void);
-void action_previous_file(void);
 void action_move_up(size_t x);
 void action_move_down(size_t x);
 void action_move_right(size_t x);
