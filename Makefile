@@ -4,10 +4,14 @@ TESTS_DIR := tests
 BUILD_DIR := build
 EXE := aalv
 
+# linenoise
+LINENOISE_DIR := linenoise
+
 # src targets
 SRC := $(wildcard $(SRC_DIR)/*.c)
 SRC := $(filter-out $(SRC_DIR)/main.c, $(SRC))
 SRC_OBJS := $(patsubst $(SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(SRC))
+SRC_OBJS += $(BUILD_DIR)/linenoise.o
 SRC_TARGET := $(BUILD_DIR)/$(EXE)
 
 # tests targets
@@ -24,7 +28,7 @@ MACROS := '-DPROGRAM_NAME="$(EXE)"' '-DVERSION="$(VERSION)"' # See macros.h for 
 # CC flags
 CC := cc
 CFLAGS := -Wall -Wextra -pedantic -std=c99
-CPPFLAGS := $(MACROS)
+CPPFLAGS := $(MACROS) -I$(LINENOISE_DIR)
 ifeq ($(OS), Linux)
 	CPPFLAGS += -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE -D_DEFAULT_SOURCE
 endif
@@ -37,6 +41,9 @@ $(SRC_TARGET): $(SRC_OBJS) $(SRC_DIR)/main.c
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/linenoise.o: $(LINENOISE_DIR)/linenoise.c | $(BUILD_DIR)
+	$(CC) $(CPPFLAGS) $(CLAGS) -c $< -o $@
 
 # tests rules
 .PHONY: test
