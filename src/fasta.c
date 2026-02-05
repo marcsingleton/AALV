@@ -210,8 +210,14 @@ int fasta_fwrite(FILE *fp, SeqRecordArray *record_array, const int maxlen)
 int fasta_write(const char *path, SeqRecordArray *record_array, const int maxlen)
 {
     FILE *fp = fopen(path, "w");
+    if (!fp)
+        return FASTA_ERROR_FILE_IO;
+
     int retcode = fasta_fwrite(fp, record_array, maxlen);
-    fclose(fp);
+
+    if (fclose(fp) != 0)
+        return FASTA_ERROR_FILE_IO;
+
     return retcode;
 }
 
