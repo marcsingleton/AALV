@@ -31,12 +31,12 @@ int records_equal(SeqRecordArray *record_array_1, SeqRecordArray *record_array_2
     size_t nrecords = record_array_1->len;
     for (unsigned int i = 0; i < nrecords; i++)
     {
-        SeqRecord record_1, record_2;
-        record_1 = record_array_1->data[i];
-        record_2 = record_array_2->data[i];
-        if (strcmp(record_1.header, record_2.header) != 0)
+        SeqRecord *record_1, *record_2;
+        record_1 = record_array_1->data + i;
+        record_2 = record_array_2->data + i;
+        if (strcmp(record_1->header, record_2->header) != 0)
             return 0;
-        if (strcmp(record_1.seq, record_2.seq) != 0)
+        if (strcmp(record_1->seq, record_2->seq) != 0)
             return 0;
     }
     return 1;
@@ -83,8 +83,8 @@ int test_no_header(void)
     int retcode = 0;
     char buffer[BUFFERLEN];
     FILE *fp = fmemopen(buffer, BUFFERLEN, "rw");
-    SeqRecord record = record_array.data[0];
-    fasta_wrap_string(fp, record.seq, record.len, MAXLEN);
+    SeqRecord *record = record_array.data;
+    fasta_wrap_string(fp, record->seq, record->len, MAXLEN);
     SeqRecordArray truncated_record_array = {.data = record_array.data + 1, .len = record_array.len - 1};
     fasta_fwrite(fp, &truncated_record_array, MAXLEN);
     fseek(fp, 0, SEEK_SET);
@@ -122,9 +122,9 @@ int test_blank_lines(void)
     fputs("\n\n\n", fp);
     for (size_t i = 0; i < record_array.len; i++)
     {
-        SeqRecord record = record_array.data[i];
-        fprintf(fp, ">%s\n\n", record.header);
-        wrap_string_with_blanks(fp, record.seq, record.len, MAXLEN);
+        SeqRecord *record = record_array.data + i;
+        fprintf(fp, ">%s\n\n", record->header);
+        wrap_string_with_blanks(fp, record->seq, record->len, MAXLEN);
     }
     fseek(fp, 0, SEEK_SET);
     SeqRecordArray new_record_array;
