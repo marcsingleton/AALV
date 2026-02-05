@@ -95,7 +95,7 @@ int fasta_fread(FILE *fp, SeqRecordArray *record_array)
                 trim_len--;
 
             // Check for sequence overflow
-            if (seq_len >= SIZE_MAX - trim_len - 1)
+            if (seq_len > SIZE_MAX - trim_len - 1)
             {
                 retcode = FASTA_ERROR_SEQUENCE_OVERFLOW;
                 goto cleanup;
@@ -137,7 +137,7 @@ int fasta_fread(FILE *fp, SeqRecordArray *record_array)
             .len = seq_len,
             .type = SEQ_TYPE_UNSPECIFIED,
         };
-        if (new_records.len >= SIZE_MAX - 1) // Ensures fit into return type
+        if (new_records.len > SIZE_MAX - 1) // Ensures fit into return type
         {
             retcode = FASTA_ERROR_RECORD_OVERFLOW;
             goto cleanup;
