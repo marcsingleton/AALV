@@ -22,7 +22,7 @@ TESTS_TARGETS := $(TESTS:$(TESTS_DIR)/%.c=$(BUILD_DIR)/%)
 
 # platform and program macros
 OS := $(shell uname -s)
-VERSION := 1.0.0
+VERSION := $(shell ./version.sh)
 MACROS := '-DPROGRAM_NAME="$(EXE)"' '-DVERSION="$(VERSION)"' # See macros.h for default values
 
 # CC flags
