@@ -352,6 +352,47 @@ void *prefix_tree_node_get(PrefixTreeNode *node, CharMap *char_map, char *key)
     return NULL;
 }
 
+void *prefix_tree_node_get_prefix_match(PrefixTreeNode *node, CharMap *char_map, char *key)
+{
+    if (!node || !char_map || !key)
+        return NULL;
+
+    unsigned int key_index = 0;
+    unsigned int keylen = strlen(key);
+    while (key_index < keylen)
+    {
+        char *suffix = key + key_index;
+        unsigned int suffixlen = keylen - key_index;
+        unsigned int prefixlen = strlen(node->prefix);
+        unsigned int commonlen = prefix_tree_common_prefix_len(node->prefix, suffix);
+        if (commonlen == suffixlen && commonlen == prefixlen) // Exact prefix/suffix match; get value at node
+            return node->value;
+        else if (commonlen == prefixlen) // Consumes entire prefix with remaining suffix
+        {
+            key_index += commonlen;
+            int c = key[key_index];
+            unsigned int child_index = char_map->map[c];
+            PrefixTreeNode *child = node->children[child_index];
+            if (!child) // Go to child if it exists
+                return NULL;
+            node = child;
+            continue;
+        }
+        else if (commonlen < prefixlen) // Incomplete prefix match
+        {
+            unsigned int child_count = prefix_tree_node_count_children(node);
+            if (child_count == 0)
+                return node->value;
+            else
+                return NULL;
+        }
+        else
+            return NULL;
+    }
+
+    return NULL;
+}
+
 int prefix_tree_node_delete(PrefixTreeNode *node, CharMap *char_map, char *key)
 {
     if (!node || !char_map || !key)
@@ -548,6 +589,22 @@ void *prefix_tree_get(PrefixTree *tree, char *key)
         return NULL;
     CharMap *char_map = &tree->char_map;
     void *value = prefix_tree_node_get(node, char_map, key);
+
+    return value;
+}
+
+void *prefix_tree_get_prefix_match(PrefixTree *tree, char *key)
+{
+    if (!tree)
+        return NULL;
+    if (!char_map_is_in(&tree->char_map, key))
+        return NULL;
+
+    PrefixTreeNode *node = &tree->root;
+    if (!node->prefix)
+        return NULL;
+    CharMap *char_map = &tree->char_map;
+    void *value = prefix_tree_node_get_prefix_match(node, char_map, key);
 
     return value;
 }
