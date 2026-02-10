@@ -285,6 +285,98 @@ int test_tree_insert_get_delete_leaf(void)
     return 0;
 }
 
+int test_tree_insert_get_prefix(void)
+{
+    PrefixTree tree;
+    char s[] = "ABC";
+
+    char *key;
+    int value;
+
+    int expected_value;
+    int returned_value;
+    void *ptr;
+
+    int retcode = prefix_tree_init(&tree, s, sizeof(int));
+    if (retcode != 0)
+        return 1;
+
+    // Insert
+    key = "A";
+    value = 0;
+    if (prefix_tree_insert(&tree, key, &value) != 0)
+        return 2;
+
+    key = "AAA";
+    value = 1;
+    if (prefix_tree_insert(&tree, key, &value) != 0)
+        return 3;
+
+    // Get
+    key = "A";
+    expected_value = 0;
+    ptr = prefix_tree_get_prefix_match(&tree, key);
+    if (!ptr)
+        return 4;
+    returned_value = *(int *)ptr;
+    if (expected_value != returned_value)
+        return 5;
+
+    key = "AA";
+    expected_value = 1;
+    ptr = prefix_tree_get_prefix_match(&tree, key);
+    if (!ptr)
+        return 6;
+    returned_value = *(int *)ptr;
+    if (expected_value != returned_value)
+        return 7;
+
+    key = "AAA";
+    expected_value = 1;
+    ptr = prefix_tree_get_prefix_match(&tree, key);
+    if (!ptr)
+        return 8;
+    returned_value = *(int *)ptr;
+    if (expected_value != returned_value)
+        return 9;
+
+    // Insert prefix
+    key = "AA";
+    value = 2;
+    if (prefix_tree_insert(&tree, key, &value) != 0)
+        return 10;
+
+    // Get prefix
+    key = "A";
+    expected_value = 0;
+    ptr = prefix_tree_get_prefix_match(&tree, key);
+    if (!ptr)
+        return 11;
+    returned_value = *(int *)ptr;
+    if (expected_value != returned_value)
+        return 12;
+
+    key = "AAA";
+    expected_value = 1;
+    ptr = prefix_tree_get_prefix_match(&tree, key);
+    if (!ptr)
+        return 13;
+    returned_value = *(int *)ptr;
+    if (expected_value != returned_value)
+        return 14;
+
+    key = "AA";
+    expected_value = 2;
+    ptr = prefix_tree_get_prefix_match(&tree, key);
+    if (!ptr)
+        return 15;
+    returned_value = *(int *)ptr;
+    if (expected_value != returned_value)
+        return 16;
+
+    return 0;
+}
+
 int test_tree_insert_split_leaf(void)
 {
     PrefixTree tree;
@@ -412,6 +504,7 @@ TestFunction tests[] = {
     {&test_tree_insert_get_delete_parent, "test_tree_insert_get_delete_parent"},
     {&test_tree_insert_get_delete_parent_root, "test_tree_insert_get_delete_parent_root"},
     {&test_tree_insert_get_delete_leaf, "test_tree_insert_get_delete_leaf"},
+    {&test_tree_insert_get_prefix, "test_tree_insert_get_prefix"},
     {&test_tree_insert_split_leaf, "test_tree_insert_split_leaf"},
     {&test_tree_insert_split_internal, "test_tree_insert_split_internal"},
     {&test_tree_insert_out_of_char_map, "test_tree_insert_out_of_char_map"},
