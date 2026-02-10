@@ -152,7 +152,7 @@ int main(int argc, char *argv[])
 
     // Prepare color schemes
     state.color_schemes = schemes_base;
-    state.n_color_schemes = SCHEMES_N_BASE_4_BIT;
+    state.n_color_schemes = N_BASE_SCHEMES;
 
     // Prepare known sequence types
     for (unsigned int i = 0; i < N_SEQ_TYPE_OPTIONS; i++)
@@ -359,8 +359,7 @@ void cleanup(void)
 {
     // Free memory
     sequences_deinit_base_alphabets();
-    for (unsigned int i = 0; i < state.n_color_schemes; i++)
-        color_deinit_color_scheme(state.color_schemes + i);
+    schemes_deinit_base();
     if (state.files)
     {
         for (unsigned int i = 0; i < state.nfiles; i++)

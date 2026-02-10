@@ -4,13 +4,13 @@ ColorScheme schemes_default_nucleic_4_bit;
 ColorScheme schemes_default_protein_4_bit;
 ColorScheme schemes_default_nucleic_8_bit;
 ColorScheme schemes_default_protein_8_bit;
-ColorScheme schemes_base[SCHEMES_N_BASE];
+ColorScheme schemes_base[N_BASE_SCHEMES];
 
 int schemes_init_base(void)
 {
     unsigned int scheme_index = 0;
 
-    for (unsigned int i = 0; i < SCHEMES_N_BASE_4_BIT; i++)
+    for (unsigned int i = 0; i < N_BASE_SCHEMES_4_BIT; i++)
     {
         const ColorSchemeRecord4Bit *scheme_record = schemes_base_records_4_bit + i;
         ColorScheme *scheme = scheme_record->scheme;
@@ -38,7 +38,7 @@ int schemes_init_base(void)
         scheme_index++;
     }
 
-    for (unsigned int i = 0; i < SCHEMES_N_BASE_8_BIT; i++)
+    for (unsigned int i = 0; i < N_BASE_SCHEMES_8_BIT; i++)
     {
         const ColorSchemeRecord8Bit *scheme_record = schemes_base_records_8_bit + i;
         ColorScheme *scheme = scheme_record->scheme;
@@ -67,4 +67,10 @@ int schemes_init_base(void)
     }
 
     return 0;
+}
+
+void schemes_deinit_base(void)
+{
+    for (unsigned int i = 0; i < N_BASE_SCHEMES; i++)
+        color_deinit_color_scheme(schemes_base + i);
 }

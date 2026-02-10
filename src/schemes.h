@@ -104,7 +104,7 @@ static const ColorSchemeRecord4Bit schemes_base_records_4_bit[] = {
     },
 };
 
-#define SCHEMES_N_BASE_4_BIT sizeof(schemes_base_records_4_bit) / sizeof(ColorSchemeRecord4Bit)
+#define N_BASE_SCHEMES_4_BIT sizeof(schemes_base_records_4_bit) / sizeof(ColorSchemeRecord4Bit)
 
 // 8 bit
 static const ColorMapRecord8Bit schemes_default_nucleic_map_records_8_bit[] = {
@@ -161,12 +161,13 @@ static const ColorSchemeRecord8Bit schemes_base_records_8_bit[] = {
     },
 };
 
-#define SCHEMES_N_BASE_8_BIT sizeof(schemes_base_records_8_bit) / sizeof(ColorSchemeRecord8Bit)
+#define N_BASE_SCHEMES_8_BIT sizeof(schemes_base_records_8_bit) / sizeof(ColorSchemeRecord8Bit)
 
-#define SCHEMES_N_BASE (SCHEMES_N_BASE_4_BIT + SCHEMES_N_BASE_8_BIT)
+#define N_BASE_SCHEMES (N_BASE_SCHEMES_4_BIT + N_BASE_SCHEMES_8_BIT)
 
 extern ColorScheme schemes_base[];
 
 int schemes_init_base(void);
+void schemes_deinit_base(void);
 
 #endif // SCHEMES_H
