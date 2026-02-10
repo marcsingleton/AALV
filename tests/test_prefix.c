@@ -147,10 +147,10 @@ int test_tree_insert_get_delete_parent(void)
     expected_value = 0;
     ptr = prefix_tree_get(&tree, key);
     if (!ptr)
-        return 10;
+        return 12;
     returned_value = *(int *)ptr;
     if (expected_value != returned_value)
-        return 11;
+        return 13;
 
     return 0;
 }
@@ -411,6 +411,7 @@ TestFunction tests[] = {
     {&test_tree_insert_get_delete_root, "test_tree_insert_get_delete_root"},
     {&test_tree_insert_get_delete_parent, "test_tree_insert_get_delete_parent"},
     {&test_tree_insert_get_delete_parent_root, "test_tree_insert_get_delete_parent_root"},
+    {&test_tree_insert_get_delete_leaf, "test_tree_insert_get_delete_leaf"},
     {&test_tree_insert_split_leaf, "test_tree_insert_split_leaf"},
     {&test_tree_insert_split_internal, "test_tree_insert_split_internal"},
     {&test_tree_insert_out_of_char_map, "test_tree_insert_out_of_char_map"},
