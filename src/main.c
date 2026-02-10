@@ -149,6 +149,11 @@ int main(int argc, char *argv[])
         error_printf("%s: Failed to initialize color schemes\n", INVOCATION_NAME);
         return EXIT_FAILURE;
     }
+    if (cmd_init_command_map() != 0)
+    {
+        error_printf("%s: Failed to initialize command map\n", INVOCATION_NAME);
+        return EXIT_FAILURE;
+    }
 
     // Prepare color schemes
     state.color_schemes = schemes_base;
@@ -348,8 +353,8 @@ int main(int argc, char *argv[])
         {
             state.mode = NORMAL;
             state.refresh_command_pane = true;
-            char *command = cmd_read_command(":");
-            retcode = cmd_parse_and_execute_command(command);
+            char *cmd_line = cmd_read_command_line(":");
+            retcode = cmd_parse_and_execute_command_line(cmd_line);
         }
         }
     }
@@ -360,6 +365,7 @@ void cleanup(void)
     // Free memory
     sequences_deinit_base_alphabets();
     schemes_deinit_base();
+    cmd_deinit_command_map();
     if (state.files)
     {
         for (unsigned int i = 0; i < state.nfiles; i++)

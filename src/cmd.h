@@ -5,10 +5,23 @@
  * Command parsing
  */
 
-char *cmd_read_command(char *prompt);
-int cmd_parse_and_execute_command(char *command);
+#define CMD_ARG_MAX 8
+#define CMD_ALPHABET "abcdefghijklmnopqrstuvwxyz"
 
-void cmd_next_file(void);
-void cmd_previous_file(void);
+typedef struct
+{
+    void (*fn_ptr)(int, char **);
+    char *name;
+} Command;
+
+char *cmd_read_command_line(char *prompt);
+int cmd_parse_and_execute_command_line(char *cmd_line);
+int cmd_init_command_map(void);
+void cmd_deinit_command_map(void);
+
+void cmd_quit(int argc, char **argv);
+void cmd_next_file(int argc, char **argv);
+void cmd_previous_file(int argc, char **argv);
+void cmd_set(int argc, char **argv);
 
 #endif // CMD_H
