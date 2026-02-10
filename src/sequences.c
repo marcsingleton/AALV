@@ -177,6 +177,20 @@ error:
     return 1;
 }
 
+void sequences_deinit_alphabet(Alphabet *alphabet)
+{
+    if (!alphabet)
+        return;
+    for (unsigned int i = 0; i < CHAR_MAX; i++)
+        alphabet->index_map[i] = -1;
+    free(alphabet->name);
+    free(alphabet->syms);
+    free(alphabet->gaps);
+    alphabet->name = NULL;
+    alphabet->syms = NULL;
+    alphabet->gaps = NULL;
+}
+
 int sequences_init_base_alphabets(void)
 {
     int retcode = 0;
@@ -190,6 +204,15 @@ int sequences_init_base_alphabets(void)
             return retcode;
     }
     return retcode;
+}
+
+void sequences_deinit_base_alphabets(void)
+{
+    for (unsigned int i = 0; i < N_BASE_ALPHABETS; i++)
+    {
+        Alphabet *alphabet = BASE_ALPHABETS[i];
+        sequences_deinit_alphabet(alphabet);
+    }
 }
 
 int sequences_init_unaligned_indices(UnalignedIndices *unaligned_indices, size_t len)

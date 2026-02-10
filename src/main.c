@@ -358,6 +358,7 @@ int main(int argc, char *argv[])
 void cleanup(void)
 {
     // Free memory
+    sequences_deinit_base_alphabets();
     for (unsigned int i = 0; i < state.n_color_schemes; i++)
         color_deinit_color_scheme(state.color_schemes + i);
     if (state.files)
