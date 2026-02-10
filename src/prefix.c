@@ -35,6 +35,40 @@ unsigned int prefix_tree_common_prefix_len(char *s, char *t)
     return i;
 }
 
+unsigned int prefix_tree_node_count_children(PrefixTreeNode *node)
+{
+    if (!node)
+        return 0;
+
+    unsigned int child_count = 0;
+    for (unsigned int i = 0; i < node->capacity; i++)
+    {
+        PrefixTreeNode *child = node->children[i];
+        if (child)
+            child_count++;
+    }
+    return child_count;
+}
+
+PrefixTreeNode *prefix_tree_node_get_child(PrefixTreeNode *node, unsigned int index)
+{
+    if (!node)
+        return NULL;
+
+    for (unsigned int i = 0; i < node->capacity; i++)
+    {
+        PrefixTreeNode *child = node->children[i];
+        if (child)
+        {
+            if (index == 0)
+                return child;
+            index--;
+        }
+    }
+
+    return NULL;
+}
+
 // CharMap
 int char_map_init(CharMap *char_map, char *s)
 {
@@ -168,59 +202,6 @@ void prefix_tree_node_destroy(PrefixTreeNode *node)
 
     prefix_tree_node_deinit(node);
     free(node);
-}
-
-unsigned int prefix_tree_node_count_children(PrefixTreeNode *node)
-{
-    if (!node)
-        return 0;
-
-    unsigned int child_count = 0;
-    for (unsigned int i = 0; i < node->capacity; i++)
-    {
-        PrefixTreeNode *child = node->children[i];
-        if (child)
-            child_count++;
-    }
-    return child_count;
-}
-
-PrefixTreeNode *prefix_tree_node_get_child(PrefixTreeNode *node, unsigned int index)
-{
-    if (!node)
-        return NULL;
-
-    for (unsigned int i = 0; i < node->capacity; i++)
-    {
-        PrefixTreeNode *child = node->children[i];
-        if (child)
-        {
-            if (index == 0)
-                return child;
-            index--;
-        }
-    }
-
-    return NULL;
-}
-
-void prefix_tree_node_print(PrefixTreeNode *node, void (*print_value_fn)(PrefixTreeNode *), unsigned int depth)
-{
-    if (!node)
-        return;
-
-    unsigned int child_count = prefix_tree_node_count_children(node);
-    for (unsigned int i = 0; i < depth; i++)
-        fputs("  ", stdout);
-    printf("<prefix=%s, value=", node->prefix);
-    print_value_fn(node);
-    printf(", child_count=%d>\n", child_count);
-    for (unsigned int i = 0; i < node->capacity; i++)
-    {
-        PrefixTreeNode *child = node->children[i];
-        if (child)
-            prefix_tree_node_print(child, print_value_fn, depth + 1);
-    }
 }
 
 int prefix_tree_node_insert(PrefixTreeNode *node, CharMap *char_map, char *key, void *value)
@@ -495,6 +476,25 @@ int prefix_tree_node_delete(PrefixTreeNode *node, CharMap *char_map, char *key)
     return 0;
 }
 
+void prefix_tree_node_print(PrefixTreeNode *node, void (*print_value_fn)(PrefixTreeNode *), unsigned int depth)
+{
+    if (!node)
+        return;
+
+    unsigned int child_count = prefix_tree_node_count_children(node);
+    for (unsigned int i = 0; i < depth; i++)
+        fputs("  ", stdout);
+    printf("<prefix=%s, value=", node->prefix);
+    print_value_fn(node);
+    printf(", child_count=%d>\n", child_count);
+    for (unsigned int i = 0; i < node->capacity; i++)
+    {
+        PrefixTreeNode *child = node->children[i];
+        if (child)
+            prefix_tree_node_print(child, print_value_fn, depth + 1);
+    }
+}
+
 // Tree
 int prefix_tree_init(PrefixTree *tree, char *s, size_t size)
 {
@@ -542,11 +542,6 @@ void prefix_tree_destroy(PrefixTree *tree)
 
     prefix_tree_deinit(tree);
     free(tree);
-}
-
-void prefix_tree_print(PrefixTree *tree, void (*print_value_fn)(PrefixTreeNode *))
-{
-    prefix_tree_node_print(&tree->root, print_value_fn, 0);
 }
 
 int prefix_tree_insert(PrefixTree *tree, char *key, void *value)
@@ -623,4 +618,9 @@ int prefix_tree_delete(PrefixTree *tree, char *key)
     int retcode = prefix_tree_node_delete(node, char_map, key);
 
     return retcode;
+}
+
+void prefix_tree_print(PrefixTree *tree, void (*print_value_fn)(PrefixTreeNode *))
+{
+    prefix_tree_node_print(&tree->root, print_value_fn, 0);
 }
