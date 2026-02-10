@@ -135,19 +135,19 @@ int main(int argc, char *argv[])
     if (sigaction(SIGWINCH, &sa, NULL) == -1)
     {
         error_printf("%s: Failed to register signal handler\n", INVOCATION_NAME);
-        return 1;
+        return EXIT_FAILURE;
     }
 
     // Initializations
     if (sequences_init_base_alphabets() != 0)
     {
         error_printf("%s: Failed to initialize alphabets\n", INVOCATION_NAME);
-        return 1;
+        return EXIT_FAILURE;
     };
     if (schemes_init_base() != 0)
     {
         error_printf("%s: Failed to initialize color schemes\n", INVOCATION_NAME);
-        return 1;
+        return EXIT_FAILURE;
     }
 
     // Prepare color schemes
@@ -216,7 +216,7 @@ int main(int argc, char *argv[])
     if (isatty(STDIN_FILENO) && n_positional_args == 0)
     {
         cli_print_short_help(NOPTIONS, options, PROGRAM_NAME, positional_usage);
-        return 1;
+        return EXIT_FAILURE;
     }
 
     // Handle special cases for piped input
@@ -230,7 +230,7 @@ int main(int argc, char *argv[])
         if (input_fd == -1)
         {
             error_printf("%s: Failed to open /dev/tty for reading commands\n", INVOCATION_NAME);
-            return 1;
+            return EXIT_FAILURE;
         }
         TERMINAL_FILENO = input_fd;
     }
@@ -242,7 +242,7 @@ int main(int argc, char *argv[])
     if (!files)
     {
         error_printf("%s: Failed to allocate memory to load files\n", INVOCATION_NAME);
-        return 1;
+        return EXIT_FAILURE;
     }
     state.files = files;
     state.nfiles = nfiles;
@@ -284,7 +284,7 @@ int main(int argc, char *argv[])
         if (retcode > 0)
         {
             error_printf("%s: Failed to allocate unaligned indices in %s\n", INVOCATION_NAME, file->file_path);
-            return 1;
+            return EXIT_FAILURE;
         }
     }
     state_set_active_file_index(&state, 0);
@@ -298,13 +298,13 @@ int main(int argc, char *argv[])
     if (terminal_get_termios(&old_termios) != 0)
     {
         error_printf("%s: Failed to get current termios\n", INVOCATION_NAME);
-        return 1;
+        return EXIT_FAILURE;
     }
     raw_termios = old_termios; // Copy current settings to raw
     if (terminal_enable_raw_mode(&raw_termios) != 0)
     {
         error_printf("%s: Failed to set raw mode\n", INVOCATION_NAME);
-        return 1;
+        return EXIT_FAILURE;
     };
     raw_mode = true;
     terminal_set_blocking_read();
