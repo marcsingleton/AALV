@@ -13,6 +13,19 @@
 #include "scroller.h"
 #include "sequences.h"
 
+#define RULER_PANE_ELLIPSES_CHAR "·"
+#define RULER_PANE_ELLIPSES_NUM 3
+
+#define RULER_PANE_MIN_HEIGHT RULER_PANE_ELLIPSES_NUM + 1
+#define HEADER_PANE_MIN_WIDTH 2
+#define SEQUENCE_PANE_MIN_WIDTH 2
+#define RECORDS_PANE_MIN_HEIGHT 0
+#define COMMAND_PANE_MIN_HEIGHT 2
+
+#define SCROLLER_NPANES 2
+#define SCROLLER_HEADER_PANE 0
+#define SCROLLER_SEQUENCE_PANE 1
+
 typedef struct
 {
     unsigned int ruler_records_divider_i;
@@ -77,19 +90,6 @@ typedef struct
     SeqTypeState *seq_types;
     unsigned int n_seq_types;
 } State;
-
-#define RULER_PANE_ELLIPSES_CHAR "·"
-#define RULER_PANE_ELLIPSES_NUM 3
-
-#define RULER_PANE_MIN_HEIGHT RULER_PANE_ELLIPSES_NUM + 1
-#define HEADER_PANE_MIN_WIDTH 2
-#define SEQUENCE_PANE_MIN_WIDTH 2
-#define RECORDS_PANE_MIN_HEIGHT 0
-#define COMMAND_PANE_MIN_HEIGHT 2
-
-#define SCROLLER_NPANES 2
-#define SCROLLER_HEADER_PANE 0
-#define SCROLLER_SEQUENCE_PANE 1
 
 // FileState setters
 void state_set_ruler_records_divider_i(State *state, unsigned int i);
