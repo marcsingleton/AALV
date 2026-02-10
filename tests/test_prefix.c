@@ -1,4 +1,4 @@
-#include "prefix.c"
+#include "prefix.h"
 #include "utils.h"
 
 #define MODULE_NAME "test_prefix"
