@@ -189,7 +189,7 @@ int test_get_id(void)
     return retcode;
 }
 
-TestFunction tests[] = {
+Test tests[] = {
     {&test_read_write, "test_read_write"},
     {&test_no_header, "test_no_header"},
     {&test_empty_file, "test_empty_file"},
@@ -198,7 +198,7 @@ TestFunction tests[] = {
     {&test_get_id, "test_get_id"},
 };
 
-#define NTESTS sizeof(tests) / sizeof(TestFunction)
+#define NTESTS sizeof(tests) / sizeof(Test)
 
 int main(void)
 {

@@ -351,7 +351,7 @@ cleanup:
     return retcode;
 }
 
-TestFunction tests[] = {
+Test tests[] = {
     {&test_init, "test_init"},
     {&test_append_null, "append_null"},
     {&test_extend_null, "extend_null"},
@@ -363,7 +363,7 @@ TestFunction tests[] = {
     {&test_shrink, "test_shrink"},
 };
 
-#define NTESTS sizeof(tests) / sizeof(TestFunction)
+#define NTESTS sizeof(tests) / sizeof(Test)
 
 int main(void)
 {

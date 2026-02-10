@@ -121,7 +121,7 @@ int test_is_in_strsep(void)
     return 0;
 }
 
-TestFunction tests[] = {
+Test tests[] = {
     {&test_split_empty_input, "test_split_empty_input"},
     {&test_split_nonempty_fields, "test_split_nonempty_fields"},
     {&test_split_empty_fields, "test_split_empty_fields"},
@@ -131,7 +131,7 @@ TestFunction tests[] = {
     {&test_is_in_strsep, "test_is_in_strsep"},
 };
 
-#define NTESTS sizeof(tests) / sizeof(TestFunction)
+#define NTESTS sizeof(tests) / sizeof(Test)
 
 int main(void)
 {

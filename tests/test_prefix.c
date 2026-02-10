@@ -498,7 +498,7 @@ int test_tree_insert_out_of_char_map(void)
     return 0;
 }
 
-TestFunction tests[] = {
+Test tests[] = {
     {&test_tree_init, "test_tree_init"},
     {&test_tree_insert_get_delete_root, "test_tree_insert_get_delete_root"},
     {&test_tree_insert_get_delete_parent, "test_tree_insert_get_delete_parent"},
@@ -510,7 +510,7 @@ TestFunction tests[] = {
     {&test_tree_insert_out_of_char_map, "test_tree_insert_out_of_char_map"},
 };
 
-#define NTESTS sizeof(tests) / sizeof(TestFunction)
+#define NTESTS sizeof(tests) / sizeof(Test)
 
 int main(void)
 {

@@ -9,18 +9,18 @@
 
 typedef struct
 {
-    int (*func_ptr)(void);
-    char *func_name;
-} TestFunction;
+    int (*fn_ptr)(void);
+    char *name;
+} Test;
 
-void run_tests(TestFunction *tests, int ntests, char *module_name)
+void run_tests(Test *tests, int ntests, char *module_name)
 {
     int npasses = 0;
     for (int i = 0; i < ntests; i++)
     {
-        TestFunction *test = tests + i;
-        printf("Running %s...", test->func_name);
-        int retcode = (*test->func_ptr)();
+        Test *test = tests + i;
+        printf("Running %s...", test->name);
+        int retcode = (*test->fn_ptr)();
         if (retcode == 0)
         {
             printf("passed!\n");

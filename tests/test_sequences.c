@@ -178,7 +178,7 @@ int test_dna_nucleic_subset(void)
     return 0;
 }
 
-TestFunction tests[] = {
+Test tests[] = {
     {&test_init_alphabet_base, "test_init_alphabet_base"},
     {&test_init_alphabet_duplicated_sym, "test_init_alphabet_duplicated_sym"},
     {&test_init_alphabet_out_of_alphabet_gap, "test_init_alphabet_out_of_alphabet_gap"},
@@ -190,7 +190,7 @@ TestFunction tests[] = {
     {&test_dna_nucleic_subset, "test_dna_nucleic_subset"},
 };
 
-#define NTESTS sizeof(tests) / sizeof(TestFunction)
+#define NTESTS sizeof(tests) / sizeof(Test)
 
 int main(void)
 {
