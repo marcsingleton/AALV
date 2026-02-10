@@ -408,7 +408,7 @@ void display_sequence(Array *buffer, SeqRecord *record, size_t offset, unsigned 
             {
                 char sym = record->seq[offset + i];
                 int index = alphabet->index_map[(unsigned int)sym];
-                if (index > 0)
+                if (index >= 0)
                     if (color_scheme->mask.fg[index] && color_scheme->mask.bg[index])
                     {
                         Color4Bit fg_color = color_scheme->map.b4.fg[index];
@@ -439,7 +439,7 @@ void display_sequence(Array *buffer, SeqRecord *record, size_t offset, unsigned 
             {
                 char sym = record->seq[offset + i];
                 int index = alphabet->index_map[(unsigned int)sym];
-                if (index > 0)
+                if (index >= 0)
                     if (color_scheme->mask.fg[index] && color_scheme->mask.bg[index])
                     {
                         Color8Bit fg_color = color_scheme->map.b8.fg[index];
