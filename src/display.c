@@ -249,24 +249,6 @@ void display_command_pane(Array *buffer)
 
         int n = 0;
 
-        if (unaligned_indices->indices && unaligned_indices->len > 0)
-        {
-            size_t unaligned_index = (sequence_index + 1 > unaligned_indices->len) ? unaligned_indices->len - 1
-                                                                                   : sequence_index;
-            n = snprintf(status + n_status, sizeof(status) - n_status,
-                         "POS %zu/%zu  ",
-                         unaligned_indices->indices[unaligned_index],
-                         unaligned_indices->indices[unaligned_indices->len - 1]);
-        }
-        else
-        {
-            n = snprintf(status + n_status, sizeof(status) - n_status,
-                         "POS ?/?  ");
-        }
-        if (n < 0)
-            return;
-        n_status += n;
-
         n = snprintf(status + n_status, sizeof(status) - n_status,
                      "ROW %zu/%zu  ",
                      record_index + 1, // 1-based indexing
@@ -276,9 +258,29 @@ void display_command_pane(Array *buffer)
         n_status += n;
 
         n = snprintf(status + n_status, sizeof(status) - n_status,
-                     "COL %zu/%zu",
-                     sequence_index + active_file->tick_offset,
-                     active_file->records_maxlen);
+                     "COL %zu/%u-%zu  ",
+                     active_file->tick_offset + sequence_index,
+                     active_file->tick_offset,
+                     active_file->records_maxlen + active_file->tick_offset);
+        if (n < 0)
+            return;
+        n_status += n;
+
+        if (unaligned_indices->indices && unaligned_indices->len > 0)
+        {
+            size_t unaligned_index = (sequence_index + 1 > unaligned_indices->len) ? unaligned_indices->len - 1
+                                                                                   : sequence_index;
+            n = snprintf(status + n_status, sizeof(status) - n_status,
+                         "POS %zu/%u-%zu",
+                         active_file->tick_offset + unaligned_indices->indices[unaligned_index],
+                         active_file->tick_offset,
+                         active_file->tick_offset + unaligned_indices->indices[unaligned_indices->len - 1]);
+        }
+        else
+        {
+            n = snprintf(status + n_status, sizeof(status) - n_status,
+                         "POS ?/?");
+        }
         if (n < 0)
             return;
         n_status += n;
