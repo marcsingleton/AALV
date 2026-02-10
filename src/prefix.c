@@ -1,30 +1,7 @@
-#include <stdbool.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
-#define CHAR_MAX 128
-
-typedef struct
-{
-    int map[CHAR_MAX];
-    unsigned int len;
-} CharMap;
-
-typedef struct PrefixTreeNode
-{
-    struct PrefixTreeNode **children;
-    unsigned int capacity;
-    size_t size;
-    char *prefix;
-    void *value;
-} PrefixTreeNode;
-
-typedef struct
-{
-    PrefixTreeNode root;
-    CharMap char_map;
-} PrefixTree;
+#include "prefix.h"
 
 // Utilities
 unsigned int prefix_tree_common_prefix_len(char *s, char *t)
@@ -75,7 +52,7 @@ int char_map_init(CharMap *char_map, char *s)
     if (!char_map || !s)
         return 1;
 
-    for (unsigned int i = 0; i < CHAR_MAX; i++)
+    for (unsigned int i = 0; i < PREFIX_CHAR_MAX; i++)
         char_map->map[i] = -1;
 
     unsigned int len = 0;
@@ -131,7 +108,7 @@ void char_map_print(CharMap *char_map)
     if (!char_map)
         return;
 
-    for (unsigned int i = 0; i < CHAR_MAX; i++)
+    for (unsigned int i = 0; i < PREFIX_CHAR_MAX; i++)
     {
         if (char_map->map[i] != -1)
         {
