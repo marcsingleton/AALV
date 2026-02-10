@@ -267,11 +267,12 @@ int sequences_index_nongap_syms(Alphabet *alphabet, SeqRecord *record, Unaligned
     size_t index = 0;
     for (size_t i = 0; i < record->len; i++)
     {
+        unaligned_indices->indices[i] = index;
+
         char sym = record->seq[i];
         int is_gap = sequences_sym_is_gap(alphabet, sym);
         if (!is_gap)
             index++;
-        unaligned_indices->indices[i] = index;
     }
     return 0;
 }
