@@ -353,7 +353,7 @@ int main(int argc, char *argv[])
         {
             state.mode = NORMAL;
             state.refresh_command_pane = true;
-            char *cmd_line = cmd_read_command_line(":");
+            char *cmd_line = cmd_read_command_line(input_fd, ":");
             retcode = cmd_parse_and_execute_command_line(cmd_line);
         }
         }

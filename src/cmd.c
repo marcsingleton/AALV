@@ -22,9 +22,15 @@ Command cmds[] = {
 
 #define NCMDS sizeof(cmds) / sizeof(Command)
 
-char *cmd_read_command_line(char *prompt)
+char *cmd_read_command_line(int input_fd, char *prompt)
 {
-    char *line = linenoise(prompt);
+    struct linenoiseState ls;
+    char buffer[1024];
+    linenoiseEditStart(&ls, input_fd, -1, buffer, sizeof(buffer), prompt);
+    char *line = NULL;
+    while ((line = linenoiseEditFeed(&ls)) == linenoiseEditMore)
+        ;
+    linenoiseEditStop(&ls);
     return line;
 }
 
