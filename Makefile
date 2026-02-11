@@ -43,7 +43,7 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/linenoise.o: $(LINENOISE_DIR)/linenoise.c | $(BUILD_DIR)
-	$(CC) $(CPPFLAGS) $(CLAGS) -c $< -o $@
+	$(CC) -c $< -o $@
 
 # tests rules
 .PHONY: test
