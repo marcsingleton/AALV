@@ -187,15 +187,15 @@ int prefix_tree_node_insert(PrefixTreeNode *node, CharMap *char_map, char *key, 
         return 1;
 
     unsigned int key_index = 0;
-    unsigned int keylen = strlen(key);
-    while (key_index < keylen)
+    unsigned int key_len = strlen(key);
+    while (key_index < key_len)
     {
         char *suffix = key + key_index;
-        unsigned int suffixlen = keylen - key_index;
-        unsigned int prefixlen = strlen(node->prefix);
-        unsigned int commonlen = prefix_tree_common_prefix_len(node->prefix, suffix);
+        unsigned int suffix_len = key_len - key_index;
+        unsigned int prefix_len = strlen(node->prefix);
+        unsigned int common_len = prefix_tree_common_prefix_len(node->prefix, suffix);
 
-        if (commonlen == suffixlen && commonlen == prefixlen) // Exact prefix/suffix match; write value to node
+        if (common_len == suffix_len && common_len == prefix_len) // Exact prefix/suffix match; write value to node
         {
             void *new_value = malloc(node->size);
             if (!new_value)
@@ -205,9 +205,9 @@ int prefix_tree_node_insert(PrefixTreeNode *node, CharMap *char_map, char *key, 
             node->value = new_value;
             return 0;
         }
-        else if (commonlen == prefixlen) // Consumes entire prefix with remaining suffix
+        else if (common_len == prefix_len) // Consumes entire prefix with remaining suffix
         {
-            key_index += commonlen;
+            key_index += common_len;
             int c = key[key_index];
             unsigned int child_index = char_map->map[c];
             PrefixTreeNode *child = node->children[child_index];
@@ -232,15 +232,15 @@ int prefix_tree_node_insert(PrefixTreeNode *node, CharMap *char_map, char *key, 
             }
             continue;
         }
-        else if (commonlen < prefixlen) // Split node
+        else if (common_len < prefix_len) // Split node
         {
-            int c = node->prefix[commonlen];
+            int c = node->prefix[common_len];
             unsigned int child_index = char_map->map[c];
 
             // Allocate all new memory
-            char *new_prefix = strndup(node->prefix, commonlen);
+            char *new_prefix = strndup(node->prefix, common_len);
             void *new_value = malloc(node->size);
-            char *new_child_prefix = strdup(node->prefix + commonlen);
+            char *new_child_prefix = strdup(node->prefix + common_len);
             PrefixTreeNode *new_child = prefix_tree_node_create(char_map->len, node->size);
             if (!new_prefix || !new_child_prefix || !new_value || !new_child)
             {
@@ -281,18 +281,18 @@ void *prefix_tree_node_get(PrefixTreeNode *node, CharMap *char_map, char *key)
         return NULL;
 
     unsigned int key_index = 0;
-    unsigned int keylen = strlen(key);
-    while (key_index < keylen)
+    unsigned int key_len = strlen(key);
+    while (key_index < key_len)
     {
         char *suffix = key + key_index;
-        unsigned int suffixlen = keylen - key_index;
-        unsigned int prefixlen = strlen(node->prefix);
-        unsigned int commonlen = prefix_tree_common_prefix_len(node->prefix, suffix);
-        if (commonlen == suffixlen && commonlen == prefixlen) // Exact prefix/suffix match; get value at node
+        unsigned int suffix_len = key_len - key_index;
+        unsigned int prefix_len = strlen(node->prefix);
+        unsigned int common_len = prefix_tree_common_prefix_len(node->prefix, suffix);
+        if (common_len == suffix_len && common_len == prefix_len) // Exact prefix/suffix match; get value at node
             return node->value;
-        else if (commonlen == prefixlen) // Consumes entire prefix with remaining suffix
+        else if (common_len == prefix_len) // Consumes entire prefix with remaining suffix
         {
-            key_index += commonlen;
+            key_index += common_len;
             int c = key[key_index];
             unsigned int child_index = char_map->map[c];
             PrefixTreeNode *child = node->children[child_index];
@@ -301,7 +301,7 @@ void *prefix_tree_node_get(PrefixTreeNode *node, CharMap *char_map, char *key)
             node = child;
             continue;
         }
-        else if (commonlen < prefixlen) // Incomplete prefix match
+        else if (common_len < prefix_len) // Incomplete prefix match
             return NULL;
         else
             return NULL;
@@ -316,18 +316,18 @@ void *prefix_tree_node_get_prefix_match(PrefixTreeNode *node, CharMap *char_map,
         return NULL;
 
     unsigned int key_index = 0;
-    unsigned int keylen = strlen(key);
-    while (key_index < keylen)
+    unsigned int key_len = strlen(key);
+    while (key_index < key_len)
     {
         char *suffix = key + key_index;
-        unsigned int suffixlen = keylen - key_index;
-        unsigned int prefixlen = strlen(node->prefix);
-        unsigned int commonlen = prefix_tree_common_prefix_len(node->prefix, suffix);
-        if (commonlen == suffixlen && commonlen == prefixlen) // Exact prefix/suffix match; get value at node
+        unsigned int suffix_len = key_len - key_index;
+        unsigned int prefix_len = strlen(node->prefix);
+        unsigned int common_len = prefix_tree_common_prefix_len(node->prefix, suffix);
+        if (common_len == suffix_len && common_len == prefix_len) // Exact prefix/suffix match; get value at node
             return node->value;
-        else if (commonlen == prefixlen) // Consumes entire prefix with remaining suffix
+        else if (common_len == prefix_len) // Consumes entire prefix with remaining suffix
         {
-            key_index += commonlen;
+            key_index += common_len;
             int c = key[key_index];
             unsigned int child_index = char_map->map[c];
             PrefixTreeNode *child = node->children[child_index];
@@ -336,7 +336,7 @@ void *prefix_tree_node_get_prefix_match(PrefixTreeNode *node, CharMap *char_map,
             node = child;
             continue;
         }
-        else if (commonlen < prefixlen) // Incomplete prefix match
+        else if (common_len < prefix_len) // Incomplete prefix match
         {
             unsigned int child_count = prefix_tree_node_count_children(node);
             if (child_count == 0)
@@ -358,20 +358,20 @@ int prefix_tree_node_delete(PrefixTreeNode *node, CharMap *char_map, char *key)
 
     // Find matching node
     unsigned int key_index = 0;
-    unsigned int keylen = strlen(key);
+    unsigned int key_len = strlen(key);
     PrefixTreeNode *parent = NULL;
     unsigned int node_index = 0;
-    while (key_index < keylen)
+    while (key_index < key_len)
     {
         char *suffix = key + key_index;
-        unsigned int suffixlen = keylen - key_index;
-        unsigned int prefixlen = strlen(node->prefix);
-        unsigned int commonlen = prefix_tree_common_prefix_len(node->prefix, suffix);
-        if (commonlen == suffixlen && commonlen == prefixlen) // Exact prefix/suffix match; get value at node
+        unsigned int suffix_len = key_len - key_index;
+        unsigned int prefix_len = strlen(node->prefix);
+        unsigned int common_len = prefix_tree_common_prefix_len(node->prefix, suffix);
+        if (common_len == suffix_len && common_len == prefix_len) // Exact prefix/suffix match; get value at node
             break;
-        else if (commonlen == prefixlen) // Consumes entire prefix with remaining suffix
+        else if (common_len == prefix_len) // Consumes entire prefix with remaining suffix
         {
-            key_index += commonlen;
+            key_index += common_len;
             int c = key[key_index];
             unsigned int child_index = char_map->map[c];
             PrefixTreeNode *child = node->children[child_index];
@@ -382,7 +382,7 @@ int prefix_tree_node_delete(PrefixTreeNode *node, CharMap *char_map, char *key)
             node_index = child_index;
             continue;
         }
-        else if (commonlen < prefixlen) // Incomplete prefix match
+        else if (common_len < prefix_len) // Incomplete prefix match
             return 1;
         else
             return 1;
