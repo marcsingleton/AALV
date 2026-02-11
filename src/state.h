@@ -49,7 +49,7 @@ typedef struct
     unsigned int tick_offset;
     unsigned int tick_spacing;
     SeqRecordArray record_array;
-    size_t records_maxlen;
+    size_t records_max_len;
     UnalignedIndicesArray indices_array;
 } FileState;
 

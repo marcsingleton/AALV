@@ -196,24 +196,24 @@ int fasta_read(const char *path, SeqRecordArray *record_array)
     return retcode;
 }
 
-int fasta_fwrite(FILE *fp, SeqRecordArray *record_array, const int maxlen)
+int fasta_fwrite(FILE *fp, SeqRecordArray *record_array, const int max_len)
 {
     for (size_t i = 0; i < record_array->len; i++)
     {
         SeqRecord *record = record_array->data + i;
         fprintf(fp, ">%s\n", record->header);
-        fasta_wrap_string(fp, record->seq, record->len, maxlen);
+        fasta_wrap_string(fp, record->seq, record->len, max_len);
     }
     return 0;
 }
 
-int fasta_write(const char *path, SeqRecordArray *record_array, const int maxlen)
+int fasta_write(const char *path, SeqRecordArray *record_array, const int max_len)
 {
     FILE *fp = fopen(path, "w");
     if (!fp)
         return FASTA_ERROR_FILE_IO;
 
-    int retcode = fasta_fwrite(fp, record_array, maxlen);
+    int retcode = fasta_fwrite(fp, record_array, max_len);
 
     if (fclose(fp) != 0)
         return FASTA_ERROR_FILE_IO;
@@ -221,19 +221,19 @@ int fasta_write(const char *path, SeqRecordArray *record_array, const int maxlen
     return retcode;
 }
 
-void fasta_wrap_string(FILE *fp, const char *s, const size_t len, const int maxlen)
+void fasta_wrap_string(FILE *fp, const char *s, const size_t len, const int max_len)
 {
-    size_t nlines = len / maxlen;
+    size_t nlines = len / max_len;
     size_t j;
     for (j = 0; j < nlines; j++)
     {
-        fwrite(s + j * maxlen, sizeof(char), maxlen, fp);
+        fwrite(s + j * max_len, sizeof(char), max_len, fp);
         fputc('\n', fp);
     }
-    size_t nchars = len % maxlen;
+    size_t nchars = len % max_len;
     if (nchars > 0)
     {
-        fwrite(s + j * maxlen, sizeof(char), nchars, fp);
+        fwrite(s + j * max_len, sizeof(char), nchars, fp);
         fputc('\n', fp);
     }
 }

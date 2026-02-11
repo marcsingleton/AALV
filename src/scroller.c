@@ -342,7 +342,7 @@ void scroller_move_page_down(RowLinkedScroller *scroller, size_t nlines, PageSiz
         scroller_set_cursor_i(scroller, nlines - scroller->offset_i - 1);
 }
 
-void scroller_move_page_right(RowLinkedScroller *scroller, size_t nlines, size_t maxlen, PageSize page_size)
+void scroller_move_page_right(RowLinkedScroller *scroller, size_t nlines, size_t max_len, PageSize page_size)
 {
     if (!scroller)
         return;
@@ -362,13 +362,13 @@ void scroller_move_page_right(RowLinkedScroller *scroller, size_t nlines, size_t
     unsigned int x = scroller_width;
     if (page_size == PAGE_SIZE_HALF)
         x /= 2;
-    if (offset_j + x + 1 > maxlen)
-        scroller_set_offset_j(scroller, maxlen - 1);
+    if (offset_j + x + 1 > max_len)
+        scroller_set_offset_j(scroller, max_len - 1);
     else
         scroller_set_offset_j(scroller, offset_j + x);
-    if (cursor_j + scroller->offsets_j[active_index] + 1 > maxlen) // Check for cursor exceeding line end
+    if (cursor_j + scroller->offsets_j[active_index] + 1 > max_len) // Check for cursor exceeding line end
     {
-        size_t index_j = (maxlen > 0) ? maxlen - scroller->offsets_j[active_index] - 1 : 0;
+        size_t index_j = (max_len > 0) ? max_len - scroller->offsets_j[active_index] - 1 : 0;
         scroller_set_cursor_j(scroller, index_j);
     }
 }

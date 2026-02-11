@@ -116,7 +116,7 @@ void state_set_layout(State *state, unsigned int ruler_records_divider_i, unsign
 void state_set_tick_offset(State *state, unsigned int tick_offset)
 {
     FileState *active_file = state->active_file;
-    if (active_file->records_maxlen > SIZE_MAX - tick_offset)
+    if (active_file->records_max_len > SIZE_MAX - tick_offset)
         return;
     if (tick_offset != active_file->tick_offset)
     {

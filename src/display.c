@@ -261,7 +261,7 @@ void display_command_pane(Array *buffer)
                      "COL %zu/%u-%zu  ",
                      active_file->tick_offset + sequence_index,
                      active_file->tick_offset,
-                     active_file->records_maxlen + active_file->tick_offset);
+                     active_file->records_max_len + active_file->tick_offset);
         if (n < 0)
             return;
         n_status += n;

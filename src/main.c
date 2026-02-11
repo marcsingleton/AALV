@@ -423,13 +423,13 @@ int load_seqs(FileState *file, const char *format_arg, const char *seq_type_arg)
         return 2;
     }
 
-    // Get maxlen
-    size_t maxlen = 0;
+    // Get max_len
+    size_t max_len = 0;
     for (size_t i = 0; i < record_array->len; i++)
     {
         SeqRecord *record = record_array->data + i;
-        if (record->len > maxlen)
-            maxlen = record->len;
+        if (record->len > max_len)
+            max_len = record->len;
     }
 
     // Set sequence type
@@ -438,7 +438,7 @@ int load_seqs(FileState *file, const char *format_arg, const char *seq_type_arg)
         return 1;
 
     file->tick_offset = 1;
-    file->records_maxlen = maxlen;
+    file->records_max_len = max_len;
 
     return 0;
 }

@@ -22,7 +22,7 @@ SeqRecord data[] = {
 SeqRecordArray record_array = {.data = data, .len = NRECORDS};
 
 #define BUFFERLEN 1024 // Must be large enough to hold above SeqRecords
-#define MAXLEN 10      // Make small enough to ensure above records will wrap a few times
+#define MAX_LEN 10      // Make small enough to ensure above records will wrap a few times
 
 int records_equal(SeqRecordArray *record_array_1, SeqRecordArray *record_array_2)
 {
@@ -42,19 +42,19 @@ int records_equal(SeqRecordArray *record_array_1, SeqRecordArray *record_array_2
     return 1;
 }
 
-void wrap_string_with_blanks(FILE *fp, const char *s, const int len, const int maxlen)
+void wrap_string_with_blanks(FILE *fp, const char *s, const int len, const int max_len)
 {
-    unsigned int nlines = len / maxlen;
+    unsigned int nlines = len / max_len;
     unsigned int j;
     for (j = 0; j < nlines; j++)
     {
-        fwrite(s + j * maxlen, sizeof(char), maxlen, fp);
+        fwrite(s + j * max_len, sizeof(char), max_len, fp);
         fputs("\n\n", fp);
     }
-    unsigned int nchars = len % maxlen;
+    unsigned int nchars = len % max_len;
     if (nchars > 0)
     {
-        fwrite(s + j * maxlen, sizeof(char), nchars, fp);
+        fwrite(s + j * max_len, sizeof(char), nchars, fp);
         fputs("\n\n", fp);
     }
 }
@@ -64,7 +64,7 @@ int test_read_write(void)
     int retcode = 0;
     char buffer[BUFFERLEN];
     FILE *fp = fmemopen(buffer, BUFFERLEN, "rw");
-    fasta_fwrite(fp, &record_array, MAXLEN);
+    fasta_fwrite(fp, &record_array, MAX_LEN);
     fseek(fp, 0, SEEK_SET);
     SeqRecordArray new_record_array;
     int fasta_retcode = fasta_fread(fp, &new_record_array);
@@ -84,9 +84,9 @@ int test_no_header(void)
     char buffer[BUFFERLEN];
     FILE *fp = fmemopen(buffer, BUFFERLEN, "rw");
     SeqRecord *record = record_array.data;
-    fasta_wrap_string(fp, record->seq, record->len, MAXLEN);
+    fasta_wrap_string(fp, record->seq, record->len, MAX_LEN);
     SeqRecordArray truncated_record_array = {.data = record_array.data + 1, .len = record_array.len - 1};
-    fasta_fwrite(fp, &truncated_record_array, MAXLEN);
+    fasta_fwrite(fp, &truncated_record_array, MAX_LEN);
     fseek(fp, 0, SEEK_SET);
     SeqRecordArray new_record_array;
     int fasta_retcode = fasta_fread(fp, &new_record_array);
@@ -124,7 +124,7 @@ int test_blank_lines(void)
     {
         SeqRecord *record = record_array.data + i;
         fprintf(fp, ">%s\n\n", record->header);
-        wrap_string_with_blanks(fp, record->seq, record->len, MAXLEN);
+        wrap_string_with_blanks(fp, record->seq, record->len, MAX_LEN);
     }
     fseek(fp, 0, SEEK_SET);
     SeqRecordArray new_record_array;

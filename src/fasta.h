@@ -21,9 +21,9 @@ typedef enum
 
 int fasta_fread(FILE *fp, SeqRecordArray *record_array);
 int fasta_read(const char *path, SeqRecordArray *record_array);
-int fasta_fwrite(FILE *fp, SeqRecordArray *record_array, const int maxlen);
-int fasta_write(const char *path, SeqRecordArray *record_array, const int maxlen);
-void fasta_wrap_string(FILE *fp, const char *s, const size_t len, const int maxlen);
+int fasta_fwrite(FILE *fp, SeqRecordArray *record_array, const int max_len);
+int fasta_write(const char *path, SeqRecordArray *record_array, const int max_len);
+void fasta_wrap_string(FILE *fp, const char *s, const size_t len, const int max_len);
 char *fasta_get_id(const char *header);
 
 #endif // FASTA_H

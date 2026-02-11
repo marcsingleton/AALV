@@ -77,7 +77,7 @@ void action_move_page_right(PageSize page_size)
 {
     FileState *active_file = state.active_file;
     RowLinkedScroller *scroller = &active_file->layout.scroller;
-    scroller_move_page_right(scroller, active_file->record_array.len, active_file->records_maxlen, page_size);
+    scroller_move_page_right(scroller, active_file->record_array.len, active_file->records_max_len, page_size);
 }
 
 void action_move_page_left(PageSize page_size)

@@ -48,7 +48,7 @@ void scroller_move_right(RowLinkedScroller *scroller, size_t nlines, size_t line
 void scroller_move_left(RowLinkedScroller *scroller, size_t nlines, size_t line_len, size_t x);
 void scroller_move_page_up(RowLinkedScroller *scroller, size_t nlines, PageSize page_size);
 void scroller_move_page_down(RowLinkedScroller *scroller, size_t nlines, PageSize page_size);
-void scroller_move_page_right(RowLinkedScroller *scroller, size_t nlines, size_t maxlen, PageSize page_size);
+void scroller_move_page_right(RowLinkedScroller *scroller, size_t nlines, size_t max_len, PageSize page_size);
 void scroller_move_page_left(RowLinkedScroller *scroller, size_t nlines, PageSize page_size);
 void scroller_move_line_start(RowLinkedScroller *scroller, size_t nlines);
 void scroller_move_line_end(RowLinkedScroller *scroller, size_t nlines, size_t line_len);
