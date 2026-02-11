@@ -503,7 +503,7 @@ int set_seq_types(FileState *file, const char *seq_type_arg)
                 if (str_is_in_strsep(identifiers, option_delim, seq_type_arg))
                 {
                     if (seq_type != SEQ_TYPE_ERROR) // Allow forced type unless error
-                        record->type = seq_type;
+                        record->type = seq_type_option->type;
                     break;
                 }
             }
