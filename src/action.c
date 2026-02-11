@@ -297,7 +297,7 @@ void action_decrease_tick_spacing(void)
 void action_enter_command_mode(void)
 {
     state.mode = COMMAND;
-    state.refresh_window = true;
+    state.refresh_command_pane = true;
 }
 
 void action_set_header_pane_active(void)

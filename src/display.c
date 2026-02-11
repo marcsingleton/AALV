@@ -304,6 +304,8 @@ void display_command_pane(Array *buffer)
         break;
     }
     case COMMAND:
+        for (unsigned int i = 0; i < pane->w; i++)
+            array_append(buffer, " ");
         break;
     }
 }
