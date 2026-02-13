@@ -16,8 +16,7 @@ int fasta_fread(FILE *fp, SeqRecordArray *record_array)
 
     void *ptr = NULL; // A generic temporary pointer for allocations
 
-    Array new_records;
-    array_init(&new_records, sizeof(SeqRecord));
+    Array new_records = {.data = NULL};
 
     char *line = NULL;
     size_t capacity = 0;
@@ -30,7 +29,15 @@ int fasta_fread(FILE *fp, SeqRecordArray *record_array)
     size_t seq_len = 0;
 
     size_t buffer_len = 256;
-    char *buffer = malloc(buffer_len);
+    char *buffer = NULL;
+
+    if (array_init(&new_records, sizeof(SeqRecord)) != 0)
+    {
+        retcode = FASTA_ERROR_MEMORY_ALLOCATION;
+        goto cleanup;
+    }
+
+    buffer = malloc(buffer_len);
     if (!buffer)
     {
         retcode = FASTA_ERROR_MEMORY_ALLOCATION;

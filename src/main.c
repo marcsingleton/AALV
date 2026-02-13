@@ -36,6 +36,9 @@ struct termios old_termios;
 struct termios raw_termios;
 bool raw_mode = false;
 
+Array read_buffer;
+Array write_buffer;
+
 void cleanup(void);
 void handle_sigwinch(int signum);
 int load_seqs(FileState *file, const char *format_arg, const char *seq_type_arg);
@@ -154,6 +157,16 @@ int main(int argc, char *argv[])
         error_printf("%s: Failed to initialize command map\n", INVOCATION_NAME);
         return EXIT_FAILURE;
     }
+    if (array_init(&read_buffer, sizeof(char)) != 0)
+    {
+        error_printf("%s: Failed to initialize read buffer\n", INVOCATION_NAME);
+        return EXIT_FAILURE;
+    };
+    if (array_init(&write_buffer, sizeof(char)) != 0)
+    {
+        error_printf("%s: Failed to initialize write buffer\n", INVOCATION_NAME);
+        return EXIT_FAILURE;
+    };
 
     // Prepare color schemes
     state.color_schemes = schemes_base;
@@ -319,10 +332,6 @@ int main(int argc, char *argv[])
     size_t count;
     Action action;
 
-    Array read_buffer, write_buffer;
-    array_init(&read_buffer, sizeof(char));
-    array_init(&write_buffer, sizeof(char));
-
     while (1)
     {
         display_refresh(&write_buffer);
@@ -366,6 +375,8 @@ void cleanup(void)
     sequences_deinit_base_alphabets();
     schemes_deinit_base();
     cmd_deinit_command_map();
+    array_deinit(&read_buffer);
+    array_deinit(&write_buffer);
     if (state.files)
     {
         for (unsigned int i = 0; i < state.nfiles; i++)

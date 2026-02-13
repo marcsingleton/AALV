@@ -12,8 +12,12 @@ int cli_prepare_options(unsigned int noptions, Option *options,
                         const char *invocation_name)
 {
     int retcode = 0;
-    Array short_options_array;
-    array_init(&short_options_array, sizeof(char));
+    Array short_options_array = {.data = NULL};
+    if (array_init(&short_options_array, sizeof(char)) != 0)
+    {
+        error_printf("%s: Failed to allocate memory to create options array\n", invocation_name);
+        goto cleanup;
+    }
     for (unsigned int i = 0; i < noptions; i++)
     {
         Option *argument = options + i;
