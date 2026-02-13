@@ -5,7 +5,7 @@
 int color_init_color_scheme(ColorScheme *color_scheme, ColorType type, const char *name, unsigned int len)
 {
     if (!color_scheme || !name || len == 0)
-        return 1;
+        return -1;
 
     // Get allocation sizes
     size_t fg_size, bg_size;
@@ -24,7 +24,7 @@ int color_init_color_scheme(ColorScheme *color_scheme, ColorType type, const cha
         break;
     }
     default:
-        return 1;
+        return -1;
     }
 
     // Allocate
@@ -38,7 +38,7 @@ int color_init_color_scheme(ColorScheme *color_scheme, ColorType type, const cha
         free(bg_map);
         free(fg_mask);
         free(bg_mask);
-        return 1;
+        return -1;
     }
 
     // Common members

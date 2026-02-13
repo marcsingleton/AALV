@@ -39,7 +39,7 @@ size_t N_BASE_ALPHABETS = sizeof(BASE_ALPHABETS) / sizeof(Alphabet *);
 int sequences_init_seq_record(SeqRecord *record, char *header, char *seq, char *id)
 {
     if (!record || !header || !seq || !id)
-        return 1;
+        return -1;
     char *new_header = strdup(header);
     char *new_seq = strdup(seq);
     char *new_id = strdup(id);
@@ -48,7 +48,7 @@ int sequences_init_seq_record(SeqRecord *record, char *header, char *seq, char *
         free(new_header);
         free(new_seq);
         free(new_id);
-        return 1;
+        return -1;
     }
     record->header = new_header;
     record->seq = new_seq;
@@ -73,7 +73,7 @@ SeqRecord *sequences_create_seq_record(char *header, char *seq, char *id)
     if (!record)
         return NULL;
     int retcode = sequences_init_seq_record(record, header, seq, id);
-    if (retcode > 0)
+    if (retcode != 0)
     {
         free(record);
         return NULL;
@@ -90,10 +90,10 @@ void sequences_destroy_seq_record(SeqRecord *record)
 int sequences_init_seq_record_array(SeqRecordArray *record_array, size_t len)
 {
     if (!record_array)
-        return 1;
+        return -1;
     SeqRecord *data = calloc(len, sizeof(SeqRecord));
     if (!data)
-        return 1;
+        return -1;
     record_array->data = data;
     record_array->len = len;
     return 0;
@@ -112,7 +112,7 @@ void sequences_deinit_seq_record_array(SeqRecordArray *record_array)
 int sequences_init_alphabet(Alphabet *alphabet, char *name, char *syms, char *gaps, bool case_sensitive)
 {
     if (!alphabet || !name || !syms || !gaps)
-        return 1;
+        return -1;
     Alphabet test_alphabet;
     char *new_name = strdup(name);
     char *new_syms = strdup(syms);
@@ -174,7 +174,7 @@ error:
     free(new_name);
     free(new_syms);
     free(new_gaps);
-    return 1;
+    return -1;
 }
 
 void sequences_deinit_alphabet(Alphabet *alphabet)
@@ -200,7 +200,7 @@ int sequences_init_base_alphabets(void)
         retcode = sequences_init_alphabet(alphabet, alphabet->name,
                                           alphabet->syms, alphabet->gaps,
                                           alphabet->case_sensitive);
-        if (retcode > 0)
+        if (retcode != 0)
             return retcode;
     }
     return retcode;
@@ -218,10 +218,10 @@ void sequences_deinit_base_alphabets(void)
 int sequences_init_unaligned_indices(UnalignedIndices *unaligned_indices, size_t len)
 {
     if (!unaligned_indices)
-        return 1;
+        return -1;
     size_t *indices = malloc(len * sizeof(size_t));
     if (!indices)
-        return 1;
+        return -1;
     unaligned_indices->indices = indices;
     unaligned_indices->len = len;
     return 0;
@@ -238,10 +238,10 @@ void sequences_deinit_unaligned_indices(UnalignedIndices *unaligned_indices)
 int sequences_init_unaligned_indices_array(UnalignedIndicesArray *indices_array, size_t len)
 {
     if (!indices_array)
-        return 1;
+        return -1;
     UnalignedIndices *data = calloc(len, sizeof(UnalignedIndices));
     if (!data)
-        return 1;
+        return -1;
     indices_array->data = data;
     indices_array->len = len;
     return 0;
@@ -260,10 +260,10 @@ void sequences_deinit_unaligned_indices_array(UnalignedIndicesArray *indices_arr
 int sequences_index_nongap_syms(Alphabet *alphabet, SeqRecord *record, UnalignedIndices *unaligned_indices)
 {
     if (!alphabet || !record || !unaligned_indices)
-        return 1;
+        return -1;
     int retcode = sequences_init_unaligned_indices(unaligned_indices, record->len);
-    if (retcode > 0)
-        return 1;
+    if (retcode != 0)
+        return -1;
     size_t index = 0;
     for (size_t i = 0; i < record->len; i++)
     {

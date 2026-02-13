@@ -50,7 +50,7 @@ PrefixTreeNode *prefix_tree_node_get_child(PrefixTreeNode *node, unsigned int in
 int char_map_init(CharMap *char_map, char *s)
 {
     if (!char_map || !s)
-        return 1;
+        return -1;
 
     for (unsigned int i = 0; i < PREFIX_CHAR_MAX; i++)
         char_map->map[i] = -1;
@@ -80,7 +80,7 @@ CharMap *char_map_create(char *s)
         return NULL;
 
     int retcode = char_map_init(char_map, s);
-    if (retcode > 0)
+    if (retcode != 0)
     {
         free(char_map);
         return NULL;
@@ -121,11 +121,11 @@ void char_map_print(CharMap *char_map)
 int prefix_tree_node_init(PrefixTreeNode *node, unsigned int capacity, size_t size)
 {
     if (!node)
-        return 1;
+        return -1;
 
     PrefixTreeNode **children = calloc(capacity, sizeof(PrefixTreeNode *));
     if (!children)
-        return 1;
+        return -1;
     node->children = children;
     node->capacity = capacity;
     node->size = size;
@@ -163,7 +163,7 @@ PrefixTreeNode *prefix_tree_node_create(unsigned int capacity, size_t size)
     if (!node)
         return NULL;
     int retcode = prefix_tree_node_init(node, capacity, size);
-    if (retcode > 0)
+    if (retcode != 0)
     {
         free(node);
         return NULL;
@@ -184,7 +184,7 @@ void prefix_tree_node_destroy(PrefixTreeNode *node)
 int prefix_tree_node_insert(PrefixTreeNode *node, CharMap *char_map, char *key, void *value)
 {
     if (!node || !char_map || !key)
-        return 1;
+        return -1;
 
     unsigned int key_index = 0;
     unsigned int key_len = strlen(key);
@@ -199,7 +199,7 @@ int prefix_tree_node_insert(PrefixTreeNode *node, CharMap *char_map, char *key, 
         {
             void *new_value = malloc(node->size);
             if (!new_value)
-                return 1;
+                return -1;
             memcpy(new_value, value, node->size);
             free(node->value);
             node->value = new_value;
@@ -222,7 +222,7 @@ int prefix_tree_node_insert(PrefixTreeNode *node, CharMap *char_map, char *key, 
                 {
                     free(new_child_prefix);
                     prefix_tree_node_deinit(child);
-                    return 1;
+                    return -1;
                 }
                 memcpy(new_child_value, value, node->size);
                 new_child->prefix = new_child_prefix;
@@ -248,7 +248,7 @@ int prefix_tree_node_insert(PrefixTreeNode *node, CharMap *char_map, char *key, 
                 free(new_value);
                 free(new_child_prefix);
                 prefix_tree_node_deinit(new_child);
-                return 1;
+                return -1;
             }
             memcpy(new_value, value, node->size);
 
@@ -269,7 +269,7 @@ int prefix_tree_node_insert(PrefixTreeNode *node, CharMap *char_map, char *key, 
             node->children[child_index] = new_child;
         }
         else
-            return 1;
+            return -1;
     }
 
     return 0;
@@ -354,7 +354,7 @@ void *prefix_tree_node_get_prefix_match(PrefixTreeNode *node, CharMap *char_map,
 int prefix_tree_node_delete(PrefixTreeNode *node, CharMap *char_map, char *key)
 {
     if (!node || !char_map || !key)
-        return 1;
+        return -1;
 
     // Find matching node
     unsigned int key_index = 0;
@@ -376,16 +376,16 @@ int prefix_tree_node_delete(PrefixTreeNode *node, CharMap *char_map, char *key)
             unsigned int child_index = char_map->map[c];
             PrefixTreeNode *child = node->children[child_index];
             if (!child) // Go to child if it exists
-                return 1;
+                return -1;
             parent = node;
             node = child;
             node_index = child_index;
             continue;
         }
         else if (common_len < prefix_len) // Incomplete prefix match
-            return 1;
+            return -1;
         else
-            return 1;
+            return -1;
     }
 
     // Unset value
@@ -401,7 +401,7 @@ int prefix_tree_node_delete(PrefixTreeNode *node, CharMap *char_map, char *key)
         unsigned int new_prefix_len = strlen(node->prefix) + strlen(child->prefix);
         char *new_prefix = malloc(new_prefix_len + 1);
         if (!new_prefix)
-            return 1;
+            return -1;
 
         strcpy(new_prefix, node->prefix);
         strcat(new_prefix, child->prefix);
@@ -432,7 +432,7 @@ int prefix_tree_node_delete(PrefixTreeNode *node, CharMap *char_map, char *key)
         unsigned int new_prefix_len = strlen(parent->prefix) + strlen(child->prefix);
         char *new_prefix = malloc(new_prefix_len + 1);
         if (!new_prefix)
-            return 1;
+            return -1;
         strcpy(new_prefix, parent->prefix);
         strcat(new_prefix, child->prefix);
 
@@ -476,14 +476,14 @@ void prefix_tree_node_print(PrefixTreeNode *node, void (*print_value_fn)(PrefixT
 int prefix_tree_init(PrefixTree *tree, char *s, size_t size)
 {
     if (!tree)
-        return 1;
+        return -1;
 
     int retcode = char_map_init(&tree->char_map, s);
-    if (retcode > 0)
-        return 1;
+    if (retcode != 0)
+        return -1;
     retcode = prefix_tree_node_init(&tree->root, tree->char_map.len, size);
-    if (retcode > 0)
-        return 1;
+    if (retcode != 0)
+        return -1;
 
     return 0;
 }
@@ -503,7 +503,7 @@ PrefixTree *prefix_tree_create(char *s, size_t size)
         return NULL;
 
     int retcode = prefix_tree_init(tree, s, size);
-    if (retcode > 0)
+    if (retcode != 0)
     {
         free(tree);
         return NULL;
@@ -524,9 +524,9 @@ void prefix_tree_destroy(PrefixTree *tree)
 int prefix_tree_insert(PrefixTree *tree, char *key, void *value)
 {
     if (!tree)
-        return 1;
+        return -1;
     if (!char_map_is_in(&tree->char_map, key))
-        return 1;
+        return -1;
 
     PrefixTreeNode *node = &tree->root;
     if (!node->prefix)
@@ -584,13 +584,13 @@ void *prefix_tree_get_prefix_match(PrefixTree *tree, char *key)
 int prefix_tree_delete(PrefixTree *tree, char *key)
 {
     if (!tree)
-        return 1;
+        return -1;
     if (!char_map_is_in(&tree->char_map, key))
-        return 1;
+        return -1;
 
     PrefixTreeNode *node = &tree->root;
     if (!node->prefix)
-        return 1;
+        return -1;
     CharMap *char_map = &tree->char_map;
     int retcode = prefix_tree_node_delete(node, char_map, key);
 

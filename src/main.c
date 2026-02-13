@@ -195,7 +195,7 @@ int main(int argc, char *argv[])
     struct option long_options[NOPTIONS + 1]; // Extra struct of 0s to mark end
     char *short_options = NULL;
     retcode = cli_prepare_options(NOPTIONS, options, &short_options, long_options, INVOCATION_NAME);
-    if (retcode > 0)
+    if (retcode != 0)
         return retcode;
 
     // Parse options
@@ -212,8 +212,8 @@ int main(int argc, char *argv[])
                                &n_seq_type_args, &seq_type_args,
                                PROGRAM_NAME, positional_usage, synopsis);
     free(short_options);
-    if (retcode > 0) // "Expected" exit == 1 and "unexpected" exit > 1; shift -1 for CLI convention
-        return retcode - 1;
+    if (retcode != 0) // "Expected" exit == -1 and "unexpected" exit < -1
+        return (retcode == -1) ? EXIT_SUCCESS : EXIT_FAILURE;
     unsigned int n_positional_args = argc - optind;
     char **positional_args = argv + optind;
 
@@ -280,13 +280,13 @@ int main(int argc, char *argv[])
             seq_type_arg = seq_type_args[file_index];
 
         retcode = load_seqs(file, format_arg, seq_type_arg);
-        if (retcode > 0) // "Expected" exit == 1 and "unexpected" exit > 1; shift -1 for CLI convention
+        if (retcode != 0) // "Expected" exit == -1 and "unexpected" exit < -1
         {
             error_printf("%s: Failed to load sequences in %s\n", INVOCATION_NAME, file->file_path);
-            return retcode - 1;
+            return (retcode == -1) ? EXIT_SUCCESS : EXIT_FAILURE;
         }
         retcode = set_unaligned_indices(file);
-        if (retcode > 0)
+        if (retcode != 0)
         {
             error_printf("%s: Failed to allocate unaligned indices in %s\n", INVOCATION_NAME, file->file_path);
             return EXIT_FAILURE;
@@ -404,7 +404,7 @@ int load_seqs(FileState *file, const char *format_arg, const char *seq_type_arg)
     // Infer reader
     FileReader reader = get_reader(file, format_arg);
     if (!reader)
-        return 2;
+        return -2;
 
     // Read file
     FILE *fp;
@@ -413,14 +413,14 @@ int load_seqs(FileState *file, const char *format_arg, const char *seq_type_arg)
     else if (!(fp = fopen(file->file_path, "r")))
     {
         error_printf("%s: %s: %s\n", INVOCATION_NAME, file->file_path, strerror(errno));
-        return 2;
+        return -2;
     }
     SeqRecordArray *record_array = &file->record_array;
     retcode = reader(fp, record_array);
-    if (retcode > 0)
+    if (retcode != 0)
     {
         error_printf("%s: %s: Error processing file (code %d)\n", INVOCATION_NAME, file->file_path, retcode);
-        return 2;
+        return -2;
     }
 
     // Get max_len
@@ -434,8 +434,8 @@ int load_seqs(FileState *file, const char *format_arg, const char *seq_type_arg)
 
     // Set sequence type
     retcode = set_seq_types(file, seq_type_arg);
-    if (retcode > 0)
-        return 1;
+    if (retcode != 0)
+        return -1;
 
     file->tick_offset = 1;
     file->records_max_len = max_len;
@@ -490,7 +490,7 @@ int set_seq_types(FileState *file, const char *seq_type_arg)
                    file->file_path);
             int c = getchar();
             if (c != 'y' && c != 'Y')
-                return 1;
+                return -1;
             while ((c = getchar()) != '\n' && c != EOF)
                 ; // Clear remaining input
         };
@@ -521,8 +521,8 @@ int set_seq_types(FileState *file, const char *seq_type_arg)
 int set_unaligned_indices(FileState *file)
 {
     int retcode = sequences_init_unaligned_indices_array(&file->indices_array, file->record_array.len);
-    if (retcode > 0)
-        return 1;
+    if (retcode != 0)
+        return -1;
     for (size_t i = 0; i < file->record_array.len; i++)
     {
         SeqRecord *record = file->record_array.data + i;

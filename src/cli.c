@@ -53,7 +53,7 @@ int cli_prepare_options(unsigned int noptions, Option *options,
     char *short_options = malloc(short_options_array.len * short_options_array.size);
     if (!short_options)
     {
-        retcode = 1;
+        retcode = -1;
         error_printf("%s: Failed to allocate memory to create options string\n", invocation_name);
         goto cleanup;
     }

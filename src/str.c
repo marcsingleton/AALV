@@ -11,7 +11,7 @@ static int copy_field(char **field_ptr, const char *s, const size_t len)
 {
     char *field = malloc((len + 1) * sizeof(char));
     if (!field)
-        return 1;
+        return -1;
     memcpy(field, s, len * sizeof(char));
     field[len] = '\0';
     *field_ptr = field;
@@ -39,7 +39,7 @@ int str_is_in_split(const char **ss, unsigned int n, const char *t)
 {
     for (unsigned int i = 0; i < n; i++)
         if (strcmp(ss[i], t) == 0)
-            return 1;
+            return -1;
     return 0;
 }
 

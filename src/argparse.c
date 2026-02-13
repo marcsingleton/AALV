@@ -29,7 +29,7 @@ int argparse_options(int argc, char *argv[],
         else if (c == '?')
         {
             cli_print_short_help(noptions, options, program_name, positional_usage);
-            return 2;
+            return -2;
         }
 
         // Process option
@@ -38,23 +38,23 @@ int argparse_options(int argc, char *argv[],
             name = options[option_index].long_name;
         if (c == 'f' || strcmp(name, "format") == 0)
         {
-            ssize_t code = str_split(format_args_ptr, argv[optind - 1], option_delim);
-            if (code < 0)
+            ssize_t nwords = str_split(format_args_ptr, argv[optind - 1], option_delim);
+            if (nwords < 0)
             {
                 error_printf("%s: Failed to parse formats\n", INVOCATION_NAME);
-                return 2;
+                return -2;
             }
-            *n_format_args = code;
+            *n_format_args = nwords;
         }
         else if (c == 'h')
         {
             cli_print_short_help(noptions, options, program_name, positional_usage);
-            return 1;
+            return -1;
         }
         else if (strcmp(name, "help") == 0)
         {
             cli_print_long_help(noptions, options, program_name, positional_usage, synopsis);
-            return 1;
+            return -1;
         }
         else if (strcmp(name, "list-formats") == 0)
         {
@@ -64,7 +64,7 @@ int argparse_options(int argc, char *argv[],
                 FormatOption *format_option = format_options + i;
                 printf("%s\t%s\n", format_option->name, format_option->exts);
             }
-            return 1;
+            return -1;
         }
         else if (strcmp(name, "list-types") == 0)
         {
@@ -74,22 +74,22 @@ int argparse_options(int argc, char *argv[],
                 SeqTypeOption *seq_type_option = seq_type_options + i;
                 printf("%s\t%s\n", seq_type_option->name, seq_type_option->identifiers);
             }
-            return 1;
+            return -1;
         }
         else if (c == 't' || strcmp(name, "type") == 0)
         {
-            ssize_t code = str_split(seq_type_args_ptr, argv[optind - 1], option_delim);
-            if (code < 0)
+            ssize_t nwords = str_split(seq_type_args_ptr, argv[optind - 1], option_delim);
+            if (nwords < 0)
             {
                 error_printf("%s: Failed to parse types\n", INVOCATION_NAME);
-                return 2;
+                return -2;
             }
-            *n_seq_type_args = code;
+            *n_seq_type_args = nwords;
         }
         else if (c == 'v' || strcmp(name, "version") == 0)
         {
             printf(PROGRAM_NAME " " VERSION "\n");
-            return 1;
+            return -1;
         }
     }
     return 0;

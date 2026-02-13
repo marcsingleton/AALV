@@ -15,21 +15,21 @@ int test_init(void)
     value = array_init(NULL, sizeof(int));
     if (value == 0)
     {
-        retcode = 1;
+        retcode = -1;
         goto cleanup;
     }
     // 0 size
     value = array_init(&array, 0);
     if (value == 0)
     {
-        retcode = 2;
+        retcode = -2;
         goto cleanup;
     }
     // Success
     value = array_init(&array, sizeof(int));
     if (value != 0 || array.size != sizeof(int) || array.capacity == 0 || array.len != 0)
     {
-        retcode = 3;
+        retcode = -3;
         goto cleanup;
     }
 
@@ -48,7 +48,7 @@ int test_append_null(void)
     value = array_append(NULL, &x);
     if (value == 0)
     {
-        retcode = 1;
+        retcode = -1;
         goto cleanup;
     }
 
@@ -67,14 +67,14 @@ int test_extend_null(void)
     value = array_append(NULL, &x);
     if (value == 0)
     {
-        retcode = 1;
+        retcode = -1;
         goto cleanup;
     }
     // NULL values
     value = array_append(&array, NULL);
     if (value == 0)
     {
-        retcode = 2;
+        retcode = -2;
         goto cleanup;
     }
 
@@ -90,7 +90,7 @@ int test_get_null(void)
     int *ptr = array_get(NULL, 0);
     if (ptr)
     {
-        retcode = 1;
+        retcode = -1;
         goto cleanup;
     }
 
@@ -108,7 +108,7 @@ int test_append_get(void)
     value = array_init(&array, sizeof(int));
     if (value != 0)
     {
-        retcode = 1;
+        retcode = -1;
         goto cleanup;
     }
     // Append
@@ -119,7 +119,7 @@ int test_append_get(void)
         value = array_append(&array, &x);
         if (value != 0)
         {
-            retcode = 2;
+            retcode = -2;
             goto cleanup;
         }
     }
@@ -129,14 +129,14 @@ int test_append_get(void)
         int *ptr = array_get(&array, i);
         if (!ptr)
         {
-            retcode = 3;
+            retcode = -3;
             goto cleanup;
         }
         int actual_x = *ptr;
         int expected_x = 2 * i * i - 1;
         if (actual_x != expected_x)
         {
-            retcode = 4;
+            retcode = -4;
             goto cleanup;
         }
     }
@@ -155,7 +155,7 @@ int test_extend_get(void)
     // Initialize
     if (array_init(&array_1, sizeof(int)) != 0 || array_init(&array_2, sizeof(int)) != 0)
     {
-        retcode = 1;
+        retcode = -1;
         goto cleanup;
     }
     // Append
@@ -166,7 +166,7 @@ int test_extend_get(void)
         value = array_append(&array_1, &x);
         if (value != 0)
         {
-            retcode = 2;
+            retcode = -2;
             goto cleanup;
         }
     }
@@ -177,7 +177,7 @@ int test_extend_get(void)
         value = array_append(&array_2, &x);
         if (value != 0)
         {
-            retcode = 3;
+            retcode = -3;
             goto cleanup;
         }
     }
@@ -185,7 +185,7 @@ int test_extend_get(void)
     value = array_extend(&array_1, array_2.data, array_2.len);
     if (value != 0)
     {
-        retcode = 4;
+        retcode = -4;
         goto cleanup;
     }
     for (int i = 0; i < n_1 + n_2; i++)
@@ -193,7 +193,7 @@ int test_extend_get(void)
         int *ptr = array_get(&array_1, i);
         if (!ptr)
         {
-            retcode = 5;
+            retcode = -5;
             goto cleanup;
         }
         int actual_x = *ptr;
@@ -204,12 +204,12 @@ int test_extend_get(void)
             expected_x = (i - n_1) * (i - n_1) - 1;
         else
         {
-            retcode = 6;
+            retcode = -6;
             goto cleanup;
         }
         if (actual_x != expected_x)
         {
-            retcode = 7;
+            retcode = -7;
             goto cleanup;
         }
     }
@@ -230,7 +230,7 @@ int test_append_pop(void)
     value = array_init(&array, sizeof(int));
     if (value != 0)
     {
-        retcode = 1;
+        retcode = -1;
         goto cleanup;
     }
     // Append
@@ -241,7 +241,7 @@ int test_append_pop(void)
         value = array_append(&array, &x);
         if (value != 0)
         {
-            retcode = 2;
+            retcode = -2;
             goto cleanup;
         }
     }
@@ -251,19 +251,19 @@ int test_append_pop(void)
         int *ptr = array_pop(&array);
         if (!ptr)
         {
-            retcode = 3;
+            retcode = -3;
             goto cleanup;
         }
         int actual_x = *ptr;
         int expected_x = 2 * i * i - 1;
         if (actual_x != expected_x)
         {
-            retcode = 4;
+            retcode = -4;
             goto cleanup;
         }
         if (array.len != (unsigned)i) // Silence sign mis-match
         {
-            retcode = 5;
+            retcode = -5;
             goto cleanup;
         }
     }
@@ -283,7 +283,7 @@ int test_get_out_of_bounds(void)
     value = array_init(&array, sizeof(int));
     if (value != 0)
     {
-        retcode = 1;
+        retcode = -1;
         goto cleanup;
     }
     // Append
@@ -293,7 +293,7 @@ int test_get_out_of_bounds(void)
         value = array_append(&array, &i);
         if (value != 0)
         {
-            retcode = 2;
+            retcode = -2;
             goto cleanup;
         }
     }
@@ -301,13 +301,13 @@ int test_get_out_of_bounds(void)
     int *ptr = array_get(&array, len - 1);
     if (!ptr)
     {
-        retcode = 3;
+        retcode = -3;
         goto cleanup;
     }
     ptr = array_get(&array, len);
     if (ptr)
     {
-        retcode = 4;
+        retcode = -4;
         goto cleanup;
     }
 
@@ -326,7 +326,7 @@ int test_shrink(void)
     value = array_init(&array, sizeof(int));
     if (value != 0)
     {
-        retcode = 1;
+        retcode = -1;
         goto cleanup;
     }
     // Shrink
@@ -334,7 +334,7 @@ int test_shrink(void)
     array_shrink(&array);
     if (array.capacity != capacity)
     {
-        retcode = 2;
+        retcode = -2;
         goto cleanup;
     }
     for (size_t i = 0; i < capacity + 1; i++)
@@ -342,7 +342,7 @@ int test_shrink(void)
     array_shrink(&array);
     if (array.capacity != array.len)
     {
-        retcode = 3;
+        retcode = -3;
         goto cleanup;
     }
 

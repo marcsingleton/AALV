@@ -23,7 +23,7 @@ int test_tree_init(void)
 
     int retcode = prefix_tree_init(&tree, s, sizeof(int));
     if (retcode != 0)
-        return 1;
+        return -1;
 
     return 0;
 }
@@ -42,28 +42,28 @@ int test_tree_insert_get_delete_root(void)
 
     int retcode = prefix_tree_init(&tree, s, sizeof(int));
     if (retcode != 0)
-        return 1;
+        return -1;
 
     key = "A";
     value = 0;
     if (prefix_tree_insert(&tree, key, &value) != 0)
-        return 2;
+        return -2;
 
     key = "A";
     expected_value = 0;
     ptr = prefix_tree_get(&tree, key);
     if (!ptr)
-        return 3;
+        return -3;
     returned_value = *(int *)ptr;
     if (expected_value != returned_value)
-        return 4;
+        return -4;
 
     key = "A";
     if (prefix_tree_delete(&tree, key) != 0)
-        return 5;
+        return -5;
     ptr = prefix_tree_get(&tree, key);
     if (ptr)
-        return 6;
+        return -6;
 
     return 0;
 }
@@ -82,75 +82,75 @@ int test_tree_insert_get_delete_parent(void)
 
     int retcode = prefix_tree_init(&tree, s, sizeof(int));
     if (retcode != 0)
-        return 1;
+        return -1;
 
     // Insert
     key = "A";
     value = 0;
     if (prefix_tree_insert(&tree, key, &value) != 0)
-        return 2;
+        return -2;
     key = "AB";
     value = 1;
     if (prefix_tree_insert(&tree, key, &value) != 0)
-        return 3;
+        return -3;
     key = "ABC";
     value = 2;
     if (prefix_tree_insert(&tree, key, &value) != 0)
-        return 3;
+        return -4;
 
     // Get
     key = "A";
     expected_value = 0;
     ptr = prefix_tree_get(&tree, key);
     if (!ptr)
-        return 4;
+        return -5;
     returned_value = *(int *)ptr;
     if (expected_value != returned_value)
-        return 5;
+        return -6;
 
     key = "AB";
     expected_value = 1;
     ptr = prefix_tree_get(&tree, key);
     if (!ptr)
-        return 6;
+        return -7;
     returned_value = *(int *)ptr;
     if (expected_value != returned_value)
-        return 7;
+        return -8;
 
     key = "ABC";
     expected_value = 2;
     ptr = prefix_tree_get(&tree, key);
     if (!ptr)
-        return 6;
+        return -9;
     returned_value = *(int *)ptr;
     if (expected_value != returned_value)
-        return 7;
+        return -10;
 
     // Delete
     key = "AB";
     if (prefix_tree_delete(&tree, key) != 0)
-        return 8;
+        return -11;
     ptr = prefix_tree_get(&tree, key);
     if (ptr)
-        return 9;
+        return -12;
 
     key = "ABC";
     expected_value = 2;
     ptr = prefix_tree_get(&tree, key);
     if (!ptr)
-        return 10;
+        return -13;
     returned_value = *(int *)ptr;
     if (expected_value != returned_value)
-        return 11;
+        return -14;
 
     key = "A";
     expected_value = 0;
     ptr = prefix_tree_get(&tree, key);
     if (!ptr)
-        return 12;
+        return -15;
     returned_value = *(int *)ptr;
     if (expected_value != returned_value)
-        return 13;
+        return -16;
 
     return 0;
 }
@@ -169,53 +169,53 @@ int test_tree_insert_get_delete_parent_root(void)
 
     int retcode = prefix_tree_init(&tree, s, sizeof(int));
     if (retcode != 0)
-        return 1;
+        return -1;
 
     // Insert
     key = "A";
     value = 0;
     if (prefix_tree_insert(&tree, key, &value) != 0)
-        return 2;
+        return -2;
     key = "AB";
     value = 1;
     if (prefix_tree_insert(&tree, key, &value) != 0)
-        return 3;
+        return -3;
 
     // Get
     key = "A";
     expected_value = 0;
     ptr = prefix_tree_get(&tree, key);
     if (!ptr)
-        return 4;
+        return -4;
     returned_value = *(int *)ptr;
     if (expected_value != returned_value)
-        return 5;
+        return -5;
 
     key = "AB";
     expected_value = 1;
     ptr = prefix_tree_get(&tree, key);
     if (!ptr)
-        return 6;
+        return -6;
     returned_value = *(int *)ptr;
     if (expected_value != returned_value)
-        return 7;
+        return -7;
 
     // Delete
     key = "A";
     if (prefix_tree_delete(&tree, key) != 0)
-        return 8;
+        return -8;
     ptr = prefix_tree_get(&tree, key);
     if (ptr)
-        return 9;
+        return -9;
 
     key = "AB";
     expected_value = 1;
     ptr = prefix_tree_get(&tree, key);
     if (!ptr)
-        return 10;
+        return -10;
     returned_value = *(int *)ptr;
     if (expected_value != returned_value)
-        return 11;
+        return -11;
 
     return 0;
 }
@@ -234,53 +234,53 @@ int test_tree_insert_get_delete_leaf(void)
 
     int retcode = prefix_tree_init(&tree, s, sizeof(int));
     if (retcode != 0)
-        return 1;
+        return -1;
 
     // Insert
     key = "A";
     value = 0;
     if (prefix_tree_insert(&tree, key, &value) != 0)
-        return 2;
+        return -2;
     key = "AB";
     value = 1;
     if (prefix_tree_insert(&tree, key, &value) != 0)
-        return 3;
+        return -3;
 
     // Get
     key = "A";
     expected_value = 0;
     ptr = prefix_tree_get(&tree, key);
     if (!ptr)
-        return 4;
+        return -4;
     returned_value = *(int *)ptr;
     if (expected_value != returned_value)
-        return 5;
+        return -5;
 
     key = "AB";
     expected_value = 1;
     ptr = prefix_tree_get(&tree, key);
     if (!ptr)
-        return 6;
+        return -6;
     returned_value = *(int *)ptr;
     if (expected_value != returned_value)
-        return 7;
+        return -7;
 
     // Delete
     key = "AB";
     if (prefix_tree_delete(&tree, key) != 0)
-        return 8;
+        return -8;
     ptr = prefix_tree_get(&tree, key);
     if (ptr)
-        return 9;
+        return -9;
 
     key = "A";
     expected_value = 0;
     ptr = prefix_tree_get(&tree, key);
     if (!ptr)
-        return 10;
+        return -10;
     returned_value = *(int *)ptr;
     if (expected_value != returned_value)
-        return 11;
+        return -11;
 
     return 0;
 }
@@ -299,80 +299,80 @@ int test_tree_insert_get_prefix(void)
 
     int retcode = prefix_tree_init(&tree, s, sizeof(int));
     if (retcode != 0)
-        return 1;
+        return -1;
 
     // Insert
     key = "A";
     value = 0;
     if (prefix_tree_insert(&tree, key, &value) != 0)
-        return 2;
+        return -2;
 
     key = "AAA";
     value = 1;
     if (prefix_tree_insert(&tree, key, &value) != 0)
-        return 3;
+        return -3;
 
     // Get
     key = "A";
     expected_value = 0;
     ptr = prefix_tree_get_prefix_match(&tree, key);
     if (!ptr)
-        return 4;
+        return -4;
     returned_value = *(int *)ptr;
     if (expected_value != returned_value)
-        return 5;
+        return -5;
 
     key = "AA";
     expected_value = 1;
     ptr = prefix_tree_get_prefix_match(&tree, key);
     if (!ptr)
-        return 6;
+        return -6;
     returned_value = *(int *)ptr;
     if (expected_value != returned_value)
-        return 7;
+        return -7;
 
     key = "AAA";
     expected_value = 1;
     ptr = prefix_tree_get_prefix_match(&tree, key);
     if (!ptr)
-        return 8;
+        return -8;
     returned_value = *(int *)ptr;
     if (expected_value != returned_value)
-        return 9;
+        return -9;
 
     // Insert prefix
     key = "AA";
     value = 2;
     if (prefix_tree_insert(&tree, key, &value) != 0)
-        return 10;
+        return -10;
 
     // Get prefix
     key = "A";
     expected_value = 0;
     ptr = prefix_tree_get_prefix_match(&tree, key);
     if (!ptr)
-        return 11;
+        return -11;
     returned_value = *(int *)ptr;
     if (expected_value != returned_value)
-        return 12;
+        return -12;
 
     key = "AAA";
     expected_value = 1;
     ptr = prefix_tree_get_prefix_match(&tree, key);
     if (!ptr)
-        return 13;
+        return -13;
     returned_value = *(int *)ptr;
     if (expected_value != returned_value)
-        return 14;
+        return -14;
 
     key = "AA";
     expected_value = 2;
     ptr = prefix_tree_get_prefix_match(&tree, key);
     if (!ptr)
-        return 15;
+        return -15;
     returned_value = *(int *)ptr;
     if (expected_value != returned_value)
-        return 16;
+        return -16;
 
     return 0;
 }
@@ -391,36 +391,36 @@ int test_tree_insert_split_leaf(void)
 
     int retcode = prefix_tree_init(&tree, s, sizeof(int));
     if (retcode != 0)
-        return 1;
+        return -1;
 
     // Insert
     key = "AA";
     value = 0;
     if (prefix_tree_insert(&tree, key, &value) != 0)
-        return 2;
+        return -2;
     key = "AAB";
     value = 1;
     if (prefix_tree_insert(&tree, key, &value) != 0)
-        return 3;
+        return -3;
 
     // Get
     key = "AA";
     expected_value = 0;
     ptr = prefix_tree_get(&tree, key);
     if (!ptr)
-        return 4;
+        return -4;
     returned_value = *(int *)ptr;
     if (expected_value != returned_value)
-        return 5;
+        return -5;
 
     key = "AAB";
     expected_value = 1;
     ptr = prefix_tree_get(&tree, key);
     if (!ptr)
-        return 6;
+        return -6;
     returned_value = *(int *)ptr;
     if (expected_value != returned_value)
-        return 7;
+        return -7;
 
     return 0;
 }
@@ -439,44 +439,44 @@ int test_tree_insert_split_internal(void)
 
     int retcode = prefix_tree_init(&tree, s, sizeof(int));
     if (retcode != 0)
-        return 1;
+        return -1;
 
     // Insert
     key = "AAA";
     value = 0;
     if (prefix_tree_insert(&tree, key, &value) != 0)
-        return 2;
+        return -2;
     key = "AAB";
     value = 1;
     if (prefix_tree_insert(&tree, key, &value) != 0)
-        return 3;
+        return -3;
 
     // Get
     key = "AAA";
     expected_value = 0;
     ptr = prefix_tree_get(&tree, key);
     if (!ptr)
-        return 4;
+        return -4;
     returned_value = *(int *)ptr;
     if (expected_value != returned_value)
-        return 5;
+        return -5;
 
     key = "AAB";
     expected_value = 1;
     ptr = prefix_tree_get(&tree, key);
     if (!ptr)
-        return 6;
+        return -6;
     returned_value = *(int *)ptr;
     if (expected_value != returned_value)
-        return 7;
+        return -7;
 
     key = "AA";
     ptr = prefix_tree_get(&tree, key);
     if (ptr)
-        return 8;
+        return -8;
 
     if (tree.root.value)
-        return 9;
+        return -9;
 
     return 0;
 }
@@ -488,12 +488,12 @@ int test_tree_insert_out_of_char_map(void)
 
     int retcode = prefix_tree_init(&tree, s, sizeof(int));
     if (retcode != 0)
-        return 1;
+        return -1;
 
     char *key = "abc";
     int value = 10;
-    if (prefix_tree_insert(&tree, key, &value) != 1)
-        return 2;
+    if (prefix_tree_insert(&tree, key, &value) == 0)
+        return -2;
 
     return 0;
 }

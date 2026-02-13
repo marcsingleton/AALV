@@ -16,11 +16,11 @@ int test_init_alphabet_base(void)
     int retcode = sequences_init_alphabet(&test_alphabet, test_alphabet.name,
                                           test_alphabet.syms, test_alphabet.gaps,
                                           test_alphabet.case_sensitive);
-    if (retcode > 0)
+    if (retcode != 0)
         return retcode;
 
     if (test_alphabet.len != len)
-        return 1;
+        return -1;
 
     return 0;
 }
@@ -38,11 +38,11 @@ int test_init_alphabet_duplicated_sym(void)
     int retcode = sequences_init_alphabet(&test_alphabet, test_alphabet.name,
                                           test_alphabet.syms, test_alphabet.gaps,
                                           test_alphabet.case_sensitive);
-    if (retcode > 0)
+    if (retcode != 0)
         return retcode;
 
     if (test_alphabet.len != len)
-        return 1;
+        return -1;
 
     return 0;
 }
@@ -60,7 +60,7 @@ int test_init_alphabet_out_of_alphabet_gap(void)
                                           test_alphabet.syms, test_alphabet.gaps,
                                           test_alphabet.case_sensitive);
     if (retcode == 0)
-        return 1;
+        return -1;
 
     return 0;
 }
@@ -85,15 +85,15 @@ int test_sym_in_alphabet(void)
     int retcode = sequences_init_alphabet(&test_alphabet, test_alphabet.name,
                                           test_alphabet.syms, test_alphabet.gaps,
                                           test_alphabet.case_sensitive);
-    if (retcode > 0)
+    if (retcode != 0)
         return retcode;
 
     if (sequences_sym_in_alphabet(&test_alphabet, in_sym) != 1)
-        return 1;
+        return -1;
     if (sequences_sym_in_alphabet(&test_alphabet, out_sym) != 0)
-        return 1;
+        return -1;
     if (sequences_sym_in_alphabet(&test_alphabet, non_ascii_sym) != -1)
-        return 1;
+        return -1;
 
     return 0;
 }
@@ -114,17 +114,17 @@ int test_sym_is_gap(void)
     int retcode = sequences_init_alphabet(&test_alphabet, test_alphabet.name,
                                           test_alphabet.syms, test_alphabet.gaps,
                                           test_alphabet.case_sensitive);
-    if (retcode > 0)
+    if (retcode != 0)
         return retcode;
 
     if (sequences_sym_is_gap(&test_alphabet, in_sym) != 0)
-        return 1;
+        return -1;
     if (sequences_sym_is_gap(&test_alphabet, out_sym) != 0)
-        return 1;
+        return -1;
     if (sequences_sym_is_gap(&test_alphabet, non_ascii_sym) != -1)
-        return 1;
+        return -1;
     if (sequences_sym_is_gap(&test_alphabet, gap_sym) != 1)
-        return 1;
+        return -1;
 
     return 0;
 }
@@ -143,13 +143,13 @@ int test_seq_in_alphabet(void)
     int retcode = sequences_init_alphabet(&test_alphabet, test_alphabet.name,
                                           test_alphabet.syms, test_alphabet.gaps,
                                           test_alphabet.case_sensitive);
-    if (retcode > 0)
+    if (retcode != 0)
         return retcode;
 
     if (sequences_seq_in_alphabet(&test_alphabet, seq_1.seq) != 1)
-        return 1;
+        return -1;
     if (sequences_seq_in_alphabet(&test_alphabet, seq_2.seq) == 1)
-        return 1;
+        return -1;
 
     return 0;
 }
@@ -157,11 +157,11 @@ int test_seq_in_alphabet(void)
 int test_rna_nucleic_subset(void)
 {
     int retcode = sequences_init_base_alphabets();
-    if (retcode > 0)
+    if (retcode != 0)
         return retcode;
 
     if (sequences_seq_in_alphabet(&NUCLEIC_ALPHABET, RNA_ALPHABET.syms) != 1)
-        return 1;
+        return -1;
 
     return 0;
 }
@@ -169,11 +169,11 @@ int test_rna_nucleic_subset(void)
 int test_dna_nucleic_subset(void)
 {
     int retcode = sequences_init_base_alphabets();
-    if (retcode > 0)
+    if (retcode != 0)
         return retcode;
 
     if (sequences_seq_in_alphabet(&NUCLEIC_ALPHABET, DNA_ALPHABET.syms) != 1)
-        return 1;
+        return -1;
 
     return 0;
 }

@@ -37,7 +37,7 @@ char *cmd_read_command_line(int input_fd, char *prompt)
 int cmd_parse_and_execute_command_line(char *line)
 {
     if (!line)
-        return 1;
+        return -1;
 
     int argc = 0;
     char *argv[CMD_ARG_MAX];
@@ -69,10 +69,10 @@ int cmd_parse_and_execute_command_line(char *line)
     }
 
     if (argc == 0)
-        return 1;
+        return -1;
     void *ptr = prefix_tree_get_prefix_match(&cmd_map, argv[0]);
     if (!ptr)
-        return 1;
+        return -1;
     Command *cmd = ptr;
 
     void (*fn)(int, char **) = cmd->fn_ptr;
@@ -88,13 +88,13 @@ cleanup:
 int cmd_init_command_map(void)
 {
     int retcode = prefix_tree_init(&cmd_map, CMD_ALPHABET, sizeof(Command));
-    if (retcode > 0)
+    if (retcode != 0)
         return retcode;
     for (unsigned int i = 0; i < NCMDS; i++)
     {
         Command *cmd = cmds + i;
         retcode = prefix_tree_insert(&cmd_map, cmd->name, cmd);
-        if (retcode > 0)
+        if (retcode != 0)
             return retcode;
     }
     return retcode;

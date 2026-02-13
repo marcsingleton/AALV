@@ -12,13 +12,13 @@ int split_tester(char *s, char **expected_fields, int expected_n, const char *de
     int returned_n = str_split(&returned_fields, s, delim);
     if (returned_n != expected_n)
     {
-        retcode = 1;
+        retcode = -1;
         goto cleanup;
     }
     for (int i = 0; i < expected_n; i++)
         if (strcmp(expected_fields[i], returned_fields[i]) != 0)
         {
-            retcode = 2;
+            retcode = -2;
             goto cleanup;
         }
 cleanup:
@@ -77,7 +77,7 @@ int test_split_wrong_expected_n(void)
     if (split_tester(s, expected_fields, expected_n, delim) != 0)
         return 0;
     else
-        return 1;
+        return -1;
 }
 
 int test_split_wrong_expected_fields(void)
@@ -90,7 +90,7 @@ int test_split_wrong_expected_fields(void)
     if (split_tester(s, expected_fields, expected_n, delim) != 0)
         return 0;
     else
-        return 1;
+        return -1;
 }
 
 int test_is_in_strsep(void)
@@ -100,24 +100,24 @@ int test_is_in_strsep(void)
 
     // True
     if (str_is_in_strsep(s, delim, "a") != 1)
-        return 1;
+        return -1;
     if (str_is_in_strsep(s, delim, "1234") != 1)
-        return 1;
+        return -1;
     if (str_is_in_strsep(s, delim, "!@") != 1)
-        return 1;
+        return -1;
     if (str_is_in_strsep(s, delim, "xyz") != 1)
-        return 1;
+        return -1;
     if (str_is_in_strsep("", delim, "") != 1) // Degenerate but consistent with empty set memberships
-        return 1;
+        return -1;
     // False
     if (str_is_in_strsep(s, delim, "123") != 0)
-        return 1;
+        return -1;
     if (str_is_in_strsep(s, delim, "789") != 0)
-        return 1;
+        return -1;
     if (str_is_in_strsep(s, delim, "") != 0)
-        return 1;
+        return -1;
     if (str_is_in_strsep("", delim, "a") != 0)
-        return 1;
+        return -1;
     return 0;
 }
 

@@ -12,7 +12,7 @@
 int fasta_fread(FILE *fp, SeqRecordArray *record_array)
 {
     // Declarations
-    int retcode = 0;
+    int retcode = FASTA_ERROR_SUCCESS;
 
     void *ptr = NULL; // A generic temporary pointer for allocations
 
@@ -168,7 +168,7 @@ cleanup:
     free(id);
     free(seq);
 
-    if (retcode > 0)
+    if (retcode != FASTA_ERROR_SUCCESS)
     {
         for (size_t i = 0; i < new_records.len; i++)
         {

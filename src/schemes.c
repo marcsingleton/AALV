@@ -16,13 +16,13 @@ int schemes_init_base(void)
         ColorScheme *scheme = scheme_record->scheme;
         Alphabet *alphabet = scheme_record->alphabet;
         int retcode = color_init_color_scheme(scheme, COLOR_4_BIT, scheme_record->name, alphabet->len);
-        if (retcode > 0)
+        if (retcode != 0)
             return retcode;
         for (const ColorMapRecord4Bit *map_record = scheme_record->map; map_record->sym != 0; map_record++)
         {
             int index = alphabet->index_map[(unsigned int)map_record->sym];
             if (index == -1)
-                return 1;
+                return -1;
             if (map_record->fg_mask)
             {
                 scheme->map.b4.fg[index] = map_record->fg_color;
@@ -44,13 +44,13 @@ int schemes_init_base(void)
         ColorScheme *scheme = scheme_record->scheme;
         Alphabet *alphabet = scheme_record->alphabet;
         int retcode = color_init_color_scheme(scheme, COLOR_8_BIT, scheme_record->name, alphabet->len);
-        if (retcode > 0)
+        if (retcode != 0)
             return retcode;
         for (const ColorMapRecord8Bit *map_record = scheme_record->map; map_record->sym != 0; map_record++)
         {
             int index = alphabet->index_map[(unsigned int)map_record->sym];
             if (index == -1)
-                return 1;
+                return -1;
             if (map_record->fg_mask)
             {
                 scheme->map.b8.fg[index] = map_record->fg_color;

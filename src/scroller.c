@@ -3,7 +3,7 @@
 int scroller_init(RowLinkedScroller *scroller, unsigned int npanes)
 {
     if (!scroller || npanes == 0)
-        return 1;
+        return -1;
 
     size_t *offsets_j = NULL;
     size_t *cursors_j = NULL;
@@ -20,7 +20,7 @@ int scroller_init(RowLinkedScroller *scroller, unsigned int npanes)
         free(cursors_j);
         free(ws);
         free(refreshes);
-        return 1;
+        return -1;
     }
 
     scroller->offset_i = 0;

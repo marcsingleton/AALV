@@ -22,7 +22,7 @@ SeqRecord data[] = {
 SeqRecordArray record_array = {.data = data, .len = NRECORDS};
 
 #define BUFFERLEN 1024 // Must be large enough to hold above SeqRecords
-#define MAX_LEN 10      // Make small enough to ensure above records will wrap a few times
+#define MAX_LEN 10     // Make small enough to ensure above records will wrap a few times
 
 int records_equal(SeqRecordArray *record_array_1, SeqRecordArray *record_array_2)
 {
@@ -68,11 +68,11 @@ int test_read_write(void)
     fseek(fp, 0, SEEK_SET);
     SeqRecordArray new_record_array;
     int fasta_retcode = fasta_fread(fp, &new_record_array);
-    if (fasta_retcode > 0)
-        retcode = 1;
+    if (fasta_retcode != FASTA_ERROR_SUCCESS)
+        retcode = -1;
     else if (records_equal(&record_array, &new_record_array) != 1)
-        retcode = 1;
-    if (fasta_retcode == 0)
+        retcode = -1;
+    if (fasta_retcode == FASTA_ERROR_SUCCESS)
         sequences_deinit_seq_record_array(&new_record_array);
     fclose(fp);
     return retcode;
@@ -91,7 +91,7 @@ int test_no_header(void)
     SeqRecordArray new_record_array;
     int fasta_retcode = fasta_fread(fp, &new_record_array);
     if (fasta_retcode != FASTA_ERROR_INVALID_FORMAT)
-        retcode = 1;
+        retcode = -1;
     if (fasta_retcode == 0)
         sequences_deinit_seq_record_array(&new_record_array);
     fclose(fp);
@@ -107,7 +107,7 @@ int test_empty_file(void)
     SeqRecordArray new_record_array;
     int fasta_retcode = fasta_fread(fp, &new_record_array);
     if (fasta_retcode != 0 || new_record_array.len != 0)
-        retcode = 1;
+        retcode = -1;
     if (fasta_retcode == 0)
         sequences_deinit_seq_record_array(&new_record_array);
     fclose(fp);
@@ -129,11 +129,11 @@ int test_blank_lines(void)
     fseek(fp, 0, SEEK_SET);
     SeqRecordArray new_record_array;
     int fasta_retcode = fasta_fread(fp, &new_record_array);
-    if (fasta_retcode != 0 || new_record_array.len != record_array.len)
-        retcode = 1;
+    if (fasta_retcode != FASTA_ERROR_SUCCESS || new_record_array.len != record_array.len)
+        retcode = -1;
     else if (records_equal(&record_array, &new_record_array) != 1)
-        retcode = 1;
-    if (fasta_retcode == 0)
+        retcode = -1;
+    if (fasta_retcode == FASTA_ERROR_SUCCESS)
         sequences_deinit_seq_record_array(&new_record_array);
     fclose(fp);
     return retcode;
@@ -150,7 +150,7 @@ int test_non_fasta(void)
     SeqRecordArray new_record_array;
     int fasta_retcode = fasta_fread(fp, &new_record_array);
     if (fasta_retcode != FASTA_ERROR_INVALID_FORMAT)
-        retcode = 1;
+        retcode = -1;
     if (fasta_retcode == 0)
         sequences_deinit_seq_record_array(&new_record_array);
     fclose(fp);
@@ -182,7 +182,7 @@ int test_get_id(void)
         expected_id = test->id;
         returned_id = fasta_get_id(test->header);
         if (!returned_id || strcmp(expected_id, returned_id) != 0)
-            retcode += 1;
+            retcode -= 1;
         free(returned_id);
     }
 
