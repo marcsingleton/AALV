@@ -25,12 +25,12 @@ int schemes_init_base(void)
                 return -1;
             if (map_record->fg_mask)
             {
-                scheme->map.b4.fg[index] = map_record->fg_color.b4;
+                scheme->map.fg[index].b4 = map_record->fg_color.b4;
                 scheme->mask.fg[index] = true;
             }
             if (map_record->bg_mask)
             {
-                scheme->map.b4.bg[index] = map_record->bg_color.b4;
+                scheme->map.bg[index].b4 = map_record->bg_color.b4;
                 scheme->mask.bg[index] = true;
             }
         }
@@ -53,12 +53,12 @@ int schemes_init_base(void)
                 return -1;
             if (map_record->fg_mask)
             {
-                scheme->map.b8.fg[index] = map_record->fg_color.b8;
+                scheme->map.fg[index].b8 = map_record->fg_color.b8;
                 scheme->mask.fg[index] = true;
             }
             if (map_record->bg_mask)
             {
-                scheme->map.b8.bg[index] = map_record->bg_color.b8;
+                scheme->map.bg[index].b8 = map_record->bg_color.b8;
                 scheme->mask.bg[index] = true;
             }
         }

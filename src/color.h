@@ -25,27 +25,15 @@ typedef union
 
 typedef struct
 {
-    Color4Bit *fg;
-    Color4Bit *bg;
-} ColorMap4Bit;
-
-typedef struct
-{
-    uint8_t *fg;
-    uint8_t *bg;
-} ColorMap8Bit;
+    Color *fg;
+    Color *bg;
+} ColorMap;
 
 typedef struct
 {
     bool *fg;
     bool *bg;
 } ColorMask;
-
-typedef union
-{
-    ColorMap4Bit b4;
-    ColorMap8Bit b8;
-} ColorMap;
 
 typedef struct
 {

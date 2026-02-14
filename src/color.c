@@ -9,29 +9,13 @@ int color_init_color_scheme(ColorScheme *color_scheme, ColorType type, const cha
         return -1;
 
     // Get allocation sizes
-    size_t fg_size, bg_size;
-    switch (type)
-    {
-    case COLOR_4_BIT:
-    {
-        fg_size = sizeof(Color4Bit);
-        bg_size = sizeof(Color4Bit);
-        break;
-    }
-    case COLOR_8_BIT:
-    {
-        fg_size = sizeof(Color8Bit);
-        bg_size = sizeof(Color8Bit);
-        break;
-    }
-    default:
-        return -1;
-    }
+    size_t fg_size = sizeof(Color);
+    size_t bg_size = sizeof(Color);
 
     // Allocate
-    void *new_name = strdup(name);
-    void *fg_map = malloc(len * fg_size);
-    void *bg_map = malloc(len * bg_size);
+    char *new_name = strdup(name);
+    Color *fg_map = malloc(len * fg_size);
+    Color *bg_map = malloc(len * bg_size);
     bool *fg_mask = malloc(len * sizeof(bool));
     bool *bg_mask = malloc(len * sizeof(bool));
     if (!fg_map || !bg_map || !fg_mask || !bg_mask)
@@ -61,31 +45,25 @@ int color_init_color_scheme(ColorScheme *color_scheme, ColorType type, const cha
     {
     case COLOR_4_BIT:
     {
-        Color4Bit *fg_map_b4 = fg_map;
-        Color4Bit *bg_map_b4 = bg_map;
         for (unsigned int i = 0; i < len; i++)
         {
-            fg_map_b4[i] = 0;
-            bg_map_b4[i] = 0;
+            fg_map[i].b4 = 0;
+            bg_map[i].b4 = 0;
         }
-        color_scheme->map.b4.fg = fg_map;
-        color_scheme->map.b4.bg = bg_map;
         break;
     }
     case COLOR_8_BIT:
     {
-        uint8_t *fg_map_b8 = fg_map;
-        uint8_t *bg_map_b8 = bg_map;
         for (unsigned int i = 0; i < len; i++)
         {
-            fg_map_b8[i] = 0;
-            bg_map_b8[i] = 0;
+            fg_map[i].b8 = 0;
+            bg_map[i].b8 = 0;
         }
-        color_scheme->map.b8.fg = fg_map;
-        color_scheme->map.b8.bg = bg_map;
         break;
     }
     }
+    color_scheme->map.fg = fg_map;
+    color_scheme->map.bg = bg_map;
 
     return 0;
 }
@@ -98,14 +76,6 @@ void color_deinit_color_scheme(ColorScheme *color_scheme)
     free(color_scheme->name);
     free(color_scheme->mask.fg);
     free(color_scheme->mask.bg);
-    if (color_scheme->type == COLOR_4_BIT)
-    {
-        free(color_scheme->map.b4.fg);
-        free(color_scheme->map.b4.bg);
-    }
-    else if (color_scheme->type == COLOR_8_BIT)
-    {
-        free(color_scheme->map.b8.fg);
-        free(color_scheme->map.b8.bg);
-    }
+    free(color_scheme->map.fg);
+    free(color_scheme->map.bg);
 }
