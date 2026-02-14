@@ -49,7 +49,7 @@ typedef union
 
 typedef struct
 {
-    const char *name;
+    char *name;
     ColorType type;
     ColorMap map;
     ColorMask mask;

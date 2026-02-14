@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 
 #include "color.h"
 
@@ -28,12 +29,14 @@ int color_init_color_scheme(ColorScheme *color_scheme, ColorType type, const cha
     }
 
     // Allocate
+    void *new_name = strdup(name);
     void *fg_map = malloc(len * fg_size);
     void *bg_map = malloc(len * bg_size);
     bool *fg_mask = malloc(len * sizeof(bool));
     bool *bg_mask = malloc(len * sizeof(bool));
     if (!fg_map || !bg_map || !fg_mask || !bg_mask)
     {
+        free(new_name);
         free(fg_map);
         free(bg_map);
         free(fg_mask);
@@ -42,7 +45,7 @@ int color_init_color_scheme(ColorScheme *color_scheme, ColorType type, const cha
     }
 
     // Common members
-    color_scheme->name = name;
+    color_scheme->name = new_name;
     color_scheme->type = type;
     color_scheme->len = len;
     for (unsigned int i = 0; i < len; i++)
@@ -92,6 +95,7 @@ void color_deinit_color_scheme(ColorScheme *color_scheme)
     if (!color_scheme)
         return;
 
+    free(color_scheme->name);
     free(color_scheme->mask.fg);
     free(color_scheme->mask.bg);
     if (color_scheme->type == COLOR_4_BIT)
