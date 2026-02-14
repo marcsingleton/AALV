@@ -8,42 +8,24 @@ ColorScheme schemes_base[N_BASE_SCHEMES];
 
 int schemes_init_base(void)
 {
-    unsigned int scheme_index = 0;
-
     for (unsigned int i = 0; i < N_BASE_ALPHABETS; i++)
     {
-        const ColorSchemeRecord *scheme_record = schemes_base_records_4_bit + i;
-        ColorScheme *scheme = scheme_record->scheme;
-        Alphabet *alphabet = scheme_record->alphabet;
-        int retcode = color_init_color_scheme(scheme, COLOR_4_BIT, scheme_record->name, alphabet->len);
-        if (retcode != 0)
-            return retcode;
-        for (const ColorMapRecord *map_record = scheme_record->map; map_record->sym != 0; map_record++)
+        ColorType type;
+        const ColorSchemeRecord *scheme_record;
+        if (i < N_BASE_SCHEMES_4_BIT)
         {
-            int index = alphabet->index_map[(unsigned int)map_record->sym];
-            if (index == -1)
-                return -1;
-            if (map_record->fg_mask)
-            {
-                scheme->map.fg[index].b4 = map_record->fg_color.b4;
-                scheme->mask.fg[index] = true;
-            }
-            if (map_record->bg_mask)
-            {
-                scheme->map.bg[index].b4 = map_record->bg_color.b4;
-                scheme->mask.bg[index] = true;
-            }
+            type = COLOR_4_BIT;
+            scheme_record = schemes_base_records_4_bit + i;
         }
-        schemes_base[scheme_index] = *scheme;
-        scheme_index++;
-    }
+        else
+        {
+            type = COLOR_8_BIT;
+            scheme_record = schemes_base_records_8_bit + i - N_BASE_SCHEMES_4_BIT;
+        }
 
-    for (unsigned int i = 0; i < N_BASE_SCHEMES_8_BIT; i++)
-    {
-        const ColorSchemeRecord *scheme_record = schemes_base_records_8_bit + i;
         ColorScheme *scheme = scheme_record->scheme;
         Alphabet *alphabet = scheme_record->alphabet;
-        int retcode = color_init_color_scheme(scheme, COLOR_8_BIT, scheme_record->name, alphabet->len);
+        int retcode = color_init_color_scheme(scheme, type, scheme_record->name, alphabet->len);
         if (retcode != 0)
             return retcode;
         for (const ColorMapRecord *map_record = scheme_record->map; map_record->sym != 0; map_record++)
@@ -52,18 +34,11 @@ int schemes_init_base(void)
             if (index == -1)
                 return -1;
             if (map_record->fg_mask)
-            {
-                scheme->map.fg[index].b8 = map_record->fg_color.b8;
-                scheme->mask.fg[index] = true;
-            }
+                color_scheme_map_fg_color(scheme, map_record->fg_color, index);
             if (map_record->bg_mask)
-            {
-                scheme->map.bg[index].b8 = map_record->bg_color.b8;
-                scheme->mask.bg[index] = true;
-            }
+                color_scheme_map_bg_color(scheme, map_record->bg_color, index);
         }
-        schemes_base[scheme_index] = *scheme;
-        scheme_index++;
+        schemes_base[i] = *scheme;
     }
 
     return 0;
