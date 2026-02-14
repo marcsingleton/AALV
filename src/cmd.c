@@ -6,8 +6,8 @@
 #include "linenoise.h"
 
 #include "cmd.h"
-#include "state.h"
 #include "prefix.h"
+#include "state.h"
 
 extern State state;
 
@@ -18,6 +18,7 @@ Command cmds[] = {
     {&cmd_next_file, "next"},
     {&cmd_previous_file, "previous"},
     {&cmd_set, "set"},
+    {&cmd_type, "type"},
 };
 
 #define NCMDS sizeof(cmds) / sizeof(Command)
@@ -142,7 +143,6 @@ void cmd_set(int argc, char **argv)
         char *endptr;
         errno = 0;
         long value = strtol(argv[2], &endptr, 10);
-
         if (errno == ERANGE || endptr == argv[2] || *endptr != '\0')
             return;
         if (value < 0 || value > UINT_MAX)
@@ -153,24 +153,25 @@ void cmd_set(int argc, char **argv)
 
         return;
     }
+}
 
-    if (argc == 3 && strcmp("type", argv[1]) == 0)
-    {
-        SeqType type;
-        if (strcmp("nucleic", argv[2]) == 0)
-            type = SEQ_TYPE_NUCLEIC;
-        else if (strcmp("protein", argv[2]) == 0)
-            type = SEQ_TYPE_PROTEIN;
-        else
-            return;
-
-        FileState *active_file = state.active_file;
-        RowLinkedScroller *scroller = &active_file->layout.scroller;
-        size_t record_index = scroller->offset_i + scroller->cursor_i;
-        SeqRecord *record = active_file->record_array.data + record_index;
-        record->type = type;
-        state.refresh_sequence_pane = true;
-
+void cmd_type(int argc, char **argv)
+{
+    if (argc != 2)
         return;
-    }
+
+    SeqType type;
+    if (strcmp("nucleic", argv[1]) == 0)
+        type = SEQ_TYPE_NUCLEIC;
+    else if (strcmp("protein", argv[1]) == 0)
+        type = SEQ_TYPE_PROTEIN;
+    else
+        return;
+
+    FileState *active_file = state.active_file;
+    RowLinkedScroller *scroller = &active_file->layout.scroller;
+    size_t record_index = scroller->offset_i + scroller->cursor_i;
+    SeqRecord *record = active_file->record_array.data + record_index;
+    record->type = type;
+    state.refresh_sequence_pane = true;
 }
