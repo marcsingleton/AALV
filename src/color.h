@@ -17,6 +17,12 @@ typedef enum
     COLOR_8_BIT,
 } ColorType;
 
+typedef union
+{
+    Color4Bit b4;
+    Color8Bit b8;
+} Color;
+
 typedef struct
 {
     Color4Bit *fg;

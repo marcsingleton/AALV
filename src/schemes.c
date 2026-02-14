@@ -10,27 +10,27 @@ int schemes_init_base(void)
 {
     unsigned int scheme_index = 0;
 
-    for (unsigned int i = 0; i < N_BASE_SCHEMES_4_BIT; i++)
+    for (unsigned int i = 0; i < N_BASE_ALPHABETS; i++)
     {
-        const ColorSchemeRecord4Bit *scheme_record = schemes_base_records_4_bit + i;
+        const ColorSchemeRecord *scheme_record = schemes_base_records_4_bit + i;
         ColorScheme *scheme = scheme_record->scheme;
         Alphabet *alphabet = scheme_record->alphabet;
         int retcode = color_init_color_scheme(scheme, COLOR_4_BIT, scheme_record->name, alphabet->len);
         if (retcode != 0)
             return retcode;
-        for (const ColorMapRecord4Bit *map_record = scheme_record->map; map_record->sym != 0; map_record++)
+        for (const ColorMapRecord *map_record = scheme_record->map; map_record->sym != 0; map_record++)
         {
             int index = alphabet->index_map[(unsigned int)map_record->sym];
             if (index == -1)
                 return -1;
             if (map_record->fg_mask)
             {
-                scheme->map.b4.fg[index] = map_record->fg_color;
+                scheme->map.b4.fg[index] = map_record->fg_color.b4;
                 scheme->mask.fg[index] = true;
             }
             if (map_record->bg_mask)
             {
-                scheme->map.b4.bg[index] = map_record->bg_color;
+                scheme->map.b4.bg[index] = map_record->bg_color.b4;
                 scheme->mask.bg[index] = true;
             }
         }
@@ -40,25 +40,25 @@ int schemes_init_base(void)
 
     for (unsigned int i = 0; i < N_BASE_SCHEMES_8_BIT; i++)
     {
-        const ColorSchemeRecord8Bit *scheme_record = schemes_base_records_8_bit + i;
+        const ColorSchemeRecord *scheme_record = schemes_base_records_8_bit + i;
         ColorScheme *scheme = scheme_record->scheme;
         Alphabet *alphabet = scheme_record->alphabet;
         int retcode = color_init_color_scheme(scheme, COLOR_8_BIT, scheme_record->name, alphabet->len);
         if (retcode != 0)
             return retcode;
-        for (const ColorMapRecord8Bit *map_record = scheme_record->map; map_record->sym != 0; map_record++)
+        for (const ColorMapRecord *map_record = scheme_record->map; map_record->sym != 0; map_record++)
         {
             int index = alphabet->index_map[(unsigned int)map_record->sym];
             if (index == -1)
                 return -1;
             if (map_record->fg_mask)
             {
-                scheme->map.b8.fg[index] = map_record->fg_color;
+                scheme->map.b8.fg[index] = map_record->fg_color.b8;
                 scheme->mask.fg[index] = true;
             }
             if (map_record->bg_mask)
             {
-                scheme->map.b8.bg[index] = map_record->bg_color;
+                scheme->map.b8.bg[index] = map_record->bg_color.b8;
                 scheme->mask.bg[index] = true;
             }
         }
