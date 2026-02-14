@@ -32,12 +32,12 @@ const char *INVOCATION_NAME;
 
 State state;
 
+Array read_buffer;
+Array write_buffer;
+
 struct termios old_termios;
 struct termios raw_termios;
 bool raw_mode = false;
-
-Array read_buffer;
-Array write_buffer;
 
 void cleanup(void);
 void handle_sigwinch(int signum);
@@ -141,7 +141,7 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
-    // Initializations
+    // Initialize globals
     if (sequences_init_base_alphabets() != 0)
     {
         error_printf("%s: Failed to initialize alphabets\n", INVOCATION_NAME);
@@ -149,7 +149,7 @@ int main(int argc, char *argv[])
     };
     if (schemes_init_base() != 0)
     {
-        error_printf("%s: Failed to initialize color schemes\n", INVOCATION_NAME);
+        error_printf("%s: Failed to initialize base color schemes\n", INVOCATION_NAME);
         return EXIT_FAILURE;
     }
     if (cmd_init_command_map() != 0)
@@ -167,10 +167,6 @@ int main(int argc, char *argv[])
         error_printf("%s: Failed to initialize write buffer\n", INVOCATION_NAME);
         return EXIT_FAILURE;
     };
-
-    // Prepare color schemes
-    state.color_schemes = schemes_base;
-    state.n_color_schemes = N_BASE_SCHEMES;
 
     // Prepare known sequence types
     for (unsigned int i = 0; i < N_SEQ_TYPE_OPTIONS; i++)
@@ -371,12 +367,20 @@ int main(int argc, char *argv[])
 
 void cleanup(void)
 {
-    // Free memory
+    // Free globals
     sequences_deinit_base_alphabets();
     schemes_deinit_base();
     cmd_deinit_command_map();
     array_deinit(&read_buffer);
     array_deinit(&write_buffer);
+
+    // Free state
+    if (state.color_schemes)
+    {
+        for (unsigned int i = 0; i < state.n_color_schemes; i++)
+            color_deinit_color_scheme(&state.color_schemes[i]);
+        free(state.color_schemes);
+    }
     if (state.files)
     {
         for (unsigned int i = 0; i < state.nfiles; i++)
