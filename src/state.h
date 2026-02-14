@@ -91,7 +91,7 @@ typedef struct
     unsigned int n_seq_types;
 } State;
 
-// FileState setters
+// FileState
 void state_set_ruler_records_divider_i(State *state, unsigned int i);
 void state_set_header_sequence_divider_j(State *state, unsigned int j);
 void state_set_records_command_divider_i(State *state, unsigned int i);
@@ -100,9 +100,10 @@ void state_set_layout(State *state, unsigned int ruler_records_divider_i, unsign
 void state_set_tick_offset(State *state, unsigned int tick_offset);
 void state_set_tick_spacing(State *state, unsigned int tick_spacing);
 
-// State setters
+// State
 void state_set_terminal_size(State *state);
 void state_set_active_file_index(State *state, unsigned int file_index);
 void state_set_seq_type_color_scheme(State *state, unsigned int seq_type_index, ColorScheme *color_scheme);
+void state_new_color_scheme(State *state, char *name, ColorType type, unsigned int len);
 
 #endif // STATE_H

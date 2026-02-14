@@ -169,3 +169,25 @@ void state_set_seq_type_color_scheme(State *state, unsigned int seq_type_index, 
         return;
     seq_type->color_scheme = color_scheme;
 }
+
+void state_new_color_scheme(State *state, char *name, ColorType type, unsigned int len)
+{
+    if (!name)
+        return;
+
+    ColorScheme new_color_scheme;
+    if (color_init_color_scheme(&new_color_scheme, type, name, len) != 0)
+        return;
+
+    ColorScheme *new_color_schemes = realloc(state->color_schemes,
+                                             (state->n_color_schemes + 1) * sizeof(ColorScheme));
+    if (!new_color_schemes)
+    {
+        color_deinit_color_scheme(&new_color_scheme);
+        return;
+    }
+
+    new_color_schemes[state->n_color_schemes] = new_color_scheme;
+    state->color_schemes = new_color_schemes;
+    state->n_color_schemes++;
+}
