@@ -47,4 +47,7 @@ typedef struct
 int color_init_color_scheme(ColorScheme *color_scheme, ColorType type, const char *name, unsigned int len);
 void color_deinit_color_scheme(ColorScheme *color_scheme);
 
+int color_scheme_map_fg_color(ColorScheme *color_scheme, Color color, unsigned int index);
+int color_scheme_map_bg_color(ColorScheme *color_scheme, Color color, unsigned int index);
+
 #endif // COLOR_H

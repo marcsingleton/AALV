@@ -79,3 +79,47 @@ void color_deinit_color_scheme(ColorScheme *color_scheme)
     free(color_scheme->map.fg);
     free(color_scheme->map.bg);
 }
+
+int color_scheme_map_fg_color(ColorScheme *color_scheme, Color color, unsigned int index)
+{
+    if (!color_scheme)
+        return -1;
+    if (index >= color_scheme->len)
+        return -1;
+
+    switch (color_scheme->type)
+    {
+    case COLOR_4_BIT:
+        color_scheme->map.fg[index].b4 = color.b4;
+        color_scheme->mask.fg[index] = true;
+        break;
+    case COLOR_8_BIT:
+        color_scheme->map.fg[index].b8 = color.b8;
+        color_scheme->mask.fg[index] = true;
+        break;
+    }
+
+    return 0;
+}
+
+int color_scheme_map_bg_color(ColorScheme *color_scheme, Color color, unsigned int index)
+{
+    if (!color_scheme)
+        return -1;
+    if (index >= color_scheme->len)
+        return -1;
+
+    switch (color_scheme->type)
+    {
+    case COLOR_4_BIT:
+        color_scheme->map.bg[index].b4 = color.b4;
+        color_scheme->mask.bg[index] = true;
+        break;
+    case COLOR_8_BIT:
+        color_scheme->map.bg[index].b8 = color.b8;
+        color_scheme->mask.bg[index] = true;
+        break;
+    }
+
+    return 0;
+}
