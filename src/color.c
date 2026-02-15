@@ -47,8 +47,8 @@ int color_init_color_scheme(ColorScheme *color_scheme, ColorType type, const cha
     {
         for (unsigned int i = 0; i < len; i++)
         {
-            fg_map[i].b4 = 0;
-            bg_map[i].b4 = 0;
+            fg_map[i].u4 = 0;
+            bg_map[i].u4 = 0;
         }
         break;
     }
@@ -56,8 +56,8 @@ int color_init_color_scheme(ColorScheme *color_scheme, ColorType type, const cha
     {
         for (unsigned int i = 0; i < len; i++)
         {
-            fg_map[i].b8 = 0;
-            bg_map[i].b8 = 0;
+            fg_map[i].u8 = 0;
+            bg_map[i].u8 = 0;
         }
         break;
     }
@@ -90,11 +90,11 @@ int color_scheme_map_fg_color(ColorScheme *color_scheme, Color color, unsigned i
     switch (color_scheme->type)
     {
     case COLOR_4_BIT:
-        color_scheme->map.fg[index].b4 = color.b4;
+        color_scheme->map.fg[index].u4 = color.u4;
         color_scheme->mask.fg[index] = true;
         break;
     case COLOR_8_BIT:
-        color_scheme->map.fg[index].b8 = color.b8;
+        color_scheme->map.fg[index].u8 = color.u8;
         color_scheme->mask.fg[index] = true;
         break;
     }
@@ -112,11 +112,11 @@ int color_scheme_map_bg_color(ColorScheme *color_scheme, Color color, unsigned i
     switch (color_scheme->type)
     {
     case COLOR_4_BIT:
-        color_scheme->map.bg[index].b4 = color.b4;
+        color_scheme->map.bg[index].u4 = color.u4;
         color_scheme->mask.bg[index] = true;
         break;
     case COLOR_8_BIT:
-        color_scheme->map.bg[index].b8 = color.b8;
+        color_scheme->map.bg[index].u8 = color.u8;
         color_scheme->mask.bg[index] = true;
         break;
     }

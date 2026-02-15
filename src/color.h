@@ -19,8 +19,8 @@ typedef enum
 
 typedef union
 {
-    Color4Bit b4;
-    Color8Bit b8;
+    Color4Bit u4;
+    Color8Bit u8;
 } Color;
 
 typedef struct

@@ -413,18 +413,18 @@ void display_sequence(Array *buffer, SeqRecord *record, size_t offset, unsigned 
                 if (index >= 0)
                     if (color_scheme->mask.fg[index] && color_scheme->mask.bg[index])
                     {
-                        Color4Bit fg_color = color_scheme->map.fg[index].b4;
-                        Color4Bit bg_color = color_scheme->map.bg[index].b4;
+                        Color4Bit fg_color = color_scheme->map.fg[index].u4;
+                        Color4Bit bg_color = color_scheme->map.bg[index].u4;
                         terminal_set_color_4bit(buffer, fg_color, bg_color);
                     }
                     else if (color_scheme->mask.fg[index])
                     {
-                        Color4Bit fg_color = color_scheme->map.fg[index].b4;
+                        Color4Bit fg_color = color_scheme->map.fg[index].u4;
                         terminal_set_foreground_color_4bit(buffer, fg_color);
                     }
                     else if (color_scheme->mask.bg[index])
                     {
-                        Color4Bit bg_color = color_scheme->map.bg[index].b4;
+                        Color4Bit bg_color = color_scheme->map.bg[index].u4;
                         terminal_set_background_color_4bit(buffer, bg_color);
                     }
                     else
@@ -444,18 +444,18 @@ void display_sequence(Array *buffer, SeqRecord *record, size_t offset, unsigned 
                 if (index >= 0)
                     if (color_scheme->mask.fg[index] && color_scheme->mask.bg[index])
                     {
-                        Color8Bit fg_color = color_scheme->map.fg[index].b8;
-                        Color8Bit bg_color = color_scheme->map.bg[index].b8;
+                        Color8Bit fg_color = color_scheme->map.fg[index].u8;
+                        Color8Bit bg_color = color_scheme->map.bg[index].u8;
                         terminal_set_color_8bit(buffer, fg_color, bg_color);
                     }
                     else if (color_scheme->mask.fg[index])
                     {
-                        Color8Bit fg_color = color_scheme->map.fg[index].b8;
+                        Color8Bit fg_color = color_scheme->map.fg[index].u8;
                         terminal_set_foreground_color_8bit(buffer, fg_color);
                     }
                     else if (color_scheme->mask.bg[index])
                     {
-                        Color8Bit bg_color = color_scheme->map.bg[index].b8;
+                        Color8Bit bg_color = color_scheme->map.bg[index].u8;
                         terminal_set_background_color_8bit(buffer, bg_color);
                     }
                     else
