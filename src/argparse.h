@@ -36,5 +36,6 @@ int argparse_options(int argc, char *argv[],
                      unsigned int *n_format_args, char ***format_args_ptr,
                      unsigned int *n_type_args, char ***type_args_ptr,
                      char *program_name, char *positional_usage, char *synopsis);
+SeqType argparse_seq_type(const char *seq_type_arg, unsigned int n_seq_type_options, SeqTypeOption *seq_type_options);
 
 #endif // ARGPARSE_H

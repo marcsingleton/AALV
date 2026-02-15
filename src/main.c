@@ -497,8 +497,8 @@ int set_seq_types(FileState *file, const char *seq_type_arg)
     for (size_t i = 0; i < record_array->len; i++)
     {
         SeqRecord *record = record_array->data + i;
-        SeqType seq_type = sequences_seq_to_seq_type(record->seq);
-        if (seq_type == SEQ_TYPE_ERROR)
+        SeqType seq_type_from_seq = sequences_seq_to_seq_type(record->seq);
+        if (seq_type_from_seq == SEQ_TYPE_ERROR)
         {
             printf("%s contains at least one non-ASCII symbol in its sequence(s). "
                    "The viewer may render incorrectly. Continue? (y/n): ",
@@ -509,26 +509,17 @@ int set_seq_types(FileState *file, const char *seq_type_arg)
             while ((c = getchar()) != '\n' && c != EOF)
                 ; // Clear remaining input
         };
-        if (seq_type_arg[0] != '\0')
+        if (seq_type_from_seq != SEQ_TYPE_ERROR && seq_type_arg[0] != '\0') // Allow forced type unless error
         {
-            for (unsigned int j = 0; j < N_SEQ_TYPE_OPTIONS; j++)
-            {
-                SeqTypeOption *seq_type_option = seq_type_options + j;
-                const char *identifiers = seq_type_option->identifiers;
-                if (str_is_in_strsep(identifiers, option_delim, seq_type_arg))
-                {
-                    if (seq_type != SEQ_TYPE_ERROR) // Allow forced type unless error
-                        record->type = seq_type_option->type;
-                    break;
-                }
-            }
+            SeqType seq_type_from_arg = argparse_seq_type(seq_type_arg, N_SEQ_TYPE_OPTIONS, seq_type_options);
+            record->type = seq_type_from_arg;
         }
-        else if (seq_type == SEQ_TYPE_RNA || seq_type == SEQ_TYPE_DNA)
+        else if (seq_type_from_seq == SEQ_TYPE_RNA || seq_type_from_seq == SEQ_TYPE_DNA)
             record->type = SEQ_TYPE_NUCLEIC;
-        else if (seq_type == SEQ_TYPE_INDETERMINATE && record->len >= rcparams_nucleic_tiebreak_len)
+        else if (seq_type_from_seq == SEQ_TYPE_INDETERMINATE && record->len >= rcparams_nucleic_tiebreak_len)
             record->type = SEQ_TYPE_NUCLEIC;
         else
-            record->type = seq_type;
+            record->type = seq_type_from_seq;
     }
     return 0;
 }

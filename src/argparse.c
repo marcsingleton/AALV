@@ -94,3 +94,19 @@ int argparse_options(int argc, char *argv[],
     }
     return 0;
 }
+
+SeqType argparse_seq_type(const char *seq_type_arg, unsigned int n_seq_type_options, SeqTypeOption *seq_type_options)
+{
+    SeqType seq_type = SEQ_TYPE_UNSPECIFIED;
+    for (unsigned int i = 0; i < n_seq_type_options; i++)
+    {
+        SeqTypeOption *seq_type_option = seq_type_options + i;
+        const char *identifiers = seq_type_option->identifiers;
+        if (str_is_in_strsep(identifiers, option_delim, seq_type_arg))
+        {
+            seq_type = seq_type_option->type;
+            break;
+        }
+    }
+    return seq_type;
+}
