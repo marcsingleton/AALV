@@ -5,6 +5,7 @@
  * Generic command-line interface functions
  */
 
+#include <getopt.h>
 #include <stdbool.h>
 
 typedef enum
