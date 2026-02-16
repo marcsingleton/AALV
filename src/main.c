@@ -284,7 +284,6 @@ int main(int argc, char *argv[])
         retcode = load_seqs(file, format_arg, seq_type_arg);
         if (retcode != 0) // "Expected" exit == -1 and "unexpected" exit < -1
         {
-            error_printf("%s: Failed to load sequences in %s\n", INVOCATION_NAME, file->file_path);
             return (retcode == -1) ? EXIT_SUCCESS : EXIT_FAILURE;
         }
         retcode = set_unaligned_indices(file);
