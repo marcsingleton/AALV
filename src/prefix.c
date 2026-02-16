@@ -336,7 +336,7 @@ void *prefix_tree_node_get_prefix_match(PrefixTreeNode *node, CharMap *char_map,
             node = child;
             continue;
         }
-        else if (common_len < prefix_len) // Incomplete prefix match
+        else if (common_len < prefix_len && key_index + common_len == key_len) // Incomplete prefix match
         {
             unsigned int child_count = prefix_tree_node_count_children(node);
             if (child_count == 0)
