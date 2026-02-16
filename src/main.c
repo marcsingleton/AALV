@@ -107,7 +107,9 @@ SeqTypeOption seq_type_options[] = {
 
 char *option_delim = ",";
 
-SeqTypeState seq_types[SEQ_TYPE_ERROR + 1];
+SeqColorScheme *active_color_schemes[SEQ_TYPE_ERROR + 1];
+
+#define N_ACTIVE_COLOR_SCHEMES sizeof(active_color_schemes) / sizeof(SeqColorScheme *);
 
 char synopsis[] = PROGRAM_NAME " is a vim-inspired alignment viewer\n";
 char positional_usage[] = "[<file> ...]";
@@ -168,16 +170,6 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     };
 
-    // Prepare known sequence types
-    for (unsigned int i = 0; i < N_SEQ_TYPE_OPTIONS; i++)
-    {
-        SeqTypeOption *seq_type_option = seq_type_options + i;
-        SeqTypeState *type = seq_types + seq_type_option->type;
-        type->alphabet = seq_type_option->alphabet;
-    }
-    state.seq_types = seq_types;
-    state.n_seq_types = SEQ_TYPE_ERROR + 1;
-
     // Get terminal color support
     state.ncolors = 1;
     int errret;
@@ -189,15 +181,17 @@ int main(int argc, char *argv[])
     }
 
     // Set color schemes
+    state.active_color_schemes = active_color_schemes;
+    state.n_active_color_schemes = N_ACTIVE_COLOR_SCHEMES;
     if (state.ncolors >= 256)
     {
-        state_set_seq_type_color_scheme(&state, SEQ_TYPE_NUCLEIC, &schemes_default_nucleic_8_bit);
-        state_set_seq_type_color_scheme(&state, SEQ_TYPE_PROTEIN, &schemes_default_protein_8_bit);
+        state_set_active_color_scheme(&state, &schemes_default_nucleic_8_bit);
+        state_set_active_color_scheme(&state, &schemes_default_protein_8_bit);
     }
     else if (state.ncolors >= 16)
     {
-        state_set_seq_type_color_scheme(&state, SEQ_TYPE_NUCLEIC, &schemes_default_nucleic_4_bit);
-        state_set_seq_type_color_scheme(&state, SEQ_TYPE_PROTEIN, &schemes_default_protein_4_bit);
+        state_set_active_color_scheme(&state, &schemes_default_nucleic_4_bit);
+        state_set_active_color_scheme(&state, &schemes_default_protein_4_bit);
     }
 
     // Prepare options
@@ -378,7 +372,7 @@ void cleanup(void)
     if (state.color_schemes)
     {
         for (unsigned int i = 0; i < state.n_color_schemes; i++)
-            color_deinit_color_scheme(&state.color_schemes[i]);
+            color_deinit_color_scheme(&state.color_schemes[i].scheme);
         free(state.color_schemes);
     }
     if (state.files)

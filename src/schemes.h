@@ -17,6 +17,12 @@
 
 typedef struct
 {
+    SeqType type;
+    ColorScheme scheme;
+} SeqColorScheme;
+
+typedef struct
+{
     char sym;
     Color fg_color;
     Color bg_color;
@@ -26,10 +32,9 @@ typedef struct
 
 typedef struct
 {
-    ColorScheme *scheme;
+    SeqColorScheme *scheme;
     const char *name;
     const ColorMapRecord *map;
-    Alphabet *alphabet;
 } ColorSchemeRecord;
 
 // 4 bit
@@ -43,7 +48,7 @@ static const ColorMapRecord schemes_default_nucleic_map_records_4_bit[] = {
     {.sym = 0},
 };
 
-extern ColorScheme schemes_default_nucleic_4_bit;
+extern SeqColorScheme schemes_default_nucleic_4_bit;
 
 static const ColorMapRecord schemes_default_protein_map_records_4_bit[] = {
     {.sym = 'A', .fg_color.u4 = FG_BRIGHT_GREEN, .fg_mask = true},
@@ -70,20 +75,18 @@ static const ColorMapRecord schemes_default_protein_map_records_4_bit[] = {
     {.sym = 0},
 };
 
-extern ColorScheme schemes_default_protein_4_bit;
+extern SeqColorScheme schemes_default_protein_4_bit;
 
 static const ColorSchemeRecord schemes_base_records_4_bit[] = {
     {
         .scheme = &schemes_default_nucleic_4_bit,
         .name = "default_nucleic_4_bit",
         .map = schemes_default_nucleic_map_records_4_bit,
-        .alphabet = &NUCLEIC_ALPHABET,
     },
     {
         .scheme = &schemes_default_protein_4_bit,
         .name = "default_protein_4_bit",
         .map = schemes_default_protein_map_records_4_bit,
-        .alphabet = &PROTEIN_ALPHABET,
     },
 };
 
@@ -100,7 +103,7 @@ static const ColorMapRecord schemes_default_nucleic_map_records_8_bit[] = {
     {.sym = 0},
 };
 
-extern ColorScheme schemes_default_nucleic_8_bit;
+extern SeqColorScheme schemes_default_nucleic_8_bit;
 
 static const ColorMapRecord schemes_default_protein_map_records_8_bit[] = {
     {.sym = 'A', .fg_color.u8 = 114, .fg_mask = true},
@@ -127,20 +130,18 @@ static const ColorMapRecord schemes_default_protein_map_records_8_bit[] = {
     {.sym = 0},
 };
 
-extern ColorScheme schemes_default_protein_8_bit;
+extern SeqColorScheme schemes_default_protein_8_bit;
 
 static const ColorSchemeRecord schemes_base_records_8_bit[] = {
     {
         .scheme = &schemes_default_nucleic_8_bit,
         .name = "default_nucleic_8_bit",
         .map = schemes_default_nucleic_map_records_8_bit,
-        .alphabet = &NUCLEIC_ALPHABET,
     },
     {
         .scheme = &schemes_default_protein_8_bit,
         .name = "default_protein_8_bit",
         .map = schemes_default_protein_map_records_8_bit,
-        .alphabet = &PROTEIN_ALPHABET,
     },
 };
 
@@ -148,7 +149,7 @@ static const ColorSchemeRecord schemes_base_records_8_bit[] = {
 
 #define N_BASE_SCHEMES (N_BASE_SCHEMES_4_BIT + N_BASE_SCHEMES_8_BIT)
 
-extern ColorScheme schemes_base[];
+extern SeqColorScheme schemes_base[];
 
 int schemes_init_base(void);
 void schemes_deinit_base(void);

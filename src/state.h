@@ -10,6 +10,7 @@
 #include "array.h"
 #include "color.h"
 #include "pane.h"
+#include "schemes.h"
 #include "scroller.h"
 #include "sequences.h"
 
@@ -53,12 +54,6 @@ typedef struct
     UnalignedIndicesArray indices_array;
 } FileState;
 
-typedef struct
-{
-    const Alphabet *alphabet;
-    ColorScheme *color_scheme;
-} SeqTypeState;
-
 typedef enum
 {
     NORMAL = 0,
@@ -83,12 +78,11 @@ typedef struct
     FileState *active_file;
     unsigned int active_file_index;
     // Color variables
-    ColorScheme *color_schemes;
+    SeqColorScheme *color_schemes;
     unsigned int n_color_schemes;
+    SeqColorScheme **active_color_schemes;
+    unsigned int n_active_color_schemes;
     int ncolors;
-    // Type variables
-    SeqTypeState *seq_types;
-    unsigned int n_seq_types;
 } State;
 
 // FileState
@@ -103,7 +97,7 @@ void state_set_tick_spacing(State *state, unsigned int tick_spacing);
 // State
 void state_set_terminal_size(State *state);
 void state_set_active_file_index(State *state, unsigned int file_index);
-void state_set_seq_type_color_scheme(State *state, unsigned int seq_type_index, ColorScheme *color_scheme);
-void state_new_color_scheme(State *state, char *name, ColorType type, unsigned int len);
+void state_set_active_color_scheme(State *state, SeqColorScheme *color_scheme);
+void state_new_color_scheme(State *state, char *name, SeqType seq_type, ColorType color_type);
 
 #endif // STATE_H

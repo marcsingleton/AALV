@@ -154,36 +154,38 @@ void state_set_active_file_index(State *state, unsigned int file_index)
     state->active_file = state->files + file_index;
 }
 
-void state_set_seq_type_color_scheme(State *state, unsigned int seq_type_index, ColorScheme *color_scheme)
+void state_set_active_color_scheme(State *state, SeqColorScheme *color_scheme)
 {
     if (!color_scheme)
         return;
-    if (color_scheme->type == COLOR_4_BIT && state->ncolors < 16)
+    if (color_scheme->scheme.type == COLOR_4_BIT && state->ncolors < 16)
         return;
-    if (color_scheme->type == COLOR_8_BIT && state->ncolors < 256)
+    if (color_scheme->scheme.type == COLOR_8_BIT && state->ncolors < 256)
         return;
-    if (seq_type_index > state->n_seq_types)
+    if (color_scheme->type > state->n_active_color_schemes)
         return;
-    SeqTypeState *seq_type = state->seq_types + seq_type_index;
-    if (seq_type->alphabet->len != color_scheme->len)
-        return;
-    seq_type->color_scheme = color_scheme;
+    state->active_color_schemes[color_scheme->type] = color_scheme;
+    state->refresh_sequence_pane = true;
 }
 
-void state_new_color_scheme(State *state, char *name, ColorType type, unsigned int len)
+void state_new_color_scheme(State *state, char *name, SeqType seq_type, ColorType color_type)
 {
     if (!name)
         return;
 
-    ColorScheme new_color_scheme;
-    if (color_init_color_scheme(&new_color_scheme, type, name, len) != 0)
+    SeqColorScheme new_color_scheme;
+    Alphabet *alphabet = sequences_seq_type_to_alphabet(seq_type);
+    if (!alphabet)
         return;
+    if (color_init_color_scheme(&new_color_scheme.scheme, color_type, name, alphabet->len) != 0)
+        return;
+    new_color_scheme.type = seq_type;
 
-    ColorScheme *new_color_schemes = realloc(state->color_schemes,
-                                             (state->n_color_schemes + 1) * sizeof(ColorScheme));
+    SeqColorScheme *new_color_schemes = realloc(state->color_schemes,
+                                                (state->n_color_schemes + 1) * sizeof(SeqColorScheme));
     if (!new_color_schemes)
     {
-        color_deinit_color_scheme(&new_color_scheme);
+        color_deinit_color_scheme(&new_color_scheme.scheme);
         return;
     }
 

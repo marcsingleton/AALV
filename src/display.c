@@ -399,32 +399,34 @@ void display_header(Array *buffer, SeqRecord *record, size_t offset, unsigned in
 
 void display_sequence(Array *buffer, SeqRecord *record, size_t offset, unsigned int display_len)
 {
-    SeqTypeState *seq_type = state.seq_types + record->type;
-    const Alphabet *alphabet = seq_type->alphabet;
-    ColorScheme *color_scheme = seq_type->color_scheme;
+    SeqColorScheme *color_scheme = state.active_color_schemes[record->type];
     if (state.ncolors > 1 && color_scheme)
     {
-        if (color_scheme->type == COLOR_4_BIT)
+        ColorType type = color_scheme->scheme.type;
+        ColorMap *map = &color_scheme->scheme.map;
+        ColorMask *mask = &color_scheme->scheme.mask;
+        Alphabet *alphabet = sequences_seq_type_to_alphabet(record->type);
+        if (type == COLOR_4_BIT)
         {
             for (unsigned int i = 0; i < display_len; i++)
             {
                 char sym = record->seq[offset + i];
                 int index = alphabet->index_map[(unsigned int)sym];
                 if (index >= 0)
-                    if (color_scheme->mask.fg[index] && color_scheme->mask.bg[index])
+                    if (mask->fg[index] && mask->bg[index])
                     {
-                        Color4Bit fg_color = color_scheme->map.fg[index].u4;
-                        Color4Bit bg_color = color_scheme->map.bg[index].u4;
+                        Color4Bit fg_color = map->fg[index].u4;
+                        Color4Bit bg_color = map->bg[index].u4;
                         terminal_set_color_4bit(buffer, fg_color, bg_color);
                     }
-                    else if (color_scheme->mask.fg[index])
+                    else if (mask->fg[index])
                     {
-                        Color4Bit fg_color = color_scheme->map.fg[index].u4;
+                        Color4Bit fg_color = map->fg[index].u4;
                         terminal_set_foreground_color_4bit(buffer, fg_color);
                     }
-                    else if (color_scheme->mask.bg[index])
+                    else if (mask->bg[index])
                     {
-                        Color4Bit bg_color = color_scheme->map.bg[index].u4;
+                        Color4Bit bg_color = map->bg[index].u4;
                         terminal_set_background_color_4bit(buffer, bg_color);
                     }
                     else
@@ -435,27 +437,27 @@ void display_sequence(Array *buffer, SeqRecord *record, size_t offset, unsigned 
             }
             terminal_set_color_default(buffer);
         }
-        else if (color_scheme->type == COLOR_8_BIT)
+        else if (type == COLOR_8_BIT)
         {
             for (unsigned int i = 0; i < display_len; i++)
             {
                 char sym = record->seq[offset + i];
                 int index = alphabet->index_map[(unsigned int)sym];
                 if (index >= 0)
-                    if (color_scheme->mask.fg[index] && color_scheme->mask.bg[index])
+                    if (mask->fg[index] && mask->bg[index])
                     {
-                        Color8Bit fg_color = color_scheme->map.fg[index].u8;
-                        Color8Bit bg_color = color_scheme->map.bg[index].u8;
+                        Color8Bit fg_color = map->fg[index].u8;
+                        Color8Bit bg_color = map->bg[index].u8;
                         terminal_set_color_8bit(buffer, fg_color, bg_color);
                     }
-                    else if (color_scheme->mask.fg[index])
+                    else if (mask->fg[index])
                     {
-                        Color8Bit fg_color = color_scheme->map.fg[index].u8;
+                        Color8Bit fg_color = map->fg[index].u8;
                         terminal_set_foreground_color_8bit(buffer, fg_color);
                     }
-                    else if (color_scheme->mask.bg[index])
+                    else if (mask->bg[index])
                     {
-                        Color8Bit bg_color = color_scheme->map.bg[index].u8;
+                        Color8Bit bg_color = map->bg[index].u8;
                         terminal_set_background_color_8bit(buffer, bg_color);
                     }
                     else
