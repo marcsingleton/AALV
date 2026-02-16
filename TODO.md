@@ -1,14 +1,33 @@
 ## TODO
-- More supported file formats
+- IO
+  - More supported file formats
   - Format inference?
-- Read config and color schemes from .aalvrc
-- Mechanism for displaying messages
-  - Reserved buffer
-  - Cleared after keystroke or time-out
-- "Ex-style" commands
-  - Next/previous file
-  - Display options
+- Config
+  - Check for ~/.aalvrc
+    - Read lines from file (if exists) and execute as though input from user
+- Display
+  - Hydrophobic color scheme
+  - Mechanism for displaying messages
+    - Reserved buffer?
+    - Cleared after keystroke or time-out?
+  - Graph panel
+- Commands
     - Add color scheme
-    - Set color scheme
-    - Identities as dots
-  - Set sequence type?
+      - `scheme new <name>`
+      - `scheme map <name> <sym> <color>`
+        - fg/bg option
+    - Set sequence type
+      - `type <type> <record-pattern>`
+    - Identities as dots?
+      - `set display_mode dots`
+    - Set scheme
+      - `set scheme <type> <name>`
+    - Write file
+      - `write <path>`
+  - Regexes
+    - Syntax for specifying line vs current view?
+    - How to set regex pattern and change prompt to / while taking advantage of command mode
+- Actions
+  - Re-arrange lines
+  - Make move left/right edges and middle work like vim?
+- Negative offsets
