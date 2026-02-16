@@ -86,7 +86,7 @@ Option options[] = {
      required_argument},
 };
 
-#define NOPTIONS sizeof(options) / sizeof(Option)
+unsigned int noptions = sizeof(options) / sizeof(Option);
 
 FormatOption format_options[] = {
     {"FASTA", "fasta,fa,faa,fna,afa", &fasta_fread},
@@ -96,20 +96,20 @@ FormatOption format_options[] = {
     // STOCKHOLM
 };
 
-#define N_FORMAT_OPTIONS sizeof(format_options) / sizeof(FormatOption)
+unsigned int n_format_options = sizeof(format_options) / sizeof(FormatOption);
 
 SeqTypeOption seq_type_options[] = {
     {"nucleic", "nucleic,nt", SEQ_TYPE_NUCLEIC, &NUCLEIC_ALPHABET},
     {"protein", "protein,aa", SEQ_TYPE_PROTEIN, &PROTEIN_ALPHABET},
 };
 
-#define N_SEQ_TYPE_OPTIONS sizeof(seq_type_options) / sizeof(SeqTypeOption)
+unsigned int n_seq_type_options = sizeof(seq_type_options) / sizeof(SeqTypeOption);
 
 char *option_delim = ",";
 
 SeqColorScheme *active_color_schemes[SEQ_TYPE_ERROR + 1];
 
-#define N_ACTIVE_COLOR_SCHEMES sizeof(active_color_schemes) / sizeof(SeqColorScheme *);
+unsigned int n_active_color_schemes = sizeof(active_color_schemes) / sizeof(SeqColorScheme *);
 
 char synopsis[] = PROGRAM_NAME " is a vim-inspired alignment viewer\n";
 char positional_usage[] = "[<file> ...]";
@@ -182,7 +182,7 @@ int main(int argc, char *argv[])
 
     // Set color schemes
     state.active_color_schemes = active_color_schemes;
-    state.n_active_color_schemes = N_ACTIVE_COLOR_SCHEMES;
+    state.n_active_color_schemes = n_active_color_schemes;
     if (state.ncolors >= 256)
     {
         state_set_active_color_scheme(&state, &schemes_default_nucleic_8_bit);
@@ -195,9 +195,9 @@ int main(int argc, char *argv[])
     }
 
     // Prepare options
-    struct option long_options[NOPTIONS + 1]; // Extra struct of 0s to mark end
+    struct option long_options[noptions + 1]; // Extra struct of 0s to mark end
     char *short_options = NULL;
-    retcode = cli_prepare_options(NOPTIONS, options, &short_options, long_options, INVOCATION_NAME);
+    retcode = cli_prepare_options(noptions, options, &short_options, long_options, INVOCATION_NAME);
     if (retcode != 0)
         return retcode;
 
@@ -207,9 +207,9 @@ int main(int argc, char *argv[])
     unsigned int n_seq_type_args = 0;
     char **seq_type_args = NULL;
     retcode = argparse_options(argc, argv,
-                               NOPTIONS, options,
-                               N_FORMAT_OPTIONS, format_options,
-                               N_SEQ_TYPE_OPTIONS, seq_type_options,
+                               noptions, options,
+                               n_format_options, format_options,
+                               n_seq_type_options, seq_type_options,
                                short_options, long_options,
                                &n_format_args, &format_args,
                                &n_seq_type_args, &seq_type_args,
@@ -223,7 +223,7 @@ int main(int argc, char *argv[])
     // Check for positional arguments
     if (isatty(STDIN_FILENO) && n_positional_args == 0)
     {
-        cli_print_short_help(NOPTIONS, options, PROGRAM_NAME, positional_usage);
+        cli_print_short_help(noptions, options, PROGRAM_NAME, positional_usage);
         return EXIT_FAILURE;
     }
 
@@ -457,7 +457,7 @@ FileReader get_reader(FileState *file, const char *format_arg)
     const char *file_ext;
     if (format_arg[0] != '\0') // From format argument
     {
-        for (unsigned int i = 0; i < N_FORMAT_OPTIONS; i++)
+        for (unsigned int i = 0; i < n_format_options; i++)
         {
             FormatOption *format_option = format_options + i;
             const char *exts = format_option->exts;
@@ -470,7 +470,7 @@ FileReader get_reader(FileState *file, const char *format_arg)
     else if ((file_ext = strrchr(file->file_path, '.'))) // From path extension
     {
         file_ext++; // Exclude dot from comparison
-        for (unsigned int i = 0; i < N_FORMAT_OPTIONS; i++)
+        for (unsigned int i = 0; i < n_format_options; i++)
         {
             FormatOption *format_option = format_options + i;
             const char *exts = format_option->exts;
@@ -505,7 +505,7 @@ int set_seq_types(FileState *file, const char *seq_type_arg)
         };
         if (seq_type_from_seq != SEQ_TYPE_ERROR && seq_type_arg[0] != '\0') // Allow forced type unless error
         {
-            SeqType seq_type_from_arg = argparse_seq_type(seq_type_arg, N_SEQ_TYPE_OPTIONS, seq_type_options);
+            SeqType seq_type_from_arg = argparse_seq_type(seq_type_arg, n_seq_type_options, seq_type_options);
             record->type = seq_type_from_arg;
         }
         else if (seq_type_from_seq == SEQ_TYPE_RNA || seq_type_from_seq == SEQ_TYPE_DNA)
