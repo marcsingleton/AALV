@@ -276,7 +276,7 @@ void cmd_scheme(int argc, char **argv)
         Alphabet *alphabet = sequences_seq_type_to_alphabet(color_scheme->type);
         if (!alphabet)
             return;
-        unsigned int index = alphabet->index_map[(unsigned int)sym];
+        int index = alphabet->index_map[(unsigned int)sym];
         if (index < 0)
             return;
 
