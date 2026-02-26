@@ -188,6 +188,32 @@ void cmd_previous_file(int argc, char **argv)
  */
 void cmd_set(int argc, char **argv)
 {
+    if (argc == 3 && strcmp("ruler_records_divider", argv[1]) == 0)
+    {
+        // Parse <value> into unsigned int
+        char *value_arg = argv[2];
+        long value;
+        int retcode = parse_integer(value_arg, &value);
+        if (retcode != 0 || value < 0 || value > UINT_MAX)
+            return;
+        unsigned int ruler_records_divider = value;
+
+        state_set_ruler_records_divider(&state, ruler_records_divider);
+    }
+
+    if (argc == 3 && strcmp("header_sequence_divider", argv[1]) == 0)
+    {
+        // Parse <value> into unsigned int
+        char *value_arg = argv[2];
+        long value;
+        int retcode = parse_integer(value_arg, &value);
+        if (retcode != 0 || value < 0 || value > UINT_MAX)
+            return;
+        unsigned int header_sequence_divider = value;
+
+        state_set_header_sequence_divider(&state, header_sequence_divider);
+    }
+
     if (argc == 3 && strcmp("tick_offset", argv[1]) == 0)
     {
         // Parse <value> into unsigned int
