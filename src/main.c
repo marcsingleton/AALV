@@ -41,7 +41,7 @@ bool raw_mode = false;
 
 void cleanup(void);
 void handle_sigwinch(int signum);
-int load_user_rcparams(void);
+int load_user_config(void);
 int load_seqs(FileState *file, const char *format_arg, const char *seq_type_arg);
 FileReader get_reader(FileState *file, const char *format_arg);
 int set_seq_types(FileState *file, const char *seq_type_arg);
@@ -258,10 +258,10 @@ int main(int argc, char *argv[])
     state.active_file = files;
     state_set_active_file_index(&state, 0);
 
-    // Initialize state and rcparams
+    // Initialize state and config
     state_set_terminal_size(&state);
-    rcparams_init();
-    load_user_rcparams();
+    config_init();
+    load_user_config();
 
     // Initialize file states
     for (unsigned int file_index = 0; file_index < state.nfiles; file_index++)
@@ -275,8 +275,8 @@ int main(int argc, char *argv[])
         scroller_init(&file->layout.scroller, SCROLLER_NPANES);
         scroller_set_active_pane(&file->layout.scroller, SCROLLER_SEQUENCE_PANE);
         state_set_active_file_index(&state, file_index);
-        state_set_layout(&state, rcparams_ruler_records_divider, rcparams_header_sequence_divider);
-        state_set_tick_spacing(&state, rcparams_tick_spacing);
+        state_set_layout(&state, config_ruler_records_divider, config_header_sequence_divider);
+        state_set_tick_spacing(&state, config_tick_spacing);
 
         char *format_arg = "";
         if (file_index < n_format_args)
@@ -410,7 +410,7 @@ void handle_sigwinch(int signum)
     state.refresh_window = true;
 }
 
-int load_user_rcparams(void)
+int load_user_config(void)
 {
     char *home = getenv("HOME");
     if (!home)
@@ -536,7 +536,7 @@ int set_seq_types(FileState *file, const char *seq_type_arg)
         }
         else if (seq_type_from_seq == SEQ_TYPE_RNA || seq_type_from_seq == SEQ_TYPE_DNA)
             record->type = SEQ_TYPE_NUCLEIC;
-        else if (seq_type_from_seq == SEQ_TYPE_INDETERMINATE && record->len >= rcparams_nucleic_tiebreak_len)
+        else if (seq_type_from_seq == SEQ_TYPE_INDETERMINATE && record->len >= config_nucleic_tiebreak_len)
             record->type = SEQ_TYPE_NUCLEIC;
         else
             record->type = seq_type_from_seq;

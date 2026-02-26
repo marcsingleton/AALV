@@ -355,7 +355,7 @@ void cmd_config(int argc, char **argv)
             return;
         unsigned int ruler_records_divider = value;
 
-        rcparams_set_ruler_records_divider(ruler_records_divider);
+        config_set_ruler_records_divider(ruler_records_divider);
     }
 
     if (argc == 3 && strcmp("header_sequence_divider", argv[1]) == 0)
@@ -368,7 +368,7 @@ void cmd_config(int argc, char **argv)
             return;
         unsigned int header_sequence_divider = value;
 
-        rcparams_set_header_sequence_divider(header_sequence_divider);
+        config_set_header_sequence_divider(header_sequence_divider);
     }
 
     if (argc == 3 && strcmp("tick_offset", argv[1]) == 0)
@@ -381,7 +381,7 @@ void cmd_config(int argc, char **argv)
             return;
         unsigned int tick_offset = value;
 
-        rcparams_set_tick_offset(tick_offset);
+        config_set_tick_offset(tick_offset);
     }
 
     if (argc == 3 && strcmp("tick_spacing", argv[1]) == 0)
@@ -394,7 +394,7 @@ void cmd_config(int argc, char **argv)
             return;
         unsigned int tick_spacing = value;
 
-        rcparams_set_tick_spacing(tick_spacing);
+        config_set_tick_spacing(tick_spacing);
     }
 
     if (argc == 3 && strcmp("nucleic_tiebreak_len", argv[1]) == 0)
@@ -407,6 +407,6 @@ void cmd_config(int argc, char **argv)
             return;
         unsigned int nucleic_tiebreak_len = value;
 
-        rcparams_set_nucleic_tiebreak_len(nucleic_tiebreak_len);
+        config_set_nucleic_tiebreak_len(nucleic_tiebreak_len);
     }
 }
