@@ -201,6 +201,19 @@ void cmd_set(int argc, char **argv)
         state_set_tick_offset(&state, tick_offset);
     }
 
+    if (argc == 3 && strcmp("tick_spacing", argv[1]) == 0)
+    {
+        // Parse <value> into unsigned int
+        char *value_arg = argv[2];
+        long value;
+        int retcode = parse_integer(value_arg, &value);
+        if (retcode != 0 || value < 0 || value > UINT_MAX)
+            return;
+        unsigned int tick_spacing = value;
+
+        state_set_tick_spacing(&state, tick_spacing);
+    }
+
     if (argc == 3 && strcmp("scheme", argv[1]) == 0)
     {
         // Parse <value> into color scheme
