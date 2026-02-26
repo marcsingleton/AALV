@@ -276,7 +276,7 @@ void cmd_type(int argc, char **argv)
 
 /*
  * scheme new <name> <seq_type>
- * scheme map <name> <sym> <value>
+ * scheme map fg|bg <name> <sym> <value>
  */
 void cmd_scheme(int argc, char **argv)
 {
@@ -298,17 +298,20 @@ void cmd_scheme(int argc, char **argv)
 
     if (argc > 1 && strcmp("map", argv[1]) == 0)
     {
-        if (argc != 5)
+        if (argc != 6)
             return;
 
+        // Parse fg/bg
+        char *color_ground = argv[2];
+
         // Parse <name> into color scheme
-        char *color_scheme_arg = argv[2];
+        char *color_scheme_arg = argv[3];
         SeqColorScheme *color_scheme = parse_color_scheme_name(color_scheme_arg);
         if (!color_scheme)
             return;
 
         // Parse <sym>
-        char *sym_arg = argv[3];
+        char *sym_arg = argv[4];
         if (strlen(sym_arg) != 1)
             return;
         char sym = sym_arg[0];
@@ -320,7 +323,7 @@ void cmd_scheme(int argc, char **argv)
             return;
 
         // Parse <value>
-        char *value_arg = argv[4];
+        char *value_arg = argv[5];
         long value;
         int retcode = parse_integer(value_arg, &value);
         if (retcode != 0 || value < 0 || value > UINT8_MAX)
@@ -328,6 +331,9 @@ void cmd_scheme(int argc, char **argv)
         Color color;
         color.u8 = value;
 
-        color_scheme_map_fg_color(&color_scheme->scheme, color, index);
+        if (strcmp("fg", color_ground) == 0)
+            color_scheme_map_fg_color(&color_scheme->scheme, color, index);
+        else if (strcmp("bg", color_ground) == 0)
+            color_scheme_map_bg_color(&color_scheme->scheme, color, index);
     }
 }
