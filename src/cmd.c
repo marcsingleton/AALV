@@ -8,6 +8,7 @@
 #include "argparse.h"
 #include "cmd.h"
 #include "prefix.h"
+#include "rcparams.h"
 #include "state.h"
 
 extern State state;
@@ -23,6 +24,7 @@ Command cmds[] = {
     {&cmd_set, "set"},
     {&cmd_type, "type"},
     {&cmd_scheme, "scheme"},
+    {&cmd_config, "config"},
 };
 
 #define ncmds sizeof(cmds) / sizeof(Command)
@@ -335,5 +337,76 @@ void cmd_scheme(int argc, char **argv)
             color_scheme_map_fg_color(&color_scheme->scheme, color, index);
         else if (strcmp("bg", color_ground) == 0)
             color_scheme_map_bg_color(&color_scheme->scheme, color, index);
+    }
+}
+
+/*
+ * config <name> <value>
+ */
+void cmd_config(int argc, char **argv)
+{
+    if (argc == 3 && strcmp("ruler_records_divider", argv[1]) == 0)
+    {
+        // Parse <value> into unsigned int
+        char *value_arg = argv[2];
+        long value;
+        int retcode = parse_integer(value_arg, &value);
+        if (retcode != 0 || value < 0 || value > UINT_MAX)
+            return;
+        unsigned int ruler_records_divider = value;
+
+        rcparams_set_ruler_records_divider(ruler_records_divider);
+    }
+
+    if (argc == 3 && strcmp("header_sequence_divider", argv[1]) == 0)
+    {
+        // Parse <value> into unsigned int
+        char *value_arg = argv[2];
+        long value;
+        int retcode = parse_integer(value_arg, &value);
+        if (retcode != 0 || value < 0 || value > UINT_MAX)
+            return;
+        unsigned int header_sequence_divider = value;
+
+        rcparams_set_header_sequence_divider(header_sequence_divider);
+    }
+
+    if (argc == 3 && strcmp("tick_offset", argv[1]) == 0)
+    {
+        // Parse <value> into unsigned int
+        char *value_arg = argv[2];
+        long value;
+        int retcode = parse_integer(value_arg, &value);
+        if (retcode != 0 || value < 0 || value > UINT_MAX)
+            return;
+        unsigned int tick_offset = value;
+
+        rcparams_set_tick_offset(tick_offset);
+    }
+
+    if (argc == 3 && strcmp("tick_spacing", argv[1]) == 0)
+    {
+        // Parse <value> into unsigned int
+        char *value_arg = argv[2];
+        long value;
+        int retcode = parse_integer(value_arg, &value);
+        if (retcode != 0 || value < 0 || value > UINT_MAX)
+            return;
+        unsigned int tick_spacing = value;
+
+        rcparams_set_tick_spacing(tick_spacing);
+    }
+
+    if (argc == 3 && strcmp("nucleic_tiebreak_len", argv[1]) == 0)
+    {
+        // Parse <value> into unsigned int
+        char *value_arg = argv[2];
+        long value;
+        int retcode = parse_integer(value_arg, &value);
+        if (retcode != 0 || value < 0 || value > UINT_MAX)
+            return;
+        unsigned int nucleic_tiebreak_len = value;
+
+        rcparams_set_nucleic_tiebreak_len(nucleic_tiebreak_len);
     }
 }
