@@ -29,13 +29,13 @@
 
 typedef struct
 {
-    unsigned int ruler_records_divider_i;
-    unsigned int header_sequence_divider_j;
-    unsigned int records_command_divider_i;
-    unsigned int min_ruler_records_divider_i;
-    unsigned int min_header_sequence_divider_j;
-    unsigned int max_header_sequence_divider_j;
-    unsigned int max_records_command_divider_i;
+    unsigned int ruler_records_divider;
+    unsigned int header_sequence_divider;
+    unsigned int records_command_divider;
+    unsigned int min_ruler_records_divider;
+    unsigned int min_header_sequence_divider;
+    unsigned int max_header_sequence_divider;
+    unsigned int max_records_command_divider;
     Pane ruler_pane;
     Pane header_pane;
     Pane sequence_pane;
@@ -86,11 +86,11 @@ typedef struct
 } State;
 
 // FileState
-void state_set_ruler_records_divider_i(State *state, unsigned int i);
-void state_set_header_sequence_divider_j(State *state, unsigned int j);
-void state_set_records_command_divider_i(State *state, unsigned int i);
+void state_set_ruler_records_divider(State *state, unsigned int i);
+void state_set_header_sequence_divider(State *state, unsigned int j);
+void state_set_records_command_divider(State *state, unsigned int i);
 void state_set_divider_limits(State *state);
-void state_set_layout(State *state, unsigned int ruler_records_divider_i, unsigned int header_sequence_divider_j);
+void state_set_layout(State *state, unsigned int ruler_records_divider, unsigned int header_sequence_divider);
 void state_set_tick_offset(State *state, unsigned int tick_offset);
 void state_set_tick_spacing(State *state, unsigned int tick_spacing);
 

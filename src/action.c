@@ -261,25 +261,25 @@ void action_move_horizontal_middle(void)
 void action_increase_header_sequence_divider(void)
 {
     FileState *active_file = state.active_file;
-    state_set_header_sequence_divider_j(&state, active_file->layout.header_sequence_divider_j + 1);
+    state_set_header_sequence_divider(&state, active_file->layout.header_sequence_divider + 1);
 }
 
 void action_decrease_header_sequence_divider(void)
 {
     FileState *active_file = state.active_file;
-    state_set_header_sequence_divider_j(&state, active_file->layout.header_sequence_divider_j - 1);
+    state_set_header_sequence_divider(&state, active_file->layout.header_sequence_divider - 1);
 }
 
 void action_increase_ruler_records_divider(void)
 {
     FileState *active_file = state.active_file;
-    state_set_ruler_records_divider_i(&state, active_file->layout.ruler_records_divider_i + 1);
+    state_set_ruler_records_divider(&state, active_file->layout.ruler_records_divider + 1);
 }
 
 void action_decrease_ruler_records_divider(void)
 {
     FileState *active_file = state.active_file;
-    state_set_ruler_records_divider_i(&state, active_file->layout.ruler_records_divider_i - 1);
+    state_set_ruler_records_divider(&state, active_file->layout.ruler_records_divider - 1);
 }
 
 void action_increase_tick_spacing(void)
