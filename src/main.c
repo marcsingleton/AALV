@@ -41,6 +41,7 @@ bool raw_mode = false;
 
 void cleanup(void);
 void handle_sigwinch(int signum);
+int load_user_rcparams(void);
 int load_seqs(FileState *file, const char *format_arg, const char *seq_type_arg);
 FileReader get_reader(FileState *file, const char *format_arg);
 int set_seq_types(FileState *file, const char *seq_type_arg);
@@ -257,9 +258,10 @@ int main(int argc, char *argv[])
     state.active_file = files;
     state_set_active_file_index(&state, 0);
 
-    // Initialize state
-    rcparams_init();
+    // Initialize state and rcparams
     state_set_terminal_size(&state);
+    rcparams_init();
+    load_user_rcparams();
 
     // Initialize file states
     for (unsigned int file_index = 0; file_index < state.nfiles; file_index++)
@@ -406,6 +408,28 @@ void handle_sigwinch(int signum)
 {
     (void)signum; // Suppress unused parameter warning
     state.refresh_window = true;
+}
+
+int load_user_rcparams(void)
+{
+    char *home = getenv("HOME");
+    if (!home)
+        return -1;
+
+    char path[128];
+    int n = snprintf(path, sizeof(path), "%s/.aalvrc", home);
+    if (n < 0 || (unsigned int)n > sizeof(path) - 1)
+        return -1;
+
+    FILE *fp;
+    if (!(fp = fopen(path, "r")))
+        return -1;
+
+    size_t capacity = 0;
+    ssize_t line_len = 0;
+    while ((line_len = getline(&cmd_line, &capacity, fp)) > 0)
+        cmd_parse_and_execute_command_line(cmd_line);
+    return 0;
 }
 
 int load_seqs(FileState *file, const char *format_arg, const char *seq_type_arg)
