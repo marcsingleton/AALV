@@ -33,6 +33,7 @@ State state;
 
 Array read_buffer;
 Array write_buffer;
+char *cmd_line;
 
 struct termios old_termios;
 struct termios raw_termios;
@@ -352,7 +353,7 @@ int main(int argc, char *argv[])
         {
             state.mode = NORMAL;
             state.refresh_command_pane = true;
-            char *cmd_line = cmd_read_command_line(input_fd, ":");
+            cmd_line = cmd_read_command_line(input_fd, ":");
             retcode = cmd_parse_and_execute_command_line(cmd_line);
         }
         }
@@ -367,6 +368,7 @@ void cleanup(void)
     cmd_deinit_command_map();
     array_deinit(&read_buffer);
     array_deinit(&write_buffer);
+    free(cmd_line);
 
     // Free state
     if (state.color_schemes)
