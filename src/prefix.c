@@ -145,6 +145,7 @@ void prefix_tree_node_deinit(PrefixTreeNode *node)
         if (child)
         {
             prefix_tree_node_deinit(child);
+            free(child);
         }
     }
     free(node->children);
@@ -266,6 +267,7 @@ int prefix_tree_node_insert(PrefixTreeNode *node, CharMap *char_map, char *key, 
 
             // Set current node with new values
             node->prefix = new_prefix;
+            node->value = new_value;
             node->children[child_index] = new_child;
         }
         else
