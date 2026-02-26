@@ -256,9 +256,11 @@ int main(int argc, char *argv[])
     state.active_file = files;
     state_set_active_file_index(&state, 0);
 
-    // Initialize file states
+    // Initialize state
+    rcparams_init();
     state_set_terminal_size(&state);
 
+    // Initialize file states
     for (unsigned int file_index = 0; file_index < state.nfiles; file_index++)
     {
         FileState *file = state.files + file_index;
@@ -270,7 +272,7 @@ int main(int argc, char *argv[])
         scroller_init(&file->layout.scroller, SCROLLER_NPANES);
         scroller_set_active_pane(&file->layout.scroller, SCROLLER_SEQUENCE_PANE);
         state_set_active_file_index(&state, file_index);
-        state_set_layout(&state, rcparams_ruler_records_divider_i, rcparams_header_sequence_divider_j);
+        state_set_layout(&state, rcparams_ruler_records_divider, rcparams_header_sequence_divider);
         state_set_tick_spacing(&state, rcparams_tick_spacing);
 
         char *format_arg = "";
