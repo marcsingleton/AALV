@@ -1,4 +1,4 @@
-#include "rcparams.h"
+#include "config.h"
 
 unsigned int rcparams_ruler_records_divider;
 unsigned int rcparams_header_sequence_divider;

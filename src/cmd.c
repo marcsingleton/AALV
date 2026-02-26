@@ -7,8 +7,8 @@
 
 #include "argparse.h"
 #include "cmd.h"
+#include "config.h"
 #include "prefix.h"
-#include "rcparams.h"
 #include "state.h"
 
 extern State state;
