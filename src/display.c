@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -394,7 +395,13 @@ void display_cursor(Array *buffer)
 
 void display_header(Array *buffer, SeqRecord *record, size_t offset, unsigned int display_len)
 {
-    array_extend(buffer, offset + record->header, display_len);
+    for (unsigned int i = 0; i < display_len; i++)
+    {
+        char sym = record->header[offset + i];
+        if (iscntrl(sym))
+            sym = ' ';
+        array_append(buffer, &sym);
+    }
 }
 
 void display_sequence(Array *buffer, SeqRecord *record, size_t offset, unsigned int display_len)
