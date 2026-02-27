@@ -15,12 +15,12 @@ int schemes_init_base(void)
         if (i < N_BASE_SCHEMES_4_BIT)
         {
             type = COLOR_4_BIT;
-            scheme_record = schemes_base_records_4_bit + i;
+            scheme_record = schemes_base_4_bit_records + i;
         }
         else
         {
             type = COLOR_8_BIT;
-            scheme_record = schemes_base_records_8_bit + i - N_BASE_SCHEMES_4_BIT;
+            scheme_record = schemes_base_8_bit_records + i - N_BASE_SCHEMES_4_BIT;
         }
 
         SeqColorScheme *scheme = scheme_record->scheme;
