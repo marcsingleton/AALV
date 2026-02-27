@@ -412,22 +412,33 @@ void handle_sigwinch(int signum)
 
 int load_user_config(void)
 {
-    char *home = getenv("HOME");
-    if (!home)
+    char *home_dir = NULL;
+    char config_path[128];
+    FILE *config_fp = NULL;
+
+    home_dir = getenv("HOME");
+    if (!home_dir)
         return -1;
 
-    char path[128];
-    int n = snprintf(path, sizeof(path), "%s/.aalvrc", home);
-    if (n < 0 || (unsigned int)n > sizeof(path) - 1)
-        return -1;
+    char *prefixes[] = {".config/", "."};
+    unsigned int nprefixes = sizeof(prefixes) / sizeof(char *);
+    for (unsigned int i = 0; i < nprefixes; i++)
+    {
+        int n = snprintf(config_path, sizeof(config_path), "%s/%s%src", home_dir, prefixes[i], PROGRAM_NAME);
+        if (n < 0 || (unsigned int)n > sizeof(config_path) - 1)
+            continue;
 
-    FILE *fp;
-    if (!(fp = fopen(path, "r")))
+        if (!(config_fp = fopen(config_path, "r")))
+            continue;
+
+        break;
+    }
+    if (!config_fp)
         return -1;
 
     size_t capacity = 0;
     ssize_t line_len = 0;
-    while ((line_len = getline(&cmd_line, &capacity, fp)) > 0)
+    while ((line_len = getline(&cmd_line, &capacity, config_fp)) > 0)
         cmd_parse_and_execute_command_line(cmd_line);
     return 0;
 }
