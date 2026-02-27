@@ -8,7 +8,7 @@ SeqColorScheme schemes_base[N_BASE_SCHEMES];
 
 int schemes_init_base(void)
 {
-    for (unsigned int i = 0; i < N_BASE_ALPHABETS; i++)
+    for (unsigned int i = 0; i < N_BASE_SCHEMES; i++)
     {
         ColorType type;
         const ColorSchemeRecord *scheme_record;
