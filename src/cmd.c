@@ -1,4 +1,5 @@
 #include <ctype.h>
+#include <fnmatch.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/errno.h>
@@ -255,11 +256,11 @@ void cmd_set(int argc, char **argv)
 }
 
 /*
- * type <seq_type>
+ * type <seq_type> [<id_pattern>]
  */
 void cmd_type(int argc, char **argv)
 {
-    if (argc != 2)
+    if (!(argc == 2 || argc == 3))
         return;
 
     // Parse <seq_type>
@@ -268,11 +269,26 @@ void cmd_type(int argc, char **argv)
     if (seq_type == SEQ_TYPE_UNSPECIFIED)
         return;
 
+    // Apply to record(s)
     FileState *active_file = state.active_file;
-    RowLinkedScroller *scroller = &active_file->layout.scroller;
-    size_t record_index = scroller->offset_i + scroller->cursor_i;
-    SeqRecord *record = active_file->record_array.data + record_index;
-    record->type = seq_type;
+    if (argc == 2)
+    {
+        RowLinkedScroller *scroller = &active_file->layout.scroller;
+        size_t record_index = scroller->offset_i + scroller->cursor_i;
+        SeqRecord *record = active_file->record_array.data + record_index;
+        record->type = seq_type;
+    }
+    else if (argc == 3)
+    {
+        char *id_pattern = argv[2];
+        int flags = 0;
+        for (size_t record_index = 0; record_index < active_file->record_array.len; record_index++)
+        {
+            SeqRecord *record = active_file->record_array.data + record_index;
+            if (fnmatch(id_pattern, record->id, flags) == 0)
+                record->type = seq_type;
+        }
+    }
     state.refresh_sequence_pane = true;
 }
 
