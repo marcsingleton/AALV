@@ -240,18 +240,15 @@ int prefix_tree_node_insert(PrefixTreeNode *node, CharMap *char_map, char *key, 
 
             // Allocate all new memory
             char *new_prefix = strndup(node->prefix, common_len);
-            void *new_value = malloc(node->size);
             char *new_child_prefix = strdup(node->prefix + common_len);
             PrefixTreeNode *new_child = prefix_tree_node_create(char_map->len, node->size);
-            if (!new_prefix || !new_child_prefix || !new_value || !new_child)
+            if (!new_prefix || !new_child_prefix || !new_child)
             {
                 free(new_prefix);
-                free(new_value);
                 free(new_child_prefix);
                 prefix_tree_node_deinit(new_child);
                 return -1;
             }
-            memcpy(new_value, value, node->size);
 
             // Copy current node to new child
             new_child->prefix = new_child_prefix;
@@ -267,7 +264,6 @@ int prefix_tree_node_insert(PrefixTreeNode *node, CharMap *char_map, char *key, 
 
             // Set current node with new values
             node->prefix = new_prefix;
-            node->value = new_value;
             node->children[child_index] = new_child;
         }
         else
