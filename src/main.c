@@ -385,7 +385,7 @@ void cleanup(void)
         {
             scroller_deinit(&state.files[i].layout.scroller);
             sequences_deinit_seq_record_array(&state.files[i].record_array);
-            sequences_deinit_unaligned_indices_array(&state.files[i].indices_array);
+            sequences_deinit_unaligned_indices_array(&state.files[i].metadata.indices_array);
         }
         free(state.files);
     }
@@ -486,7 +486,7 @@ int load_seqs(FileState *file, const char *format_arg, const char *seq_type_arg)
         return -1;
 
     file->tick_offset = 1;
-    file->records_max_len = max_len;
+    file->metadata.max_len = max_len;
 
     return 0;
 }
@@ -559,13 +559,13 @@ int set_seq_types(FileState *file, const char *seq_type_arg)
 
 int set_unaligned_indices(FileState *file)
 {
-    int retcode = sequences_init_unaligned_indices_array(&file->indices_array, file->record_array.len);
+    int retcode = sequences_init_unaligned_indices_array(&file->metadata.indices_array, file->record_array.len);
     if (retcode != 0)
         return -1;
     for (size_t i = 0; i < file->record_array.len; i++)
     {
         SeqRecord *record = file->record_array.data + i;
-        UnalignedIndices *unaligned_indices = file->indices_array.data + i;
+        UnalignedIndices *unaligned_indices = file->metadata.indices_array.data + i;
         Alphabet *alphabet = sequences_seq_type_to_alphabet(record->type);
         if (alphabet)
             sequences_index_nongap_syms(alphabet, record, unaligned_indices);

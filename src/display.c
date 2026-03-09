@@ -254,7 +254,7 @@ void display_command_pane(Array *buffer)
     {
         char status[256];
         unsigned int n_status = 0;
-        UnalignedIndices *unaligned_indices = active_file->indices_array.data + record_index;
+        UnalignedIndices *unaligned_indices = active_file->metadata.indices_array.data + record_index;
 
         int n = 0;
 
@@ -270,7 +270,7 @@ void display_command_pane(Array *buffer)
                      "COL %d/%d,%d  ",
                      active_file->tick_offset + (int)sequence_index,
                      active_file->tick_offset,
-                     active_file->tick_offset + (int)active_file->records_max_len);
+                     active_file->tick_offset + (int)active_file->metadata.max_len);
         if (n < 0)
             return;
         n_status += n;

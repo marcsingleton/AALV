@@ -45,13 +45,18 @@ typedef struct
 
 typedef struct
 {
+    size_t max_len;
+    UnalignedIndicesArray indices_array;
+} FileMetadata;
+
+typedef struct
+{
     const char *file_path;
     Layout layout;
     int tick_offset;
     int tick_spacing;
     SeqRecordArray record_array;
-    size_t records_max_len;
-    UnalignedIndicesArray indices_array;
+    FileMetadata metadata;
 } FileState;
 
 typedef enum
