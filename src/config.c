@@ -2,8 +2,8 @@
 
 unsigned int config_ruler_records_divider;
 unsigned int config_header_sequence_divider;
-unsigned int config_tick_offset;
-unsigned int config_tick_spacing;
+int config_tick_offset;
+int config_tick_spacing;
 unsigned int config_nucleic_tiebreak_len;
 
 void config_init(void)
@@ -25,12 +25,12 @@ void config_set_header_sequence_divider(unsigned int i)
     config_header_sequence_divider = i;
 }
 
-void config_set_tick_offset(unsigned int tick_offset)
+void config_set_tick_offset(int tick_offset)
 {
     config_tick_offset = tick_offset;
 }
 
-void config_set_tick_spacing(unsigned int tick_spacing)
+void config_set_tick_spacing(int tick_spacing)
 {
     if (tick_spacing < 1)
         tick_spacing = 1;

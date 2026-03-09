@@ -148,45 +148,53 @@ void display_ruler_pane_ticks(Array *buffer)
     Pane *pane = &active_file->layout.ruler_pane;
     unsigned int header_sequence_divider = active_file->layout.header_sequence_divider;
 
-    unsigned int tick_offset = active_file->tick_offset;
-    unsigned int tick_spacing = active_file->tick_spacing;
-    size_t x0 = offset_sequence + tick_offset;
-    size_t q = x0 / tick_spacing;
-    size_t r = x0 % tick_spacing;
-    if (r > 0)
-        q++;
+    int tick_offset = active_file->tick_offset;
+    int tick_spacing = active_file->tick_spacing;
 
-    size_t x = q * tick_spacing;
-    size_t j = header_sequence_divider + 1;
-    j += x - offset_sequence - tick_offset;
+    // Initialize tick position and label
+    int x = offset_sequence + tick_offset;
+    unsigned int j = header_sequence_divider + 1;
+    int r = x % tick_spacing;
+    if (r != 0) // Shift left if not multiple of spacing
+    {
+        int d = (x > 0) ? tick_spacing - r : -r;
+        x += d;
+        j += d;
+    }
+
     while (j < pane->w)
     {
         pane_cursor_ij(pane, buffer, pane->h - 1, j);
         array_extend(buffer, "┷", sizeof("┷") - 1);
 
-        char c[2];
-        size_t n = x;
+        char c;
+        unsigned int n = abs(x);
         unsigned int d;
-        unsigned int i = pane->h - 2;
+        unsigned int i = pane->h - 1;
         do
         {
             // Write numbers from tick to top
-            pane_cursor_ij(pane, buffer, i, j);
+            i--;
             d = n % 10;
             n = n / 10;
-            snprintf(c, 2, "%d", d);
-            array_append(buffer, c); // Excludes null in c
-            if (i == 0 && n != 0)
+            c = d + '0';
+            pane_cursor_ij(pane, buffer, i, j);
+            array_append(buffer, &c);
+        } while (n != 0 && i > 0);
+        if (i == 0 && (n != 0 || x < 0)) // If hit top and remaining digits or negative
+        {
+            for (i = 0; i < RULER_PANE_ELLIPSES_NUM; i++)
             {
-                for (i = 0; i < RULER_PANE_ELLIPSES_NUM; i++)
-                {
-                    pane_cursor_ij(pane, buffer, i, j);
-                    array_extend(buffer, "·", sizeof("·") - 1);
-                }
-                break;
+                pane_cursor_ij(pane, buffer, i, j);
+                array_extend(buffer, "·", sizeof("·") - 1);
             }
+        }
+        else if (x < 0)
+        {
             i--;
-        } while (n != 0);
+            pane_cursor_ij(pane, buffer, i, j);
+            array_extend(buffer, "-", sizeof("-") - 1);
+        }
 
         x += tick_spacing;
         j += tick_spacing;
@@ -259,10 +267,10 @@ void display_command_pane(Array *buffer)
         n_status += n;
 
         n = snprintf(status + n_status, sizeof(status) - n_status,
-                     "COL %zu/%u-%zu  ",
-                     active_file->tick_offset + sequence_index,
+                     "COL %d/%d,%d  ",
+                     active_file->tick_offset + (int)sequence_index,
                      active_file->tick_offset,
-                     active_file->records_max_len + active_file->tick_offset);
+                     active_file->tick_offset + (int)active_file->records_max_len);
         if (n < 0)
             return;
         n_status += n;
@@ -272,10 +280,10 @@ void display_command_pane(Array *buffer)
             size_t unaligned_index = (sequence_index + 1 > unaligned_indices->len) ? unaligned_indices->len - 1
                                                                                    : sequence_index;
             n = snprintf(status + n_status, sizeof(status) - n_status,
-                         "POS %zu/%u-%zu",
-                         active_file->tick_offset + unaligned_indices->indices[unaligned_index],
+                         "POS %d/%d,%d",
+                         active_file->tick_offset + (int)unaligned_indices->indices[unaligned_index],
                          active_file->tick_offset,
-                         active_file->tick_offset + unaligned_indices->indices[unaligned_indices->len - 1]);
+                         active_file->tick_offset + (int)unaligned_indices->indices[unaligned_indices->len - 1]);
         }
         else
         {

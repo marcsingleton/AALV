@@ -113,10 +113,10 @@ void state_set_layout(State *state, unsigned int ruler_records_divider, unsigned
     state->active_file->layout.ruler_pane.w = state->terminal_cols;
 }
 
-void state_set_tick_offset(State *state, unsigned int tick_offset)
+void state_set_tick_offset(State *state, int tick_offset)
 {
     FileState *active_file = state->active_file;
-    if (active_file->records_max_len > SIZE_MAX - tick_offset)
+    if (tick_offset > 0 && active_file->records_max_len > INT_MAX - (unsigned int)tick_offset)
         return;
     if (tick_offset != active_file->tick_offset)
     {
@@ -125,7 +125,7 @@ void state_set_tick_offset(State *state, unsigned int tick_offset)
     }
 }
 
-void state_set_tick_spacing(State *state, unsigned int tick_spacing)
+void state_set_tick_spacing(State *state, int tick_spacing)
 {
     FileState *active_file = state->active_file;
     if (tick_spacing < 1)

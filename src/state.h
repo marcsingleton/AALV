@@ -47,8 +47,8 @@ typedef struct
 {
     const char *file_path;
     Layout layout;
-    unsigned int tick_offset;
-    unsigned int tick_spacing;
+    int tick_offset;
+    int tick_spacing;
     SeqRecordArray record_array;
     size_t records_max_len;
     UnalignedIndicesArray indices_array;
@@ -91,8 +91,8 @@ void state_set_header_sequence_divider(State *state, unsigned int j);
 void state_set_records_command_divider(State *state, unsigned int i);
 void state_set_divider_limits(State *state);
 void state_set_layout(State *state, unsigned int ruler_records_divider, unsigned int header_sequence_divider);
-void state_set_tick_offset(State *state, unsigned int tick_offset);
-void state_set_tick_spacing(State *state, unsigned int tick_spacing);
+void state_set_tick_offset(State *state, int tick_offset);
+void state_set_tick_spacing(State *state, int tick_spacing);
 
 // State
 void state_set_terminal_size(State *state);

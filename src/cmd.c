@@ -223,9 +223,9 @@ void cmd_set(int argc, char **argv)
         char *value_arg = argv[2];
         long value;
         int retcode = parse_integer(value_arg, &value);
-        if (retcode != 0 || value < 0 || value > UINT_MAX)
+        if (retcode != 0 || value < INT_MIN || value > INT_MAX)
             return;
-        unsigned int tick_offset = value;
+        int tick_offset = value;
 
         state_set_tick_offset(&state, tick_offset);
     }
@@ -236,9 +236,9 @@ void cmd_set(int argc, char **argv)
         char *value_arg = argv[2];
         long value;
         int retcode = parse_integer(value_arg, &value);
-        if (retcode != 0 || value < 0 || value > UINT_MAX)
+        if (retcode != 0 || value < 0 || value > INT_MAX)
             return;
-        unsigned int tick_spacing = value;
+        int tick_spacing = value;
 
         state_set_tick_spacing(&state, tick_spacing);
     }
@@ -393,9 +393,9 @@ void cmd_config(int argc, char **argv)
         char *value_arg = argv[2];
         long value;
         int retcode = parse_integer(value_arg, &value);
-        if (retcode != 0 || value < 0 || value > UINT_MAX)
+        if (retcode != 0 || value < INT_MIN || value > INT_MAX)
             return;
-        unsigned int tick_offset = value;
+        int tick_offset = value;
 
         config_set_tick_offset(tick_offset);
     }
@@ -406,9 +406,9 @@ void cmd_config(int argc, char **argv)
         char *value_arg = argv[2];
         long value;
         int retcode = parse_integer(value_arg, &value);
-        if (retcode != 0 || value < 0 || value > UINT_MAX)
+        if (retcode != 0 || value < 0 || value > INT_MAX)
             return;
-        unsigned int tick_spacing = value;
+        int tick_spacing = value;
 
         config_set_tick_spacing(tick_spacing);
     }

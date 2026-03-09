@@ -477,6 +477,8 @@ int load_seqs(FileState *file, const char *format_arg, const char *seq_type_arg)
         if (record->len > max_len)
             max_len = record->len;
     }
+    if (max_len > INT_MAX)
+        return -2;
 
     // Set sequence type
     retcode = set_seq_types(file, seq_type_arg);
