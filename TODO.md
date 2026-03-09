@@ -2,9 +2,6 @@
 - IO
   - More supported file formats
   - Format inference?
-- Config
-  - Check for ~/.aalvrc
-    - Read lines from file (if exists) and execute as though input from user
 - Display
   - Hydrophobic color scheme
   - Mechanism for displaying messages
@@ -12,16 +9,10 @@
     - Cleared after keystroke or time-out?
   - Graph panel
 - Commands
-    - Add color scheme
-      - `scheme new <name>`
-      - `scheme map <name> <sym> <color>`
-        - fg/bg option
-    - Set sequence type
-      - `type <type> <record-pattern>`
+    - `scheme map <name> <sym> <color>`
+      - Change color to <sym>=<color> to allow multiple
     - Identities as dots?
       - `set display_mode dots`
-    - Set scheme
-      - `set scheme <type> <name>`
     - Write file
       - `write <path>`
   - Regexes
@@ -30,4 +21,3 @@
 - Actions
   - Re-arrange lines
   - Make move left/right edges and middle work like vim?
-- Negative offsets
