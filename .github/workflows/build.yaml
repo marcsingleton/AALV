@@ -16,6 +16,7 @@ jobs:
 
     - name: Build project
       run: |
+        git submodule update --init
         make
     
     - uses: actions/upload-artifact@v4
