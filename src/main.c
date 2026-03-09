@@ -357,6 +357,7 @@ int main(int argc, char *argv[])
             state.refresh_command_pane = true;
             cmd_line = cmd_read_command_line(input_fd, ":");
             retcode = cmd_parse_and_execute_command_line(cmd_line);
+            free(cmd_line);
         }
         }
     }
@@ -440,6 +441,7 @@ int load_user_config(void)
     ssize_t line_len = 0;
     while ((line_len = getline(&cmd_line, &capacity, config_fp)) > 0)
         cmd_parse_and_execute_command_line(cmd_line);
+    free(cmd_line);
     return 0;
 }
 
