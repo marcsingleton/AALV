@@ -1,6 +1,6 @@
 # paths
 SRC_DIR := src
-TEST_DIR := test
+TESTS_DIR := tests
 BUILD_DIR := build
 EXE := aalv
 
@@ -15,10 +15,10 @@ SRC_OBJS += $(BUILD_DIR)/linenoise.o
 SRC_TARGET := $(BUILD_DIR)/$(EXE)
 
 # test targets
-TEST := $(wildcard $(TEST_DIR)/*.c)
-TEST_DEPS := array.c fasta.c prefix.c sequences.c str.c
-TEST_OBJS := $(TEST_DEPS:%.c=$(BUILD_DIR)/%.o)
-TEST_TARGETS := $(TEST:$(TEST_DIR)/%.c=$(BUILD_DIR)/%)
+TESTS := $(wildcard $(TESTS_DIR)/*.c)
+TESTS_DEPS := array.c fasta.c prefix.c sequences.c str.c
+TESTS_OBJS := $(TESTS_DEPS:%.c=$(BUILD_DIR)/%.o)
+TEST_TARGETS := $(TESTS:$(TESTS_DIR)/%.c=$(BUILD_DIR)/%)
 
 # platform and program macros
 OS := $(shell uname -s)
@@ -49,7 +49,7 @@ $(BUILD_DIR)/linenoise.o: $(LINENOISE_DIR)/linenoise.c | $(BUILD_DIR)
 .PHONY: test
 test: $(TEST_TARGETS)
 
-$(BUILD_DIR)/test_%: $(TEST_DIR)/test_%.c $(TEST_OBJS) | $(BUILD_DIR)
+$(BUILD_DIR)/test_%: $(TESTS_DIR)/test_%.c $(TESTS_OBJS) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $^ -I$(SRC_DIR) -o $@
 	@echo
 	$@
