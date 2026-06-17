@@ -41,6 +41,13 @@ bool raw_mode = false;
 
 void cleanup(void);
 void handle_sigwinch(int signum);
+void handle_sigtstp(int signum);
+void handle_sigcont(int signum);
+int register_sigwinch_handler(void);
+int register_sigtstp_handler(void);
+int register_sigcont_handler(void);
+int init_terminal(void);
+int deinit_terminal(void);
 int load_user_config(void);
 int load_seqs(FileState *file, const char *format_arg, const char *seq_type_arg);
 FileReader get_reader(FileState *file, const char *format_arg);
@@ -133,14 +140,20 @@ int main(int argc, char *argv[])
     else
         INVOCATION_NAME = "?";
 
-    // Register window change handler
-    struct sigaction sa;
-    sigemptyset(&sa.sa_mask);
-    sa.sa_handler = handle_sigwinch;
-    sa.sa_flags = 0; // No SA_RESTART--blocking read calls will return
-    if (sigaction(SIGWINCH, &sa, NULL) == -1)
+    // Register handlers
+    if (register_sigwinch_handler() == -1)
     {
-        error_printf("%s: Failed to register signal handler\n", INVOCATION_NAME);
+        error_printf("%s: Failed to register WINCH signal handler\n", INVOCATION_NAME);
+        return EXIT_FAILURE;
+    }
+    if (register_sigtstp_handler() == -1)
+    {
+        error_printf("%s: Failed to register TSTP signal handler\n", INVOCATION_NAME);
+        return EXIT_FAILURE;
+    }
+    if (register_sigcont_handler() == -1)
+    {
+        error_printf("%s: Failed to register CONT signal handler\n", INVOCATION_NAME);
         return EXIT_FAILURE;
     }
 
@@ -306,20 +319,27 @@ int main(int argc, char *argv[])
         str_free_split(seq_type_args, n_seq_type_args);
 
     // Set screen and terminal options
-    if (terminal_get_termios(&old_termios) != 0)
+    retcode = init_terminal();
+    if (retcode == -1)
     {
         error_printf("%s: Failed to get current termios\n", INVOCATION_NAME);
         return EXIT_FAILURE;
     }
-    raw_termios = old_termios; // Copy current settings to raw
-    if (terminal_enable_raw_mode(&raw_termios) != 0)
+    else if (retcode == -2)
     {
         error_printf("%s: Failed to set raw mode\n", INVOCATION_NAME);
         return EXIT_FAILURE;
-    };
-    raw_mode = true;
-    terminal_set_blocking_read();
-    terminal_use_alternate_buffer();
+    }
+    else if (retcode == -3)
+    {
+        error_printf("%s: Failed to set blocking read\n", INVOCATION_NAME);
+        return EXIT_FAILURE;
+    }
+    else if (retcode != 0)
+    {
+        error_printf("%s: Unknown error code during terminal initialization: %d\n", INVOCATION_NAME, retcode);
+        return EXIT_FAILURE;
+    }
 
     // Main loop
     size_t count;
@@ -392,11 +412,7 @@ void cleanup(void)
     }
 
     // Restore terminal options
-    if (raw_mode)
-    {
-        terminal_use_normal_buffer();
-        terminal_disable_raw_mode(&old_termios);
-    }
+    deinit_terminal();
     if (TERMINAL_FILENO != STDIN_FILENO)
         close(TERMINAL_FILENO);
 
@@ -409,6 +425,94 @@ void handle_sigwinch(int signum)
 {
     (void)signum; // Suppress unused parameter warning
     state.refresh_window = true;
+}
+
+void handle_sigtstp(int signum)
+{
+    (void)signum; // Suppress unused parameter warning
+
+    deinit_terminal();
+
+    // Reset SIGTSTP to default
+    struct sigaction sa;
+    sa.sa_handler = SIG_DFL;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = SA_RESTART;
+    sigaction(SIGTSTP, &sa, NULL);
+
+    raise(SIGTSTP); // Re-raise to stop process
+}
+
+void handle_sigcont(int signum)
+{
+    (void)signum; // Suppress unused parameter warning
+
+    // Re-register the SIGTSTP handler on resume
+    register_sigtstp_handler();
+
+    init_terminal();
+    state.refresh_window = true;
+}
+
+int register_sigwinch_handler(void)
+{
+    struct sigaction sa;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_handler = handle_sigwinch;
+    sa.sa_flags = 0; // No SA_RESTART--blocking read calls will return
+    return sigaction(SIGWINCH, &sa, NULL);
+}
+
+int register_sigtstp_handler(void)
+{
+    struct sigaction sa;
+    sigemptyset(&sa.sa_mask);
+    sigaddset(&sa.sa_mask, SIGCONT);
+    sa.sa_handler = handle_sigtstp;
+    sa.sa_flags = 0; // No SA_RESTART--blocking read calls will return
+    return sigaction(SIGTSTP, &sa, NULL);
+}
+
+int register_sigcont_handler(void)
+{
+    struct sigaction sa;
+    sigemptyset(&sa.sa_mask);
+    sigaddset(&sa.sa_mask, SIGTSTP);
+    sa.sa_handler = handle_sigcont;
+    sa.sa_flags = 0; // No SA_RESTART--blocking read calls will return
+    return sigaction(SIGCONT, &sa, NULL);
+}
+
+int init_terminal(void)
+{
+    if (terminal_get_termios(&old_termios) != 0)
+        return -1;
+    raw_termios = old_termios; // Copy current settings to raw
+
+    if (terminal_enable_raw_mode(&raw_termios) != 0)
+        return -2;
+    raw_mode = true; // Not re-entrant, but unlikely to cause issues during signal handling
+
+    if (terminal_set_blocking_read() != 0)
+        return -3;
+
+    terminal_use_alternate_buffer();
+
+    return 0;
+}
+
+int deinit_terminal(void)
+{
+    if (raw_mode)
+    {
+        terminal_use_normal_buffer();
+
+        if (terminal_disable_raw_mode(&old_termios) != 0)
+            return -1;
+        raw_mode = false; // Not re-entrant, but unlikely to cause issues during signal handling
+    }
+
+    return 0;
 }
 
 int load_user_config(void)

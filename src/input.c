@@ -1,4 +1,5 @@
 #include <ctype.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -268,6 +269,8 @@ int input_parse_keys(Array *buffer, Action *action, size_t *count)
             return PARSE_FAIL;
         }
         break;
+    case CTRL('Z'):
+        raise(SIGTSTP);
     default:
         return PARSE_FAIL;
     }
