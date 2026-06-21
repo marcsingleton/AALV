@@ -41,6 +41,7 @@ void action_move_page_down(PageSize page_size);
 void action_move_page_right(PageSize page_size);
 void action_move_page_left(PageSize page_size);
 void action_move_line_start(void);
+void action_move_line_middle(void);
 void action_move_line_end(void);
 void action_move_to_column(size_t x);
 void action_move_first_non_gap_or_non_whitespace(void);

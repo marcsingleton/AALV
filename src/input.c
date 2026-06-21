@@ -182,6 +182,10 @@ int input_parse_keys(Array *buffer, Action *action, size_t *count)
             action->fn.void_arg = action_move_horizontal_middle;
             action->args = VOID_ARG;
             break;
+        case 'M':
+            action->fn.void_arg = action_move_line_middle;
+            action->args = VOID_ARG;
+            break;
         case '$':
             action->fn.void_arg = action_move_right_edge;
             action->args = VOID_ARG;
