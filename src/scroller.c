@@ -490,6 +490,18 @@ void scroller_move_to_line(RowLinkedScroller *scroller, size_t nlines, size_t x)
         scroller_move_up(scroller, nlines, index_i - x);
 }
 
+void scroller_move_top_edge(RowLinkedScroller *scroller, size_t nlines)
+{
+    if (!scroller)
+        return;
+    scroller_cursor_clamp(scroller);
+
+    if (nlines == 0)
+        return;
+
+    scroller_set_cursor_i(scroller, 0);
+}
+
 void scroller_move_bottom_edge(RowLinkedScroller *scroller, size_t nlines)
 {
     if (!scroller)
@@ -509,30 +521,6 @@ void scroller_move_bottom_edge(RowLinkedScroller *scroller, size_t nlines)
         scroller_set_cursor_i(scroller, scroller_height - 1);
 }
 
-void scroller_move_top_edge(RowLinkedScroller *scroller, size_t nlines)
-{
-    if (!scroller)
-        return;
-    scroller_cursor_clamp(scroller);
-
-    if (nlines == 0)
-        return;
-
-    scroller_set_cursor_i(scroller, 0);
-}
-
-void scroller_move_left_edge(RowLinkedScroller *scroller, size_t nlines)
-{
-    if (!scroller)
-        return;
-    scroller_cursor_clamp(scroller);
-
-    if (nlines == 0)
-        return;
-
-    scroller_set_cursor_j(scroller, 0);
-}
-
 void scroller_move_right_edge(RowLinkedScroller *scroller, size_t nlines)
 {
     if (!scroller)
@@ -548,6 +536,18 @@ void scroller_move_right_edge(RowLinkedScroller *scroller, size_t nlines)
         scroller_width = 1; // Treat collapsed scroller as single column
 
     scroller_set_cursor_j(scroller, scroller_width - 1);
+}
+
+void scroller_move_left_edge(RowLinkedScroller *scroller, size_t nlines)
+{
+    if (!scroller)
+        return;
+    scroller_cursor_clamp(scroller);
+
+    if (nlines == 0)
+        return;
+
+    scroller_set_cursor_j(scroller, 0);
 }
 
 void scroller_move_vertical_middle(RowLinkedScroller *scroller, size_t nlines)

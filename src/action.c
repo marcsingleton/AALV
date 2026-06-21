@@ -254,13 +254,6 @@ void action_move_to_record(size_t x)
     scroller_move_to_line(scroller, active_file->record_array.len, x);
 }
 
-void action_move_bottom_edge(void)
-{
-    FileState *active_file = state.active_file;
-    RowLinkedScroller *scroller = &active_file->layout.scroller;
-    scroller_move_bottom_edge(scroller, active_file->record_array.len);
-}
-
 void action_move_top_edge(void)
 {
     FileState *active_file = state.active_file;
@@ -268,11 +261,11 @@ void action_move_top_edge(void)
     scroller_move_top_edge(scroller, active_file->record_array.len);
 }
 
-void action_move_left_edge(void)
+void action_move_bottom_edge(void)
 {
     FileState *active_file = state.active_file;
     RowLinkedScroller *scroller = &active_file->layout.scroller;
-    scroller_move_left_edge(scroller, active_file->record_array.len);
+    scroller_move_bottom_edge(scroller, active_file->record_array.len);
 }
 
 void action_move_right_edge(void)
@@ -280,6 +273,13 @@ void action_move_right_edge(void)
     FileState *active_file = state.active_file;
     RowLinkedScroller *scroller = &active_file->layout.scroller;
     scroller_move_right_edge(scroller, active_file->record_array.len);
+}
+
+void action_move_left_edge(void)
+{
+    FileState *active_file = state.active_file;
+    RowLinkedScroller *scroller = &active_file->layout.scroller;
+    scroller_move_left_edge(scroller, active_file->record_array.len);
 }
 
 void action_move_vertical_middle(void)

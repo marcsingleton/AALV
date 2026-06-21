@@ -56,10 +56,10 @@ void scroller_move_to_column(RowLinkedScroller *scroller, size_t nlines, size_t 
 void scroller_move_first_line(RowLinkedScroller *scroller, size_t nlines);
 void scroller_move_last_line(RowLinkedScroller *scroller, size_t nlines);
 void scroller_move_to_line(RowLinkedScroller *scroller, size_t nlines, size_t x);
-void scroller_move_bottom_edge(RowLinkedScroller *scroller, size_t nlines);
 void scroller_move_top_edge(RowLinkedScroller *scroller, size_t nlines);
-void scroller_move_left_edge(RowLinkedScroller *scroller, size_t nlines);
+void scroller_move_bottom_edge(RowLinkedScroller *scroller, size_t nlines);
 void scroller_move_right_edge(RowLinkedScroller *scroller, size_t nlines);
+void scroller_move_left_edge(RowLinkedScroller *scroller, size_t nlines);
 void scroller_move_vertical_middle(RowLinkedScroller *scroller, size_t nlines);
 void scroller_move_horizontal_middle(RowLinkedScroller *scroller, size_t nlines);
 
