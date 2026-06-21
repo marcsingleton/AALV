@@ -113,6 +113,25 @@ void action_move_line_end(void)
     scroller_move_line_end(scroller, active_file->record_array.len, line_len);
 }
 
+void action_move_to_column(size_t x)
+{
+    FileState *active_file = state.active_file;
+    RowLinkedScroller *scroller = &active_file->layout.scroller;
+    size_t record_index = scroller->offset_i + scroller->cursor_i;
+    SeqRecord *record = active_file->record_array.data + record_index;
+    size_t line_len;
+    switch (scroller->active_pane_index)
+    {
+    case SCROLLER_HEADER_PANE:
+        line_len = strlen(record->header);
+        break;
+    case SCROLLER_SEQUENCE_PANE:
+        line_len = record->len;
+        break;
+    }
+    scroller_move_to_column(scroller, active_file->record_array.len, line_len, x);
+}
+
 void action_move_first_non_gap_or_non_whitespace(void)
 {
     FileState *active_file = state.active_file;

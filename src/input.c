@@ -28,7 +28,7 @@ int input_parse_keys(Array *buffer, Action *action, size_t *count)
 
     // Parse digits
     size_t accum = 0;
-    int accum_default_set = 0;
+    int accum_default_is_set = 0;
     while (index < buffer->len)
     {
         ptr = array_get(buffer, index);
@@ -47,7 +47,7 @@ int input_parse_keys(Array *buffer, Action *action, size_t *count)
     if (accum == 0)
     {
         accum = 1;
-        accum_default_set = 1;
+        accum_default_is_set = 1;
     }
 
     // Parse command
@@ -150,6 +150,11 @@ int input_parse_keys(Array *buffer, Action *action, size_t *count)
         action->fn.void_arg = action_move_line_start;
         action->args = VOID_ARG;
         break;
+    case '|':
+        action->fn.size_t_arg = action_move_to_column;
+        action->args = SIZE_T_ARG;
+        accum--; // Convert to 0-based index
+        break;
     case '^':
         action->fn.void_arg = action_move_first_non_gap_or_non_whitespace;
         action->args = VOID_ARG;
@@ -186,7 +191,7 @@ int input_parse_keys(Array *buffer, Action *action, size_t *count)
         }
         break;
     case 'G':
-        if (accum_default_set == 1)
+        if (accum_default_is_set == 1)
         {
             action->fn.void_arg = action_move_last_record;
             action->args = VOID_ARG;
@@ -195,7 +200,7 @@ int input_parse_keys(Array *buffer, Action *action, size_t *count)
         {
             action->fn.size_t_arg = action_move_to_record;
             action->args = SIZE_T_ARG;
-            accum--;
+            accum--; // Convert to 0-based index
         }
         break;
     case 'H':

@@ -428,6 +428,25 @@ void scroller_move_line_end(RowLinkedScroller *scroller, size_t nlines, size_t l
     scroller_move_right(scroller, nlines, line_len, x);
 }
 
+void scroller_move_to_column(RowLinkedScroller *scroller, size_t nlines, size_t line_len, size_t x)
+{
+    if (!scroller)
+        return;
+    scroller_cursor_clamp(scroller);
+
+    if (nlines == 0)
+        return;
+
+    unsigned int active_index = scroller->active_pane_index;
+    size_t offset_j = scroller->offsets_j[active_index];
+    size_t cursor_j = scroller->cursors_j[active_index];
+    size_t index_j = offset_j + cursor_j;
+    if (x > index_j)
+        scroller_move_right(scroller, nlines, line_len, x - index_j);
+    else if (x < index_j)
+        scroller_move_left(scroller, nlines, line_len, index_j - x);
+}
+
 void scroller_move_first_line(RowLinkedScroller *scroller, size_t nlines)
 {
     if (!scroller)
