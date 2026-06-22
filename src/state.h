@@ -104,6 +104,7 @@ int state_init(State *state);
 void state_deinit(State *state);
 void state_set_terminal_size(State *state);
 void state_set_active_file_index(State *state, unsigned int file_index);
+void state_new_file(State *state);
 void state_set_active_color_scheme(State *state, SeqColorScheme *color_scheme);
 void state_new_color_scheme(State *state, char *name, SeqType seq_type, ColorType color_type);
 
