@@ -320,23 +320,20 @@ int main(int argc, char *argv[])
 
     // Set screen and terminal options
     retcode = init_terminal();
-    if (retcode == -1)
+    switch (retcode)
     {
+    case 0:
+        break;
+    case -1:
         error_printf("%s: Failed to get current termios\n", INVOCATION_NAME);
         return EXIT_FAILURE;
-    }
-    else if (retcode == -2)
-    {
+    case -2:
         error_printf("%s: Failed to set raw mode\n", INVOCATION_NAME);
         return EXIT_FAILURE;
-    }
-    else if (retcode == -3)
-    {
+    case -3:
         error_printf("%s: Failed to set blocking read\n", INVOCATION_NAME);
         return EXIT_FAILURE;
-    }
-    else if (retcode != 0)
-    {
+    default:
         error_printf("%s: Unknown error code during terminal initialization: %d\n", INVOCATION_NAME, retcode);
         return EXIT_FAILURE;
     }
