@@ -100,6 +100,8 @@ void state_set_tick_offset(State *state, int tick_offset);
 void state_set_tick_spacing(State *state, int tick_spacing);
 
 // State
+int state_init(State *state);
+void state_deinit(State *state);
 void state_set_terminal_size(State *state);
 void state_set_active_file_index(State *state, unsigned int file_index);
 void state_set_active_color_scheme(State *state, SeqColorScheme *color_scheme);

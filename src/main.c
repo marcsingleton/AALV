@@ -394,22 +394,7 @@ void cleanup(void)
     free(cmd_line);
 
     // Free state
-    if (state.color_schemes)
-    {
-        for (unsigned int i = 0; i < state.n_color_schemes; i++)
-            color_deinit_color_scheme(&state.color_schemes[i].scheme);
-        free(state.color_schemes);
-    }
-    if (state.files)
-    {
-        for (unsigned int i = 0; i < state.nfiles; i++)
-        {
-            scroller_deinit(&state.files[i].layout.scroller);
-            sequences_deinit_seq_record_array(&state.files[i].record_array);
-            sequences_deinit_unaligned_indices_array(&state.files[i].metadata.indices_array);
-        }
-        free(state.files);
-    }
+    state_deinit(&state);
 
     // Restore terminal options
     deinit_terminal();

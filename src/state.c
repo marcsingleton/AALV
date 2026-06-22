@@ -1,3 +1,5 @@
+#include <string.h>
+
 #include "display.h"
 #include "state.h"
 
@@ -138,6 +140,33 @@ void state_set_tick_spacing(State *state, int tick_spacing)
 }
 
 // State setters
+int state_init(State *state)
+{
+    memset(&state, 0, sizeof(state));
+
+    return 0;
+}
+
+void state_deinit(State *state)
+{
+    if (state->files)
+    {
+        for (unsigned int i = 0; i < state->nfiles; i++)
+        {
+            scroller_deinit(&state->files[i].layout.scroller);
+            sequences_deinit_seq_record_array(&state->files[i].record_array);
+            sequences_deinit_unaligned_indices_array(&state->files[i].metadata.indices_array);
+        }
+        free(state->files);
+    }
+    if (state->color_schemes)
+    {
+        for (unsigned int i = 0; i < state->n_color_schemes; i++)
+            color_deinit_color_scheme(&state->color_schemes[i].scheme);
+        free(state->color_schemes);
+    }
+}
+
 void state_set_terminal_size(State *state)
 {
     unsigned int rows, cols;
@@ -150,8 +179,22 @@ void state_set_active_file_index(State *state, unsigned int file_index)
 {
     if (file_index > state->nfiles - 1)
         file_index = state->nfiles - 1;
-    state->active_file_index = file_index;
     state->active_file = state->files + file_index;
+    state->active_file_index = file_index;
+}
+
+void state_new_file(State *state)
+{
+    FileState *files;
+    if (state->nfiles == 0)
+        files = malloc(sizeof(FileState));
+    else
+        files = realloc(state->files, (state->nfiles + 1) * sizeof(FileState));
+    if (!files)
+        return;
+    memset(files + state->nfiles, 0, sizeof(FileState));
+    state->files = files;
+    state->nfiles += 1;
 }
 
 void state_set_active_color_scheme(State *state, SeqColorScheme *color_scheme)
