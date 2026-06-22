@@ -192,7 +192,10 @@ void state_new_file(State *state)
         files = realloc(state->files, (state->nfiles + 1) * sizeof(FileState));
     if (!files)
         return;
-    memset(files + state->nfiles, 0, sizeof(FileState));
+
+    FileState *file = files + state->nfiles;
+    scroller_init(&file->layout.scroller, SCROLLER_NPANES);
+    scroller_set_active_pane(&file->layout.scroller, SCROLLER_SEQUENCE_PANE);
     state->files = files;
     state->nfiles += 1;
 }

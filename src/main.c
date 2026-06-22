@@ -259,37 +259,29 @@ int main(int argc, char *argv[])
     else
         input_fd = STDIN_FILENO;
 
-    // Allocate file states
-    FileState *files = malloc(nfiles * sizeof(FileState));
-    if (!files)
-    {
-        error_printf("%s: Failed to allocate memory to load files\n", INVOCATION_NAME);
-        return EXIT_FAILURE;
-    }
-    state.files = files;
-    state.nfiles = nfiles;
-    state.active_file = files;
-    state_set_active_file_index(&state, 0);
-
     // Initialize state and config
     state_set_terminal_size(&state);
     config_init();
     load_user_config();
 
     // Initialize file states
-    for (unsigned int file_index = 0; file_index < state.nfiles; file_index++)
+    for (unsigned int file_index = 0; file_index < nfiles; file_index++)
     {
+        state_new_file(&state);
+        if (state.nfiles != file_index + 1)
+        {
+            error_printf("%s: Failed to allocate memory to load file\n", INVOCATION_NAME);
+            return EXIT_FAILURE;
+        }
         FileState *file = state.files + file_index;
+        state_set_active_file_index(&state, file_index);
+        state_set_layout(&state, config_ruler_records_divider, config_header_sequence_divider);
+        state_set_tick_spacing(&state, config_tick_spacing);
+
         if (!isatty(STDIN_FILENO) && n_positional_args == 0)
             file->file_path = "-";
         else
             file->file_path = positional_args[file_index];
-
-        scroller_init(&file->layout.scroller, SCROLLER_NPANES);
-        scroller_set_active_pane(&file->layout.scroller, SCROLLER_SEQUENCE_PANE);
-        state_set_active_file_index(&state, file_index);
-        state_set_layout(&state, config_ruler_records_divider, config_header_sequence_divider);
-        state_set_tick_spacing(&state, config_tick_spacing);
 
         char *format_arg = "";
         if (file_index < n_format_args)
