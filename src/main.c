@@ -593,9 +593,9 @@ FileReader get_reader(FileState *file, const char *format_arg)
             const char *exts = format_option->exts;
             if (str_is_in_strsep(exts, option_delim, format_arg))
                 return format_option->reader;
-            error_printf("%s: %s: Error identifying format\n", INVOCATION_NAME, format_arg);
-            return NULL;
         }
+        error_printf("%s: %s: Error identifying format\n", INVOCATION_NAME, format_arg);
+        return NULL;
     }
     else if ((file_ext = strrchr(file->file_path, '.'))) // From path extension
     {
@@ -606,10 +606,9 @@ FileReader get_reader(FileState *file, const char *format_arg)
             const char *exts = format_option->exts;
             if (str_is_in_strsep(exts, option_delim, file_ext))
                 return format_option->reader;
-            break;
-            error_printf("%s: %s: Unknown extension\n", INVOCATION_NAME, file->file_path);
-            return NULL;
         }
+        error_printf("%s: %s: Unknown extension\n", INVOCATION_NAME, file->file_path);
+        return NULL;
     }
     error_printf("%s: %s: No format or known extension\n", INVOCATION_NAME, file->file_path);
     return NULL;
