@@ -23,6 +23,7 @@ void display_command_pane(Array *buffer);
 void display_cursor(Array *buffer);
 void display_header(Array *buffer, SeqRecord *record, size_t offset, unsigned int display_len);
 void display_sequence(Array *buffer, SeqRecord *record, size_t offset, unsigned int display_len);
+void display_splash_screen(Array *buffer);
 void display_continued_line(Array *buffer,
                             SeqRecord *record, size_t offset, size_t len,
                             DisplayFunction display_fn, unsigned int display_width);
