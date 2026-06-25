@@ -1,5 +1,6 @@
 #include <string.h>
 
+#include "config.h"
 #include "display.h"
 #include "state.h"
 
@@ -196,8 +197,14 @@ void state_new_file(State *state)
     FileState *file = files + state->nfiles;
     scroller_init(&file->layout.scroller, SCROLLER_NPANES);
     scroller_set_active_pane(&file->layout.scroller, SCROLLER_SEQUENCE_PANE);
+
     state->files = files;
     state->nfiles += 1;
+
+    state_set_active_file_index(state, state->nfiles);
+    state_set_layout(state, config_ruler_records_divider, config_header_sequence_divider);
+    state_set_tick_offset(state, config_tick_offset);
+    state_set_tick_spacing(state, config_tick_spacing);
 }
 
 void state_set_active_color_scheme(State *state, SeqColorScheme *color_scheme)

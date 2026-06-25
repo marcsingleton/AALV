@@ -234,13 +234,6 @@ int main(int argc, char *argv[])
     unsigned int n_positional_args = argc - optind;
     char **positional_args = argv + optind;
 
-    // Check for positional arguments
-    if (isatty(STDIN_FILENO) && n_positional_args == 0)
-    {
-        cli_print_short_help(noptions, options, PROGRAM_NAME, positional_usage);
-        return EXIT_FAILURE;
-    }
-
     // Handle special cases for piped input
     unsigned int nfiles = n_positional_args;
     int input_fd;
@@ -265,42 +258,54 @@ int main(int argc, char *argv[])
     load_user_config();
 
     // Initialize file states
-    for (unsigned int file_index = 0; file_index < nfiles; file_index++)
+    if (isatty(STDIN_FILENO) && nfiles == 0)
     {
         state_new_file(&state);
-        if (state.nfiles != file_index + 1)
+        if (state.nfiles != 1)
         {
             error_printf("%s: Failed to allocate memory to load file\n", INVOCATION_NAME);
             return EXIT_FAILURE;
         }
-        FileState *file = state.files + file_index;
-        state_set_active_file_index(&state, file_index);
-        state_set_layout(&state, config_ruler_records_divider, config_header_sequence_divider);
-        state_set_tick_spacing(&state, config_tick_spacing);
+        FileState *file = state.files;
 
-        if (!isatty(STDIN_FILENO) && n_positional_args == 0)
-            file->file_path = "-";
-        else
-            file->file_path = positional_args[file_index];
-
-        char *format_arg = "";
-        if (file_index < n_format_args)
-            format_arg = format_args[file_index];
-
-        char *seq_type_arg = "";
-        if (file_index < n_seq_type_args)
-            seq_type_arg = seq_type_args[file_index];
-
-        retcode = load_seqs(file, format_arg, seq_type_arg);
-        if (retcode != 0) // "Expected" exit == -1 and "unexpected" exit < -1
+        file->file_path = "";
+    }
+    else
+    {
+        for (unsigned int file_index = 0; file_index < nfiles; file_index++)
         {
-            return (retcode == -1) ? EXIT_SUCCESS : EXIT_FAILURE;
-        }
-        retcode = set_unaligned_indices(file);
-        if (retcode != 0)
-        {
-            error_printf("%s: Failed to allocate unaligned indices in %s\n", INVOCATION_NAME, file->file_path);
-            return EXIT_FAILURE;
+            state_new_file(&state);
+            if (state.nfiles != file_index + 1)
+            {
+                error_printf("%s: Failed to allocate memory to load file\n", INVOCATION_NAME);
+                return EXIT_FAILURE;
+            }
+            FileState *file = state.files + file_index;
+
+            if (!isatty(STDIN_FILENO) && n_positional_args == 0)
+                file->file_path = "-";
+            else
+                file->file_path = positional_args[file_index];
+
+            char *format_arg = "";
+            if (file_index < n_format_args)
+                format_arg = format_args[file_index];
+
+            char *seq_type_arg = "";
+            if (file_index < n_seq_type_args)
+                seq_type_arg = seq_type_args[file_index];
+
+            retcode = load_seqs(file, format_arg, seq_type_arg);
+            if (retcode != 0) // "Expected" exit == -1 and "unexpected" exit < -1
+            {
+                return (retcode == -1) ? EXIT_SUCCESS : EXIT_FAILURE;
+            }
+            retcode = set_unaligned_indices(file);
+            if (retcode != 0)
+            {
+                error_printf("%s: Failed to allocate unaligned indices in %s\n", INVOCATION_NAME, file->file_path);
+                return EXIT_FAILURE;
+            }
         }
     }
     state_set_active_file_index(&state, 0);
@@ -328,6 +333,14 @@ int main(int argc, char *argv[])
     default:
         error_printf("%s: Unknown error code during terminal initialization: %d\n", INVOCATION_NAME, retcode);
         return EXIT_FAILURE;
+    }
+
+    // Special case for splash screen
+    if (isatty(STDIN_FILENO) && nfiles == 0)
+    {
+        display_refresh(&write_buffer);
+        input_write_buffer_flush(&write_buffer);
+        display_splash_screen(&write_buffer);
     }
 
     // Main loop
@@ -565,7 +578,6 @@ int load_seqs(FileState *file, const char *format_arg, const char *seq_type_arg)
     if (retcode != 0)
         return -1;
 
-    file->tick_offset = 1;
     file->metadata.max_len = max_len;
 
     return 0;
