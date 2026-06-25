@@ -275,7 +275,7 @@ void display_command_pane(Array *buffer)
             return;
         n_status += n;
 
-        if (unaligned_indices->indices && unaligned_indices->len > 0)
+        if (unaligned_indices && unaligned_indices->indices && unaligned_indices->len > 0)
         {
             size_t unaligned_index = (sequence_index + 1 > unaligned_indices->len) ? unaligned_indices->len - 1
                                                                                    : sequence_index;
