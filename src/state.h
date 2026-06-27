@@ -91,6 +91,10 @@ typedef struct
 } State;
 
 // FileState
+void state_init_file_data(FileState *file);
+void state_deinit_file_data(FileState *file);
+
+// FileState and State
 void state_set_ruler_records_divider(State *state, unsigned int i);
 void state_set_header_sequence_divider(State *state, unsigned int j);
 void state_set_records_command_divider(State *state, unsigned int i);

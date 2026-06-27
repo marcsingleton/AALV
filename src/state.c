@@ -4,7 +4,26 @@
 #include "display.h"
 #include "state.h"
 
-// FileState setters
+// FileState
+void state_init_file_data(FileState *file)
+{
+    file->file_path = NULL;
+    file->record_array.data = NULL;
+    file->record_array.len = 0;
+    file->metadata.indices_array.data = NULL;
+    file->metadata.indices_array.len = 0;
+    file->metadata.max_len = 0;
+}
+
+void state_deinit_file_data(FileState *file)
+{
+    // TODO: Remember to free file_path when modified to make copy
+    sequences_deinit_seq_record_array(&file->record_array);
+    sequences_deinit_unaligned_indices_array(&file->metadata.indices_array);
+    file->metadata.max_len = 0;
+}
+
+// FileState and State
 void state_set_ruler_records_divider(State *state, unsigned int i)
 {
     Layout *layout = &state->active_file->layout;
@@ -140,7 +159,7 @@ void state_set_tick_spacing(State *state, int tick_spacing)
     }
 }
 
-// State setters
+// State
 int state_init(State *state)
 {
     memset(&state, 0, sizeof(state));
@@ -154,9 +173,9 @@ void state_deinit(State *state)
     {
         for (unsigned int i = 0; i < state->nfiles; i++)
         {
-            scroller_deinit(&state->files[i].layout.scroller);
-            sequences_deinit_seq_record_array(&state->files[i].record_array);
-            sequences_deinit_unaligned_indices_array(&state->files[i].metadata.indices_array);
+            FileState *file = state->files + i;
+            scroller_deinit(&file->layout.scroller);
+            state_deinit_file_data(file);
         }
         free(state->files);
     }
@@ -197,6 +216,7 @@ void state_new_file(State *state)
     FileState *file = files + state->nfiles;
     scroller_init(&file->layout.scroller, SCROLLER_NPANES);
     scroller_set_active_pane(&file->layout.scroller, SCROLLER_SEQUENCE_PANE);
+    state_init_file_data(file);
 
     state->files = files;
     state->nfiles += 1;
