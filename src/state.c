@@ -5,7 +5,7 @@
 #include "state.h"
 
 // FileState
-void state_init_file_data(FileState *file)
+int state_init_file_data(FileState *file)
 {
     file->file_path = NULL;
     file->record_array.data = NULL;
@@ -13,6 +13,8 @@ void state_init_file_data(FileState *file)
     file->metadata.indices_array.data = NULL;
     file->metadata.indices_array.len = 0;
     file->metadata.max_len = 0;
+
+    return 0;
 }
 
 void state_deinit_file_data(FileState *file)
@@ -24,7 +26,7 @@ void state_deinit_file_data(FileState *file)
 }
 
 // FileState and State
-void state_set_ruler_records_divider(State *state, unsigned int i)
+int state_set_ruler_records_divider(State *state, unsigned int i)
 {
     Layout *layout = &state->active_file->layout;
     if (i < layout->min_ruler_records_divider)
@@ -54,9 +56,11 @@ void state_set_ruler_records_divider(State *state, unsigned int i)
     state->refresh_ruler_pane = true;
     state->refresh_header_pane = true;
     state->refresh_sequence_pane = true;
+
+    return 0;
 }
 
-void state_set_header_sequence_divider(State *state, unsigned int j)
+int state_set_header_sequence_divider(State *state, unsigned int j)
 {
     Layout *layout = &state->active_file->layout;
     if (j < layout->min_header_sequence_divider)
@@ -76,9 +80,11 @@ void state_set_header_sequence_divider(State *state, unsigned int j)
     state->refresh_ruler_pane = true;
     state->refresh_header_pane = true;
     state->refresh_sequence_pane = true;
+
+    return 0;
 }
 
-void state_set_records_command_divider(State *state, unsigned int i)
+int state_set_records_command_divider(State *state, unsigned int i)
 {
     Layout *layout = &state->active_file->layout;
     if (i < layout->ruler_records_divider)
@@ -105,9 +111,11 @@ void state_set_records_command_divider(State *state, unsigned int i)
     state->refresh_header_pane = true;
     state->refresh_sequence_pane = true;
     state->refresh_command_pane = true;
+
+    return 0;
 }
 
-void state_set_divider_limits(State *state)
+int state_set_divider_limits(State *state)
 {
     Layout *layout = &state->active_file->layout;
     unsigned int min_height = RULER_PANE_MIN_HEIGHT + RECORDS_PANE_MIN_HEIGHT + COMMAND_PANE_MIN_HEIGHT;
@@ -115,7 +123,7 @@ void state_set_divider_limits(State *state)
     if (state->terminal_rows < min_height || state->terminal_cols < min_width)
     {
         state->visible_window = false;
-        return;
+        return -1;
     }
 
     layout->min_ruler_records_divider = RULER_PANE_MIN_HEIGHT - 1;
@@ -123,31 +131,41 @@ void state_set_divider_limits(State *state)
     layout->max_header_sequence_divider = state->terminal_cols - SEQUENCE_PANE_MIN_WIDTH - 1;
     layout->max_records_command_divider = state->terminal_rows - COMMAND_PANE_MIN_HEIGHT;
     state->visible_window = true;
+
+    return 0;
 }
 
-void state_set_layout(State *state, unsigned int ruler_records_divider, unsigned int header_sequence_divider)
+int state_set_layout(State *state, unsigned int ruler_records_divider, unsigned int header_sequence_divider)
 {
-    state_set_divider_limits(state);
-    state_set_records_command_divider(state, state->terminal_rows - 2); // Needs to be first
-    state_set_ruler_records_divider(state, ruler_records_divider);
-    state_set_header_sequence_divider(state, header_sequence_divider);
+    if (state_set_divider_limits(state) != 0)
+        return -1;
+    if (state_set_records_command_divider(state, state->terminal_rows - 2) != 0) // Needs to be first
+        return -1;
+    if (state_set_ruler_records_divider(state, ruler_records_divider) != 0)
+        return -1;
+    if (state_set_header_sequence_divider(state, header_sequence_divider) != 0)
+        return -1;
     state->active_file->layout.command_pane.w = state->terminal_cols;
     state->active_file->layout.ruler_pane.w = state->terminal_cols;
+
+    return 0;
 }
 
-void state_set_tick_offset(State *state, int tick_offset)
+int state_set_tick_offset(State *state, int tick_offset)
 {
     FileState *active_file = state->active_file;
     if (tick_offset > 0 && active_file->metadata.max_len > INT_MAX - (unsigned int)tick_offset)
-        return;
+        return -1;
     if (tick_offset != active_file->tick_offset)
     {
         active_file->tick_offset = tick_offset;
         state->refresh_ruler_pane = true;
     }
+
+    return 0;
 }
 
-void state_set_tick_spacing(State *state, int tick_spacing)
+int state_set_tick_spacing(State *state, int tick_spacing)
 {
     FileState *active_file = state->active_file;
     if (tick_spacing < 1)
@@ -157,6 +175,8 @@ void state_set_tick_spacing(State *state, int tick_spacing)
         active_file->tick_spacing = tick_spacing;
         state->refresh_ruler_pane = true;
     }
+
+    return 0;
 }
 
 // State
@@ -187,23 +207,27 @@ void state_deinit(State *state)
     }
 }
 
-void state_set_terminal_size(State *state)
+int state_set_terminal_size(State *state)
 {
     unsigned int rows, cols;
     terminal_get_window_size(&rows, &cols);
     state->terminal_rows = rows;
     state->terminal_cols = cols;
+
+    return 0;
 }
 
-void state_set_active_file_index(State *state, unsigned int file_index)
+int state_set_active_file_index(State *state, unsigned int file_index)
 {
     if (file_index > state->nfiles - 1)
         file_index = state->nfiles - 1;
     state->active_file = state->files + file_index;
     state->active_file_index = file_index;
+
+    return 0;
 }
 
-void state_new_file(State *state)
+int state_new_file(State *state)
 {
     FileState *files;
     if (state->nfiles == 0)
@@ -211,7 +235,7 @@ void state_new_file(State *state)
     else
         files = realloc(state->files, (state->nfiles + 1) * sizeof(FileState));
     if (!files)
-        return;
+        return -1;
 
     FileState *file = files + state->nfiles;
     scroller_init(&file->layout.scroller, SCROLLER_NPANES);
@@ -227,9 +251,11 @@ void state_new_file(State *state)
     state_set_tick_spacing(state, config_tick_spacing);
 
     state->refresh_window = true;
+
+    return 0;
 }
 
-void state_remove_file(State *state)
+int state_remove_file(State *state)
 {
     FileState *file = state->active_file;
     scroller_deinit(&file->layout.scroller);
@@ -242,7 +268,7 @@ void state_remove_file(State *state)
     {
         FileState *files = realloc(state->files, (state->nfiles - 1) * sizeof(FileState));
         if (!files)
-            return;
+            return -1;
         state->files = files;
         state->nfiles -= 1;
         state_set_active_file_index(state, state->nfiles);
@@ -256,33 +282,37 @@ void state_remove_file(State *state)
     }
 
     state->refresh_window = true;
+
+    return 0;
 }
 
-void state_set_active_color_scheme(State *state, SeqColorScheme *color_scheme)
+int state_set_active_color_scheme(State *state, SeqColorScheme *color_scheme)
 {
     if (!color_scheme)
-        return;
+        return -1;
     if (color_scheme->scheme.type == COLOR_4_BIT && state->ncolors < 16)
-        return;
+        return -1;
     if (color_scheme->scheme.type == COLOR_8_BIT && state->ncolors < 256)
-        return;
+        return -1;
     if (color_scheme->type > state->n_active_color_schemes)
-        return;
+        return -1;
     state->active_color_schemes[color_scheme->type] = color_scheme;
     state->refresh_sequence_pane = true;
+
+    return 0;
 }
 
-void state_new_color_scheme(State *state, char *name, SeqType seq_type, ColorType color_type)
+int state_new_color_scheme(State *state, char *name, SeqType seq_type, ColorType color_type)
 {
     if (!name)
-        return;
+        return -1;
 
     SeqColorScheme new_color_scheme;
     Alphabet *alphabet = sequences_seq_type_to_alphabet(seq_type);
     if (!alphabet)
-        return;
+        return -1;
     if (color_init_color_scheme(&new_color_scheme.scheme, color_type, name, alphabet->len) != 0)
-        return;
+        return -1;
     new_color_scheme.type = seq_type;
 
     SeqColorScheme *new_color_schemes = realloc(state->color_schemes,
@@ -290,10 +320,12 @@ void state_new_color_scheme(State *state, char *name, SeqType seq_type, ColorTyp
     if (!new_color_schemes)
     {
         color_deinit_color_scheme(&new_color_scheme.scheme);
-        return;
+        return -1;
     }
 
     new_color_schemes[state->n_color_schemes] = new_color_scheme;
     state->color_schemes = new_color_schemes;
     state->n_color_schemes++;
+
+    return 0;
 }

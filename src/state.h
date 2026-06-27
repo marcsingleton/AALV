@@ -91,25 +91,26 @@ typedef struct
 } State;
 
 // FileState
-void state_init_file_data(FileState *file);
+int state_init_file_data(FileState *file);
 void state_deinit_file_data(FileState *file);
 
 // FileState and State
-void state_set_ruler_records_divider(State *state, unsigned int i);
-void state_set_header_sequence_divider(State *state, unsigned int j);
-void state_set_records_command_divider(State *state, unsigned int i);
-void state_set_divider_limits(State *state);
-void state_set_layout(State *state, unsigned int ruler_records_divider, unsigned int header_sequence_divider);
-void state_set_tick_offset(State *state, int tick_offset);
-void state_set_tick_spacing(State *state, int tick_spacing);
+int state_set_ruler_records_divider(State *state, unsigned int i);
+int state_set_header_sequence_divider(State *state, unsigned int j);
+int state_set_records_command_divider(State *state, unsigned int i);
+int state_set_divider_limits(State *state);
+int state_set_layout(State *state, unsigned int ruler_records_divider, unsigned int header_sequence_divider);
+int state_set_tick_offset(State *state, int tick_offset);
+int state_set_tick_spacing(State *state, int tick_spacing);
 
 // State
 int state_init(State *state);
 void state_deinit(State *state);
-void state_set_terminal_size(State *state);
-void state_set_active_file_index(State *state, unsigned int file_index);
-void state_new_file(State *state);
-void state_set_active_color_scheme(State *state, SeqColorScheme *color_scheme);
-void state_new_color_scheme(State *state, char *name, SeqType seq_type, ColorType color_type);
+int state_set_terminal_size(State *state);
+int state_set_active_file_index(State *state, unsigned int file_index);
+int state_new_file(State *state);
+int state_remove_file(State *state);
+int state_set_active_color_scheme(State *state, SeqColorScheme *color_scheme);
+int state_new_color_scheme(State *state, char *name, SeqType seq_type, ColorType color_type);
 
 #endif // STATE_H

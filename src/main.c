@@ -260,8 +260,7 @@ int main(int argc, char *argv[])
     // Initialize file states
     if (isatty(STDIN_FILENO) && nfiles == 0)
     {
-        state_new_file(&state);
-        if (state.nfiles != 1)
+        if (state_new_file(&state) != 0)
         {
             error_printf("%s: Failed to allocate memory to load file\n", INVOCATION_NAME);
             return EXIT_FAILURE;
