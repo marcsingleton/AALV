@@ -20,6 +20,9 @@ PrefixTree cmd_map;
 
 Command cmds[] = {
     {&cmd_quit, "quit"},
+    {&cmd_quit, "q"},
+    {&cmd_quitall, "quitall"},
+    {&cmd_quitall, "qall"},
     {&cmd_next_file, "next"},
     {&cmd_previous_file, "previous"},
     {&cmd_set, "set"},
@@ -155,7 +158,21 @@ void cmd_quit(int argc, char **argv)
     (void)argc; // Silence warnings
     (void)argv;
 
-    exit(EXIT_SUCCESS);
+    state_remove_file(&state);
+}
+
+/*
+ * quitall
+ */
+
+void cmd_quitall(int argc, char **argv)
+{
+    (void)argc; // Silence warnings
+    (void)argv;
+
+    // TODO: If files are editable, check none are modified before closing any to mimic Vim behavior
+    while (state.nfiles > 0)
+        state_remove_file(&state);
 }
 
 /*

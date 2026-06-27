@@ -347,7 +347,7 @@ int main(int argc, char *argv[])
     size_t count;
     Action action;
 
-    while (1)
+    while (state.nfiles > 0)
     {
         display_refresh(&write_buffer);
         input_write_buffer_flush(&write_buffer);

@@ -20,6 +20,7 @@ int cmd_init_command_map(void);
 void cmd_deinit_command_map(void);
 
 void cmd_quit(int argc, char **argv);
+void cmd_quitall(int argc, char **argv);
 void cmd_next_file(int argc, char **argv);
 void cmd_previous_file(int argc, char **argv);
 void cmd_set(int argc, char **argv);

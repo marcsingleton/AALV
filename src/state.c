@@ -225,6 +225,37 @@ void state_new_file(State *state)
     state_set_layout(state, config_ruler_records_divider, config_header_sequence_divider);
     state_set_tick_offset(state, config_tick_offset);
     state_set_tick_spacing(state, config_tick_spacing);
+
+    state->refresh_window = true;
+}
+
+void state_remove_file(State *state)
+{
+    FileState *file = state->active_file;
+    scroller_deinit(&file->layout.scroller);
+    state_deinit_file_data(file);
+
+    for (unsigned int i = state->active_file_index + 1; i < state->nfiles; i++)
+        state->files[i - 1] = state->files[i];
+
+    if (state->nfiles > 1)
+    {
+        FileState *files = realloc(state->files, (state->nfiles - 1) * sizeof(FileState));
+        if (!files)
+            return;
+        state->files = files;
+        state->nfiles -= 1;
+        state_set_active_file_index(state, state->nfiles);
+    }
+    else
+    {
+        free(state->files);
+        state->files = NULL;
+        state->nfiles = 0;
+        state_set_active_file_index(state, 0);
+    }
+
+    state->refresh_window = true;
 }
 
 void state_set_active_color_scheme(State *state, SeqColorScheme *color_scheme)
