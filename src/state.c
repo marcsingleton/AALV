@@ -19,10 +19,20 @@ int state_init_file_data(FileState *file)
 
 void state_deinit_file_data(FileState *file)
 {
-    // TODO: Remember to free file_path when modified to make copy
+    free(file->file_path);
     sequences_deinit_seq_record_array(&file->record_array);
     sequences_deinit_unaligned_indices_array(&file->metadata.indices_array);
     file->metadata.max_len = 0;
+}
+
+int state_set_file_path(FileState *file, char *file_path)
+{
+    char *new_file_path = strdup(file_path);
+    if (!new_file_path)
+        return -1;
+    free(file->file_path);
+    file->file_path = new_file_path;
+    return 0;
 }
 
 // FileState and State

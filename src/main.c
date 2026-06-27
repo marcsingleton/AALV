@@ -267,7 +267,11 @@ int main(int argc, char *argv[])
         }
         FileState *file = state.files;
 
-        file->file_path = "";
+        if (state_set_file_path(file, "") != 0)
+        {
+            error_printf("%s: Failed to allocate memory to store file path\n", INVOCATION_NAME);
+            return EXIT_FAILURE;
+        }
     }
     else
     {
@@ -281,10 +285,16 @@ int main(int argc, char *argv[])
             }
             FileState *file = state.files + file_index;
 
+            char *file_path;
             if (!isatty(STDIN_FILENO) && n_positional_args == 0)
-                file->file_path = "-";
+                file_path = "";
             else
-                file->file_path = positional_args[file_index];
+                file_path = positional_args[file_index];
+            if (state_set_file_path(file, file_path) != 0)
+            {
+                error_printf("%s: Failed to allocate memory to store file path\n", INVOCATION_NAME);
+                return EXIT_FAILURE;
+            }
 
             char *format_arg = "";
             if (file_index < n_format_args)

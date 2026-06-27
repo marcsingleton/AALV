@@ -51,7 +51,7 @@ typedef struct
 
 typedef struct
 {
-    const char *file_path;
+    char *file_path;
     Layout layout;
     int tick_offset;
     int tick_spacing;
@@ -93,6 +93,7 @@ typedef struct
 // FileState
 int state_init_file_data(FileState *file);
 void state_deinit_file_data(FileState *file);
+int state_set_file_path(FileState *file, char *file_path);
 
 // FileState and State
 int state_set_ruler_records_divider(State *state, unsigned int i);
