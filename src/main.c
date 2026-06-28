@@ -52,12 +52,6 @@ int load_seqs(FileState *file, const char *format_arg);
 int set_seq_types(FileState *file, const char *seq_type_arg);
 int set_unaligned_indices(FileState *file);
 
-SeqColorScheme *active_color_schemes[SEQ_TYPE_ERROR + 1];
-unsigned int n_active_color_schemes = sizeof(active_color_schemes) / sizeof(SeqColorScheme *);
-
-char synopsis[] = PROGRAM_NAME " is a vim-inspired alignment viewer\n";
-char positional_usage[] = "[<file> ...]";
-
 // Main
 int main(int argc, char *argv[])
 {

@@ -90,6 +90,9 @@ typedef struct
     int ncolors;
 } State;
 
+extern SeqColorScheme *active_color_schemes[];
+extern unsigned int n_active_color_schemes;
+
 // FileState
 int state_init_file_data(FileState *file);
 void state_deinit_file_data(FileState *file);

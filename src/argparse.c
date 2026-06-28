@@ -67,6 +67,9 @@ unsigned int n_seq_type_options = sizeof(seq_type_options) / sizeof(SeqTypeOptio
 
 char *option_delim = ",";
 
+char synopsis[] = PROGRAM_NAME " is a vim-inspired alignment viewer\n";
+char positional_usage[] = "[<file> ...]";
+
 int argparse_options(int argc, char *argv[],
                      unsigned int noptions, Option *options,
                      unsigned int n_format_options, FormatOption *format_options,

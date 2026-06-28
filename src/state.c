@@ -4,6 +4,9 @@
 #include "display.h"
 #include "state.h"
 
+SeqColorScheme *active_color_schemes[SEQ_TYPE_ERROR + 1];
+unsigned int n_active_color_schemes = sizeof(active_color_schemes) / sizeof(SeqColorScheme *);
+
 // FileState
 int state_init_file_data(FileState *file)
 {

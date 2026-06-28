@@ -39,6 +39,9 @@ extern unsigned int n_seq_type_options;
 
 extern char *option_delim;
 
+extern char synopsis[];
+extern char positional_usage[];
+
 // Option parsing
 int argparse_options(int argc, char *argv[],
                      unsigned int noptions, Option *options,
