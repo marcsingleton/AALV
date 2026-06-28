@@ -13,8 +13,6 @@
 #include "state.h"
 
 extern State state;
-extern SeqTypeOption seq_type_options;
-extern unsigned int n_seq_type_options;
 
 PrefixTree cmd_map;
 
@@ -282,7 +280,7 @@ void cmd_type(int argc, char **argv)
 
     // Parse <seq_type>
     char *seq_type_arg = argv[1];
-    SeqType seq_type = argparse_seq_type(seq_type_arg, n_seq_type_options, &seq_type_options);
+    SeqType seq_type = argparse_seq_type(seq_type_arg, n_seq_type_options, seq_type_options);
     if (seq_type == SEQ_TYPE_UNSPECIFIED)
         return;
 
@@ -324,7 +322,7 @@ void cmd_scheme(int argc, char **argv)
 
         // Parse <seq_type>
         char *seq_type_arg = argv[3];
-        SeqType seq_type = argparse_seq_type(seq_type_arg, n_seq_type_options, &seq_type_options);
+        SeqType seq_type = argparse_seq_type(seq_type_arg, n_seq_type_options, seq_type_options);
         if (seq_type == SEQ_TYPE_UNSPECIFIED)
             return;
 

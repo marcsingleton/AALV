@@ -17,7 +17,6 @@
 #include "config.h"
 #include "display.h"
 #include "error.h"
-#include "fasta.h"
 #include "input.h"
 #include "macros.h"
 #include "schemes.h"
@@ -49,74 +48,11 @@ int register_sigcont_handler(void);
 int init_terminal(void);
 int deinit_terminal(void);
 int load_user_config(void);
-int load_seqs(FileState *file, const char *format_arg, const char *seq_type_arg);
-FileReader get_reader(FileState *file, const char *format_arg);
+int load_seqs(FileState *file, const char *format_arg);
 int set_seq_types(FileState *file, const char *seq_type_arg);
 int set_unaligned_indices(FileState *file);
 
-// --help option shows in given order (alphabetical except help and version)
-Option options[] = {
-    {"help",
-     'h',
-     "print usage and options then exit",
-     "",
-     SHORT_NAME,
-     no_argument},
-    {"version",
-     'v',
-     "print version then exit",
-     "",
-     OMIT,
-     no_argument},
-    {"format",
-     'f',
-     "comma-separated list of format extensions for input files",
-     "<fmt,...,fmt>",
-     SHORT_NAME,
-     required_argument},
-    {"list-formats",
-     0,
-     "list allowable formats and their recognized extensions then exit",
-     "",
-     OMIT,
-     no_argument},
-    {"list-types",
-     0,
-     "list allowable types and their recognized identifiers then exit",
-     "",
-     OMIT,
-     no_argument},
-    {"type",
-     't',
-     "comma-separated list of sequence types for input files",
-     "<type,...,type>",
-     SHORT_NAME,
-     required_argument},
-};
-
-unsigned int noptions = sizeof(options) / sizeof(Option);
-
-FormatOption format_options[] = {
-    {"FASTA", "fasta,fa,faa,fna,afa", &fasta_fread},
-    {"A2M/A3M", "a2m,a3m", &fasta_fread},
-    // CLUSTAL
-    // PHYLIP
-    // STOCKHOLM
-};
-
-unsigned int n_format_options = sizeof(format_options) / sizeof(FormatOption);
-
-SeqTypeOption seq_type_options[] = {
-    {"nucleic", "nucleic,nt", SEQ_TYPE_NUCLEIC, &NUCLEIC_ALPHABET},
-    {"protein", "protein,aa", SEQ_TYPE_PROTEIN, &PROTEIN_ALPHABET},
-};
-
-unsigned int n_seq_type_options = sizeof(seq_type_options) / sizeof(SeqTypeOption);
-
-char *option_delim = ",";
-
 SeqColorScheme *active_color_schemes[SEQ_TYPE_ERROR + 1];
-
 unsigned int n_active_color_schemes = sizeof(active_color_schemes) / sizeof(SeqColorScheme *);
 
 char synopsis[] = PROGRAM_NAME " is a vim-inspired alignment viewer\n";
@@ -277,6 +213,7 @@ int main(int argc, char *argv[])
     {
         for (unsigned int file_index = 0; file_index < nfiles; file_index++)
         {
+            // Make file
             state_new_file(&state);
             if (state.nfiles != file_index + 1)
             {
@@ -285,6 +222,7 @@ int main(int argc, char *argv[])
             }
             FileState *file = state.files + file_index;
 
+            // Set file path
             char *file_path;
             if (!isatty(STDIN_FILENO) && n_positional_args == 0)
                 file_path = "";
@@ -296,6 +234,7 @@ int main(int argc, char *argv[])
                 return EXIT_FAILURE;
             }
 
+            // Get CLI args
             char *format_arg = "";
             if (file_index < n_format_args)
                 format_arg = format_args[file_index];
@@ -304,11 +243,17 @@ int main(int argc, char *argv[])
             if (file_index < n_seq_type_args)
                 seq_type_arg = seq_type_args[file_index];
 
-            retcode = load_seqs(file, format_arg, seq_type_arg);
-            if (retcode != 0) // "Expected" exit == -1 and "unexpected" exit < -1
-            {
-                return (retcode == -1) ? EXIT_SUCCESS : EXIT_FAILURE;
-            }
+            // Load seqs
+            retcode = load_seqs(file, format_arg);
+            if (retcode != 0)
+                return EXIT_FAILURE;
+
+            // Set seq types
+            retcode = set_seq_types(file, seq_type_arg);
+            if (retcode != 0)
+                return EXIT_FAILURE;
+
+            // Set indices
             retcode = set_unaligned_indices(file);
             if (retcode != 0)
             {
@@ -545,14 +490,34 @@ int load_user_config(void)
     return 0;
 }
 
-int load_seqs(FileState *file, const char *format_arg, const char *seq_type_arg)
+int load_seqs(FileState *file, const char *format_arg)
 {
-    int retcode;
-
     // Infer reader
-    FileReader reader = get_reader(file, format_arg);
-    if (!reader)
-        return -2;
+    FileReader reader;
+    if (format_arg[0] != '\0') // From format argument
+    {
+        reader = argparse_reader(format_arg, n_format_options, format_options);
+        if (!reader)
+        {
+            error_printf("%s: %s: Error identifying format\n", INVOCATION_NAME, format_arg);
+            return -1;
+        }
+    }
+    else if ((format_arg = strrchr(file->file_path, '.'))) // From path extension
+    {
+        format_arg++; // Exclude dot from comparison
+        reader = argparse_reader(format_arg, n_format_options, format_options);
+        if (!reader)
+        {
+            error_printf("%s: %s: Unknown extension\n", INVOCATION_NAME, file->file_path);
+            return -1;
+        }
+    }
+    else
+    {
+        error_printf("%s: %s: No format or known extension\n", INVOCATION_NAME, file->file_path);
+        return -1;
+    }
 
     // Read file
     FILE *fp;
@@ -561,14 +526,14 @@ int load_seqs(FileState *file, const char *format_arg, const char *seq_type_arg)
     else if (!(fp = fopen(file->file_path, "r")))
     {
         error_printf("%s: %s: %s\n", INVOCATION_NAME, file->file_path, strerror(errno));
-        return -2;
+        return -1;
     }
     SeqRecordArray *record_array = &file->record_array;
-    retcode = reader(fp, record_array);
+    int retcode = reader(fp, record_array);
     if (retcode != 0)
     {
         error_printf("%s: %s: Error processing file (code %d)\n", INVOCATION_NAME, file->file_path, retcode);
-        return -2;
+        return -1;
     }
 
     // Get max_len
@@ -580,48 +545,13 @@ int load_seqs(FileState *file, const char *format_arg, const char *seq_type_arg)
             max_len = record->len;
     }
     if (max_len > INT_MAX)
-        return -2;
-
-    // Set sequence type
-    retcode = set_seq_types(file, seq_type_arg);
-    if (retcode != 0)
+    {
+        error_printf("%s: %s: A sequence exceeds the maximum length\n", INVOCATION_NAME, file->file_path);
         return -1;
-
+    }
     file->metadata.max_len = max_len;
 
     return 0;
-}
-
-FileReader get_reader(FileState *file, const char *format_arg)
-{
-    const char *file_ext;
-    if (format_arg[0] != '\0') // From format argument
-    {
-        for (unsigned int i = 0; i < n_format_options; i++)
-        {
-            FormatOption *format_option = format_options + i;
-            const char *exts = format_option->exts;
-            if (str_is_in_strsep(exts, option_delim, format_arg))
-                return format_option->reader;
-        }
-        error_printf("%s: %s: Error identifying format\n", INVOCATION_NAME, format_arg);
-        return NULL;
-    }
-    else if ((file_ext = strrchr(file->file_path, '.'))) // From path extension
-    {
-        file_ext++; // Exclude dot from comparison
-        for (unsigned int i = 0; i < n_format_options; i++)
-        {
-            FormatOption *format_option = format_options + i;
-            const char *exts = format_option->exts;
-            if (str_is_in_strsep(exts, option_delim, file_ext))
-                return format_option->reader;
-        }
-        error_printf("%s: %s: Unknown extension\n", INVOCATION_NAME, file->file_path);
-        return NULL;
-    }
-    error_printf("%s: %s: No format or known extension\n", INVOCATION_NAME, file->file_path);
-    return NULL;
 }
 
 int set_seq_types(FileState *file, const char *seq_type_arg)
