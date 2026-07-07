@@ -342,7 +342,7 @@ int main(int argc, char *argv[])
             switch (retcode)
             {
             case PARSE_SUCCESS:
-                input_execute_action(&action, count);
+                input_execute_action(&state, &action, count);
                 input_read_buffer_flush(&read_buffer);
                 break;
             case PARSE_INCOMPLETE:

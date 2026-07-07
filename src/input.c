@@ -289,28 +289,28 @@ int input_parse_keys(Array *buffer, Action *action, size_t *count)
     return PARSE_SUCCESS;
 }
 
-int input_execute_action(Action *action, size_t count)
+int input_execute_action(State *state, Action *action, size_t count)
 {
     switch (action->args)
     {
     case VOID_ARG:
     {
-        void (*fn)(void) = action->fn.void_arg;
-        fn();
+        void (*fn)(State *) = action->fn.void_arg;
+        fn(state);
         break;
     }
     case SIZE_T_ARG:
     {
-        void (*fn)(size_t) = action->fn.size_t_arg;
+        void (*fn)(State *, size_t) = action->fn.size_t_arg;
         size_t arg = count;
-        fn(arg);
+        fn(state, arg);
         break;
     }
     case PAGE_SIZE_ARG:
     {
-        void (*fn)(PageSize) = action->fn.page_size_arg;
+        void (*fn)(State *, PageSize) = action->fn.page_size_arg;
         PageSize arg = count;
-        fn(arg);
+        fn(state, arg);
         break;
     }
     }

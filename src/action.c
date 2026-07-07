@@ -7,8 +7,6 @@
 #include "scroller.h"
 #include "state.h"
 
-extern State state;
-
 // Private
 static size_t get_line_len(FileState *active_file)
 {
@@ -32,98 +30,98 @@ static size_t get_line_len(FileState *active_file)
 }
 
 // Public
-void action_move_up(size_t x)
+void action_move_up(State *state, size_t x)
 {
-    FileState *active_file = state.active_file;
+    FileState *active_file = state->active_file;
     RowLinkedScroller *scroller = &active_file->layout.scroller;
     scroller_move_up(scroller, active_file->record_array.len, x);
 }
 
-void action_move_down(size_t x)
+void action_move_down(State *state, size_t x)
 {
-    FileState *active_file = state.active_file;
+    FileState *active_file = state->active_file;
     RowLinkedScroller *scroller = &active_file->layout.scroller;
     scroller_move_down(scroller, active_file->record_array.len, x);
 }
 
-void action_move_right(size_t x)
+void action_move_right(State *state, size_t x)
 {
-    FileState *active_file = state.active_file;
+    FileState *active_file = state->active_file;
     RowLinkedScroller *scroller = &active_file->layout.scroller;
     size_t line_len = get_line_len(active_file);
     scroller_move_right(scroller, active_file->record_array.len, line_len, x);
 }
 
-void action_move_left(size_t x)
+void action_move_left(State *state, size_t x)
 {
-    FileState *active_file = state.active_file;
+    FileState *active_file = state->active_file;
     RowLinkedScroller *scroller = &active_file->layout.scroller;
     size_t line_len = get_line_len(active_file);
     scroller_move_left(scroller, active_file->record_array.len, line_len, x);
 }
 
-void action_move_page_up(PageSize page_size)
+void action_move_page_up(State *state, PageSize page_size)
 {
-    FileState *active_file = state.active_file;
+    FileState *active_file = state->active_file;
     RowLinkedScroller *scroller = &active_file->layout.scroller;
     scroller_move_page_up(scroller, active_file->record_array.len, page_size);
 }
 
-void action_move_page_down(PageSize page_size)
+void action_move_page_down(State *state, PageSize page_size)
 {
-    FileState *active_file = state.active_file;
+    FileState *active_file = state->active_file;
     RowLinkedScroller *scroller = &active_file->layout.scroller;
     scroller_move_page_down(scroller, active_file->record_array.len, page_size);
 }
 
-void action_move_page_right(PageSize page_size)
+void action_move_page_right(State *state, PageSize page_size)
 {
-    FileState *active_file = state.active_file;
+    FileState *active_file = state->active_file;
     RowLinkedScroller *scroller = &active_file->layout.scroller;
     scroller_move_page_right(scroller, active_file->record_array.len, active_file->metadata.max_len, page_size);
 }
 
-void action_move_page_left(PageSize page_size)
+void action_move_page_left(State *state, PageSize page_size)
 {
-    FileState *active_file = state.active_file;
+    FileState *active_file = state->active_file;
     RowLinkedScroller *scroller = &active_file->layout.scroller;
     scroller_move_page_left(scroller, active_file->record_array.len, page_size);
 }
 
-void action_move_line_start(void)
+void action_move_line_start(State *state)
 {
-    FileState *active_file = state.active_file;
+    FileState *active_file = state->active_file;
     RowLinkedScroller *scroller = &active_file->layout.scroller;
     scroller_move_line_start(scroller, active_file->record_array.len);
 }
 
-void action_move_line_middle(void)
+void action_move_line_middle(State *state)
 {
-    FileState *active_file = state.active_file;
+    FileState *active_file = state->active_file;
     RowLinkedScroller *scroller = &active_file->layout.scroller;
     size_t line_len = get_line_len(active_file);
     scroller_move_to_column(scroller, active_file->record_array.len, line_len, line_len / 2);
 }
 
-void action_move_line_end(void)
+void action_move_line_end(State *state)
 {
-    FileState *active_file = state.active_file;
+    FileState *active_file = state->active_file;
     RowLinkedScroller *scroller = &active_file->layout.scroller;
     size_t line_len = get_line_len(active_file);
     scroller_move_line_end(scroller, active_file->record_array.len, line_len);
 }
 
-void action_move_to_column(size_t x)
+void action_move_to_column(State *state, size_t x)
 {
-    FileState *active_file = state.active_file;
+    FileState *active_file = state->active_file;
     RowLinkedScroller *scroller = &active_file->layout.scroller;
     size_t line_len = get_line_len(active_file);
     scroller_move_to_column(scroller, active_file->record_array.len, line_len, x);
 }
 
-void action_move_first_non_gap_or_non_whitespace(void)
+void action_move_first_non_gap_or_non_whitespace(State *state)
 {
-    FileState *active_file = state.active_file;
+    FileState *active_file = state->active_file;
     RowLinkedScroller *scroller = &active_file->layout.scroller;
     size_t line_len = get_line_len(active_file);
 
@@ -164,9 +162,9 @@ void action_move_first_non_gap_or_non_whitespace(void)
         scroller_move_left(scroller, active_file->record_array.len, line_len, old_index - new_index);
 }
 
-void action_move_last_non_gap_or_non_whitespace(void)
+void action_move_last_non_gap_or_non_whitespace(State *state)
 {
-    FileState *active_file = state.active_file;
+    FileState *active_file = state->active_file;
     RowLinkedScroller *scroller = &active_file->layout.scroller;
     size_t line_len = get_line_len(active_file);
 
@@ -209,121 +207,121 @@ void action_move_last_non_gap_or_non_whitespace(void)
         scroller_move_left(scroller, active_file->record_array.len, line_len, old_index - new_index);
 }
 
-void action_move_first_record(void)
+void action_move_first_record(State *state)
 {
-    FileState *active_file = state.active_file;
+    FileState *active_file = state->active_file;
     RowLinkedScroller *scroller = &active_file->layout.scroller;
     scroller_move_first_line(scroller, active_file->record_array.len);
 }
 
-void action_move_last_record(void)
+void action_move_last_record(State *state)
 {
-    FileState *active_file = state.active_file;
+    FileState *active_file = state->active_file;
     RowLinkedScroller *scroller = &active_file->layout.scroller;
     scroller_move_last_line(scroller, active_file->record_array.len);
 }
 
-void action_move_to_record(size_t x)
+void action_move_to_record(State *state, size_t x)
 {
-    FileState *active_file = state.active_file;
+    FileState *active_file = state->active_file;
     RowLinkedScroller *scroller = &active_file->layout.scroller;
     scroller_move_to_line(scroller, active_file->record_array.len, x);
 }
 
-void action_move_top_edge(void)
+void action_move_top_edge(State *state)
 {
-    FileState *active_file = state.active_file;
+    FileState *active_file = state->active_file;
     RowLinkedScroller *scroller = &active_file->layout.scroller;
     scroller_move_top_edge(scroller, active_file->record_array.len);
 }
 
-void action_move_bottom_edge(void)
+void action_move_bottom_edge(State *state)
 {
-    FileState *active_file = state.active_file;
+    FileState *active_file = state->active_file;
     RowLinkedScroller *scroller = &active_file->layout.scroller;
     scroller_move_bottom_edge(scroller, active_file->record_array.len);
 }
 
-void action_move_right_edge(void)
+void action_move_right_edge(State *state)
 {
-    FileState *active_file = state.active_file;
+    FileState *active_file = state->active_file;
     RowLinkedScroller *scroller = &active_file->layout.scroller;
     scroller_move_right_edge(scroller, active_file->record_array.len);
 }
 
-void action_move_left_edge(void)
+void action_move_left_edge(State *state)
 {
-    FileState *active_file = state.active_file;
+    FileState *active_file = state->active_file;
     RowLinkedScroller *scroller = &active_file->layout.scroller;
     scroller_move_left_edge(scroller, active_file->record_array.len);
 }
 
-void action_move_vertical_middle(void)
+void action_move_vertical_middle(State *state)
 {
-    FileState *active_file = state.active_file;
+    FileState *active_file = state->active_file;
     RowLinkedScroller *scroller = &active_file->layout.scroller;
     scroller_move_vertical_middle(scroller, active_file->record_array.len);
 }
 
-void action_move_horizontal_middle(void)
+void action_move_horizontal_middle(State *state)
 {
-    FileState *active_file = state.active_file;
+    FileState *active_file = state->active_file;
     RowLinkedScroller *scroller = &active_file->layout.scroller;
     scroller_move_horizontal_middle(scroller, active_file->record_array.len);
 }
 
-void action_increase_header_sequence_divider(void)
+void action_increase_header_sequence_divider(State *state)
 {
-    FileState *active_file = state.active_file;
-    state_set_header_sequence_divider(&state, active_file->layout.header_sequence_divider + 1);
+    FileState *active_file = state->active_file;
+    state_set_header_sequence_divider(state, active_file->layout.header_sequence_divider + 1);
 }
 
-void action_decrease_header_sequence_divider(void)
+void action_decrease_header_sequence_divider(State *state)
 {
-    FileState *active_file = state.active_file;
-    state_set_header_sequence_divider(&state, active_file->layout.header_sequence_divider - 1);
+    FileState *active_file = state->active_file;
+    state_set_header_sequence_divider(state, active_file->layout.header_sequence_divider - 1);
 }
 
-void action_increase_ruler_records_divider(void)
+void action_increase_ruler_records_divider(State *state)
 {
-    FileState *active_file = state.active_file;
-    state_set_ruler_records_divider(&state, active_file->layout.ruler_records_divider + 1);
+    FileState *active_file = state->active_file;
+    state_set_ruler_records_divider(state, active_file->layout.ruler_records_divider + 1);
 }
 
-void action_decrease_ruler_records_divider(void)
+void action_decrease_ruler_records_divider(State *state)
 {
-    FileState *active_file = state.active_file;
-    state_set_ruler_records_divider(&state, active_file->layout.ruler_records_divider - 1);
+    FileState *active_file = state->active_file;
+    state_set_ruler_records_divider(state, active_file->layout.ruler_records_divider - 1);
 }
 
-void action_increase_tick_spacing(void)
+void action_increase_tick_spacing(State *state)
 {
-    FileState *active_file = state.active_file;
-    state_set_tick_spacing(&state, active_file->tick_spacing + 1);
+    FileState *active_file = state->active_file;
+    state_set_tick_spacing(state, active_file->tick_spacing + 1);
 }
 
-void action_decrease_tick_spacing(void)
+void action_decrease_tick_spacing(State *state)
 {
-    FileState *active_file = state.active_file;
-    state_set_tick_spacing(&state, active_file->tick_spacing - 1);
+    FileState *active_file = state->active_file;
+    state_set_tick_spacing(state, active_file->tick_spacing - 1);
 }
 
-void action_enter_command_mode(void)
+void action_enter_command_mode(State *state)
 {
-    state.mode = COMMAND;
-    state.refresh_command_pane = true;
+    state->mode = COMMAND;
+    state->refresh_command_pane = true;
 }
 
-void action_set_header_pane_active(void)
+void action_set_header_pane_active(State *state)
 {
-    FileState *active_file = state.active_file;
+    FileState *active_file = state->active_file;
     RowLinkedScroller *scroller = &active_file->layout.scroller;
     scroller_set_active_pane(scroller, SCROLLER_HEADER_PANE);
 }
 
-void action_set_sequence_pane_active(void)
+void action_set_sequence_pane_active(State *state)
 {
-    FileState *active_file = state.active_file;
+    FileState *active_file = state->active_file;
     RowLinkedScroller *scroller = &active_file->layout.scroller;
     scroller_set_active_pane(scroller, SCROLLER_SEQUENCE_PANE);
 }
