@@ -9,6 +9,7 @@
 #include "argparse.h"
 #include "cmd.h"
 #include "config.h"
+#include "io.h"
 #include "prefix.h"
 #include "state.h"
 
@@ -27,6 +28,7 @@ Command cmds[] = {
     {&cmd_type, "type"},
     {&cmd_scheme, "scheme"},
     {&cmd_config, "config"},
+    {&cmd_edit, "edit"},
 };
 unsigned int ncmds = sizeof(cmds) / sizeof(Command);
 
@@ -438,4 +440,41 @@ void cmd_config(int argc, char **argv)
 
         config_set_nucleic_tiebreak_len(nucleic_tiebreak_len);
     }
+}
+
+/*
+ * edit <file>
+ */
+void cmd_edit(int argc, char **argv)
+{
+    if (argc != 2)
+        return;
+
+    char *file_path = argv[1];
+
+    // Close current and open new
+    if (state_remove_file(&state) != 0)
+        return;
+    if (state_new_file(&state) != 0)
+        return;
+    if (state_set_file_path(state.active_file, file_path) != 0)
+        return;
+
+    // Get reader
+    char *format_arg = strrchr(file_path, '.');
+    if (format_arg)
+        format_arg++; // Shift past dot
+    else
+        return;
+    FileReader reader = argparse_reader(format_arg, n_format_options, format_options);
+
+    // Open file
+    FILE *fp = fopen(file_path, "r");
+    if (!fp)
+        return;
+
+    // Load seqs and set metadata
+    io_load_seqs(state.active_file, fp, reader);
+    io_set_seq_types(state.active_file, "");
+    io_set_unaligned_indices(state.active_file);
 }

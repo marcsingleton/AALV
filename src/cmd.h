@@ -28,5 +28,6 @@ void cmd_set(int argc, char **argv);
 void cmd_type(int argc, char **argv);
 void cmd_scheme(int argc, char **argv);
 void cmd_config(int argc, char **argv);
+void cmd_edit(int argc, char **argv);
 
 #endif // CMD_H
