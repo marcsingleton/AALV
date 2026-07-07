@@ -96,7 +96,7 @@ int argparse_options(int argc, char *argv[],
         const char *name = "";
         if (option_index != -1)
             name = options[option_index].long_name;
-        if (c == 'f' || strcmp(name, "format") == 0)
+        if (c == 'f' || strcmp("format", name) == 0)
         {
             ssize_t nwords = str_split(format_args_ptr, argv[optind - 1], option_delim);
             if (nwords < 0)
@@ -111,12 +111,12 @@ int argparse_options(int argc, char *argv[],
             cli_print_short_help(noptions, options, program_name, positional_usage);
             return -1;
         }
-        else if (strcmp(name, "help") == 0)
+        else if (strcmp("help", name) == 0)
         {
             cli_print_long_help(noptions, options, program_name, positional_usage, synopsis);
             return -1;
         }
-        else if (strcmp(name, "list-formats") == 0)
+        else if (strcmp("list-formats", name) == 0)
         {
             printf("Format\tExtensions\n");
             for (unsigned int i = 0; i < n_format_options; i++)
@@ -126,7 +126,7 @@ int argparse_options(int argc, char *argv[],
             }
             return -1;
         }
-        else if (strcmp(name, "list-types") == 0)
+        else if (strcmp("list-types", name) == 0)
         {
             printf("Type\tIdentifiers\n");
             for (unsigned int i = 0; i < n_seq_type_options; i++)
@@ -136,7 +136,7 @@ int argparse_options(int argc, char *argv[],
             }
             return -1;
         }
-        else if (c == 't' || strcmp(name, "type") == 0)
+        else if (c == 't' || strcmp("type", name) == 0)
         {
             ssize_t nwords = str_split(seq_type_args_ptr, argv[optind - 1], option_delim);
             if (nwords < 0)
@@ -146,7 +146,7 @@ int argparse_options(int argc, char *argv[],
             }
             *n_seq_type_args = nwords;
         }
-        else if (c == 'v' || strcmp(name, "version") == 0)
+        else if (c == 'v' || strcmp("version", name) == 0)
         {
             printf(PROGRAM_NAME " " VERSION "\n");
             return -1;
