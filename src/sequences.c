@@ -217,7 +217,7 @@ void sequences_deinit_base_alphabets(void)
 
 int sequences_init_unaligned_indices(UnalignedIndices *unaligned_indices, size_t len)
 {
-    if (!unaligned_indices)
+    if (!unaligned_indices || len == 0)
         return -1;
     size_t *indices = malloc(len * sizeof(size_t));
     if (!indices)
@@ -237,7 +237,7 @@ void sequences_deinit_unaligned_indices(UnalignedIndices *unaligned_indices)
 
 int sequences_init_unaligned_indices_array(UnalignedIndicesArray *indices_array, size_t len)
 {
-    if (!indices_array)
+    if (!indices_array || len == 0)
         return -1;
     UnalignedIndices *data = calloc(len, sizeof(UnalignedIndices));
     if (!data)

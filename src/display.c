@@ -264,7 +264,6 @@ void display_command_pane(Array *buffer)
     {
         char status[256];
         unsigned int n_status = 0;
-        UnalignedIndices *unaligned_indices = active_file->metadata.indices_array.data + record_index;
 
         int n = 0;
 
@@ -285,7 +284,9 @@ void display_command_pane(Array *buffer)
             return;
         n_status += n;
 
-        if (unaligned_indices && unaligned_indices->indices && unaligned_indices->len > 0)
+        UnalignedIndicesArray *indices_array = &active_file->metadata.indices_array;
+        UnalignedIndices *unaligned_indices = indices_array->data + record_index;
+        if (indices_array->data && unaligned_indices->indices) // Check for empty file and records w/o seq
         {
             size_t unaligned_index = (sequence_index + 1 > unaligned_indices->len) ? unaligned_indices->len - 1
                                                                                    : sequence_index;

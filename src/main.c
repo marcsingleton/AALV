@@ -579,15 +579,18 @@ int set_seq_types(FileState *file, const char *seq_type_arg)
 
 int set_unaligned_indices(FileState *file)
 {
-    int retcode = sequences_init_unaligned_indices_array(&file->metadata.indices_array, file->record_array.len);
-    if (retcode != 0)
+
+    if (file->record_array.len == 0)
+        return 0;
+    if (sequences_init_unaligned_indices_array(&file->metadata.indices_array, file->record_array.len) != 0)
         return -1;
+
     for (size_t i = 0; i < file->record_array.len; i++)
     {
         SeqRecord *record = file->record_array.data + i;
         UnalignedIndices *unaligned_indices = file->metadata.indices_array.data + i;
         Alphabet *alphabet = sequences_seq_type_to_alphabet(record->type);
-        if (alphabet)
+        if (record->len > 0 && alphabet)
             sequences_index_nongap_syms(alphabet, record, unaligned_indices);
     }
     return 0;
