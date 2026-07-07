@@ -12,6 +12,7 @@
 
 extern State state;
 
+// Private
 void append_spaces(Array *buffer, unsigned int n)
 {
     char c = ' ';
@@ -19,6 +20,7 @@ void append_spaces(Array *buffer, unsigned int n)
         array_append(buffer, &c);
 }
 
+// Public
 void display_refresh(Array *buffer)
 {
     terminal_cursor_hide(buffer);

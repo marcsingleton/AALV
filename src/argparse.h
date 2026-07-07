@@ -42,7 +42,6 @@ extern char *option_delim;
 extern char synopsis[];
 extern char positional_usage[];
 
-// Option parsing
 int argparse_options(int argc, char *argv[],
                      unsigned int noptions, Option *options,
                      unsigned int n_format_options, FormatOption *format_options,

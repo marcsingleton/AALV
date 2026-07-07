@@ -34,6 +34,7 @@ int prefix_tree_init(PrefixTree *tree, char *s, size_t size);
 void prefix_tree_deinit(PrefixTree *tree);
 PrefixTree *prefix_tree_create(char *s, size_t size);
 void prefix_tree_destroy(PrefixTree *tree);
+
 int prefix_tree_insert(PrefixTree *tree, char *key, void *value);
 void *prefix_tree_get(PrefixTree *tree, char *key);
 void *prefix_tree_get_prefix_match(PrefixTree *tree, char *key);

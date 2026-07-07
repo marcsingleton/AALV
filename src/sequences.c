@@ -34,7 +34,7 @@ Alphabet *BASE_ALPHABETS[] = {
     &NUCLEIC_ALPHABET,
     &PROTEIN_ALPHABET,
 };
-size_t N_BASE_ALPHABETS = sizeof(BASE_ALPHABETS) / sizeof(Alphabet *);
+unsigned int N_BASE_ALPHABETS = sizeof(BASE_ALPHABETS) / sizeof(Alphabet *);
 
 int sequences_init_seq_record(SeqRecord *record, char *header, char *seq, char *id)
 {

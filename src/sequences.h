@@ -64,21 +64,26 @@ extern Alphabet NUCLEIC_ALPHABET;
 extern Alphabet PROTEIN_ALPHABET;
 
 extern Alphabet *BASE_ALPHABETS[];
-extern size_t N_BASE_ALPHABETS;
+extern unsigned int N_BASE_ALPHABETS;
 
 int sequences_init_seq_record(SeqRecord *record, char *header, char *seq, char *id);
 void sequences_deinit_seq_record(SeqRecord *record);
 SeqRecord *sequences_create_seq_record(char *header, char *seq, char *id);
 void sequences_destroy_seq_record(SeqRecord *record);
+
 int sequences_init_seq_record_array(SeqRecordArray *record_array, size_t len);
 void sequences_deinit_seq_record_array(SeqRecordArray *record_array);
+
 int sequences_init_alphabet(Alphabet *alphabet, char *name, char *syms, char *gaps, bool case_sensitive);
+void sequences_deinit_alphabet(Alphabet *alphabet);
 int sequences_init_base_alphabets(void);
 void sequences_deinit_base_alphabets(void);
+
 int sequences_init_unaligned_indices(UnalignedIndices *unaligned_indices, size_t len);
 void sequences_deinit_unaligned_indices(UnalignedIndices *unaligned_indices);
 int sequences_init_unaligned_indices_array(UnalignedIndicesArray *indices_array, size_t len);
 void sequences_deinit_unaligned_indices_array(UnalignedIndicesArray *indices_array);
+
 int sequences_index_nongap_syms(Alphabet *alphabet, SeqRecord *record, UnalignedIndices *unaligned_indices);
 int sequences_sym_in_alphabet(Alphabet *alphabet, char sym);
 int sequences_sym_is_gap(Alphabet *alphabet, char sym);
@@ -87,6 +92,8 @@ int sequences_seq_is_rna(char *seq);
 int sequences_seq_is_dna(char *seq);
 int sequences_seq_is_nucleic(char *seq);
 int sequences_seq_is_protein(char *seq);
+
 SeqType sequences_seq_to_seq_type(char *seq);
 Alphabet *sequences_seq_type_to_alphabet(SeqType type);
+
 #endif // SEQUENCES_H

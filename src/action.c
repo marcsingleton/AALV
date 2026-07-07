@@ -9,6 +9,7 @@
 
 extern State state;
 
+// Private
 size_t get_line_len(FileState *active_file)
 {
     if (!active_file->record_array.data)
@@ -30,6 +31,7 @@ size_t get_line_len(FileState *active_file)
     return line_len;
 }
 
+// Public
 void action_move_up(size_t x)
 {
     FileState *active_file = state.active_file;

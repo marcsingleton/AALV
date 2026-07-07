@@ -28,10 +28,9 @@ Command cmds[] = {
     {&cmd_scheme, "scheme"},
     {&cmd_config, "config"},
 };
+unsigned int ncmds = sizeof(cmds) / sizeof(Command);
 
-#define ncmds sizeof(cmds) / sizeof(Command)
-
-// PARSING HELPERS
+// Private
 static int parse_integer(char *str, long *value)
 {
     char *endptr;
@@ -61,8 +60,7 @@ static SeqColorScheme *parse_color_scheme_name(char *color_scheme_name)
     return NULL;
 }
 
-// PARSING INTERFACE
-
+// Public
 char *cmd_read_command_line(int input_fd, char *prompt)
 {
     struct linenoiseState ls;
@@ -146,7 +144,7 @@ void cmd_deinit_command_map(void)
     prefix_tree_deinit(&cmd_map);
 }
 
-// COMMANDS
+// Commands
 
 /*
  * quit

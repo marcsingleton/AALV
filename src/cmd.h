@@ -16,6 +16,7 @@ typedef struct
 
 char *cmd_read_command_line(int input_fd, char *prompt);
 int cmd_parse_and_execute_command_line(char *cmd_line);
+
 int cmd_init_command_map(void);
 void cmd_deinit_command_map(void);
 

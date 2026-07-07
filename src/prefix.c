@@ -3,8 +3,8 @@
 
 #include "prefix.h"
 
-// Utilities
-unsigned int prefix_tree_common_prefix_len(char *s, char *t)
+// Private
+unsigned int common_prefix_len(char *s, char *t)
 {
     unsigned int i = 0;
     while (s[i] == t[i] && s[i] != '\0' && t[i] != '\0')
@@ -12,7 +12,7 @@ unsigned int prefix_tree_common_prefix_len(char *s, char *t)
     return i;
 }
 
-unsigned int prefix_tree_node_count_children(PrefixTreeNode *node)
+unsigned int count_children(PrefixTreeNode *node)
 {
     if (!node)
         return 0;
@@ -194,7 +194,7 @@ int prefix_tree_node_insert(PrefixTreeNode *node, CharMap *char_map, char *key, 
         char *suffix = key + key_index;
         unsigned int suffix_len = key_len - key_index;
         unsigned int prefix_len = strlen(node->prefix);
-        unsigned int common_len = prefix_tree_common_prefix_len(node->prefix, suffix);
+        unsigned int common_len = common_prefix_len(node->prefix, suffix);
 
         if (common_len == suffix_len && common_len == prefix_len) // Exact prefix/suffix match; write value to node
         {
@@ -285,7 +285,7 @@ void *prefix_tree_node_get(PrefixTreeNode *node, CharMap *char_map, char *key)
         char *suffix = key + key_index;
         unsigned int suffix_len = key_len - key_index;
         unsigned int prefix_len = strlen(node->prefix);
-        unsigned int common_len = prefix_tree_common_prefix_len(node->prefix, suffix);
+        unsigned int common_len = common_prefix_len(node->prefix, suffix);
         if (common_len == suffix_len && common_len == prefix_len) // Exact prefix/suffix match; get value at node
             return node->value;
         else if (common_len == prefix_len) // Consumes entire prefix with remaining suffix
@@ -320,7 +320,7 @@ void *prefix_tree_node_get_prefix_match(PrefixTreeNode *node, CharMap *char_map,
         char *suffix = key + key_index;
         unsigned int suffix_len = key_len - key_index;
         unsigned int prefix_len = strlen(node->prefix);
-        unsigned int common_len = prefix_tree_common_prefix_len(node->prefix, suffix);
+        unsigned int common_len = common_prefix_len(node->prefix, suffix);
         if (common_len == suffix_len && common_len == prefix_len) // Exact prefix/suffix match; get value at node
             return node->value;
         else if (common_len == prefix_len) // Consumes entire prefix with remaining suffix
@@ -336,7 +336,7 @@ void *prefix_tree_node_get_prefix_match(PrefixTreeNode *node, CharMap *char_map,
         }
         else if (common_len < prefix_len && key_index + common_len == key_len) // Incomplete prefix match
         {
-            unsigned int child_count = prefix_tree_node_count_children(node);
+            unsigned int child_count = count_children(node);
             if (child_count == 0)
                 return node->value;
             else
@@ -364,7 +364,7 @@ int prefix_tree_node_delete(PrefixTreeNode *node, CharMap *char_map, char *key)
         char *suffix = key + key_index;
         unsigned int suffix_len = key_len - key_index;
         unsigned int prefix_len = strlen(node->prefix);
-        unsigned int common_len = prefix_tree_common_prefix_len(node->prefix, suffix);
+        unsigned int common_len = common_prefix_len(node->prefix, suffix);
         if (common_len == suffix_len && common_len == prefix_len) // Exact prefix/suffix match; get value at node
             break;
         else if (common_len == prefix_len) // Consumes entire prefix with remaining suffix
@@ -390,7 +390,7 @@ int prefix_tree_node_delete(PrefixTreeNode *node, CharMap *char_map, char *key)
     node->value = NULL;
 
     // Clean-up tree
-    int child_count = prefix_tree_node_count_children(node);
+    int child_count = count_children(node);
     if (child_count == 1) // Node has 1 child - merge with it
     {
         PrefixTreeNode *child = prefix_tree_node_get_child(node, 0);
@@ -421,7 +421,7 @@ int prefix_tree_node_delete(PrefixTreeNode *node, CharMap *char_map, char *key)
     {
         prefix_tree_node_destroy(node);
         parent->children[node_index] = NULL;
-        if (parent->value || prefix_tree_node_count_children(parent) > 1)
+        if (parent->value || count_children(parent) > 1)
             return 0;
 
         // Merge parent's prefix with its child's prefix
@@ -456,7 +456,7 @@ void prefix_tree_node_print(PrefixTreeNode *node, void (*print_value_fn)(PrefixT
     if (!node)
         return;
 
-    unsigned int child_count = prefix_tree_node_count_children(node);
+    unsigned int child_count = count_children(node);
     for (unsigned int i = 0; i < depth; i++)
         fputs("  ", stdout);
     printf("<prefix=%s, value=", node->prefix);
