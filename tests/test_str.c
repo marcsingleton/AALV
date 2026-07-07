@@ -32,7 +32,7 @@ int test_split_empty_input(void)
     char *s = "";
     char *delim = ",";
     char *expected_fields[] = {""};
-    int expected_n = sizeof(expected_fields) / sizeof(char *);
+    unsigned int expected_n = sizeof(expected_fields) / sizeof(char *);
 
     return split_tester(s, expected_fields, expected_n, delim);
 }
@@ -42,7 +42,7 @@ int test_split_nonempty_fields(void)
     char *s = "a,1234,!@,xyz";
     char *delim = ",";
     char *expected_fields[] = {"a", "1234", "!@", "xyz"};
-    int expected_n = sizeof(expected_fields) / sizeof(char *);
+    unsigned int expected_n = sizeof(expected_fields) / sizeof(char *);
 
     return split_tester(s, expected_fields, expected_n, delim);
 }
@@ -52,7 +52,7 @@ int test_split_empty_fields(void)
     char *s = ",a,1234,,,!@,xyz,,,";
     char *delim = ",";
     char *expected_fields[] = {"", "a", "1234", "", "", "!@", "xyz", "", "", ""};
-    int expected_n = sizeof(expected_fields) / sizeof(char *);
+    unsigned int expected_n = sizeof(expected_fields) / sizeof(char *);
 
     return split_tester(s, expected_fields, expected_n, delim);
 }
@@ -62,7 +62,7 @@ int test_split_alternate_delimiter(void)
     char *s = "a\t1234\t!@\txyz";
     char *delim = "\t";
     char *expected_fields[] = {"a", "1234", "!@", "xyz"};
-    int expected_n = sizeof(expected_fields) / sizeof(char *);
+    unsigned int expected_n = sizeof(expected_fields) / sizeof(char *);
 
     return split_tester(s, expected_fields, expected_n, delim);
 }
@@ -72,7 +72,7 @@ int test_split_wrong_expected_n(void)
     char *s = "a\t1234\t!@\txyz";
     char *delim = "\t";
     char *expected_fields[] = {"a", "1234", "!@"};
-    int expected_n = sizeof(expected_fields) / sizeof(char *);
+    unsigned int expected_n = sizeof(expected_fields) / sizeof(char *);
 
     if (split_tester(s, expected_fields, expected_n, delim) != 0)
         return 0;
@@ -85,7 +85,7 @@ int test_split_wrong_expected_fields(void)
     char *s = "a\t1234\t!@\txyz";
     char *delim = "\t";
     char *expected_fields[] = {"a", "1234", "!@", "xy"};
-    int expected_n = sizeof(expected_fields) / sizeof(char *);
+    unsigned int expected_n = sizeof(expected_fields) / sizeof(char *);
 
     if (split_tester(s, expected_fields, expected_n, delim) != 0)
         return 0;
