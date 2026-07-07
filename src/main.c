@@ -234,8 +234,37 @@ int main(int argc, char *argv[])
             if (file_index < n_seq_type_args)
                 seq_type_arg = seq_type_args[file_index];
 
+            // Get reader
+            if (format_arg[0] == '\0') // From format argument
+            {
+                char *ext = strrchr(file_path, '.');
+                if (ext)
+                    format_arg = ++ext; // Shift past dot
+                else
+                {
+                    error_printf("%s: %s: No format argument or extension\n", INVOCATION_NAME, file->file_path);
+                    return EXIT_FAILURE;
+                }
+            }
+            FileReader reader = argparse_reader(format_arg, n_format_options, format_options);
+            if (!reader)
+            {
+                error_printf("%s: %s: Unknown extension\n", INVOCATION_NAME, file->file_path);
+                return EXIT_FAILURE;
+            }
+
+            // Open file
+            FILE *fp;
+            if (strcmp(file->file_path, "-") == 0)
+                fp = stdin;
+            else if (!(fp = fopen(file->file_path, "r")))
+            {
+                error_printf("%s: %s: %s\n", INVOCATION_NAME, file->file_path, strerror(errno));
+                return EXIT_FAILURE;
+            }
+
             // Load seqs
-            retcode = io_load_seqs(file, format_arg);
+            retcode = io_load_seqs(file, fp, reader);
             if (retcode != 0)
             {
                 error_printf("%s: Failed to load sequences in %s\n", INVOCATION_NAME, file->file_path);
