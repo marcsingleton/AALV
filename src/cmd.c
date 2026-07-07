@@ -11,9 +11,6 @@
 #include "config.h"
 #include "io.h"
 #include "prefix.h"
-#include "state.h"
-
-extern State state;
 
 PrefixTree cmd_map;
 
@@ -44,7 +41,7 @@ static int parse_integer(char *str, long *value)
     return 0;
 }
 
-static SeqColorScheme *parse_color_scheme_name(char *color_scheme_name)
+static SeqColorScheme *parse_color_scheme_name(State *state, char *color_scheme_name)
 {
 
     for (unsigned int i = 0; i < N_BASE_SCHEMES; i++)
@@ -53,9 +50,9 @@ static SeqColorScheme *parse_color_scheme_name(char *color_scheme_name)
         if (strcmp(color_scheme->scheme.name, color_scheme_name) == 0)
             return color_scheme;
     }
-    for (unsigned int i = 0; i < state.n_color_schemes; i++)
+    for (unsigned int i = 0; i < state->n_color_schemes; i++)
     {
-        SeqColorScheme *color_scheme = state.color_schemes + i;
+        SeqColorScheme *color_scheme = state->color_schemes + i;
         if (strcmp(color_scheme->scheme.name, color_scheme_name) == 0)
             return color_scheme;
     }
@@ -75,7 +72,7 @@ char *cmd_read_command_line(int input_fd, char *prompt)
     return line;
 }
 
-int cmd_parse_and_execute_command_line(char *line)
+int cmd_parse_and_execute_command_line(State *state, char *line)
 {
     if (!line)
         return -1;
@@ -116,8 +113,8 @@ int cmd_parse_and_execute_command_line(char *line)
         return -1;
     Command *cmd = ptr;
 
-    void (*fn)(int, char **) = cmd->fn_ptr;
-    fn(argc, argv);
+    void (*fn)(State *, int, char **) = cmd->fn_ptr;
+    fn(state, argc, argv);
 
 cleanup:
     for (int i = 0; i < argc; i++)
@@ -151,60 +148,60 @@ void cmd_deinit_command_map(void)
 /*
  * quit
  */
-void cmd_quit(int argc, char **argv)
+void cmd_quit(State *state, int argc, char **argv)
 {
     (void)argc; // Silence warnings
     (void)argv;
 
-    state_remove_file(&state);
+    state_remove_file(state);
 }
 
 /*
  * quitall
  */
 
-void cmd_quitall(int argc, char **argv)
+void cmd_quitall(State *state, int argc, char **argv)
 {
     (void)argc; // Silence warnings
     (void)argv;
 
     // TODO: If files are editable, check none are modified before closing any to mimic Vim behavior
-    while (state.nfiles > 0)
-        state_remove_file(&state);
+    while (state->nfiles > 0)
+        state_remove_file(state);
 }
 
 /*
  * next
  */
-void cmd_next_file(int argc, char **argv)
+void cmd_next_file(State *state, int argc, char **argv)
 {
     (void)argc; // Silence warnings
     (void)argv;
 
-    if (state.active_file_index + 1 >= state.nfiles)
+    if (state->active_file_index + 1 >= state->nfiles)
         return;
-    state_set_active_file_index(&state, state.active_file_index + 1);
-    state.refresh_window = true;
+    state_set_active_file_index(state, state->active_file_index + 1);
+    state->refresh_window = true;
 }
 
 /*
  * previous
  */
-void cmd_previous_file(int argc, char **argv)
+void cmd_previous_file(State *state, int argc, char **argv)
 {
     (void)argc; // Silence warnings
     (void)argv;
 
-    if (state.active_file_index == 0)
+    if (state->active_file_index == 0)
         return;
-    state_set_active_file_index(&state, state.active_file_index - 1);
-    state.refresh_window = true;
+    state_set_active_file_index(state, state->active_file_index - 1);
+    state->refresh_window = true;
 }
 
 /*
  * set <name> [<value>]
  */
-void cmd_set(int argc, char **argv)
+void cmd_set(State *state, int argc, char **argv)
 {
     if (argc == 3 && strcmp("ruler_records_divider", argv[1]) == 0)
     {
@@ -216,7 +213,7 @@ void cmd_set(int argc, char **argv)
             return;
         unsigned int ruler_records_divider = value;
 
-        state_set_ruler_records_divider(&state, ruler_records_divider);
+        state_set_ruler_records_divider(state, ruler_records_divider);
     }
 
     if (argc == 3 && strcmp("header_sequence_divider", argv[1]) == 0)
@@ -229,7 +226,7 @@ void cmd_set(int argc, char **argv)
             return;
         unsigned int header_sequence_divider = value;
 
-        state_set_header_sequence_divider(&state, header_sequence_divider);
+        state_set_header_sequence_divider(state, header_sequence_divider);
     }
 
     if (argc == 3 && strcmp("tick_offset", argv[1]) == 0)
@@ -242,7 +239,7 @@ void cmd_set(int argc, char **argv)
             return;
         int tick_offset = value;
 
-        state_set_tick_offset(&state, tick_offset);
+        state_set_tick_offset(state, tick_offset);
     }
 
     if (argc == 3 && strcmp("tick_spacing", argv[1]) == 0)
@@ -255,25 +252,25 @@ void cmd_set(int argc, char **argv)
             return;
         int tick_spacing = value;
 
-        state_set_tick_spacing(&state, tick_spacing);
+        state_set_tick_spacing(state, tick_spacing);
     }
 
     if (argc == 3 && strcmp("scheme", argv[1]) == 0)
     {
         // Parse <value> into color scheme
         char *color_scheme_arg = argv[2];
-        SeqColorScheme *color_scheme = parse_color_scheme_name(color_scheme_arg);
+        SeqColorScheme *color_scheme = parse_color_scheme_name(state, color_scheme_arg);
         if (!color_scheme)
             return;
 
-        state_set_active_color_scheme(&state, color_scheme);
+        state_set_active_color_scheme(state, color_scheme);
     }
 }
 
 /*
  * type <seq_type> [<id_pattern>]
  */
-void cmd_type(int argc, char **argv)
+void cmd_type(State *state, int argc, char **argv)
 {
     if (!(argc == 2 || argc == 3))
         return;
@@ -285,7 +282,7 @@ void cmd_type(int argc, char **argv)
         return;
 
     // Apply to record(s)
-    FileState *active_file = state.active_file;
+    FileState *active_file = state->active_file;
     if (argc == 2)
     {
         RowLinkedScroller *scroller = &active_file->layout.scroller;
@@ -304,14 +301,14 @@ void cmd_type(int argc, char **argv)
                 record->type = seq_type;
         }
     }
-    state.refresh_sequence_pane = true;
+    state->refresh_sequence_pane = true;
 }
 
 /*
  * scheme new <name> <seq_type>
  * scheme map fg|bg <name> <sym> <value>
  */
-void cmd_scheme(int argc, char **argv)
+void cmd_scheme(State *state, int argc, char **argv)
 {
     if (argc > 1 && strcmp("new", argv[1]) == 0)
     {
@@ -326,7 +323,7 @@ void cmd_scheme(int argc, char **argv)
         if (seq_type == SEQ_TYPE_UNSPECIFIED)
             return;
 
-        state_new_color_scheme(&state, name, seq_type, COLOR_8_BIT);
+        state_new_color_scheme(state, name, seq_type, COLOR_8_BIT);
     }
 
     if (argc > 1 && strcmp("map", argv[1]) == 0)
@@ -339,7 +336,7 @@ void cmd_scheme(int argc, char **argv)
 
         // Parse <name> into color scheme
         char *color_scheme_arg = argv[3];
-        SeqColorScheme *color_scheme = parse_color_scheme_name(color_scheme_arg);
+        SeqColorScheme *color_scheme = parse_color_scheme_name(state, color_scheme_arg);
         if (!color_scheme)
             return;
 
@@ -374,8 +371,10 @@ void cmd_scheme(int argc, char **argv)
 /*
  * config <name> <value>
  */
-void cmd_config(int argc, char **argv)
+void cmd_config(State *state, int argc, char **argv)
 {
+    (void)state; // Silence warnings
+
     if (argc == 3 && strcmp("ruler_records_divider", argv[1]) == 0)
     {
         // Parse <value> into unsigned int
@@ -445,7 +444,7 @@ void cmd_config(int argc, char **argv)
 /*
  * edit <file>
  */
-void cmd_edit(int argc, char **argv)
+void cmd_edit(State *state, int argc, char **argv)
 {
     if (argc != 2)
         return;
@@ -453,11 +452,11 @@ void cmd_edit(int argc, char **argv)
     char *file_path = argv[1];
 
     // Close current and open new
-    if (state_remove_file(&state) != 0)
+    if (state_remove_file(state) != 0)
         return;
-    if (state_new_file(&state) != 0)
+    if (state_new_file(state) != 0)
         return;
-    if (state_set_file_path(state.active_file, file_path) != 0)
+    if (state_set_file_path(state->active_file, file_path) != 0)
         return;
 
     // Get reader
@@ -474,7 +473,7 @@ void cmd_edit(int argc, char **argv)
         return;
 
     // Load seqs and set metadata
-    io_load_seqs(state.active_file, fp, reader);
-    io_set_seq_types(state.active_file, "");
-    io_set_unaligned_indices(state.active_file);
+    io_load_seqs(state->active_file, fp, reader);
+    io_set_seq_types(state->active_file, "");
+    io_set_unaligned_indices(state->active_file);
 }

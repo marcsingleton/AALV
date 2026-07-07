@@ -5,6 +5,8 @@
  * User configuration
  */
 
+#include "state.h"
+
 extern unsigned int config_header_sequence_divider;
 extern unsigned int config_ruler_records_divider;
 extern int config_tick_offset;
@@ -19,6 +21,6 @@ void config_set_tick_offset(int tick_offset);
 void config_set_tick_spacing(int tick_spacing);
 void config_set_nucleic_tiebreak_len(unsigned int nucleic_tiebreak_len);
 
-int config_load_user_config(void);
+int config_load_user_config(State *state);
 
 #endif // CONFIG_H

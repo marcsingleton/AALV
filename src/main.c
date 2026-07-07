@@ -182,7 +182,7 @@ int main(int argc, char *argv[])
     // Initialize state and config
     state_set_terminal_size(&state);
     config_init();
-    config_load_user_config();
+    config_load_user_config(&state);
 
     // Initialize file states
     if (isatty(STDIN_FILENO) && nfiles == 0)
@@ -358,7 +358,7 @@ int main(int argc, char *argv[])
             state.mode = NORMAL;
             state.refresh_command_pane = true;
             cmd_line = cmd_read_command_line(input_fd, ":");
-            retcode = cmd_parse_and_execute_command_line(cmd_line);
+            retcode = cmd_parse_and_execute_command_line(&state, cmd_line);
         }
         }
     }

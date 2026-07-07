@@ -47,7 +47,7 @@ void config_set_nucleic_tiebreak_len(unsigned int nucleic_tiebreak_len)
     config_nucleic_tiebreak_len = nucleic_tiebreak_len;
 }
 
-int config_load_user_config(void)
+int config_load_user_config(State *state)
 {
     char *home_dir = NULL;
     char config_path[128];
@@ -77,7 +77,7 @@ int config_load_user_config(void)
     size_t capacity = 0;
     ssize_t line_len = 0;
     while ((line_len = getline(&cmd_line, &capacity, config_fp)) > 0)
-        cmd_parse_and_execute_command_line(cmd_line);
+        cmd_parse_and_execute_command_line(state, cmd_line);
     free(cmd_line);
     return 0;
 }
