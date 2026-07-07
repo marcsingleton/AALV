@@ -4,7 +4,7 @@
 #include "prefix.h"
 
 // Private
-unsigned int common_prefix_len(char *s, char *t)
+static unsigned int common_prefix_len(char *s, char *t)
 {
     unsigned int i = 0;
     while (s[i] == t[i] && s[i] != '\0' && t[i] != '\0')
@@ -12,7 +12,7 @@ unsigned int common_prefix_len(char *s, char *t)
     return i;
 }
 
-unsigned int count_children(PrefixTreeNode *node)
+static unsigned int count_children(PrefixTreeNode *node)
 {
     if (!node)
         return 0;
@@ -27,7 +27,7 @@ unsigned int count_children(PrefixTreeNode *node)
     return child_count;
 }
 
-PrefixTreeNode *prefix_tree_node_get_child(PrefixTreeNode *node, unsigned int index)
+static PrefixTreeNode *prefix_tree_node_get_child(PrefixTreeNode *node, unsigned int index)
 {
     if (!node)
         return NULL;

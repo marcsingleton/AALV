@@ -10,7 +10,7 @@
 extern State state;
 
 // Private
-size_t get_line_len(FileState *active_file)
+static size_t get_line_len(FileState *active_file)
 {
     if (!active_file->record_array.data)
         return 0;

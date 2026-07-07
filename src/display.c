@@ -13,7 +13,7 @@
 extern State state;
 
 // Private
-void append_spaces(Array *buffer, unsigned int n)
+static void append_spaces(Array *buffer, unsigned int n)
 {
     char c = ' ';
     for (unsigned int i = 0; i < n; i++)
