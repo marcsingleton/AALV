@@ -62,6 +62,7 @@ unsigned int n_format_options = sizeof(format_options) / sizeof(FormatOption);
 SeqTypeOption seq_type_options[] = {
     {"nucleic", "nucleic,nt", SEQ_TYPE_NUCLEIC, &NUCLEIC_ALPHABET},
     {"protein", "protein,aa", SEQ_TYPE_PROTEIN, &PROTEIN_ALPHABET},
+    {"unicode", "unicode,utf", SEQ_TYPE_UNKNOWN, NULL},
 };
 unsigned int n_seq_type_options = sizeof(seq_type_options) / sizeof(SeqTypeOption);
 

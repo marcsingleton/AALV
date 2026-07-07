@@ -561,22 +561,12 @@ int set_seq_types(FileState *file, const char *seq_type_arg)
     {
         SeqRecord *record = record_array->data + i;
         SeqType seq_type_from_seq = sequences_seq_to_seq_type(record->seq);
-        if (seq_type_from_seq == SEQ_TYPE_ERROR)
-        {
-            printf("%s contains at least one non-ASCII symbol in its sequence(s). "
-                   "The viewer may render incorrectly. Continue? (y/n): ",
-                   file->file_path);
-            int c = getchar();
-            if (c != 'y' && c != 'Y')
-                return -1;
-            while ((c = getchar()) != '\n' && c != EOF)
-                ; // Clear remaining input
-        };
-        if (seq_type_from_seq != SEQ_TYPE_ERROR && seq_type_arg[0] != '\0') // Allow forced type unless error
-        {
-            SeqType seq_type_from_arg = argparse_seq_type(seq_type_arg, n_seq_type_options, seq_type_options);
+        SeqType seq_type_from_arg = argparse_seq_type(seq_type_arg, n_seq_type_options, seq_type_options);
+        if (seq_type_from_seq == SEQ_TYPE_ERROR && seq_type_from_arg != SEQ_TYPE_UNKNOWN) // Must explicitly specify UTF
+            return -1;
+
+        if (seq_type_from_arg != SEQ_TYPE_UNSPECIFIED) // Use provided arg if given
             record->type = seq_type_from_arg;
-        }
         else if (seq_type_from_seq == SEQ_TYPE_RNA || seq_type_from_seq == SEQ_TYPE_DNA)
             record->type = SEQ_TYPE_NUCLEIC;
         else if (seq_type_from_seq == SEQ_TYPE_INDETERMINATE && record->len >= config_nucleic_tiebreak_len)
