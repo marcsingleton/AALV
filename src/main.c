@@ -240,12 +240,18 @@ int main(int argc, char *argv[])
             // Load seqs
             retcode = load_seqs(file, format_arg);
             if (retcode != 0)
+            {
+                error_printf("%s: Failed to load sequences in %s\n", INVOCATION_NAME, file->file_path);
                 return EXIT_FAILURE;
+            }
 
             // Set seq types
             retcode = set_seq_types(file, seq_type_arg);
             if (retcode != 0)
+            {
+                error_printf("%s: Failed to set sequence types in %s\n", INVOCATION_NAME, file->file_path);
                 return EXIT_FAILURE;
+            }
 
             // Set indices
             retcode = set_unaligned_indices(file);
