@@ -3,38 +3,38 @@
 
 #include "sequences.h"
 
-Alphabet RNA_ALPHABET = {
+Alphabet rna_alphabet = {
     .name = "rna",
     .syms = "ACGUN.-",
     .gaps = ".-",
     .case_sensitive = false,
 };
-Alphabet DNA_ALPHABET = {
+Alphabet dna_alphabet = {
     .name = "dna",
     .syms = "ACGTN.-",
     .gaps = ".-",
     .case_sensitive = false,
 };
-Alphabet NUCLEIC_ALPHABET = {
+Alphabet nucleic_alphabet = {
     .name = "nucleic",
     .syms = "ACGTUN.-",
     .gaps = ".-",
     .case_sensitive = false,
 };
-Alphabet PROTEIN_ALPHABET = {
+Alphabet protein_alphabet = {
     .name = "protein",
     .syms = "ACDEFGHIKLMNPQRSTVWYX.-",
     .gaps = ".-",
     .case_sensitive = false,
 };
 
-Alphabet *BASE_ALPHABETS[] = {
-    &RNA_ALPHABET,
-    &DNA_ALPHABET,
-    &NUCLEIC_ALPHABET,
-    &PROTEIN_ALPHABET,
+Alphabet *base_alphabets[] = {
+    &rna_alphabet,
+    &dna_alphabet,
+    &nucleic_alphabet,
+    &protein_alphabet,
 };
-unsigned int N_BASE_ALPHABETS = sizeof(BASE_ALPHABETS) / sizeof(Alphabet *);
+unsigned int n_base_alphabets = sizeof(base_alphabets) / sizeof(Alphabet *);
 
 int sequences_init_seq_record(SeqRecord *record, char *header, char *seq, char *id)
 {
@@ -194,9 +194,9 @@ void sequences_deinit_alphabet(Alphabet *alphabet)
 int sequences_init_base_alphabets(void)
 {
     int retcode = 0;
-    for (unsigned int i = 0; i < N_BASE_ALPHABETS; i++)
+    for (unsigned int i = 0; i < n_base_alphabets; i++)
     {
-        Alphabet *alphabet = BASE_ALPHABETS[i];
+        Alphabet *alphabet = base_alphabets[i];
         retcode = sequences_init_alphabet(alphabet, alphabet->name,
                                           alphabet->syms, alphabet->gaps,
                                           alphabet->case_sensitive);
@@ -208,9 +208,9 @@ int sequences_init_base_alphabets(void)
 
 void sequences_deinit_base_alphabets(void)
 {
-    for (unsigned int i = 0; i < N_BASE_ALPHABETS; i++)
+    for (unsigned int i = 0; i < n_base_alphabets; i++)
     {
-        Alphabet *alphabet = BASE_ALPHABETS[i];
+        Alphabet *alphabet = base_alphabets[i];
         sequences_deinit_alphabet(alphabet);
     }
 }
@@ -317,22 +317,22 @@ int sequences_seq_in_alphabet(Alphabet *alphabet, char *seq)
 
 int sequences_seq_is_rna(char *seq)
 {
-    return sequences_seq_in_alphabet(&RNA_ALPHABET, seq);
+    return sequences_seq_in_alphabet(&rna_alphabet, seq);
 }
 
 int sequences_seq_is_dna(char *seq)
 {
-    return sequences_seq_in_alphabet(&DNA_ALPHABET, seq);
+    return sequences_seq_in_alphabet(&dna_alphabet, seq);
 }
 
 int sequences_seq_is_nucleic(char *seq)
 {
-    return sequences_seq_in_alphabet(&NUCLEIC_ALPHABET, seq);
+    return sequences_seq_in_alphabet(&nucleic_alphabet, seq);
 }
 
 int sequences_seq_is_protein(char *seq)
 {
-    return sequences_seq_in_alphabet(&PROTEIN_ALPHABET, seq);
+    return sequences_seq_in_alphabet(&protein_alphabet, seq);
 }
 
 SeqType sequences_seq_to_seq_type(char *seq)
@@ -370,16 +370,16 @@ Alphabet *sequences_seq_type_to_alphabet(SeqType type)
     switch (type)
     {
     case SEQ_TYPE_RNA:
-        alphabet = &RNA_ALPHABET;
+        alphabet = &rna_alphabet;
         break;
     case SEQ_TYPE_DNA:
-        alphabet = &DNA_ALPHABET;
+        alphabet = &dna_alphabet;
         break;
     case SEQ_TYPE_NUCLEIC:
-        alphabet = &NUCLEIC_ALPHABET;
+        alphabet = &nucleic_alphabet;
         break;
     case SEQ_TYPE_PROTEIN:
-        alphabet = &PROTEIN_ALPHABET;
+        alphabet = &protein_alphabet;
         break;
     default:
         alphabet = NULL;

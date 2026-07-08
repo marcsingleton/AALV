@@ -58,13 +58,13 @@ typedef struct
     size_t len;
 } UnalignedIndicesArray;
 
-extern Alphabet RNA_ALPHABET;
-extern Alphabet DNA_ALPHABET;
-extern Alphabet NUCLEIC_ALPHABET;
-extern Alphabet PROTEIN_ALPHABET;
+extern Alphabet rna_alphabet;
+extern Alphabet dna_alphabet;
+extern Alphabet nucleic_alphabet;
+extern Alphabet protein_alphabet;
 
-extern Alphabet *BASE_ALPHABETS[];
-extern unsigned int N_BASE_ALPHABETS;
+extern Alphabet *base_alphabets[];
+extern unsigned int n_base_alphabets;
 
 int sequences_init_seq_record(SeqRecord *record, char *header, char *seq, char *id);
 void sequences_deinit_seq_record(SeqRecord *record);

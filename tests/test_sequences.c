@@ -160,7 +160,7 @@ int test_rna_nucleic_subset(void)
     if (retcode != 0)
         return retcode;
 
-    if (sequences_seq_in_alphabet(&NUCLEIC_ALPHABET, RNA_ALPHABET.syms) != 1)
+    if (sequences_seq_in_alphabet(&nucleic_alphabet, rna_alphabet.syms) != 1)
         return -1;
 
     return 0;
@@ -172,7 +172,7 @@ int test_dna_nucleic_subset(void)
     if (retcode != 0)
         return retcode;
 
-    if (sequences_seq_in_alphabet(&NUCLEIC_ALPHABET, DNA_ALPHABET.syms) != 1)
+    if (sequences_seq_in_alphabet(&nucleic_alphabet, dna_alphabet.syms) != 1)
         return -1;
 
     return 0;
