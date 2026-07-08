@@ -7,10 +7,7 @@
 #include "macros.h"
 #include "pane.h"
 #include "scroller.h"
-#include "state.h"
 #include "terminal.h"
-
-extern State state;
 
 // Private
 static void append_spaces(Array *buffer, unsigned int n)
@@ -21,77 +18,77 @@ static void append_spaces(Array *buffer, unsigned int n)
 }
 
 // Public
-void display_refresh(Array *buffer)
+void display_refresh(State *state, Array *buffer)
 {
     terminal_cursor_hide(buffer);
-    state.refresh_command_pane = true;
+    state->refresh_command_pane = true;
 
     unsigned int rows, cols;
     terminal_get_window_size(&rows, &cols);
-    if (state.terminal_rows != rows || state.terminal_cols != cols)
+    if (state->terminal_rows != rows || state->terminal_cols != cols)
     {
-        state.terminal_rows = rows;
-        state.terminal_cols = cols;
-        state.refresh_window = true;
+        state->terminal_rows = rows;
+        state->terminal_cols = cols;
+        state->refresh_window = true;
     }
-    RowLinkedScroller *scroller = &state.active_file->layout.scroller;
+    RowLinkedScroller *scroller = &state->active_file->layout.scroller;
     if (scroller->refreshes[SCROLLER_HEADER_PANE])
     {
-        state.refresh_header_pane = true;
+        state->refresh_header_pane = true;
         scroller->refreshes[SCROLLER_HEADER_PANE] = false;
     }
     if (scroller->refreshes[SCROLLER_SEQUENCE_PANE])
     {
-        state.refresh_sequence_pane = true;
-        state.refresh_ruler_pane = true;
+        state->refresh_sequence_pane = true;
+        state->refresh_ruler_pane = true;
         scroller->refreshes[SCROLLER_SEQUENCE_PANE] = false;
     }
 
-    if (state.refresh_window)
+    if (state->refresh_window)
     {
         terminal_clear_screen(buffer);
-        state_set_layout(&state,
-                         state.active_file->layout.ruler_records_divider,
-                         state.active_file->layout.header_sequence_divider);
-        state.refresh_window = false;
+        state_set_layout(state,
+                         state->active_file->layout.ruler_records_divider,
+                         state->active_file->layout.header_sequence_divider);
+        state->refresh_window = false;
     }
-    if (!state.visible_window)
+    if (!state->visible_window)
         return;
-    if (state.refresh_ruler_pane)
+    if (state->refresh_ruler_pane)
     {
-        display_ruler_pane(buffer);
-        display_ruler_pane_ticks(buffer);
-        state.refresh_ruler_pane = false;
+        display_ruler_pane(state, buffer);
+        display_ruler_pane_ticks(state, buffer);
+        state->refresh_ruler_pane = false;
     }
-    if (state.refresh_header_pane)
+    if (state->refresh_header_pane)
     {
-        display_header_pane(buffer);
-        state.refresh_header_pane = false;
+        display_header_pane(state, buffer);
+        state->refresh_header_pane = false;
     }
-    if (state.refresh_sequence_pane)
+    if (state->refresh_sequence_pane)
     {
-        display_sequence_pane(buffer);
-        state.refresh_sequence_pane = false;
+        display_sequence_pane(state, buffer);
+        state->refresh_sequence_pane = false;
     }
-    if (state.refresh_command_pane)
+    if (state->refresh_command_pane)
     {
-        display_command_pane(buffer);
-        state.refresh_command_pane = false;
+        display_command_pane(state, buffer);
+        state->refresh_command_pane = false;
     }
-    display_cursor(buffer);
+    display_cursor(state, buffer);
 }
 
-void display_all_panes(Array *buffer)
+void display_all_panes(State *state, Array *buffer)
 {
-    display_ruler_pane(buffer);
-    display_ruler_pane_ticks(buffer);
-    display_header_pane(buffer);
-    display_sequence_pane(buffer);
+    display_ruler_pane(state, buffer);
+    display_ruler_pane_ticks(state, buffer);
+    display_header_pane(state, buffer);
+    display_sequence_pane(state, buffer);
 }
 
-void display_header_pane(Array *buffer)
+void display_header_pane(State *state, Array *buffer)
 {
-    FileState *active_file = state.active_file;
+    FileState *active_file = state->active_file;
 
     RowLinkedScroller *scroller = &active_file->layout.scroller;
     size_t offset_i = scroller->offset_i;
@@ -106,7 +103,9 @@ void display_header_pane(Array *buffer)
         if (record_index < active_file->record_array.len) // Has record
         {
             SeqRecord *record = &active_file->record_array.data[record_index];
-            display_continued_line(buffer, record, offset_j, strlen(record->header), display_header, pane->w - 1);
+            display_continued_line(state, buffer,
+                                   record, offset_j, strlen(record->header),
+                                   display_header, pane->w - 1);
         }
         else // No record
         {
@@ -121,9 +120,9 @@ void display_header_pane(Array *buffer)
     }
 }
 
-void display_ruler_pane(Array *buffer)
+void display_ruler_pane(State *state, Array *buffer)
 {
-    FileState *active_file = state.active_file;
+    FileState *active_file = state->active_file;
     Pane *pane = &active_file->layout.ruler_pane;
     unsigned int header_sequence_divider = active_file->layout.header_sequence_divider;
 
@@ -140,7 +139,7 @@ void display_ruler_pane(Array *buffer)
     pane_cursor_ij(pane, buffer, pane->h - 1, 0);
     for (unsigned int j = 0; j < header_sequence_divider; j++)
         array_extend(buffer, "━", sizeof("━") - 1);
-    if (state.active_file->layout.ruler_records_divider < state.active_file->layout.records_command_divider) // Checks for collapsed records pane
+    if (state->active_file->layout.ruler_records_divider < state->active_file->layout.records_command_divider) // Checks for collapsed records pane
         array_extend(buffer, "╋", sizeof("╋") - 1);
     else
         array_extend(buffer, "┻", sizeof("┻") - 1);
@@ -148,9 +147,9 @@ void display_ruler_pane(Array *buffer)
         array_extend(buffer, "━", sizeof("━") - 1);
 }
 
-void display_ruler_pane_ticks(Array *buffer)
+void display_ruler_pane_ticks(State *state, Array *buffer)
 {
-    FileState *active_file = state.active_file;
+    FileState *active_file = state->active_file;
 
     RowLinkedScroller *scroller = &active_file->layout.scroller;
     size_t offset_sequence = scroller->offsets_j[SCROLLER_SEQUENCE_PANE];
@@ -211,9 +210,9 @@ void display_ruler_pane_ticks(Array *buffer)
     }
 }
 
-void display_sequence_pane(Array *buffer)
+void display_sequence_pane(State *state, Array *buffer)
 {
-    FileState *active_file = state.active_file;
+    FileState *active_file = state->active_file;
 
     RowLinkedScroller *scroller = &active_file->layout.scroller;
     size_t offset_i = scroller->offset_i;
@@ -229,7 +228,7 @@ void display_sequence_pane(Array *buffer)
         if (record_index < active_file->record_array.len) // Has record
         {
             SeqRecord *record = &active_file->record_array.data[record_index];
-            display_continued_line(buffer, record, offset_j, record->len, &display_sequence, pane->w);
+            display_continued_line(state, buffer, record, offset_j, record->len, &display_sequence, pane->w);
         }
         else // No record
             for (unsigned int j = 0; j < pane->w; j++)
@@ -237,9 +236,9 @@ void display_sequence_pane(Array *buffer)
     }
 }
 
-void display_command_pane(Array *buffer)
+void display_command_pane(State *state, Array *buffer)
 {
-    FileState *active_file = state.active_file;
+    FileState *active_file = state->active_file;
     Pane *pane = &active_file->layout.command_pane;
     unsigned int header_sequence_divider = active_file->layout.header_sequence_divider;
     RowLinkedScroller *scroller = &active_file->layout.scroller;
@@ -247,7 +246,7 @@ void display_command_pane(Array *buffer)
     size_t sequence_index = scroller->offsets_j[SCROLLER_SEQUENCE_PANE] + scroller->cursors_j[SCROLLER_SEQUENCE_PANE];
 
     // Records-command divider
-    if (state.active_file->layout.ruler_records_divider < state.active_file->layout.records_command_divider) // Checks for collapsed records pane
+    if (state->active_file->layout.ruler_records_divider < state->active_file->layout.records_command_divider) // Checks for collapsed records pane
     {
         pane_cursor_ij(pane, buffer, 0, 0);
         for (unsigned int j = 0; j < header_sequence_divider; j++)
@@ -258,7 +257,7 @@ void display_command_pane(Array *buffer)
     }
 
     // Status line
-    switch (state.mode)
+    switch (state->mode)
     {
     case NORMAL:
     {
@@ -330,11 +329,11 @@ void display_command_pane(Array *buffer)
     }
 }
 
-void display_cursor(Array *buffer)
+void display_cursor(State *state, Array *buffer)
 {
-    FileState *active_file = state.active_file;
+    FileState *active_file = state->active_file;
 
-    switch (state.mode)
+    switch (state->mode)
     {
     case NORMAL:
     {
@@ -412,8 +411,10 @@ void display_cursor(Array *buffer)
     }
 }
 
-void display_header(Array *buffer, SeqRecord *record, size_t offset, unsigned int display_len)
+void display_header(State *state, Array *buffer, SeqRecord *record, size_t offset, unsigned int display_len)
 {
+    (void)state; // Silence warnings
+
     for (unsigned int i = 0; i < display_len; i++)
     {
         char sym = record->header[offset + i];
@@ -423,10 +424,10 @@ void display_header(Array *buffer, SeqRecord *record, size_t offset, unsigned in
     }
 }
 
-void display_sequence(Array *buffer, SeqRecord *record, size_t offset, unsigned int display_len)
+void display_sequence(State *state, Array *buffer, SeqRecord *record, size_t offset, unsigned int display_len)
 {
-    SeqColorScheme *color_scheme = state.active_color_schemes[record->type];
-    if (state.ncolors > 1 && color_scheme)
+    SeqColorScheme *color_scheme = state->active_color_schemes[record->type];
+    if (state->ncolors > 1 && color_scheme)
     {
         ColorType type = color_scheme->scheme.type;
         ColorMap *map = &color_scheme->scheme.map;
@@ -499,7 +500,7 @@ void display_sequence(Array *buffer, SeqRecord *record, size_t offset, unsigned 
         array_extend(buffer, offset + record->seq, display_len);
 }
 
-void display_splash_screen(Array *buffer)
+void display_splash_screen(State *state, Array *buffer)
 {
     char *logo[] =
         {
@@ -523,7 +524,7 @@ void display_splash_screen(Array *buffer)
     unsigned int splash_height = 12;
     unsigned int splash_width = 38; // AKA maximum width of a line
 
-    FileState *active_file = state.active_file;
+    FileState *active_file = state->active_file;
     Pane *pane = &active_file->layout.sequence_pane;
 
     // Check for at least two cells of buffer
@@ -562,16 +563,16 @@ void display_splash_screen(Array *buffer)
         append_spaces(buffer, (pane->w - strlen(*p)) / 2);
         for (char *s = *p; *s != '\0'; s++)
         {
-            if (state.ncolors && *s == '<')
+            if (state->ncolors && *s == '<')
                 terminal_set_foreground_color_4bit(buffer, FG_CYAN);
             array_append(buffer, s);
-            if (state.ncolors && *s == '>')
+            if (state->ncolors && *s == '>')
                 terminal_set_foreground_color_default(buffer);
         }
     }
 }
 
-void display_continued_line(Array *buffer,
+void display_continued_line(State *state, Array *buffer,
                             SeqRecord *record, size_t offset, size_t len,
                             DisplayFunction display_fn, unsigned int display_width)
 {
@@ -597,7 +598,7 @@ void display_continued_line(Array *buffer,
     if (left_continuation)
         array_append(buffer, "<");
     if (display_len > 0)
-        display_fn(buffer, record, display_offset, display_len);
+        display_fn(state, buffer, record, display_offset, display_len);
     if (right_continuation)
         array_append(buffer, ">");
     else

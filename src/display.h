@@ -10,21 +10,22 @@
 
 #include "array.h"
 #include "sequences.h"
+#include "state.h"
 
-typedef void (*DisplayFunction)(Array *buffer, SeqRecord *record, size_t start, unsigned int display_len);
+typedef void (*DisplayFunction)(State *state, Array *buffer, SeqRecord *record, size_t start, unsigned int display_len);
 
-void display_refresh(Array *buffer);
-void display_all_panes(Array *buffer);
-void display_header_pane(Array *buffer);
-void display_ruler_pane(Array *buffer);
-void display_ruler_pane_ticks(Array *buffer);
-void display_sequence_pane(Array *buffer);
-void display_command_pane(Array *buffer);
-void display_cursor(Array *buffer);
-void display_header(Array *buffer, SeqRecord *record, size_t offset, unsigned int display_len);
-void display_sequence(Array *buffer, SeqRecord *record, size_t offset, unsigned int display_len);
-void display_splash_screen(Array *buffer);
-void display_continued_line(Array *buffer,
+void display_refresh(State *state, Array *buffer);
+void display_all_panes(State *state, Array *buffer);
+void display_header_pane(State *state, Array *buffer);
+void display_ruler_pane(State *state, Array *buffer);
+void display_ruler_pane_ticks(State *state, Array *buffer);
+void display_sequence_pane(State *state, Array *buffer);
+void display_command_pane(State *state, Array *buffer);
+void display_cursor(State *state, Array *buffer);
+void display_header(State *state, Array *buffer, SeqRecord *record, size_t offset, unsigned int display_len);
+void display_sequence(State *state, Array *buffer, SeqRecord *record, size_t offset, unsigned int display_len);
+void display_splash_screen(State *state, Array *buffer);
+void display_continued_line(State *state, Array *buffer,
                             SeqRecord *record, size_t offset, size_t len,
                             DisplayFunction display_fn, unsigned int display_width);
 

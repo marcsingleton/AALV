@@ -318,9 +318,9 @@ int main(int argc, char *argv[])
     // Special case for splash screen
     if (isatty(STDIN_FILENO) && nfiles == 0)
     {
-        display_refresh(&write_buffer);
+        display_refresh(&state, &write_buffer);
         input_write_buffer_flush(&write_buffer);
-        display_splash_screen(&write_buffer);
+        display_splash_screen(&state, &write_buffer);
     }
 
     // Main loop
@@ -329,7 +329,7 @@ int main(int argc, char *argv[])
 
     while (state.nfiles > 0)
     {
-        display_refresh(&write_buffer);
+        display_refresh(&state, &write_buffer);
         input_write_buffer_flush(&write_buffer);
 
         switch (state.mode)
