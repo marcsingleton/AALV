@@ -276,7 +276,7 @@ void cmd_type(State *state, int argc, char **argv)
 
     // Parse <seq_type>
     char *seq_type_arg = argv[1];
-    SeqType seq_type = argparse_seq_type(seq_type_arg, n_seq_type_options, seq_type_options);
+    SeqType seq_type = io_get_seq_type(seq_type_arg, n_seq_type_options, seq_type_options);
     if (seq_type == SEQ_TYPE_UNSPECIFIED)
         return;
 
@@ -318,7 +318,7 @@ void cmd_scheme(State *state, int argc, char **argv)
 
         // Parse <seq_type>
         char *seq_type_arg = argv[3];
-        SeqType seq_type = argparse_seq_type(seq_type_arg, n_seq_type_options, seq_type_options);
+        SeqType seq_type = io_get_seq_type(seq_type_arg, n_seq_type_options, seq_type_options);
         if (seq_type == SEQ_TYPE_UNSPECIFIED)
             return;
 
@@ -464,7 +464,7 @@ void cmd_edit(State *state, int argc, char **argv)
         format_arg++; // Shift past dot
     else
         return;
-    FileReader reader = argparse_reader(format_arg, n_format_options, format_options);
+    FileReader reader = io_get_reader(format_arg, n_format_options, format_options);
 
     // Open file
     FILE *fp = fopen(file_path, "r");

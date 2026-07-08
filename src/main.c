@@ -246,7 +246,7 @@ int main(int argc, char *argv[])
                     return EXIT_FAILURE;
                 }
             }
-            FileReader reader = argparse_reader(format_arg, n_format_options, format_options);
+            FileReader reader = io_get_reader(format_arg, n_format_options, format_options);
             if (!reader)
             {
                 error_printf("%s: %s: Unknown extension\n", INVOCATION_NAME, file->file_path);

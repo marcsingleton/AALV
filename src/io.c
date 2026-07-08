@@ -1,6 +1,53 @@
 #include "argparse.h"
 #include "config.h"
 #include "io.h"
+#include "str.h"
+
+FormatOption format_options[] = {
+    {"FASTA", "fasta,fa,faa,fna,afa", &fasta_fread},
+    {"A2M/A3M", "a2m,a3m", &fasta_fread},
+    // CLUSTAL
+    // PHYLIP
+    // STOCKHOLM
+};
+unsigned int n_format_options = sizeof(format_options) / sizeof(FormatOption);
+
+SeqTypeOption seq_type_options[] = {
+    {"nucleic", "nucleic,nt", SEQ_TYPE_NUCLEIC, &nucleic_alphabet},
+    {"protein", "protein,aa", SEQ_TYPE_PROTEIN, &protein_alphabet},
+    {"unicode", "unicode,utf", SEQ_TYPE_UNKNOWN, NULL},
+};
+unsigned int n_seq_type_options = sizeof(seq_type_options) / sizeof(SeqTypeOption);
+
+FileReader io_get_reader(const char *format_arg,
+                         unsigned int n_format_options,
+                         FormatOption *format_options)
+{
+    FileReader reader = NULL;
+    for (unsigned int i = 0; i < n_format_options; i++)
+    {
+        FormatOption *format_option = format_options + i;
+        const char *exts = format_option->exts;
+        if (str_is_in_strsep(exts, option_delim, format_arg))
+            return format_option->reader;
+    }
+    return reader;
+}
+
+SeqType io_get_seq_type(const char *seq_type_arg,
+                        unsigned int n_seq_type_options,
+                        SeqTypeOption *seq_type_options)
+{
+    SeqType seq_type = SEQ_TYPE_UNSPECIFIED;
+    for (unsigned int i = 0; i < n_seq_type_options; i++)
+    {
+        SeqTypeOption *seq_type_option = seq_type_options + i;
+        const char *identifiers = seq_type_option->identifiers;
+        if (str_is_in_strsep(identifiers, option_delim, seq_type_arg))
+            return seq_type_option->type;
+    }
+    return seq_type;
+}
 
 int io_load_seqs(FileState *file, FILE *fp, FileReader reader)
 {
@@ -26,7 +73,7 @@ int io_load_seqs(FileState *file, FILE *fp, FileReader reader)
 int io_set_seq_types(FileState *file, const char *seq_type_arg)
 {
     SeqRecordArray *record_array = &(file->record_array);
-    SeqType seq_type_from_arg = argparse_seq_type(seq_type_arg, n_seq_type_options, seq_type_options);
+    SeqType seq_type_from_arg = io_get_seq_type(seq_type_arg, n_seq_type_options, seq_type_options);
     for (size_t i = 0; i < record_array->len; i++)
     {
         SeqRecord *record = record_array->data + i;
