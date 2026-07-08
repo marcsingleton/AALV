@@ -411,6 +411,78 @@ void display_cursor(State *state, Array *buffer)
     }
 }
 
+void display_splash_screen(State *state, Array *buffer)
+{
+    char *logo[] =
+        {
+            "     ___    ___    __ _    __",
+            "    /   |  /   |  / /| |  / /",
+            "   / /| | / /| | / / | | / / ",
+            "  / ___ |/ ___ |/ /__| |/ /  ",
+            " /_/  |_/_/  |_/_____/___/   ",
+            NULL,
+        };
+    char author[] = "by Marc Singleton";
+    char version[] = "version " VERSION;
+    char *help[] =
+        {
+            "type  :q<Enter>         to exit       ",
+            "type  :e <path><Enter>  to open a file",
+            NULL,
+        };
+
+    // Magic numbers--update accordingly
+    unsigned int splash_height = 12;
+    unsigned int splash_width = 38; // AKA maximum width of a line
+
+    FileState *active_file = state->active_file;
+    Pane *pane = &active_file->layout.sequence_pane;
+
+    // Check for at least two cells of buffer
+    if (pane->h >= 2 && (pane->h - 2 < splash_height))
+        return;
+    if ((pane->w >= 2) && (pane->w - 2 < splash_width))
+        return;
+
+    unsigned int i = (pane->h - splash_height) / 2;
+
+    // logo
+    for (char **p = logo; *p != NULL; p++)
+    {
+        pane_cursor_ij(pane, buffer, i++, 0);
+        append_spaces(buffer, (pane->w - strlen(*p)) / 2);
+        array_extend(buffer, *p, strlen(*p));
+    }
+
+    // author
+    i += 2;
+    pane_cursor_ij(pane, buffer, i, 0);
+    append_spaces(buffer, (pane->w - strlen(author)) / 2);
+    array_extend(buffer, author, sizeof(author));
+
+    // version
+    i += 1;
+    pane_cursor_ij(pane, buffer, i, 0);
+    append_spaces(buffer, (pane->w - strlen(version)) / 2);
+    array_extend(buffer, version, sizeof(version));
+
+    // help
+    i += 1;
+    for (char **p = help; *p != NULL; p++)
+    {
+        pane_cursor_ij(pane, buffer, ++i, 0);
+        append_spaces(buffer, (pane->w - strlen(*p)) / 2);
+        for (char *s = *p; *s != '\0'; s++)
+        {
+            if (state->ncolors && *s == '<')
+                terminal_set_foreground_color_4bit(buffer, FG_CYAN);
+            array_append(buffer, s);
+            if (state->ncolors && *s == '>')
+                terminal_set_foreground_color_default(buffer);
+        }
+    }
+}
+
 void display_header(State *state, Array *buffer, SeqRecord *record, size_t offset, unsigned int display_len)
 {
     (void)state; // Silence warnings
@@ -498,78 +570,6 @@ void display_sequence(State *state, Array *buffer, SeqRecord *record, size_t off
     }
     else
         array_extend(buffer, offset + record->seq, display_len);
-}
-
-void display_splash_screen(State *state, Array *buffer)
-{
-    char *logo[] =
-        {
-            "     ___    ___    __ _    __",
-            "    /   |  /   |  / /| |  / /",
-            "   / /| | / /| | / / | | / / ",
-            "  / ___ |/ ___ |/ /__| |/ /  ",
-            " /_/  |_/_/  |_/_____/___/   ",
-            NULL,
-        };
-    char author[] = "by Marc Singleton";
-    char version[] = "version " VERSION;
-    char *help[] =
-        {
-            "type  :q<Enter>         to exit       ",
-            "type  :e <path><Enter>  to open a file",
-            NULL,
-        };
-
-    // Magic numbers--update accordingly
-    unsigned int splash_height = 12;
-    unsigned int splash_width = 38; // AKA maximum width of a line
-
-    FileState *active_file = state->active_file;
-    Pane *pane = &active_file->layout.sequence_pane;
-
-    // Check for at least two cells of buffer
-    if (pane->h >= 2 && (pane->h - 2 < splash_height))
-        return;
-    if ((pane->w >= 2) && (pane->w - 2 < splash_width))
-        return;
-
-    unsigned int i = (pane->h - splash_height) / 2;
-
-    // logo
-    for (char **p = logo; *p != NULL; p++)
-    {
-        pane_cursor_ij(pane, buffer, i++, 0);
-        append_spaces(buffer, (pane->w - strlen(*p)) / 2);
-        array_extend(buffer, *p, strlen(*p));
-    }
-
-    // author
-    i += 2;
-    pane_cursor_ij(pane, buffer, i, 0);
-    append_spaces(buffer, (pane->w - strlen(author)) / 2);
-    array_extend(buffer, author, sizeof(author));
-
-    // version
-    i += 1;
-    pane_cursor_ij(pane, buffer, i, 0);
-    append_spaces(buffer, (pane->w - strlen(version)) / 2);
-    array_extend(buffer, version, sizeof(version));
-
-    // help
-    i += 1;
-    for (char **p = help; *p != NULL; p++)
-    {
-        pane_cursor_ij(pane, buffer, ++i, 0);
-        append_spaces(buffer, (pane->w - strlen(*p)) / 2);
-        for (char *s = *p; *s != '\0'; s++)
-        {
-            if (state->ncolors && *s == '<')
-                terminal_set_foreground_color_4bit(buffer, FG_CYAN);
-            array_append(buffer, s);
-            if (state->ncolors && *s == '>')
-                terminal_set_foreground_color_default(buffer);
-        }
-    }
 }
 
 void display_continued_line(State *state, Array *buffer,

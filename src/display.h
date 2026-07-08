@@ -22,9 +22,9 @@ void display_ruler_pane_ticks(State *state, Array *buffer);
 void display_sequence_pane(State *state, Array *buffer);
 void display_command_pane(State *state, Array *buffer);
 void display_cursor(State *state, Array *buffer);
+void display_splash_screen(State *state, Array *buffer);
 void display_header(State *state, Array *buffer, SeqRecord *record, size_t offset, unsigned int display_len);
 void display_sequence(State *state, Array *buffer, SeqRecord *record, size_t offset, unsigned int display_len);
-void display_splash_screen(State *state, Array *buffer);
 void display_continued_line(State *state, Array *buffer,
                             SeqRecord *record, size_t offset, size_t len,
                             DisplayFunction display_fn, unsigned int display_width);

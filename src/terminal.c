@@ -160,7 +160,6 @@ void terminal_set_background_color_4bit(Array *buffer, const Color4Bit color)
 }
 
 void terminal_set_color_4bit(Array *buffer, const Color4Bit fg_color, const Color4Bit bg_color)
-
 {
     char s[11];
     int len = sprintf(s, "\x1b[%d;%dm", fg_color, bg_color);
@@ -169,7 +168,6 @@ void terminal_set_color_4bit(Array *buffer, const Color4Bit fg_color, const Colo
 
 void terminal_set_foreground_color_8bit(Array *buffer, const Color8Bit color)
 {
-
     char s[12];
     int len = sprintf(s, "\x1b[38;5;%dm", color);
     array_extend(buffer, s, len);
@@ -177,7 +175,6 @@ void terminal_set_foreground_color_8bit(Array *buffer, const Color8Bit color)
 
 void terminal_set_background_color_8bit(Array *buffer, const Color8Bit color)
 {
-
     char s[12];
     int len = sprintf(s, "\x1b[48;5;%dm", color);
     array_extend(buffer, s, len);

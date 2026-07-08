@@ -1,6 +1,3 @@
-#include <string.h>
-#include <sys/errno.h>
-
 #include "argparse.h"
 #include "config.h"
 #include "io.h"

@@ -43,7 +43,6 @@ static int parse_integer(char *str, long *value)
 
 static SeqColorScheme *parse_color_scheme_name(State *state, char *color_scheme_name)
 {
-
     for (unsigned int i = 0; i < N_BASE_SCHEMES; i++)
     {
         SeqColorScheme *color_scheme = schemes_base + i;

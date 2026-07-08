@@ -5,8 +5,6 @@
 
 #include "str.h"
 
-#include <stdio.h>
-
 static int copy_field(char **field_ptr, const char *s, const size_t len)
 {
     char *field = malloc((len + 1) * sizeof(char));
