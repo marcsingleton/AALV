@@ -1,7 +1,6 @@
 #include <string.h>
 
 #include "config.h"
-#include "display.h"
 #include "state.h"
 
 SeqColorScheme *active_color_schemes[SEQ_TYPE_ERROR + 1];

@@ -6,7 +6,6 @@
 
 #include "linenoise.h"
 
-#include "argparse.h"
 #include "cmd.h"
 #include "config.h"
 #include "io.h"

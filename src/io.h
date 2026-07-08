@@ -7,7 +7,6 @@
 
 #include <stdio.h>
 
-#include "argparse.h"
 #include "sequences.h"
 #include "state.h"
 

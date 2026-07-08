@@ -3,7 +3,6 @@
 #include <string.h>
 
 #include "action.h"
-#include "pane.h"
 #include "scroller.h"
 #include "state.h"
 

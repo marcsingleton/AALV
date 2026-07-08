@@ -1,5 +1,4 @@
 #include <fcntl.h>
-#include <locale.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -21,7 +20,6 @@
 #include "io.h"
 #include "macros.h"
 #include "schemes.h"
-#include "scroller.h"
 #include "sequences.h"
 #include "state.h"
 #include "str.h"

@@ -1,7 +1,7 @@
 #include <getopt.h>
 #include <string.h>
+#include <sys/types.h>
 
-#include "array.h"
 #include "argparse.h"
 #include "error.h"
 #include "macros.h"

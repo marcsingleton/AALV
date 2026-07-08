@@ -4,7 +4,6 @@
 #include <sys/ioctl.h>
 #include <termios.h>
 
-#include "array.h"
 #include "terminal.h"
 
 #define UINT_STR_MAX 3 * sizeof(UINT_MAX)

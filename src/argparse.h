@@ -9,6 +9,7 @@
 
 #include "cli.h"
 #include "fasta.h"
+#include "io.h"
 #include "sequences.h"
 
 extern Option options[];

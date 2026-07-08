@@ -5,6 +5,8 @@
 #include <termios.h>
 #include <unistd.h>
 
+#include "array.h"
+
 extern int TERMINAL_FILENO;
 
 typedef enum
