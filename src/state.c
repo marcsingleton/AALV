@@ -9,6 +9,9 @@ unsigned int n_active_color_schemes = sizeof(active_color_schemes) / sizeof(SeqC
 // FileState
 int state_init_file_data(FileState *file)
 {
+    if (!file)
+        return -1;
+
     file->file_path = NULL;
     file->record_array.data = NULL;
     file->record_array.len = 0;
@@ -21,6 +24,9 @@ int state_init_file_data(FileState *file)
 
 void state_deinit_file_data(FileState *file)
 {
+    if (!file)
+        return;
+
     free(file->file_path);
     sequences_deinit_seq_record_array(&file->record_array);
     sequences_deinit_unaligned_indices_array(&file->metadata.indices_array);
@@ -29,17 +35,24 @@ void state_deinit_file_data(FileState *file)
 
 int state_set_file_path(FileState *file, char *file_path)
 {
+    if (!file || !file_path)
+        return -1;
+
     char *new_file_path = strdup(file_path);
     if (!new_file_path)
         return -1;
     free(file->file_path);
     file->file_path = new_file_path;
+
     return 0;
 }
 
 // FileState and State
 int state_set_ruler_records_divider(State *state, unsigned int i)
 {
+    if (!state || !state->active_file)
+        return -1;
+
     Layout *layout = &state->active_file->layout;
     if (i < layout->min_ruler_records_divider)
         i = layout->min_ruler_records_divider;
@@ -74,6 +87,9 @@ int state_set_ruler_records_divider(State *state, unsigned int i)
 
 int state_set_header_sequence_divider(State *state, unsigned int j)
 {
+    if (!state || !state->active_file)
+        return -1;
+
     Layout *layout = &state->active_file->layout;
     if (j < layout->min_header_sequence_divider)
         j = layout->min_header_sequence_divider;
@@ -98,6 +114,9 @@ int state_set_header_sequence_divider(State *state, unsigned int j)
 
 int state_set_records_command_divider(State *state, unsigned int i)
 {
+    if (!state || !state->active_file)
+        return -1;
+
     Layout *layout = &state->active_file->layout;
     if (i < layout->ruler_records_divider)
         i = layout->ruler_records_divider;
@@ -129,6 +148,9 @@ int state_set_records_command_divider(State *state, unsigned int i)
 
 int state_set_divider_limits(State *state)
 {
+    if (!state || !state->active_file)
+        return -1;
+
     Layout *layout = &state->active_file->layout;
     unsigned int min_height = RULER_PANE_MIN_HEIGHT + RECORDS_PANE_MIN_HEIGHT + COMMAND_PANE_MIN_HEIGHT;
     unsigned int min_width = HEADER_PANE_MIN_WIDTH + SEQUENCE_PANE_MIN_WIDTH;
@@ -149,6 +171,9 @@ int state_set_divider_limits(State *state)
 
 int state_set_layout(State *state, unsigned int ruler_records_divider, unsigned int header_sequence_divider)
 {
+    if (!state || !state->active_file)
+        return -1;
+
     if (state_set_divider_limits(state) != 0)
         return -1;
     if (state_set_records_command_divider(state, state->terminal_rows - 2) != 0) // Needs to be first
@@ -165,6 +190,9 @@ int state_set_layout(State *state, unsigned int ruler_records_divider, unsigned 
 
 int state_set_tick_offset(State *state, int tick_offset)
 {
+    if (!state || !state->active_file)
+        return -1;
+
     FileState *active_file = state->active_file;
     if (tick_offset > 0 && active_file->metadata.max_len > INT_MAX - (unsigned int)tick_offset)
         return -1;
@@ -179,6 +207,9 @@ int state_set_tick_offset(State *state, int tick_offset)
 
 int state_set_tick_spacing(State *state, int tick_spacing)
 {
+    if (!state || !state->active_file)
+        return -1;
+
     FileState *active_file = state->active_file;
     if (tick_spacing < 1)
         tick_spacing = 1;
@@ -194,6 +225,9 @@ int state_set_tick_spacing(State *state, int tick_spacing)
 // State
 int state_init(State *state)
 {
+    if (!state)
+        return -1;
+
     memset(state, 0, sizeof(State));
     state_set_terminal_size(state);
     config_init(&state->config);
@@ -203,6 +237,9 @@ int state_init(State *state)
 
 void state_deinit(State *state)
 {
+    if (!state)
+        return;
+
     if (state->files)
     {
         for (unsigned int i = 0; i < state->nfiles; i++)
@@ -223,6 +260,9 @@ void state_deinit(State *state)
 
 int state_set_terminal_size(State *state)
 {
+    if (!state)
+        return -1;
+
     unsigned int rows, cols;
     terminal_get_window_size(&rows, &cols);
     state->terminal_rows = rows;
@@ -233,6 +273,9 @@ int state_set_terminal_size(State *state)
 
 int state_set_active_file_index(State *state, unsigned int file_index)
 {
+    if (!state)
+        return -1;
+
     if (file_index > state->nfiles - 1)
         file_index = state->nfiles - 1;
     state->active_file = state->files + file_index;
@@ -243,6 +286,9 @@ int state_set_active_file_index(State *state, unsigned int file_index)
 
 int state_new_file(State *state)
 {
+    if (!state)
+        return -1;
+
     FileState *files;
     if (state->nfiles == 0)
         files = malloc(sizeof(FileState));
@@ -271,6 +317,11 @@ int state_new_file(State *state)
 
 int state_remove_file(State *state)
 {
+    if (!state)
+        return -1;
+    if (!state->active_file || !state->files)
+        return -1;
+
     FileState *file = state->active_file;
     scroller_deinit(&file->layout.scroller);
     state_deinit_file_data(file);
@@ -302,7 +353,7 @@ int state_remove_file(State *state)
 
 int state_set_active_color_scheme(State *state, SeqColorScheme *color_scheme)
 {
-    if (!color_scheme)
+    if (!state || !color_scheme)
         return -1;
     if (color_scheme->scheme.type == COLOR_4_BIT && state->ncolors < 16)
         return -1;
@@ -310,6 +361,7 @@ int state_set_active_color_scheme(State *state, SeqColorScheme *color_scheme)
         return -1;
     if (color_scheme->type > state->n_active_color_schemes)
         return -1;
+
     state->active_color_schemes[color_scheme->type] = color_scheme;
     state->refresh_sequence_pane = true;
 
@@ -318,7 +370,7 @@ int state_set_active_color_scheme(State *state, SeqColorScheme *color_scheme)
 
 int state_new_color_scheme(State *state, char *name, SeqType seq_type, ColorType color_type)
 {
-    if (!name)
+    if (!state || !name)
         return -1;
 
     SeqColorScheme new_color_scheme;
