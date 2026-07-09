@@ -498,7 +498,7 @@ void display_header(State *state, Array *buffer, SeqRecord *record, size_t offse
 
 void display_sequence(State *state, Array *buffer, SeqRecord *record, size_t offset, unsigned int display_len)
 {
-    SeqColorScheme *color_scheme = state->active_color_schemes[record->type];
+    SeqColorScheme *color_scheme = state->active_color_schemes ? state->active_color_schemes[record->type] : NULL;
     if (state->ncolors > 1 && color_scheme)
     {
         ColorType type = color_scheme->scheme.type;
