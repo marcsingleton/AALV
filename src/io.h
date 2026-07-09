@@ -10,6 +10,8 @@
 #include "sequences.h"
 #include "state.h"
 
+#define OPTION_DELIM ","
+
 typedef int (*FileReader)(FILE *, SeqRecordArray *);
 
 typedef struct

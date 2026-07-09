@@ -1,5 +1,4 @@
-#include "argparse.h"
-#include "config.h"
+#include "fasta.h"
 #include "io.h"
 #include "str.h"
 
@@ -28,7 +27,7 @@ FileReader io_get_reader(const char *format_arg,
     {
         FormatOption *format_option = format_options + i;
         const char *exts = format_option->exts;
-        if (str_is_in_strsep(exts, option_delim, format_arg))
+        if (str_is_in_strsep(exts, OPTION_DELIM, format_arg))
             return format_option->reader;
     }
     return reader;
@@ -43,7 +42,7 @@ SeqType io_get_seq_type(const char *seq_type_arg,
     {
         SeqTypeOption *seq_type_option = seq_type_options + i;
         const char *identifiers = seq_type_option->identifiers;
-        if (str_is_in_strsep(identifiers, option_delim, seq_type_arg))
+        if (str_is_in_strsep(identifiers, OPTION_DELIM, seq_type_arg))
             return seq_type_option->type;
     }
     return seq_type;
@@ -70,7 +69,7 @@ int io_load_seqs(FileState *file, FILE *fp, FileReader reader)
     return 0;
 }
 
-int io_set_seq_types(FileState *file, const char *seq_type_arg)
+int io_set_seq_types(FileState *file, const char *seq_type_arg, unsigned int nucleic_tiebreak_len)
 {
     SeqRecordArray *record_array = &(file->record_array);
     SeqType seq_type_from_arg = io_get_seq_type(seq_type_arg, n_seq_type_options, seq_type_options);

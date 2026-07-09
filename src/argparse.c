@@ -50,8 +50,6 @@ Option options[] = {
 };
 unsigned int noptions = sizeof(options) / sizeof(Option);
 
-char *option_delim = ",";
-
 char synopsis[] = PROGRAM_NAME " is a vim-inspired alignment viewer\n";
 char positional_usage[] = "[<file> ...]";
 
@@ -83,7 +81,7 @@ int argparse_options(int argc, char *argv[],
             name = options[option_index].long_name;
         if (c == 'f' || strcmp("format", name) == 0)
         {
-            ssize_t nwords = str_split(format_args_ptr, argv[optind - 1], option_delim);
+            ssize_t nwords = str_split(format_args_ptr, argv[optind - 1], OPTION_DELIM);
             if (nwords < 0)
             {
                 error_printf("%s: Failed to parse formats\n", INVOCATION_NAME);
@@ -123,7 +121,7 @@ int argparse_options(int argc, char *argv[],
         }
         else if (c == 't' || strcmp("type", name) == 0)
         {
-            ssize_t nwords = str_split(seq_type_args_ptr, argv[optind - 1], option_delim);
+            ssize_t nwords = str_split(seq_type_args_ptr, argv[optind - 1], OPTION_DELIM);
             if (nwords < 0)
             {
                 error_printf("%s: Failed to parse types\n", INVOCATION_NAME);

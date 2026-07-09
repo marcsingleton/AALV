@@ -8,14 +8,11 @@
 #include <stdio.h>
 
 #include "cli.h"
-#include "fasta.h"
 #include "io.h"
 #include "sequences.h"
 
 extern Option options[];
 extern unsigned int noptions;
-
-extern char *option_delim;
 
 extern char synopsis[];
 extern char positional_usage[];
