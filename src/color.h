@@ -8,7 +8,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "array.h"
 #include "terminal.h"
 
 typedef enum

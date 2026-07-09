@@ -4,7 +4,6 @@
 
 #include "action.h"
 #include "scroller.h"
-#include "state.h"
 
 // Private
 static size_t get_line_len(FileState *active_file)

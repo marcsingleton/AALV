@@ -9,7 +9,6 @@
 
 #include "cli.h"
 #include "io.h"
-#include "sequences.h"
 
 extern Option options[];
 extern unsigned int noptions;

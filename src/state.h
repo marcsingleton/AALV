@@ -7,7 +7,6 @@
 
 #include <stdbool.h>
 
-#include "array.h"
 #include "color.h"
 #include "config.h"
 #include "pane.h"

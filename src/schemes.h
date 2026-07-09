@@ -13,7 +13,6 @@
 
 #include "color.h"
 #include "sequences.h"
-#include "terminal.h"
 
 typedef struct
 {
