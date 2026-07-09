@@ -9,6 +9,7 @@
 
 #include "array.h"
 #include "color.h"
+#include "config.h"
 #include "pane.h"
 #include "schemes.h"
 #include "scroller.h"
@@ -67,7 +68,9 @@ typedef enum
 
 typedef struct
 {
-    // Global state variables
+    // Global state
+    Config config;
+    Mode mode;
     unsigned int terminal_rows;
     unsigned int terminal_cols;
     bool refresh_ruler_pane;
@@ -76,18 +79,17 @@ typedef struct
     bool refresh_command_pane;
     bool refresh_window;
     bool visible_window;
-    Mode mode;
-    // File state variables
+    // File state
     FileState *files;
     unsigned int nfiles;
     FileState *active_file;
     unsigned int active_file_index;
-    // Color variables
+    // Color
+    int ncolors;
     SeqColorScheme *color_schemes;
     unsigned int n_color_schemes;
     SeqColorScheme **active_color_schemes;
     unsigned int n_active_color_schemes;
-    int ncolors;
 } State;
 
 extern SeqColorScheme *active_color_schemes[];

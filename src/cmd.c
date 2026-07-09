@@ -383,7 +383,7 @@ void cmd_config(State *state, int argc, char **argv)
             return;
         unsigned int ruler_records_divider = value;
 
-        config_set_ruler_records_divider(ruler_records_divider);
+        config_set_ruler_records_divider(&state->config, ruler_records_divider);
     }
 
     if (argc == 3 && strcmp("header_sequence_divider", argv[1]) == 0)
@@ -396,7 +396,7 @@ void cmd_config(State *state, int argc, char **argv)
             return;
         unsigned int header_sequence_divider = value;
 
-        config_set_header_sequence_divider(header_sequence_divider);
+        config_set_header_sequence_divider(&state->config, header_sequence_divider);
     }
 
     if (argc == 3 && strcmp("tick_offset", argv[1]) == 0)
@@ -409,7 +409,7 @@ void cmd_config(State *state, int argc, char **argv)
             return;
         int tick_offset = value;
 
-        config_set_tick_offset(tick_offset);
+        config_set_tick_offset(&state->config, tick_offset);
     }
 
     if (argc == 3 && strcmp("tick_spacing", argv[1]) == 0)
@@ -422,7 +422,7 @@ void cmd_config(State *state, int argc, char **argv)
             return;
         int tick_spacing = value;
 
-        config_set_tick_spacing(tick_spacing);
+        config_set_tick_spacing(&state->config, tick_spacing);
     }
 
     if (argc == 3 && strcmp("nucleic_tiebreak_len", argv[1]) == 0)
@@ -435,7 +435,7 @@ void cmd_config(State *state, int argc, char **argv)
             return;
         unsigned int nucleic_tiebreak_len = value;
 
-        config_set_nucleic_tiebreak_len(nucleic_tiebreak_len);
+        config_set_nucleic_tiebreak_len(&state->config, nucleic_tiebreak_len);
     }
 }
 
@@ -472,6 +472,6 @@ void cmd_edit(State *state, int argc, char **argv)
 
     // Load seqs and set metadata
     io_load_seqs(state->active_file, fp, reader);
-    io_set_seq_types(state->active_file, "");
+    io_set_seq_types(state->active_file, "", state->config.nucleic_tiebreak_len);
     io_set_unaligned_indices(state->active_file);
 }

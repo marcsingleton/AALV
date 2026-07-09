@@ -85,7 +85,7 @@ int io_set_seq_types(FileState *file, const char *seq_type_arg)
             record->type = seq_type_from_arg;
         else if (seq_type_from_seq == SEQ_TYPE_RNA || seq_type_from_seq == SEQ_TYPE_DNA)
             record->type = SEQ_TYPE_NUCLEIC;
-        else if (seq_type_from_seq == SEQ_TYPE_INDETERMINATE && record->len >= config_nucleic_tiebreak_len)
+        else if (seq_type_from_seq == SEQ_TYPE_INDETERMINATE && record->len >= nucleic_tiebreak_len)
             record->type = SEQ_TYPE_NUCLEIC;
         else
             record->type = seq_type_from_seq;

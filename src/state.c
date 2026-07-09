@@ -194,7 +194,9 @@ int state_set_tick_spacing(State *state, int tick_spacing)
 // State
 int state_init(State *state)
 {
-    memset(&state, 0, sizeof(state));
+    memset(state, 0, sizeof(State));
+    state_set_terminal_size(state);
+    config_init(&state->config);
 
     return 0;
 }
@@ -258,9 +260,9 @@ int state_new_file(State *state)
     state->nfiles += 1;
 
     state_set_active_file_index(state, state->nfiles);
-    state_set_layout(state, config_ruler_records_divider, config_header_sequence_divider);
-    state_set_tick_offset(state, config_tick_offset);
-    state_set_tick_spacing(state, config_tick_spacing);
+    state_set_layout(state, state->config.ruler_records_divider, state->config.header_sequence_divider);
+    state_set_tick_offset(state, state->config.tick_offset);
+    state_set_tick_spacing(state, state->config.tick_spacing);
 
     state->refresh_window = true;
 

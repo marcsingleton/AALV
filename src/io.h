@@ -40,7 +40,7 @@ SeqType io_get_seq_type(const char *seq_type_arg,
                         unsigned int n_seq_type_options,
                         SeqTypeOption *seq_type_options);
 int io_load_seqs(FileState *file, FILE *fp, FileReader reader);
-int io_set_seq_types(FileState *file, const char *seq_type_arg);
+int io_set_seq_types(FileState *file, const char *seq_type_arg, unsigned int nucleic_tiebreak_len);
 int io_set_unaligned_indices(FileState *file);
 
 #endif // IO_H

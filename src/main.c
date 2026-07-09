@@ -47,6 +47,8 @@ int register_sigcont_handler(void);
 int init_terminal(void);
 int deinit_terminal(void);
 
+int run_user_config(State *state);
+
 // Main
 int main(int argc, char *argv[])
 {
@@ -108,6 +110,10 @@ int main(int argc, char *argv[])
         error_printf("%s: Failed to initialize write buffer\n", INVOCATION_NAME);
         return EXIT_FAILURE;
     };
+
+    // Initialize state
+    state_init(&state);
+    run_user_config(&state);
 
     // Get terminal color support
     state.ncolors = 1;
@@ -176,11 +182,6 @@ int main(int argc, char *argv[])
     }
     else
         input_fd = STDIN_FILENO;
-
-    // Initialize state and config
-    state_set_terminal_size(&state);
-    config_init();
-    config_load_user_config(&state);
 
     // Initialize file states
     if (isatty(STDIN_FILENO) && nfiles == 0)
@@ -270,7 +271,7 @@ int main(int argc, char *argv[])
             }
 
             // Set seq types
-            retcode = io_set_seq_types(file, seq_type_arg);
+            retcode = io_set_seq_types(file, seq_type_arg, state.config.nucleic_tiebreak_len);
             if (retcode != 0)
             {
                 error_printf("%s: Failed to set sequence types in %s\n", INVOCATION_NAME, file->file_path);
@@ -476,5 +477,40 @@ int deinit_terminal(void)
         raw_mode = false; // Not re-entrant, but unlikely to cause issues during signal handling
     }
 
+    return 0;
+}
+
+int run_user_config(State *state)
+{
+    char *home_dir = NULL;
+    char config_path[128];
+    FILE *config_fp = NULL;
+
+    home_dir = getenv("HOME");
+    if (!home_dir)
+        return -1;
+
+    char *prefixes[] = {".config/", "."};
+    unsigned int nprefixes = sizeof(prefixes) / sizeof(char *);
+    for (unsigned int i = 0; i < nprefixes; i++)
+    {
+        int n = snprintf(config_path, sizeof(config_path), "%s/%s%src", home_dir, prefixes[i], PROGRAM_NAME);
+        if (n < 0 || (unsigned int)n > sizeof(config_path) - 1)
+            continue;
+
+        if (!(config_fp = fopen(config_path, "r")))
+            continue;
+
+        break;
+    }
+    if (!config_fp)
+        return -1;
+
+    char *cmd_line = NULL;
+    size_t capacity = 0;
+    ssize_t line_len = 0;
+    while ((line_len = getline(&cmd_line, &capacity, config_fp)) > 0)
+        cmd_parse_and_execute_command_line(state, cmd_line);
+    free(cmd_line);
     return 0;
 }
