@@ -275,6 +275,12 @@ int state_set_active_file_index(State *state, unsigned int file_index)
 {
     if (!state)
         return -1;
+    if (!state->files || state->nfiles == 0)
+    {
+        state->active_file = NULL;
+        state->active_file_index = 0;
+        return 0;
+    }
 
     if (file_index > state->nfiles - 1)
         file_index = state->nfiles - 1;
@@ -391,7 +397,7 @@ int state_new_color_scheme(State *state, char *name, SeqType seq_type, ColorType
 
     new_color_schemes[state->n_color_schemes] = new_color_scheme;
     state->color_schemes = new_color_schemes;
-    state->n_color_schemes++;
+    state->n_color_schemes += 1;
 
     return 0;
 }
