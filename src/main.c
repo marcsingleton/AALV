@@ -37,7 +37,12 @@ struct termios old_termios;
 struct termios raw_termios;
 bool raw_mode = false;
 
+volatile sig_atomic_t winch_flag;
+volatile sig_atomic_t tstp_flag;
+volatile sig_atomic_t cont_flag;
+
 void cleanup(void);
+void process_signal_flags(void);
 void handle_sigwinch(int signum);
 void handle_sigtstp(int signum);
 void handle_sigcont(int signum);
@@ -360,6 +365,8 @@ int main(int argc, char *argv[])
             retcode = cmd_parse_and_execute_command_line(&state, cmd_line);
         }
         }
+
+        process_signal_flags();
     }
 }
 
@@ -386,37 +393,54 @@ void cleanup(void)
         fputs(error_message, stderr);
 }
 
+void process_signal_flags(void)
+{
+    if (winch_flag)
+    {
+        state.refresh_window = true;
+        winch_flag = 0;
+    }
+    if (tstp_flag)
+    {
+        deinit_terminal();
+
+        // Reset SIGTSTP to default
+        struct sigaction sa;
+        sa.sa_handler = SIG_DFL;
+        sigemptyset(&sa.sa_mask);
+        sa.sa_flags = SA_RESTART;
+        sigaction(SIGTSTP, &sa, NULL);
+
+        raise(SIGTSTP); // Re-raise to stop process
+        tstp_flag = 0;
+    }
+    if (cont_flag)
+    {
+        // Re-register the SIGTSTP handler on resume
+        register_sigtstp_handler();
+
+        init_terminal();
+        state.refresh_window = true;
+        cont_flag = 0;
+    }
+}
+
 void handle_sigwinch(int signum)
 {
     (void)signum; // Suppress unused parameter warning
-    state.refresh_window = true;
+    winch_flag = 1;
 }
 
 void handle_sigtstp(int signum)
 {
     (void)signum; // Suppress unused parameter warning
-
-    deinit_terminal();
-
-    // Reset SIGTSTP to default
-    struct sigaction sa;
-    sa.sa_handler = SIG_DFL;
-    sigemptyset(&sa.sa_mask);
-    sa.sa_flags = SA_RESTART;
-    sigaction(SIGTSTP, &sa, NULL);
-
-    raise(SIGTSTP); // Re-raise to stop process
+    tstp_flag = 1;
 }
 
 void handle_sigcont(int signum)
 {
     (void)signum; // Suppress unused parameter warning
-
-    // Re-register the SIGTSTP handler on resume
-    register_sigtstp_handler();
-
-    init_terminal();
-    state.refresh_window = true;
+    cont_flag = 1;
 }
 
 int register_sigwinch_handler(void)
