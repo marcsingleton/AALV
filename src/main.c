@@ -220,7 +220,7 @@ int main(int argc, char *argv[])
             // Set file path
             char *file_path;
             if (!isatty(STDIN_FILENO) && n_positional_args == 0)
-                file_path = "";
+                file_path = "-";
             else
                 file_path = positional_args[file_index];
             if (state_set_file_path(file, file_path) != 0)
