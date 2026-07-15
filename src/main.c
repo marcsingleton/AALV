@@ -116,6 +116,21 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     };
 
+    // Check if connected to TTY
+    int input_fd;
+    if (!isatty(STDIN_FILENO))
+    {
+        input_fd = open("/dev/tty", O_RDONLY);
+        if (input_fd == -1)
+        {
+            error_printf("%s: Failed to open /dev/tty for reading commands\n", INVOCATION_NAME);
+            return EXIT_FAILURE;
+        }
+        TERMINAL_FILENO = input_fd;
+    }
+    else
+        input_fd = STDIN_FILENO;
+
     // Initialize state
     state_init(&state);
     run_user_config(&state);
@@ -170,25 +185,11 @@ int main(int argc, char *argv[])
     unsigned int n_positional_args = argc - optind;
     char **positional_args = argv + optind;
 
-    // Handle special cases for piped input
-    unsigned int nfiles = n_positional_args;
-    int input_fd;
-    if (!isatty(STDIN_FILENO))
-    {
-        if (n_positional_args == 0)
-            nfiles++; // If not a tty, treat stdin as an implicit first file
-        input_fd = open("/dev/tty", O_RDONLY);
-        if (input_fd == -1)
-        {
-            error_printf("%s: Failed to open /dev/tty for reading commands\n", INVOCATION_NAME);
-            return EXIT_FAILURE;
-        }
-        TERMINAL_FILENO = input_fd;
-    }
-    else
-        input_fd = STDIN_FILENO;
-
     // Initialize file states
+    unsigned int nfiles = n_positional_args;
+    if (!isatty(STDIN_FILENO) && n_positional_args == 0)
+        nfiles++; // If not a tty and no args, treat stdin as an implicit first file
+
     if (isatty(STDIN_FILENO) && nfiles == 0)
     {
         if (state_new_file(&state) != 0)
