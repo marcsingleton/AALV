@@ -117,5 +117,6 @@ int state_new_file(State *state);
 int state_remove_file(State *state);
 int state_set_active_color_scheme(State *state, SeqColorScheme *color_scheme);
 int state_new_color_scheme(State *state, char *name, SeqType seq_type, ColorType color_type);
+int state_remove_color_scheme(State *state, char *name);
 
 #endif // STATE_H

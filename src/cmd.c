@@ -312,6 +312,7 @@ void cmd_type(State *state, int argc, char **argv)
 
 /*
  * scheme new <name> <seq_type>
+ * scheme remove <name>
  * scheme map fg|bg <name> <sym> <value>
  */
 void cmd_scheme(State *state, int argc, char **argv)
@@ -330,6 +331,16 @@ void cmd_scheme(State *state, int argc, char **argv)
             return;
 
         state_new_color_scheme(state, name, seq_type, COLOR_8_BIT);
+    }
+
+    if (argc > 1 && strcmp("remove", argv[1]) == 0)
+    {
+        if (argc != 3)
+            return;
+
+        char *name = argv[2];
+
+        state_remove_color_scheme(state, name);
     }
 
     if (argc > 1 && strcmp("map", argv[1]) == 0)

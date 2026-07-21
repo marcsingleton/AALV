@@ -408,3 +408,52 @@ int state_new_color_scheme(State *state, char *name, SeqType seq_type, ColorType
 
     return 0;
 }
+
+int state_remove_color_scheme(State *state, char *name)
+{
+    if (!state || !name)
+        return -1;
+
+    for (unsigned int i = 0; i < state->n_active_color_schemes; i++)
+    {
+        SeqColorScheme *color_scheme = state->active_color_schemes[i];
+        if (color_scheme && strcmp(name, color_scheme->scheme.name) == 0)
+            state->active_color_schemes[i] = NULL;
+    }
+
+    int has_scheme = 0;
+    for (unsigned int i = 0; i < state->n_color_schemes; i++)
+    {
+        SeqColorScheme *color_scheme = state->color_schemes + i;
+        if (strcmp(name, color_scheme->scheme.name) == 0)
+        {
+            has_scheme = 1;
+            color_deinit_color_scheme(&color_scheme->scheme);
+            for (unsigned int j = i + 1; j < state->n_color_schemes; j++)
+                state->color_schemes[j - 1] = state->color_schemes[j];
+            break;
+        }
+    }
+    if (has_scheme == 0)
+        return 0;
+
+    if (state->n_color_schemes > 1)
+    {
+        SeqColorScheme *color_schemes = realloc(state->color_schemes,
+                                                (state->n_color_schemes - 1) * sizeof(SeqColorScheme));
+        if (!color_schemes)
+            return -1;
+        state->color_schemes = color_schemes;
+        state->n_color_schemes -= 1;
+    }
+    else
+    {
+        free(state->color_schemes);
+        state->color_schemes = NULL;
+        state->n_color_schemes = 0;
+    }
+
+    state->refresh_sequence_pane = true;
+
+    return 0;
+}
