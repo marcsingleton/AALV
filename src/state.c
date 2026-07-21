@@ -311,7 +311,7 @@ int state_new_file(State *state)
     state->files = files;
     state->nfiles += 1;
 
-    state_set_active_file_index(state, state->nfiles);
+    state_set_active_file_index(state, state->nfiles - 1);
     state_set_layout(state, state->config.ruler_records_divider, state->config.header_sequence_divider);
     state_set_tick_offset(state, state->config.tick_offset);
     state_set_tick_spacing(state, state->config.tick_spacing);
