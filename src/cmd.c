@@ -75,6 +75,8 @@ int cmd_parse_and_execute_command_line(State *state, char *line)
     if (!line)
         return -1;
 
+    int retcode = 0;
+
     int argc = 0;
     char *argv[CMD_ARG_MAX];
 
@@ -105,10 +107,16 @@ int cmd_parse_and_execute_command_line(State *state, char *line)
     }
 
     if (argc == 0)
-        return -1;
+    {
+        retcode = -1;
+        goto cleanup;
+    }
     void *ptr = prefix_tree_get_prefix_match(&cmd_map, argv[0]);
     if (!ptr)
-        return -1;
+    {
+        retcode = -1;
+        goto cleanup;
+    }
     Command *cmd = ptr;
 
     void (*fn)(State *, int, char **) = cmd->fn_ptr;
@@ -118,7 +126,7 @@ cleanup:
     for (int i = 0; i < argc; i++)
         free(argv[i]);
 
-    return 0;
+    return retcode;
 }
 
 int cmd_init_command_map(void)
