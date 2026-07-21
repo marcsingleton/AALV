@@ -474,4 +474,7 @@ void cmd_edit(State *state, int argc, char **argv)
     io_load_seqs(state->active_file, fp, reader);
     io_set_seq_types(state->active_file, "", state->config.nucleic_tiebreak_len);
     io_set_unaligned_indices(state->active_file);
+
+    // Close file
+    fclose(fp);
 }

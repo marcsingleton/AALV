@@ -276,6 +276,14 @@ int main(int argc, char *argv[])
                 return EXIT_FAILURE;
             }
 
+            // Close file
+            retcode = fclose(fp);
+            if (retcode != 0)
+            {
+                error_printf("%s: %s: %s\n", INVOCATION_NAME, file->file_path, strerror(errno));
+                return EXIT_FAILURE;
+            }
+
             // Set seq types
             retcode = io_set_seq_types(file, seq_type_arg, state.config.nucleic_tiebreak_len);
             if (retcode != 0)
@@ -537,5 +545,7 @@ int run_user_config(State *state)
     while ((line_len = getline(&cmd_line, &capacity, config_fp)) > 0)
         cmd_parse_and_execute_command_line(state, cmd_line);
     free(cmd_line);
+    fclose(config_fp);
+
     return 0;
 }
