@@ -379,6 +379,13 @@ int state_new_color_scheme(State *state, char *name, SeqType seq_type, ColorType
     if (!state || !name)
         return -1;
 
+    for (unsigned int i = 0; i < state->n_color_schemes; i++)
+    {
+        SeqColorScheme *color_scheme = state->color_schemes + i;
+        if (strcmp(name, color_scheme->scheme.name) == 0)
+            return -1;
+    }
+
     SeqColorScheme new_color_scheme;
     Alphabet *alphabet = sequences_seq_type_to_alphabet(seq_type);
     if (!alphabet)
