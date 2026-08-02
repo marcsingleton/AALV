@@ -28,10 +28,13 @@ int terminal_get_window_size(unsigned int *rows, unsigned int *cols)
     }
 }
 
-int terminal_enable_raw_mode(struct termios *raw_termios)
+int terminal_enable_raw_mode(struct termios *old_termios)
 {
-    cfmakeraw(raw_termios);
-    return tcsetattr(TERMINAL_FILENO, TCSAFLUSH, raw_termios);
+    if (old_termios && terminal_get_termios(old_termios) != 0)
+        return -1;
+    struct termios raw_termios = *old_termios; // Copy current settings to raw;
+    cfmakeraw(&raw_termios);
+    return tcsetattr(TERMINAL_FILENO, TCSAFLUSH, &raw_termios);
 }
 
 int terminal_disable_raw_mode(struct termios *old_termios)

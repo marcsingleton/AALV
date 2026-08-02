@@ -31,10 +31,8 @@ State state;
 
 Array read_buffer;
 Array write_buffer;
-char *cmd_line;
 
 struct termios old_termios;
-struct termios raw_termios;
 bool raw_mode = false;
 
 volatile sig_atomic_t winch_flag;
@@ -89,7 +87,22 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
-    // Initialize globals
+    // Set input descriptor
+    int input_fd;
+    if (!isatty(STDIN_FILENO)) // If STDIN is pipe, set input to TTY manually
+    {
+        input_fd = open("/dev/tty", O_RDONLY);
+        if (input_fd == -1)
+        {
+            error_printf("%s: Failed to open /dev/tty for reading commands\n", INVOCATION_NAME);
+            return EXIT_FAILURE;
+        }
+        TERMINAL_FILENO = input_fd;
+    }
+    else
+        input_fd = STDIN_FILENO;
+
+    // Initialize modules
     if (sequences_init_base_alphabets() != 0)
     {
         error_printf("%s: Failed to initialize alphabets\n", INVOCATION_NAME);
@@ -105,6 +118,8 @@ int main(int argc, char *argv[])
         error_printf("%s: Failed to initialize command map\n", INVOCATION_NAME);
         return EXIT_FAILURE;
     }
+
+    // Initialize buffers
     if (array_init(&read_buffer, sizeof(char)) != 0)
     {
         error_printf("%s: Failed to initialize read buffer\n", INVOCATION_NAME);
@@ -116,23 +131,12 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     };
 
-    // Check if connected to TTY
-    int input_fd;
-    if (!isatty(STDIN_FILENO))
-    {
-        input_fd = open("/dev/tty", O_RDONLY);
-        if (input_fd == -1)
-        {
-            error_printf("%s: Failed to open /dev/tty for reading commands\n", INVOCATION_NAME);
-            return EXIT_FAILURE;
-        }
-        TERMINAL_FILENO = input_fd;
-    }
-    else
-        input_fd = STDIN_FILENO;
-
     // Initialize state
-    state_init(&state);
+    if (state_init(&state) != 0)
+    {
+        error_printf("%s: Failed to initialize state\n", INVOCATION_NAME);
+        return EXIT_FAILURE;
+    };
     run_user_config(&state);
 
     // Get terminal color support
@@ -315,12 +319,9 @@ int main(int argc, char *argv[])
     case 0:
         break;
     case -1:
-        error_printf("%s: Failed to get current termios\n", INVOCATION_NAME);
-        return EXIT_FAILURE;
-    case -2:
         error_printf("%s: Failed to set raw mode\n", INVOCATION_NAME);
         return EXIT_FAILURE;
-    case -3:
+    case -2:
         error_printf("%s: Failed to set blocking read\n", INVOCATION_NAME);
         return EXIT_FAILURE;
     default:
@@ -337,9 +338,6 @@ int main(int argc, char *argv[])
     }
 
     // Main loop
-    size_t count;
-    Action action;
-
     while (state.nfiles > 0)
     {
         display_refresh(&state, &write_buffer);
@@ -351,6 +349,8 @@ int main(int argc, char *argv[])
         {
             input_read_key(&read_buffer, input_fd);
 
+            size_t count;
+            Action action;
             retcode = input_parse_keys(&read_buffer, &action, &count);
             switch (retcode)
             {
@@ -370,8 +370,9 @@ int main(int argc, char *argv[])
         {
             state.mode = NORMAL;
             state.refresh_command_pane = true;
-            cmd_line = cmd_read_command_line(input_fd, ":");
+            char *cmd_line = cmd_read_command_line(input_fd, ":");
             retcode = cmd_parse_and_execute_command_line(&state, cmd_line);
+            free(cmd_line);
         }
         }
 
@@ -381,21 +382,24 @@ int main(int argc, char *argv[])
 
 void cleanup(void)
 {
-    // Free globals
+    // Close TTY if opened
+    if (TERMINAL_FILENO != STDIN_FILENO)
+        close(TERMINAL_FILENO);
+
+    // Deinit modules
     sequences_deinit_base_alphabets();
     schemes_deinit_base();
     cmd_deinit_command_map();
+
+    // Deinit buffers
     array_deinit(&read_buffer);
     array_deinit(&write_buffer);
-    free(cmd_line);
 
-    // Free state
+    // Deinit state
     state_deinit(&state);
 
-    // Restore terminal options
+    // Deinit terminal
     deinit_terminal();
-    if (TERMINAL_FILENO != STDIN_FILENO)
-        close(TERMINAL_FILENO);
 
     // Print error
     if (error_message[0] != '\0')
@@ -483,16 +487,12 @@ int register_sigcont_handler(void)
 
 int init_terminal(void)
 {
-    if (terminal_get_termios(&old_termios) != 0)
+    if (terminal_enable_raw_mode(&old_termios) != 0)
         return -1;
-    raw_termios = old_termios; // Copy current settings to raw
-
-    if (terminal_enable_raw_mode(&raw_termios) != 0)
-        return -2;
     raw_mode = true; // Not re-entrant, but unlikely to cause issues during signal handling
 
     if (terminal_set_blocking_read() != 0)
-        return -3;
+        return -2;
 
     terminal_use_alternate_buffer();
 
@@ -501,14 +501,14 @@ int init_terminal(void)
 
 int deinit_terminal(void)
 {
-    if (raw_mode)
-    {
-        terminal_use_normal_buffer();
+    if (!raw_mode)
+        return 0;
 
-        if (terminal_disable_raw_mode(&old_termios) != 0)
-            return -1;
-        raw_mode = false; // Not re-entrant, but unlikely to cause issues during signal handling
-    }
+    terminal_use_normal_buffer();
+
+    if (terminal_disable_raw_mode(&old_termios) != 0)
+        return -1;
+    raw_mode = false; // Not re-entrant, but unlikely to cause issues during signal handling
 
     return 0;
 }
