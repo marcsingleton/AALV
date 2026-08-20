@@ -280,6 +280,7 @@ int input_parse_keys(Array *buffer, Action *action, size_t *count)
         break;
     case CTRL('Z'):
         raise(SIGTSTP);
+        break;
     default:
         return PARSE_FAIL;
     }
