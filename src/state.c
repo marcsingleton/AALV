@@ -196,9 +196,9 @@ int state_set_tick_offset(State *state, int tick_offset)
     FileState *active_file = state->active_file;
     if (tick_offset > 0 && active_file->metadata.max_len > INT_MAX - (unsigned int)tick_offset)
         return -1;
-    if (tick_offset != active_file->tick_offset)
+    if (tick_offset != active_file->layout.tick_offset)
     {
-        active_file->tick_offset = tick_offset;
+        active_file->layout.tick_offset = tick_offset;
         state->refresh_ruler_pane = true;
     }
 
@@ -213,9 +213,9 @@ int state_set_tick_spacing(State *state, int tick_spacing)
     FileState *active_file = state->active_file;
     if (tick_spacing < 1)
         tick_spacing = 1;
-    if (tick_spacing != active_file->tick_spacing)
+    if (tick_spacing != active_file->layout.tick_spacing)
     {
-        active_file->tick_spacing = tick_spacing;
+        active_file->layout.tick_spacing = tick_spacing;
         state->refresh_ruler_pane = true;
     }
 

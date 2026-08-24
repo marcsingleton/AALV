@@ -295,13 +295,13 @@ void action_decrease_ruler_records_divider(State *state)
 void action_increase_tick_spacing(State *state)
 {
     FileState *active_file = state->active_file;
-    state_set_tick_spacing(state, active_file->tick_spacing + 1);
+    state_set_tick_spacing(state, active_file->layout.tick_spacing + 1);
 }
 
 void action_decrease_tick_spacing(State *state)
 {
     FileState *active_file = state->active_file;
-    state_set_tick_spacing(state, active_file->tick_spacing - 1);
+    state_set_tick_spacing(state, active_file->layout.tick_spacing - 1);
 }
 
 void action_enter_command_mode(State *state)

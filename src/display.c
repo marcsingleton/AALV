@@ -157,8 +157,8 @@ void display_ruler_pane_ticks(State *state, Array *buffer)
     Pane *pane = &active_file->layout.ruler_pane;
     unsigned int header_sequence_divider = active_file->layout.header_sequence_divider;
 
-    int tick_offset = active_file->tick_offset;
-    int tick_spacing = active_file->tick_spacing;
+    int tick_offset = active_file->layout.tick_offset;
+    int tick_spacing = active_file->layout.tick_spacing;
 
     // Initialize tick position and label
     int x = offset_sequence + tick_offset;
@@ -276,9 +276,9 @@ void display_command_pane(State *state, Array *buffer)
 
         n = snprintf(status + n_status, sizeof(status) - n_status,
                      "COL %d/%d,%d  ",
-                     active_file->tick_offset + (int)sequence_index,
-                     active_file->tick_offset,
-                     active_file->tick_offset + (int)active_file->metadata.max_len);
+                     active_file->layout.tick_offset + (int)sequence_index,
+                     active_file->layout.tick_offset,
+                     active_file->layout.tick_offset + (int)active_file->metadata.max_len);
         if (n < 0)
             return;
         n_status += n;
@@ -291,9 +291,9 @@ void display_command_pane(State *state, Array *buffer)
                                                                                    : sequence_index;
             n = snprintf(status + n_status, sizeof(status) - n_status,
                          "POS %d/%d,%d",
-                         active_file->tick_offset + (int)unaligned_indices->indices[unaligned_index],
-                         active_file->tick_offset,
-                         active_file->tick_offset + (int)unaligned_indices->indices[unaligned_indices->len - 1]);
+                         active_file->layout.tick_offset + (int)unaligned_indices->indices[unaligned_index],
+                         active_file->layout.tick_offset,
+                         active_file->layout.tick_offset + (int)unaligned_indices->indices[unaligned_indices->len - 1]);
         }
         else
         {
