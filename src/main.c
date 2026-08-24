@@ -516,7 +516,7 @@ int deinit_terminal(void)
 int run_user_config(State *state)
 {
     char *home_dir = NULL;
-    char config_path[128];
+    char *config_path = NULL;
     FILE *config_fp = NULL;
 
     home_dir = getenv("HOME");
@@ -527,11 +527,16 @@ int run_user_config(State *state)
     unsigned int nprefixes = sizeof(prefixes) / sizeof(char *);
     for (unsigned int i = 0; i < nprefixes; i++)
     {
-        int n = snprintf(config_path, sizeof(config_path), "%s/%s%src", home_dir, prefixes[i], PROGRAM_NAME);
-        if (n < 0 || (unsigned int)n > sizeof(config_path) - 1)
+        int len = snprintf(NULL, 0, "%s/%s%src", home_dir, prefixes[i], PROGRAM_NAME) + 1;
+        config_path = malloc(len * sizeof(char));
+        if (!config_path)
             continue;
+        snprintf(config_path, len, "%s/%s%src", home_dir, prefixes[i], PROGRAM_NAME);
 
-        if (!(config_fp = fopen(config_path, "r")))
+        config_fp = fopen(config_path, "r");
+        free(config_path);
+        config_path = NULL;
+        if (!config_fp)
             continue;
 
         break;
