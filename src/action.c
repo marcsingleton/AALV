@@ -268,6 +268,13 @@ void action_move_horizontal_middle(State *state)
     scroller_move_horizontal_middle(scroller, active_file->record_array.len);
 }
 
+void action_move_line_to_center(State *state)
+{
+    FileState *active_file = state->active_file;
+    RowLinkedScroller *scroller = &active_file->layout.scroller;
+    scroller_move_line_to_center(scroller, active_file->record_array.len);
+}
+
 void action_increase_header_sequence_divider(State *state)
 {
     FileState *active_file = state->active_file;

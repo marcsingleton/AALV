@@ -56,6 +56,7 @@ void action_move_right_edge(State *state);
 void action_move_left_edge(State *state);
 void action_move_vertical_middle(State *state);
 void action_move_horizontal_middle(State *state);
+void action_move_line_to_center(State *state);
 void action_increase_header_sequence_divider(State *state);
 void action_decrease_header_sequence_divider(State *state);
 void action_increase_ruler_records_divider(State *state);

@@ -219,6 +219,21 @@ int input_parse_keys(Array *buffer, Action *action, size_t *count)
         action->fn.void_arg = action_move_bottom_edge;
         action->args = VOID_ARG;
         break;
+    case 'z':
+        if (index + 1 >= buffer->len)
+            return PARSE_INCOMPLETE;
+        ptr = array_get(buffer, index + 1);
+        c = *ptr;
+        switch (c)
+        {
+        case 'z':
+            action->fn.void_arg = action_move_line_to_center;
+            action->args = VOID_ARG;
+            break;
+        default:
+            return PARSE_FAIL;
+        }
+        break;
     case ']':
         action->fn.void_arg = action_increase_header_sequence_divider;
         action->args = VOID_ARG;
