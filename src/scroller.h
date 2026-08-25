@@ -62,5 +62,6 @@ void scroller_move_right_edge(RowLinkedScroller *scroller, size_t nlines);
 void scroller_move_left_edge(RowLinkedScroller *scroller, size_t nlines);
 void scroller_move_vertical_middle(RowLinkedScroller *scroller, size_t nlines);
 void scroller_move_horizontal_middle(RowLinkedScroller *scroller, size_t nlines);
+void scroller_move_line_to_center(RowLinkedScroller *scroller, size_t nlines);
 
 #endif // SCROLLER_H

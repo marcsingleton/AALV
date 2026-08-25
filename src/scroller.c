@@ -596,3 +596,29 @@ void scroller_move_horizontal_middle(RowLinkedScroller *scroller, size_t nlines)
 
     scroller_set_cursor_j(scroller, scroller_width / 2); // Not (scroller_width - 1) b/c column positions intrinsically offset
 }
+
+void scroller_move_line_to_center(RowLinkedScroller *scroller, size_t nlines)
+{
+    if (!scroller)
+        return;
+    scroller_cursor_clamp(scroller);
+
+    if (nlines == 0)
+        return;
+
+    unsigned int scroller_height = scroller->h;
+    if (scroller_height == 0)
+        scroller_height = 1; // Treat collapsed scroller as single row
+
+    size_t index_i = scroller->cursor_i + scroller->offset_i;
+    if (index_i < (scroller_height - 1) / 2)
+        return;
+
+    size_t offset_i = scroller->offset_i;
+    if (scroller->cursor_i > (scroller_height - 1) / 2)
+        offset_i += scroller->cursor_i - (scroller_height - 1) / 2;
+    else
+        offset_i -= (scroller_height - 1) / 2 - scroller->cursor_i; // Above index_i check ensures this is non-negative
+    scroller_set_offset_i(scroller, offset_i);
+    scroller_set_cursor_i(scroller, (scroller_height - 1) / 2);
+}
