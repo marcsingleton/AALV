@@ -61,6 +61,7 @@ void scroller_set_offset_i(RowLinkedScroller *scroller, size_t i)
 {
     if (!scroller)
         return;
+
     scroller->offset_i = i;
     scroller_set_refreshes(scroller, true);
 }
@@ -69,6 +70,7 @@ void scroller_set_cursor_i(RowLinkedScroller *scroller, size_t i)
 {
     if (!scroller)
         return;
+
     scroller->cursor_i = i;
 }
 
@@ -76,6 +78,7 @@ void scroller_set_offset_j(RowLinkedScroller *scroller, size_t j)
 {
     if (!scroller)
         return;
+
     unsigned int index = scroller->active_pane_index;
     scroller->offsets_j[index] = j;
     scroller->refreshes[index] = true;
@@ -85,6 +88,7 @@ void scroller_set_offsets_j(RowLinkedScroller *scroller, size_t j)
 {
     if (!scroller)
         return;
+
     for (unsigned int index = 0; index < scroller->npanes; index++)
     {
         scroller->offsets_j[index] = j;
@@ -96,6 +100,7 @@ void scroller_set_cursor_j(RowLinkedScroller *scroller, size_t j)
 {
     if (!scroller)
         return;
+
     unsigned int index = scroller->active_pane_index;
     scroller->cursors_j[index] = j;
 }
@@ -104,6 +109,7 @@ void scroller_set_cursors_j(RowLinkedScroller *scroller, size_t j)
 {
     if (!scroller)
         return;
+
     for (unsigned int index = 0; index < scroller->npanes; index++)
         scroller->cursors_j[index] = j;
 }
@@ -112,8 +118,10 @@ void scroller_set_active_pane(RowLinkedScroller *scroller, unsigned int index)
 {
     if (!scroller)
         return;
+
     if (index + 1 > scroller->npanes)
         return;
+
     scroller->active_pane_index = index;
 }
 
@@ -121,6 +129,7 @@ void scroller_set_refresh(RowLinkedScroller *scroller, bool refresh)
 {
     if (!scroller)
         return;
+
     unsigned int index = scroller->active_pane_index;
     scroller->refreshes[index] = refresh;
 }
@@ -129,6 +138,7 @@ void scroller_set_refreshes(RowLinkedScroller *scroller, bool refresh)
 {
     if (!scroller)
         return;
+
     for (unsigned int index = 0; index < scroller->npanes; index++)
         scroller->refreshes[index] = refresh;
 }
@@ -137,6 +147,7 @@ void scroller_cursor_clamp(RowLinkedScroller *scroller)
 {
     if (!scroller)
         return;
+
     unsigned int scroller_height = scroller->h;
     if (scroller_height == 0)
         scroller_height = 1; // Treat collapsed scroller as single row
@@ -535,7 +546,7 @@ void scroller_move_right_edge(RowLinkedScroller *scroller, size_t nlines)
     if (scroller_width == 0)
         scroller_width = 1; // Treat collapsed scroller as single column
 
-    scroller_set_cursor_j(scroller, scroller_width - 1);
+    scroller_set_cursor_j(scroller, scroller_width - 1); // Not (scroller_width - 1) b/c column positions intrinsically offset
 }
 
 void scroller_move_left_edge(RowLinkedScroller *scroller, size_t nlines)
@@ -583,5 +594,5 @@ void scroller_move_horizontal_middle(RowLinkedScroller *scroller, size_t nlines)
     if (scroller_width == 0)
         scroller_width = 1; // Treat collapsed scroller as single column
 
-    scroller_set_cursor_j(scroller, scroller_width / 2);
+    scroller_set_cursor_j(scroller, scroller_width / 2); // Not (scroller_width - 1) b/c column positions intrinsically offset
 }
