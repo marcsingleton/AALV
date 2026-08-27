@@ -57,7 +57,7 @@ void array_destroy(Array *array)
 
 int array_append(Array *array, const void *value)
 {
-    if (!array)
+    if (!array || !value)
         return -1;
     if (array->len >= array->capacity)
     {
