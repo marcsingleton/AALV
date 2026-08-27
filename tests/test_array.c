@@ -38,12 +38,11 @@ cleanup:
     return retcode;
 }
 
-int test_append_null(void)
+int test_append_null_array(void)
 {
     int retcode = 0;
     int value;
 
-    // NULL array
     int x = 0;
     value = array_append(NULL, &x);
     if (value == 0)
@@ -56,29 +55,60 @@ cleanup:
     return retcode;
 }
 
-int test_extend_null(void)
+int test_append_null_value(void)
 {
     int retcode = 0;
     Array array;
     int value;
 
-    // NULL array
-    int x[] = {0, 1, 2};
-    value = array_append(NULL, &x);
+    array_init(&array, sizeof(int));
+
+    value = array_append(&array, NULL);
     if (value == 0)
     {
         retcode = -1;
         goto cleanup;
     }
-    // NULL values
-    value = array_append(&array, NULL);
+
+cleanup:
+    array_deinit(&array);
+    return retcode;
+}
+
+int test_extend_null_array(void)
+{
+    int retcode = 0;
+    int value;
+
+    int x[] = {0, 1, 2};
+    value = array_extend(NULL, &x, sizeof(x) / sizeof(int));
     if (value == 0)
     {
-        retcode = -2;
+        retcode = -1;
         goto cleanup;
     }
 
 cleanup:
+    return retcode;
+}
+
+int test_extend_null_values(void)
+{
+    int retcode = 0;
+    Array array;
+    int value;
+
+    array_init(&array, sizeof(int));
+
+    value = array_extend(&array, NULL, 0);
+    if (value == 0)
+    {
+        retcode = -1;
+        goto cleanup;
+    }
+
+cleanup:
+    array_deinit(&array);
     return retcode;
 }
 
@@ -353,8 +383,10 @@ cleanup:
 
 Test tests[] = {
     {&test_init, "test_init"},
-    {&test_append_null, "append_null"},
-    {&test_extend_null, "extend_null"},
+    {&test_append_null_value, "append_null_value"},
+    {&test_append_null_array, "append_null_array"},
+    {&test_extend_null_values, "extend_null_values"},
+    {&test_extend_null_array, "extend_null_array"},
     {&test_get_null, "get_null"},
     {&test_append_get, "test_append_get"},
     {&test_extend_get, "test_extend_get"},
