@@ -162,14 +162,14 @@ void action_move_first_non_gap_or_non_whitespace(State *state)
 
     size_t record_index = scroller->offset_i + scroller->cursor_i;
     SeqRecord *record = active_file->record_array.data + record_index;
-    size_t new_index;
+    size_t x;
     switch (scroller->active_pane_index)
     {
     case SCROLLER_HEADER_PANE:
     {
-        for (new_index = 0; new_index < ncols; new_index++)
+        for (x = 0; x < ncols; x++)
         {
-            if (!isspace(record->header[new_index]))
+            if (!isspace(record->header[x]))
                 break;
         }
         break;
@@ -179,22 +179,17 @@ void action_move_first_non_gap_or_non_whitespace(State *state)
         Alphabet *alphabet = sequences_seq_type_to_alphabet(record->type);
         if (alphabet)
         {
-            for (new_index = 0; new_index < ncols; new_index++)
-                if (!sequences_sym_is_gap(alphabet, record->seq[new_index]))
+            for (x = 0; x < ncols; x++)
+                if (!sequences_sym_is_gap(alphabet, record->seq[x]))
                     break;
         }
         else
-            new_index = 0;
+            x = 0;
         break;
     }
     }
 
-    unsigned int active_index = scroller->active_pane_index;
-    size_t old_index = scroller->offsets_j[active_index] + scroller->cursors_j[active_index];
-    if (new_index > old_index)
-        scroller_move_right(scroller, active_file->record_array.len, ncols, new_index - old_index);
-    else if (old_index > new_index)
-        scroller_move_left(scroller, active_file->record_array.len, ncols, old_index - new_index);
+    scroller_move_to_column(scroller, active_file->record_array.len, ncols, x);
 }
 
 void action_move_last_non_gap_or_non_whitespace(State *state)
@@ -205,15 +200,15 @@ void action_move_last_non_gap_or_non_whitespace(State *state)
 
     size_t record_index = scroller->offset_i + scroller->cursor_i;
     SeqRecord *record = active_file->record_array.data + record_index;
-    size_t new_index;
+    size_t x;
     switch (scroller->active_pane_index)
     {
     case SCROLLER_HEADER_PANE:
     {
-        new_index = (ncols > 0) ? ncols - 1 : 0;
-        for (; 0 < new_index; new_index--)
+        x = (ncols > 0) ? ncols - 1 : 0;
+        for (; 0 < x; x--)
         {
-            if (!isspace(record->header[new_index]))
+            if (!isspace(record->header[x]))
                 break;
         }
         break;
@@ -223,23 +218,18 @@ void action_move_last_non_gap_or_non_whitespace(State *state)
         Alphabet *alphabet = sequences_seq_type_to_alphabet(record->type);
         if (alphabet)
         {
-            new_index = (ncols > 0) ? ncols - 1 : 0;
-            for (; 0 < new_index; new_index--)
-                if (!sequences_sym_is_gap(alphabet, record->seq[new_index]))
+            x = (ncols > 0) ? ncols - 1 : 0;
+            for (; 0 < x; x--)
+                if (!sequences_sym_is_gap(alphabet, record->seq[x]))
                     break;
         }
         else
-            new_index = 0;
+            x = 0;
         break;
     }
     }
 
-    unsigned int active_index = scroller->active_pane_index;
-    size_t old_index = scroller->offsets_j[active_index] + scroller->cursors_j[active_index];
-    if (new_index > old_index)
-        scroller_move_right(scroller, active_file->record_array.len, ncols, new_index - old_index);
-    else if (old_index > new_index)
-        scroller_move_left(scroller, active_file->record_array.len, ncols, old_index - new_index);
+    scroller_move_to_column(scroller, active_file->record_array.len, ncols, x);
 }
 
 void action_move_first_row(State *state)
