@@ -6,7 +6,7 @@
 #include "scroller.h"
 
 // Private
-static size_t get_line_len(FileState *active_file)
+static size_t get_ncols(FileState *active_file)
 {
     if (!active_file->record_array.data)
         return 0;
@@ -14,17 +14,17 @@ static size_t get_line_len(FileState *active_file)
     RowLinkedScroller *scroller = &active_file->layout.scroller;
     size_t record_index = scroller->offset_i + scroller->cursor_i;
     SeqRecord *record = active_file->record_array.data + record_index;
-    size_t line_len;
+    size_t ncols;
     switch (scroller->active_pane_index)
     {
     case SCROLLER_HEADER_PANE:
-        line_len = strlen(record->header);
+        ncols = strlen(record->header);
         break;
     case SCROLLER_SEQUENCE_PANE:
-        line_len = record->len;
+        ncols = record->len;
         break;
     }
-    return line_len;
+    return ncols;
 }
 
 // Public
@@ -46,16 +46,16 @@ void action_move_right(State *state, size_t x)
 {
     FileState *active_file = state->active_file;
     RowLinkedScroller *scroller = &active_file->layout.scroller;
-    size_t line_len = get_line_len(active_file);
-    scroller_move_right(scroller, active_file->record_array.len, line_len, x);
+    size_t ncols = get_ncols(active_file);
+    scroller_move_right(scroller, active_file->record_array.len, ncols, x);
 }
 
 void action_move_left(State *state, size_t x)
 {
     FileState *active_file = state->active_file;
     RowLinkedScroller *scroller = &active_file->layout.scroller;
-    size_t line_len = get_line_len(active_file);
-    scroller_move_left(scroller, active_file->record_array.len, line_len, x);
+    size_t ncols = get_ncols(active_file);
+    scroller_move_left(scroller, active_file->record_array.len, ncols, x);
 }
 
 void action_move_page_up(State *state, PageSize page_size)
@@ -86,42 +86,42 @@ void action_move_page_left(State *state, PageSize page_size)
     scroller_move_page_left(scroller, active_file->record_array.len, page_size);
 }
 
-void action_move_line_start(State *state)
+void action_move_row_start(State *state)
 {
     FileState *active_file = state->active_file;
     RowLinkedScroller *scroller = &active_file->layout.scroller;
-    scroller_move_line_start(scroller, active_file->record_array.len);
+    scroller_move_row_start(scroller, active_file->record_array.len);
 }
 
-void action_move_line_middle(State *state)
+void action_move_row_middle(State *state)
 {
     FileState *active_file = state->active_file;
     RowLinkedScroller *scroller = &active_file->layout.scroller;
-    size_t line_len = get_line_len(active_file);
-    scroller_move_to_column(scroller, active_file->record_array.len, line_len, line_len / 2);
+    size_t ncols = get_ncols(active_file);
+    scroller_move_to_column(scroller, active_file->record_array.len, ncols, ncols / 2);
 }
 
-void action_move_line_end(State *state)
+void action_move_row_end(State *state)
 {
     FileState *active_file = state->active_file;
     RowLinkedScroller *scroller = &active_file->layout.scroller;
-    size_t line_len = get_line_len(active_file);
-    scroller_move_line_end(scroller, active_file->record_array.len, line_len);
+    size_t ncols = get_ncols(active_file);
+    scroller_move_row_end(scroller, active_file->record_array.len, ncols);
 }
 
 void action_move_to_column(State *state, size_t x)
 {
     FileState *active_file = state->active_file;
     RowLinkedScroller *scroller = &active_file->layout.scroller;
-    size_t line_len = get_line_len(active_file);
-    scroller_move_to_column(scroller, active_file->record_array.len, line_len, x);
+    size_t ncols = get_ncols(active_file);
+    scroller_move_to_column(scroller, active_file->record_array.len, ncols, x);
 }
 
 void action_move_first_non_gap_or_non_whitespace(State *state)
 {
     FileState *active_file = state->active_file;
     RowLinkedScroller *scroller = &active_file->layout.scroller;
-    size_t line_len = get_line_len(active_file);
+    size_t ncols = get_ncols(active_file);
 
     size_t record_index = scroller->offset_i + scroller->cursor_i;
     SeqRecord *record = active_file->record_array.data + record_index;
@@ -130,7 +130,7 @@ void action_move_first_non_gap_or_non_whitespace(State *state)
     {
     case SCROLLER_HEADER_PANE:
     {
-        for (new_index = 0; new_index < line_len; new_index++)
+        for (new_index = 0; new_index < ncols; new_index++)
         {
             if (!isspace(record->header[new_index]))
                 break;
@@ -142,7 +142,7 @@ void action_move_first_non_gap_or_non_whitespace(State *state)
         Alphabet *alphabet = sequences_seq_type_to_alphabet(record->type);
         if (alphabet)
         {
-            for (new_index = 0; new_index < line_len; new_index++)
+            for (new_index = 0; new_index < ncols; new_index++)
                 if (!sequences_sym_is_gap(alphabet, record->seq[new_index]))
                     break;
         }
@@ -155,16 +155,16 @@ void action_move_first_non_gap_or_non_whitespace(State *state)
     unsigned int active_index = scroller->active_pane_index;
     size_t old_index = scroller->offsets_j[active_index] + scroller->cursors_j[active_index];
     if (new_index > old_index)
-        scroller_move_right(scroller, active_file->record_array.len, line_len, new_index - old_index);
+        scroller_move_right(scroller, active_file->record_array.len, ncols, new_index - old_index);
     else if (old_index > new_index)
-        scroller_move_left(scroller, active_file->record_array.len, line_len, old_index - new_index);
+        scroller_move_left(scroller, active_file->record_array.len, ncols, old_index - new_index);
 }
 
 void action_move_last_non_gap_or_non_whitespace(State *state)
 {
     FileState *active_file = state->active_file;
     RowLinkedScroller *scroller = &active_file->layout.scroller;
-    size_t line_len = get_line_len(active_file);
+    size_t ncols = get_ncols(active_file);
 
     size_t record_index = scroller->offset_i + scroller->cursor_i;
     SeqRecord *record = active_file->record_array.data + record_index;
@@ -173,7 +173,7 @@ void action_move_last_non_gap_or_non_whitespace(State *state)
     {
     case SCROLLER_HEADER_PANE:
     {
-        new_index = (line_len > 0) ? line_len - 1 : 0;
+        new_index = (ncols > 0) ? ncols - 1 : 0;
         for (; 0 < new_index; new_index--)
         {
             if (!isspace(record->header[new_index]))
@@ -186,7 +186,7 @@ void action_move_last_non_gap_or_non_whitespace(State *state)
         Alphabet *alphabet = sequences_seq_type_to_alphabet(record->type);
         if (alphabet)
         {
-            new_index = (line_len > 0) ? line_len - 1 : 0;
+            new_index = (ncols > 0) ? ncols - 1 : 0;
             for (; 0 < new_index; new_index--)
                 if (!sequences_sym_is_gap(alphabet, record->seq[new_index]))
                     break;
@@ -200,30 +200,30 @@ void action_move_last_non_gap_or_non_whitespace(State *state)
     unsigned int active_index = scroller->active_pane_index;
     size_t old_index = scroller->offsets_j[active_index] + scroller->cursors_j[active_index];
     if (new_index > old_index)
-        scroller_move_right(scroller, active_file->record_array.len, line_len, new_index - old_index);
+        scroller_move_right(scroller, active_file->record_array.len, ncols, new_index - old_index);
     else if (old_index > new_index)
-        scroller_move_left(scroller, active_file->record_array.len, line_len, old_index - new_index);
+        scroller_move_left(scroller, active_file->record_array.len, ncols, old_index - new_index);
 }
 
-void action_move_first_record(State *state)
+void action_move_first_row(State *state)
 {
     FileState *active_file = state->active_file;
     RowLinkedScroller *scroller = &active_file->layout.scroller;
-    scroller_move_first_line(scroller, active_file->record_array.len);
+    scroller_move_first_row(scroller, active_file->record_array.len);
 }
 
-void action_move_last_record(State *state)
+void action_move_last_row(State *state)
 {
     FileState *active_file = state->active_file;
     RowLinkedScroller *scroller = &active_file->layout.scroller;
-    scroller_move_last_line(scroller, active_file->record_array.len);
+    scroller_move_last_row(scroller, active_file->record_array.len);
 }
 
-void action_move_to_record(State *state, size_t x)
+void action_move_to_row(State *state, size_t x)
 {
     FileState *active_file = state->active_file;
     RowLinkedScroller *scroller = &active_file->layout.scroller;
-    scroller_move_to_line(scroller, active_file->record_array.len, x);
+    scroller_move_to_row(scroller, active_file->record_array.len, x);
 }
 
 void action_move_top_edge(State *state)
@@ -268,11 +268,11 @@ void action_move_horizontal_middle(State *state)
     scroller_move_horizontal_middle(scroller, active_file->record_array.len);
 }
 
-void action_move_line_to_center(State *state)
+void action_move_row_to_center(State *state)
 {
     FileState *active_file = state->active_file;
     RowLinkedScroller *scroller = &active_file->layout.scroller;
-    scroller_move_line_to_center(scroller, active_file->record_array.len);
+    scroller_move_row_to_center(scroller, active_file->record_array.len);
 }
 
 void action_increase_header_sequence_divider(State *state)

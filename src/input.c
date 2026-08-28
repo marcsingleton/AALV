@@ -143,11 +143,11 @@ int input_parse_keys(Array *buffer, Action *action, size_t *count)
         accum = PAGE_SIZE_HALF;
         break;
     case '$':
-        action->fn.void_arg = action_move_line_end;
+        action->fn.void_arg = action_move_row_end;
         action->args = VOID_ARG;
         break;
     case '0':
-        action->fn.void_arg = action_move_line_start;
+        action->fn.void_arg = action_move_row_start;
         action->args = VOID_ARG;
         break;
     case '|':
@@ -167,7 +167,7 @@ int input_parse_keys(Array *buffer, Action *action, size_t *count)
         switch (c)
         {
         case 'g':
-            action->fn.void_arg = action_move_first_record;
+            action->fn.void_arg = action_move_first_row;
             action->args = VOID_ARG;
             break;
         case '_':
@@ -183,7 +183,7 @@ int input_parse_keys(Array *buffer, Action *action, size_t *count)
             action->args = VOID_ARG;
             break;
         case 'M':
-            action->fn.void_arg = action_move_line_middle;
+            action->fn.void_arg = action_move_row_middle;
             action->args = VOID_ARG;
             break;
         case '$':
@@ -197,12 +197,12 @@ int input_parse_keys(Array *buffer, Action *action, size_t *count)
     case 'G':
         if (accum_default_is_set == 1)
         {
-            action->fn.void_arg = action_move_last_record;
+            action->fn.void_arg = action_move_last_row;
             action->args = VOID_ARG;
         }
         else
         {
-            action->fn.size_t_arg = action_move_to_record;
+            action->fn.size_t_arg = action_move_to_row;
             action->args = SIZE_T_ARG;
             accum--; // Convert to 0-based index
         }
@@ -227,7 +227,7 @@ int input_parse_keys(Array *buffer, Action *action, size_t *count)
         switch (c)
         {
         case 'z':
-            action->fn.void_arg = action_move_line_to_center;
+            action->fn.void_arg = action_move_row_to_center;
             action->args = VOID_ARG;
             break;
         default:
