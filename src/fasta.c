@@ -7,12 +7,13 @@
 
 #include "array.h"
 #include "fasta.h"
+#include "formats.h"
 #include "sequences.h"
 
 int fasta_fread(FILE *fp, SeqRecordArray *record_array)
 {
     // Declarations
-    int retcode = FASTA_ERROR_SUCCESS;
+    int retcode = FORMATS_ERROR_SUCCESS;
 
     void *ptr = NULL; // A generic temporary pointer for allocations
 
@@ -33,14 +34,14 @@ int fasta_fread(FILE *fp, SeqRecordArray *record_array)
 
     if (array_init(&new_records, sizeof(SeqRecord)) != 0)
     {
-        retcode = FASTA_ERROR_MEMORY_ALLOCATION;
+        retcode = FORMATS_ERROR_MEMORY_ALLOCATION;
         goto cleanup;
     }
 
     buffer = malloc(buffer_len);
     if (!buffer)
     {
-        retcode = FASTA_ERROR_MEMORY_ALLOCATION;
+        retcode = FORMATS_ERROR_MEMORY_ALLOCATION;
         goto cleanup;
     }
 
@@ -57,7 +58,7 @@ int fasta_fread(FILE *fp, SeqRecordArray *record_array)
     }
     if (line[0] != '>')
     {
-        retcode = FASTA_ERROR_INVALID_FORMAT;
+        retcode = FORMATS_ERROR_INVALID_FORMAT;
         goto cleanup;
     }
 
@@ -78,7 +79,7 @@ int fasta_fread(FILE *fp, SeqRecordArray *record_array)
         header = malloc(trim_len); // +1 for null; -1 for excluding >
         if (!header)
         {
-            retcode = FASTA_ERROR_MEMORY_ALLOCATION;
+            retcode = FORMATS_ERROR_MEMORY_ALLOCATION;
             goto cleanup;
         }
         memcpy(header, line + 1, trim_len - 1);
@@ -88,7 +89,7 @@ int fasta_fread(FILE *fp, SeqRecordArray *record_array)
         id = fasta_get_id(header);
         if (!id)
         {
-            retcode = FASTA_ERROR_MEMORY_ALLOCATION;
+            retcode = FORMATS_ERROR_MEMORY_ALLOCATION;
             goto cleanup;
         }
 
@@ -104,7 +105,7 @@ int fasta_fread(FILE *fp, SeqRecordArray *record_array)
             // Check for sequence overflow
             if (seq_len > SIZE_MAX - trim_len - 1)
             {
-                retcode = FASTA_ERROR_SEQUENCE_OVERFLOW;
+                retcode = FORMATS_ERROR_SEQUENCE_OVERFLOW;
                 goto cleanup;
             }
 
@@ -113,13 +114,13 @@ int fasta_fread(FILE *fp, SeqRecordArray *record_array)
             {
                 if (buffer_len > SIZE_MAX / 2)
                 {
-                    retcode = FASTA_ERROR_MEMORY_ALLOCATION;
+                    retcode = FORMATS_ERROR_MEMORY_ALLOCATION;
                     goto cleanup;
                 }
                 ptr = realloc(buffer, 2 * buffer_len);
                 if (!ptr)
                 {
-                    retcode = FASTA_ERROR_MEMORY_ALLOCATION;
+                    retcode = FORMATS_ERROR_MEMORY_ALLOCATION;
                     goto cleanup;
                 }
                 buffer = ptr;
@@ -132,7 +133,7 @@ int fasta_fread(FILE *fp, SeqRecordArray *record_array)
         seq = malloc(seq_len + 1);
         if (!seq)
         {
-            retcode = FASTA_ERROR_MEMORY_ALLOCATION;
+            retcode = FORMATS_ERROR_MEMORY_ALLOCATION;
             goto cleanup;
         }
         memcpy(seq, buffer, seq_len + 1);
@@ -146,12 +147,12 @@ int fasta_fread(FILE *fp, SeqRecordArray *record_array)
         };
         if (new_records.len > SIZE_MAX - 1) // Ensures fit into return type
         {
-            retcode = FASTA_ERROR_RECORD_OVERFLOW;
+            retcode = FORMATS_ERROR_RECORD_OVERFLOW;
             goto cleanup;
         }
         if (array_append(&new_records, &new_record) != 0)
         {
-            retcode = FASTA_ERROR_RECORD_OVERFLOW;
+            retcode = FORMATS_ERROR_RECORD_OVERFLOW;
             goto cleanup;
         }
         header = NULL;
@@ -161,7 +162,7 @@ int fasta_fread(FILE *fp, SeqRecordArray *record_array)
 
     if (array_shrink(&new_records) != 0)
     {
-        retcode = FASTA_ERROR_MEMORY_ALLOCATION;
+        retcode = FORMATS_ERROR_MEMORY_ALLOCATION;
         goto cleanup;
     }
 
@@ -175,7 +176,7 @@ cleanup:
     free(id);
     free(seq);
 
-    if (retcode != FASTA_ERROR_SUCCESS)
+    if (retcode != FORMATS_ERROR_SUCCESS)
     {
         for (size_t i = 0; i < new_records.len; i++)
         {
@@ -193,12 +194,12 @@ int fasta_read(const char *path, SeqRecordArray *record_array)
 {
     FILE *fp = fopen(path, "r");
     if (!fp)
-        return FASTA_ERROR_FILE_IO;
+        return FORMATS_ERROR_FILE_IO;
 
     int retcode = fasta_fread(fp, record_array);
 
     if (fclose(fp) != 0)
-        return FASTA_ERROR_FILE_IO;
+        return FORMATS_ERROR_FILE_IO;
 
     return retcode;
 }
@@ -218,12 +219,12 @@ int fasta_write(const char *path, SeqRecordArray *record_array, const int max_le
 {
     FILE *fp = fopen(path, "w");
     if (!fp)
-        return FASTA_ERROR_FILE_IO;
+        return FORMATS_ERROR_FILE_IO;
 
     int retcode = fasta_fwrite(fp, record_array, max_len);
 
     if (fclose(fp) != 0)
-        return FASTA_ERROR_FILE_IO;
+        return FORMATS_ERROR_FILE_IO;
 
     return retcode;
 }

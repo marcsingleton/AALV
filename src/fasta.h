@@ -9,16 +9,6 @@
 
 #include "sequences.h"
 
-typedef enum
-{
-    FASTA_ERROR_SUCCESS = 0,
-    FASTA_ERROR_INVALID_FORMAT = -1,
-    FASTA_ERROR_RECORD_OVERFLOW = -2,
-    FASTA_ERROR_SEQUENCE_OVERFLOW = -3,
-    FASTA_ERROR_FILE_IO = -4,
-    FASTA_ERROR_MEMORY_ALLOCATION = -5,
-} FastaError;
-
 int fasta_fread(FILE *fp, SeqRecordArray *record_array);
 int fasta_read(const char *path, SeqRecordArray *record_array);
 int fasta_fwrite(FILE *fp, SeqRecordArray *record_array, const int max_len);

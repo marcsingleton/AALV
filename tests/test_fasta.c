@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "fasta.h"
+#include "formats.h"
 #include "sequences.h"
 #include "utils.h"
 
@@ -68,11 +69,11 @@ int test_read_write(void)
     fseek(fp, 0, SEEK_SET);
     SeqRecordArray new_record_array;
     int fasta_retcode = fasta_fread(fp, &new_record_array);
-    if (fasta_retcode != FASTA_ERROR_SUCCESS)
+    if (fasta_retcode != FORMATS_ERROR_SUCCESS)
         retcode = -1;
     else if (records_equal(&record_array, &new_record_array) != 1)
         retcode = -1;
-    if (fasta_retcode == FASTA_ERROR_SUCCESS)
+    if (fasta_retcode == FORMATS_ERROR_SUCCESS)
         sequences_deinit_seq_record_array(&new_record_array);
     fclose(fp);
     return retcode;
@@ -90,7 +91,7 @@ int test_no_header(void)
     fseek(fp, 0, SEEK_SET);
     SeqRecordArray new_record_array;
     int fasta_retcode = fasta_fread(fp, &new_record_array);
-    if (fasta_retcode != FASTA_ERROR_INVALID_FORMAT)
+    if (fasta_retcode != FORMATS_ERROR_INVALID_FORMAT)
         retcode = -1;
     if (fasta_retcode == 0)
         sequences_deinit_seq_record_array(&new_record_array);
@@ -129,11 +130,11 @@ int test_blank_lines(void)
     fseek(fp, 0, SEEK_SET);
     SeqRecordArray new_record_array;
     int fasta_retcode = fasta_fread(fp, &new_record_array);
-    if (fasta_retcode != FASTA_ERROR_SUCCESS || new_record_array.len != record_array.len)
+    if (fasta_retcode != FORMATS_ERROR_SUCCESS || new_record_array.len != record_array.len)
         retcode = -1;
     else if (records_equal(&record_array, &new_record_array) != 1)
         retcode = -1;
-    if (fasta_retcode == FASTA_ERROR_SUCCESS)
+    if (fasta_retcode == FORMATS_ERROR_SUCCESS)
         sequences_deinit_seq_record_array(&new_record_array);
     fclose(fp);
     return retcode;
@@ -149,7 +150,7 @@ int test_non_fasta(void)
     FILE *fp = fmemopen(buffer, BUFFERLEN, "rw");
     SeqRecordArray new_record_array;
     int fasta_retcode = fasta_fread(fp, &new_record_array);
-    if (fasta_retcode != FASTA_ERROR_INVALID_FORMAT)
+    if (fasta_retcode != FORMATS_ERROR_INVALID_FORMAT)
         retcode = -1;
     if (fasta_retcode == 0)
         sequences_deinit_seq_record_array(&new_record_array);
