@@ -6,7 +6,43 @@
 #include "scroller.h"
 
 // Private
-static size_t get_ncols(FileState *active_file)
+static size_t get_page_ncols(FileState *active_file)
+{
+    if (!active_file->record_array.data)
+        return 0;
+
+    RowLinkedScroller *scroller = &active_file->layout.scroller;
+    size_t max_index;
+    if (scroller->h > active_file->record_array.len - scroller->offset_i) // Invariant: offset < len
+        max_index = active_file->record_array.len;
+    else
+        max_index = scroller->offset_i + scroller->h;
+    size_t ncols = 0;
+    switch (scroller->active_pane_index)
+    {
+    case SCROLLER_HEADER_PANE:
+        for (size_t record_index = scroller->offset_i; record_index < max_index; record_index++)
+        {
+            SeqRecord *record = active_file->record_array.data + record_index;
+            size_t row_ncols = strlen(record->header);
+            if (row_ncols > ncols)
+                ncols = row_ncols;
+        }
+        break;
+    case SCROLLER_SEQUENCE_PANE:
+        for (size_t record_index = scroller->offset_i; record_index < max_index; record_index++)
+        {
+            SeqRecord *record = active_file->record_array.data + record_index;
+            size_t row_ncols = record->len;
+            if (row_ncols > ncols)
+                ncols = row_ncols;
+        }
+    }
+
+    return ncols;
+}
+
+static size_t get_row_ncols(FileState *active_file)
 {
     if (!active_file->record_array.data)
         return 0;
@@ -46,7 +82,7 @@ void action_move_right(State *state, size_t x)
 {
     FileState *active_file = state->active_file;
     RowLinkedScroller *scroller = &active_file->layout.scroller;
-    size_t ncols = get_ncols(active_file);
+    size_t ncols = get_row_ncols(active_file);
     scroller_move_right(scroller, active_file->record_array.len, ncols, x);
 }
 
@@ -54,7 +90,7 @@ void action_move_left(State *state, size_t x)
 {
     FileState *active_file = state->active_file;
     RowLinkedScroller *scroller = &active_file->layout.scroller;
-    size_t ncols = get_ncols(active_file);
+    size_t ncols = get_row_ncols(active_file);
     scroller_move_left(scroller, active_file->record_array.len, ncols, x);
 }
 
@@ -76,7 +112,8 @@ void action_move_page_right(State *state, PageSize page_size)
 {
     FileState *active_file = state->active_file;
     RowLinkedScroller *scroller = &active_file->layout.scroller;
-    scroller_move_page_right(scroller, active_file->record_array.len, active_file->metadata.max_len, page_size);
+    size_t ncols = get_page_ncols(active_file);
+    scroller_move_page_right(scroller, active_file->record_array.len, ncols, page_size);
 }
 
 void action_move_page_left(State *state, PageSize page_size)
@@ -97,7 +134,7 @@ void action_move_row_middle(State *state)
 {
     FileState *active_file = state->active_file;
     RowLinkedScroller *scroller = &active_file->layout.scroller;
-    size_t ncols = get_ncols(active_file);
+    size_t ncols = get_row_ncols(active_file);
     scroller_move_to_column(scroller, active_file->record_array.len, ncols, ncols / 2);
 }
 
@@ -105,7 +142,7 @@ void action_move_row_end(State *state)
 {
     FileState *active_file = state->active_file;
     RowLinkedScroller *scroller = &active_file->layout.scroller;
-    size_t ncols = get_ncols(active_file);
+    size_t ncols = get_row_ncols(active_file);
     scroller_move_row_end(scroller, active_file->record_array.len, ncols);
 }
 
@@ -113,7 +150,7 @@ void action_move_to_column(State *state, size_t x)
 {
     FileState *active_file = state->active_file;
     RowLinkedScroller *scroller = &active_file->layout.scroller;
-    size_t ncols = get_ncols(active_file);
+    size_t ncols = get_row_ncols(active_file);
     scroller_move_to_column(scroller, active_file->record_array.len, ncols, x);
 }
 
@@ -121,7 +158,7 @@ void action_move_first_non_gap_or_non_whitespace(State *state)
 {
     FileState *active_file = state->active_file;
     RowLinkedScroller *scroller = &active_file->layout.scroller;
-    size_t ncols = get_ncols(active_file);
+    size_t ncols = get_row_ncols(active_file);
 
     size_t record_index = scroller->offset_i + scroller->cursor_i;
     SeqRecord *record = active_file->record_array.data + record_index;
@@ -164,7 +201,7 @@ void action_move_last_non_gap_or_non_whitespace(State *state)
 {
     FileState *active_file = state->active_file;
     RowLinkedScroller *scroller = &active_file->layout.scroller;
-    size_t ncols = get_ncols(active_file);
+    size_t ncols = get_row_ncols(active_file);
 
     size_t record_index = scroller->offset_i + scroller->cursor_i;
     SeqRecord *record = active_file->record_array.data + record_index;
