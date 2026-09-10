@@ -18,7 +18,7 @@ SRC_TARGET := $(BUILD_DIR)/$(EXE)
 TESTS := $(wildcard $(TESTS_DIR)/*.c)
 TESTS_DEPS := array.c fasta.c prefix.c sequences.c str.c
 TESTS_OBJS := $(TESTS_DEPS:%.c=$(BUILD_DIR)/%.o)
-TEST_TARGETS := $(TESTS:$(TESTS_DIR)/%.c=$(BUILD_DIR)/%)
+TESTS_TARGETS := $(TESTS:$(TESTS_DIR)/%.c=$(BUILD_DIR)/%)
 
 # platform and program macros
 OS := $(shell uname -s)
@@ -45,9 +45,9 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
 $(BUILD_DIR)/linenoise.o: $(LINENOISE_DIR)/linenoise.c | $(BUILD_DIR)
 	$(CC) -c $< -o $@
 
-# test rules
-.PHONY: test
-test: $(TEST_TARGETS)
+# tests rules
+.PHONY: tests
+tests: $(TESTS_TARGETS)
 
 $(BUILD_DIR)/test_%: $(TESTS_DIR)/test_%.c $(TESTS_OBJS) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $^ -I$(SRC_DIR) -o $@
