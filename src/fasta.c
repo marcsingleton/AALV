@@ -25,8 +25,8 @@ int fasta_fread(FILE *fp, SeqRecordArray *record_array)
 
     ssize_t trim_len = 0;
     char *header = NULL;
-    char *seq = NULL;
     char *id = NULL;
+    char *seq = NULL;
     size_t seq_len = 0;
 
     size_t buffer_len = 256;
@@ -46,7 +46,7 @@ int fasta_fread(FILE *fp, SeqRecordArray *record_array)
     }
 
     // Read until first non-empty line
-    while ((line_len = getline(&line, &capacity, fp)) == 1 && line[0] == '\n')
+    while ((line_len = getline(&line, &capacity, fp)) > 0 && formats_line_is_empty(line, line_len) == 1)
         ;
 
     // Check for empty files and improper formatting
@@ -65,17 +65,17 @@ int fasta_fread(FILE *fp, SeqRecordArray *record_array)
     // Read records
     while (line_len > 0)
     {
-        // Get header
-        if (line[0] == '\n')
-        {
-            line_len = getline(&line, &capacity, fp);
-            continue;
-        }
-
+        // Trim line
         trim_len = line_len;
         while (line[trim_len - 1] == '\n' || line[trim_len - 1] == '\r')
             trim_len--;
+        if (trim_len <= 0) // This block should always have a valid header line
+        {
+            retcode = FORMATS_ERROR_PARSING;
+            goto cleanup;
+        }
 
+        // Get header
         header = malloc(trim_len); // +1 for null; -1 for excluding >
         if (!header)
         {
@@ -93,7 +93,7 @@ int fasta_fread(FILE *fp, SeqRecordArray *record_array)
             goto cleanup;
         }
 
-        // Get seq
+        // Get sequence
         seq_len = 0;
         while ((line_len = getline(&line, &capacity, fp)) > 0 && (line[0] != '>'))
         {
@@ -101,6 +101,13 @@ int fasta_fread(FILE *fp, SeqRecordArray *record_array)
             trim_len = line_len;
             while (trim_len > 0 && (line[trim_len - 1] == '\n' || line[trim_len - 1] == '\r'))
                 trim_len--;
+            if (trim_len == 0)
+                continue;
+            else if (trim_len < 0)
+            {
+                retcode = FORMATS_ERROR_PARSING;
+                goto cleanup;
+            }
 
             // Check for sequence overflow
             if (seq_len > SIZE_MAX - trim_len - 1)
@@ -130,6 +137,8 @@ int fasta_fread(FILE *fp, SeqRecordArray *record_array)
             seq_len += trim_len;
             buffer[seq_len] = '\0';
         }
+
+        // Allocate and copy sequence
         seq = malloc(seq_len + 1);
         if (!seq)
         {
@@ -138,6 +147,7 @@ int fasta_fread(FILE *fp, SeqRecordArray *record_array)
         }
         memcpy(seq, buffer, seq_len + 1);
 
+        // Create record
         SeqRecord new_record = {
             .header = header,
             .id = id,
@@ -145,6 +155,8 @@ int fasta_fread(FILE *fp, SeqRecordArray *record_array)
             .len = seq_len,
             .type = SEQ_TYPE_UNSPECIFIED,
         };
+
+        // Check for records overflow
         if (new_records.len > SIZE_MAX - 1) // Ensures fit into return type
         {
             retcode = FORMATS_ERROR_RECORD_OVERFLOW;
@@ -155,6 +167,7 @@ int fasta_fread(FILE *fp, SeqRecordArray *record_array)
             retcode = FORMATS_ERROR_RECORD_OVERFLOW;
             goto cleanup;
         }
+
         header = NULL;
         id = NULL;
         seq = NULL;
