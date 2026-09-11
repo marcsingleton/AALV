@@ -12,6 +12,28 @@
 #define TEST_FAILURE -1
 #define TEST_RESULT_PREFIX "    "
 
+#define TEST_ASSERT(condition)                                 \
+    do                                                         \
+    {                                                          \
+        if (!(condition))                                      \
+        {                                                      \
+            fprintf(stderr, TEST_RESULT_PREFIX "%s: %d: %s\n", \
+                    __FILE__, __LINE__, #condition);           \
+            return TEST_FAILURE;                               \
+        }                                                      \
+    } while (0)
+
+#define TEST_ASSERT_MSG(condition, msg)                        \
+    do                                                         \
+    {                                                          \
+        if (!(condition))                                      \
+        {                                                      \
+            fprintf(stderr, TEST_RESULT_PREFIX "%s: %d: %s\n", \
+                    __FILE__, __LINE__, msg);                  \
+            return TEST_FAILURE;                               \
+        }                                                      \
+    } while (0)
+
 typedef struct
 {
     int (*fn_ptr)(void);
