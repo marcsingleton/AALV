@@ -7,23 +7,16 @@
 
 int split_tester(char *s, char **expected_fields, int expected_n, const char *delim)
 {
-    int retcode = 0;
+    int retcode = TEST_SUCCESS;
     char **returned_fields = NULL;
     int returned_n = str_split(&returned_fields, s, delim);
-    if (returned_n != expected_n)
-    {
-        retcode = -1;
-        goto cleanup;
-    }
+    TEST_ASSERT_GOTO(returned_n == expected_n, cleanup, retcode);
     for (int i = 0; i < expected_n; i++)
-        if (strcmp(expected_fields[i], returned_fields[i]) != 0)
-        {
-            retcode = -2;
-            goto cleanup;
-        }
+        TEST_ASSERT_GOTO(strcmp(expected_fields[i], returned_fields[i]) == 0, cleanup, retcode);
 cleanup:
     if (returned_n >= 0)
         str_free_split(returned_fields, returned_n);
+
     return retcode;
 }
 
@@ -75,9 +68,9 @@ int test_split_wrong_expected_n(void)
     unsigned int expected_n = sizeof(expected_fields) / sizeof(char *);
 
     if (split_tester(s, expected_fields, expected_n, delim) != 0)
-        return 0;
+        return TEST_SUCCESS;
     else
-        return -1;
+        return TEST_FAILURE;
 }
 
 int test_split_wrong_expected_fields(void)
@@ -88,9 +81,9 @@ int test_split_wrong_expected_fields(void)
     unsigned int expected_n = sizeof(expected_fields) / sizeof(char *);
 
     if (split_tester(s, expected_fields, expected_n, delim) != 0)
-        return 0;
+        return TEST_SUCCESS;
     else
-        return -1;
+        return TEST_FAILURE;
 }
 
 int test_is_in_strsep(void)
@@ -99,26 +92,19 @@ int test_is_in_strsep(void)
     char *delim = "\t";
 
     // True
-    if (str_is_in_strsep(s, delim, "a") != 1)
-        return -1;
-    if (str_is_in_strsep(s, delim, "1234") != 1)
-        return -1;
-    if (str_is_in_strsep(s, delim, "!@") != 1)
-        return -1;
-    if (str_is_in_strsep(s, delim, "xyz") != 1)
-        return -1;
-    if (str_is_in_strsep("", delim, "") != 1) // Degenerate but consistent with empty set memberships
-        return -1;
+    TEST_ASSERT(str_is_in_strsep(s, delim, "a") == 1);
+    TEST_ASSERT(str_is_in_strsep(s, delim, "1234") == 1);
+    TEST_ASSERT(str_is_in_strsep(s, delim, "!@") == 1);
+    TEST_ASSERT(str_is_in_strsep(s, delim, "xyz") == 1);
+    TEST_ASSERT(str_is_in_strsep("", delim, "") == 1); // Degenerate but consistent with empty set memberships
+
     // False
-    if (str_is_in_strsep(s, delim, "123") != 0)
-        return -1;
-    if (str_is_in_strsep(s, delim, "789") != 0)
-        return -1;
-    if (str_is_in_strsep(s, delim, "") != 0)
-        return -1;
-    if (str_is_in_strsep("", delim, "a") != 0)
-        return -1;
-    return 0;
+    TEST_ASSERT(str_is_in_strsep(s, delim, "123") == 0);
+    TEST_ASSERT(str_is_in_strsep(s, delim, "789") == 0);
+    TEST_ASSERT(str_is_in_strsep(s, delim, "") == 0);
+    TEST_ASSERT(str_is_in_strsep("", delim, "a") == 0);
+
+    return TEST_SUCCESS;
 }
 
 Test tests[] = {

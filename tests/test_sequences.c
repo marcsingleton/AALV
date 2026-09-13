@@ -16,13 +16,11 @@ int test_init_alphabet_base(void)
     int retcode = sequences_init_alphabet(&test_alphabet, test_alphabet.name,
                                           test_alphabet.syms, test_alphabet.gaps,
                                           test_alphabet.case_sensitive);
-    if (retcode != 0)
-        return retcode;
+    TEST_ASSERT(retcode == 0);
 
-    if (test_alphabet.len != len)
-        return -1;
+    TEST_ASSERT(test_alphabet.len == len);
 
-    return 0;
+    return TEST_SUCCESS;
 }
 
 int test_init_alphabet_duplicated_sym(void)
@@ -38,13 +36,11 @@ int test_init_alphabet_duplicated_sym(void)
     int retcode = sequences_init_alphabet(&test_alphabet, test_alphabet.name,
                                           test_alphabet.syms, test_alphabet.gaps,
                                           test_alphabet.case_sensitive);
-    if (retcode != 0)
-        return retcode;
+    TEST_ASSERT(retcode == 0);
 
-    if (test_alphabet.len != len)
-        return -1;
+    TEST_ASSERT(test_alphabet.len == len);
 
-    return 0;
+    return TEST_SUCCESS;
 }
 
 int test_init_alphabet_out_of_alphabet_gap(void)
@@ -59,10 +55,9 @@ int test_init_alphabet_out_of_alphabet_gap(void)
     int retcode = sequences_init_alphabet(&test_alphabet, test_alphabet.name,
                                           test_alphabet.syms, test_alphabet.gaps,
                                           test_alphabet.case_sensitive);
-    if (retcode == 0)
-        return -1;
+    TEST_ASSERT(retcode != 0);
 
-    return 0;
+    return TEST_SUCCESS;
 }
 
 int test_init_base_alphabets(void)
@@ -85,17 +80,13 @@ int test_sym_in_alphabet(void)
     int retcode = sequences_init_alphabet(&test_alphabet, test_alphabet.name,
                                           test_alphabet.syms, test_alphabet.gaps,
                                           test_alphabet.case_sensitive);
-    if (retcode != 0)
-        return retcode;
+    TEST_ASSERT(retcode == 0);
 
-    if (sequences_sym_in_alphabet(&test_alphabet, in_sym) != 1)
-        return -1;
-    if (sequences_sym_in_alphabet(&test_alphabet, out_sym) != 0)
-        return -1;
-    if (sequences_sym_in_alphabet(&test_alphabet, non_ascii_sym) != -1)
-        return -1;
+    TEST_ASSERT(sequences_sym_in_alphabet(&test_alphabet, in_sym) == 1);
+    TEST_ASSERT(sequences_sym_in_alphabet(&test_alphabet, out_sym) == 0);
+    TEST_ASSERT(sequences_sym_in_alphabet(&test_alphabet, non_ascii_sym) == -1);
 
-    return 0;
+    return TEST_SUCCESS;
 }
 
 int test_sym_is_gap(void)
@@ -114,19 +105,14 @@ int test_sym_is_gap(void)
     int retcode = sequences_init_alphabet(&test_alphabet, test_alphabet.name,
                                           test_alphabet.syms, test_alphabet.gaps,
                                           test_alphabet.case_sensitive);
-    if (retcode != 0)
-        return retcode;
+    TEST_ASSERT(retcode == 0);
 
-    if (sequences_sym_is_gap(&test_alphabet, in_sym) != 0)
-        return -1;
-    if (sequences_sym_is_gap(&test_alphabet, out_sym) != 0)
-        return -1;
-    if (sequences_sym_is_gap(&test_alphabet, non_ascii_sym) != -1)
-        return -1;
-    if (sequences_sym_is_gap(&test_alphabet, gap_sym) != 1)
-        return -1;
+    TEST_ASSERT(sequences_sym_is_gap(&test_alphabet, in_sym) == 0);
+    TEST_ASSERT(sequences_sym_is_gap(&test_alphabet, out_sym) == 0);
+    TEST_ASSERT(sequences_sym_is_gap(&test_alphabet, non_ascii_sym) == -1);
+    TEST_ASSERT(sequences_sym_is_gap(&test_alphabet, gap_sym) == 1);
 
-    return 0;
+    return TEST_SUCCESS;
 }
 
 int test_seq_in_alphabet(void)
@@ -143,39 +129,32 @@ int test_seq_in_alphabet(void)
     int retcode = sequences_init_alphabet(&test_alphabet, test_alphabet.name,
                                           test_alphabet.syms, test_alphabet.gaps,
                                           test_alphabet.case_sensitive);
-    if (retcode != 0)
-        return retcode;
+    TEST_ASSERT_MSG(retcode != 1, "Failed to initialize alphabet.");
 
-    if (sequences_seq_in_alphabet(&test_alphabet, seq_1.seq) != 1)
-        return -1;
-    if (sequences_seq_in_alphabet(&test_alphabet, seq_2.seq) == 1)
-        return -1;
+    TEST_ASSERT(sequences_seq_in_alphabet(&test_alphabet, seq_1.seq) == 1);
+    TEST_ASSERT(sequences_seq_in_alphabet(&test_alphabet, seq_2.seq) != 1);
 
-    return 0;
+    return TEST_SUCCESS;
 }
 
 int test_rna_nucleic_subset(void)
 {
     int retcode = sequences_init_base_alphabets();
-    if (retcode != 0)
-        return retcode;
+    TEST_ASSERT(retcode == 0);
 
-    if (sequences_seq_in_alphabet(&nucleic_alphabet, rna_alphabet.syms) != 1)
-        return -1;
+    TEST_ASSERT(sequences_seq_in_alphabet(&nucleic_alphabet, rna_alphabet.syms) == 1);
 
-    return 0;
+    return TEST_SUCCESS;
 }
 
 int test_dna_nucleic_subset(void)
 {
     int retcode = sequences_init_base_alphabets();
-    if (retcode != 0)
-        return retcode;
+    TEST_ASSERT(retcode == 0);
 
-    if (sequences_seq_in_alphabet(&nucleic_alphabet, dna_alphabet.syms) != 1)
-        return -1;
+    TEST_ASSERT(sequences_seq_in_alphabet(&nucleic_alphabet, dna_alphabet.syms) == 1);
 
-    return 0;
+    return TEST_SUCCESS;
 }
 
 Test tests[] = {

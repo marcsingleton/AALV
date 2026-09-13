@@ -7,31 +7,22 @@
 
 int test_init(void)
 {
-    int retcode = 0;
-    Array array;
+    int retcode = TEST_SUCCESS;
+    Array array = {0};
     int value;
 
     // NULL array
     value = array_init(NULL, sizeof(int));
-    if (value == 0)
-    {
-        retcode = -1;
-        goto cleanup;
-    }
+    TEST_ASSERT_GOTO(value != 0, cleanup, retcode);
+
     // 0 size
     value = array_init(&array, 0);
-    if (value == 0)
-    {
-        retcode = -2;
-        goto cleanup;
-    }
+    TEST_ASSERT_GOTO(value != 0, cleanup, retcode);
+
     // Success
     value = array_init(&array, sizeof(int));
-    if (value != 0 || array.size != sizeof(int) || array.capacity == 0 || array.len != 0)
-    {
-        retcode = -3;
-        goto cleanup;
-    }
+    int condition = value == 0 && array.size == sizeof(int) && array.capacity != 0 && array.len == 0;
+    TEST_ASSERT_GOTO(condition, cleanup, retcode);
 
 cleanup:
     array_deinit(&array);
@@ -40,16 +31,12 @@ cleanup:
 
 int test_append_null_array(void)
 {
-    int retcode = 0;
+    int retcode = TEST_SUCCESS;
     int value;
 
     int x = 0;
     value = array_append(NULL, &x);
-    if (value == 0)
-    {
-        retcode = -1;
-        goto cleanup;
-    }
+    TEST_ASSERT_GOTO(value != 0, cleanup, retcode);
 
 cleanup:
     return retcode;
@@ -57,18 +44,15 @@ cleanup:
 
 int test_append_null_value(void)
 {
-    int retcode = 0;
-    Array array;
+    int retcode = TEST_SUCCESS;
+    Array array = {0};
     int value;
 
-    array_init(&array, sizeof(int));
+    value = array_init(&array, sizeof(int));
+    TEST_ASSERT_GOTO(value == 0, cleanup, retcode);
 
     value = array_append(&array, NULL);
-    if (value == 0)
-    {
-        retcode = -1;
-        goto cleanup;
-    }
+    TEST_ASSERT_GOTO(value != 0, cleanup, retcode);
 
 cleanup:
     array_deinit(&array);
@@ -77,16 +61,12 @@ cleanup:
 
 int test_extend_null_array(void)
 {
-    int retcode = 0;
+    int retcode = TEST_SUCCESS;
     int value;
 
     int x[] = {0, 1, 2};
     value = array_extend(NULL, &x, sizeof(x) / sizeof(int));
-    if (value == 0)
-    {
-        retcode = -1;
-        goto cleanup;
-    }
+    TEST_ASSERT_GOTO(value != 0, cleanup, retcode);
 
 cleanup:
     return retcode;
@@ -94,18 +74,15 @@ cleanup:
 
 int test_extend_null_values(void)
 {
-    int retcode = 0;
-    Array array;
+    int retcode = TEST_SUCCESS;
+    Array array = {0};
     int value;
 
-    array_init(&array, sizeof(int));
+    value = array_init(&array, sizeof(int));
+    TEST_ASSERT_GOTO(value == 0, cleanup, retcode);
 
     value = array_extend(&array, NULL, 0);
-    if (value == 0)
-    {
-        retcode = -1;
-        goto cleanup;
-    }
+    TEST_ASSERT_GOTO(value != 0, cleanup, retcode);
 
 cleanup:
     array_deinit(&array);
@@ -114,15 +91,11 @@ cleanup:
 
 int test_get_null(void)
 {
-    int retcode = 0;
+    int retcode = TEST_SUCCESS;
 
     // NULL array
     int *ptr = array_get(NULL, 0);
-    if (ptr)
-    {
-        retcode = -1;
-        goto cleanup;
-    }
+    TEST_ASSERT_GOTO(ptr == NULL, cleanup, retcode);
 
 cleanup:
     return retcode;
@@ -130,45 +103,31 @@ cleanup:
 
 int test_append_get(void)
 {
-    int retcode = 0;
-    Array array;
+    int retcode = TEST_SUCCESS;
+    Array array = {0};
     int value;
 
     // Initialize
     value = array_init(&array, sizeof(int));
-    if (value != 0)
-    {
-        retcode = -1;
-        goto cleanup;
-    }
+    TEST_ASSERT_GOTO(value == 0, cleanup, retcode);
+
     // Append
     int n = 1024;
     for (int i = 0; i < n; i++)
     {
         int x = 2 * i * i - 1;
         value = array_append(&array, &x);
-        if (value != 0)
-        {
-            retcode = -2;
-            goto cleanup;
-        }
+        TEST_ASSERT_GOTO(value == 0, cleanup, retcode);
     }
+
     // Get
     for (int i = 0; i < n; i++)
     {
         int *ptr = array_get(&array, i);
-        if (!ptr)
-        {
-            retcode = -3;
-            goto cleanup;
-        }
+        TEST_ASSERT_GOTO(ptr != NULL, cleanup, retcode);
         int actual_x = *ptr;
         int expected_x = 2 * i * i - 1;
-        if (actual_x != expected_x)
-        {
-            retcode = -4;
-            goto cleanup;
-        }
+        TEST_ASSERT_GOTO(actual_x == expected_x, cleanup, retcode);
     }
 
 cleanup:
@@ -178,54 +137,38 @@ cleanup:
 
 int test_extend_get(void)
 {
-    int retcode = 0;
-    Array array_1, array_2;
+    int retcode = TEST_SUCCESS;
+    Array array1 = {0};
+    Array array2 = {0};
     int value;
 
     // Initialize
-    if (array_init(&array_1, sizeof(int)) != 0 || array_init(&array_2, sizeof(int)) != 0)
-    {
-        retcode = -1;
-        goto cleanup;
-    }
+    int condition = array_init(&array1, sizeof(int)) == 0 && array_init(&array2, sizeof(int)) == 0;
+    TEST_ASSERT_GOTO(condition, cleanup, retcode);
+
     // Append
     int n_1 = 1024;
     for (int i = 0; i < n_1; i++)
     {
         int x = 2 * i * i - 1;
-        value = array_append(&array_1, &x);
-        if (value != 0)
-        {
-            retcode = -2;
-            goto cleanup;
-        }
+        value = array_append(&array1, &x);
+        TEST_ASSERT_GOTO(value == 0, cleanup, retcode);
     }
     int n_2 = 1024;
     for (int i = 0; i < n_2; i++)
     {
         int x = i * i - 1;
-        value = array_append(&array_2, &x);
-        if (value != 0)
-        {
-            retcode = -3;
-            goto cleanup;
-        }
+        value = array_append(&array2, &x);
+        TEST_ASSERT_GOTO(value == 0, cleanup, retcode);
     }
+
     // Extend
-    value = array_extend(&array_1, array_2.data, array_2.len);
-    if (value != 0)
-    {
-        retcode = -4;
-        goto cleanup;
-    }
+    value = array_extend(&array1, array2.data, array2.len);
+    TEST_ASSERT_GOTO(value == 0, cleanup, retcode);
     for (int i = 0; i < n_1 + n_2; i++)
     {
-        int *ptr = array_get(&array_1, i);
-        if (!ptr)
-        {
-            retcode = -5;
-            goto cleanup;
-        }
+        int *ptr = array_get(&array1, i);
+        TEST_ASSERT_GOTO(ptr != NULL, cleanup, retcode);
         int actual_x = *ptr;
         int expected_x;
         if (i < n_1)
@@ -237,65 +180,43 @@ int test_extend_get(void)
             retcode = -6;
             goto cleanup;
         }
-        if (actual_x != expected_x)
-        {
-            retcode = -7;
-            goto cleanup;
-        }
+        TEST_ASSERT_GOTO(actual_x == expected_x, cleanup, retcode);
     }
 
 cleanup:
-    array_deinit(&array_1);
-    array_deinit(&array_2);
+    array_deinit(&array1);
+    array_deinit(&array2);
     return retcode;
 }
 
 int test_append_pop(void)
 {
-    int retcode = 0;
-    Array array;
+    int retcode = TEST_SUCCESS;
+    Array array = {0};
     int value;
 
     // Initialize
     value = array_init(&array, sizeof(int));
-    if (value != 0)
-    {
-        retcode = -1;
-        goto cleanup;
-    }
+    TEST_ASSERT_GOTO(value == 0, cleanup, retcode);
+
     // Append
     int n = 1024;
     for (int i = 0; i < n; i++)
     {
         int x = 2 * i * i - 1;
         value = array_append(&array, &x);
-        if (value != 0)
-        {
-            retcode = -2;
-            goto cleanup;
-        }
+        TEST_ASSERT_GOTO(value == 0, cleanup, retcode);
     }
+
     // Pop
     for (int i = n - 1; i > 0; i--)
     {
         int *ptr = array_pop(&array);
-        if (!ptr)
-        {
-            retcode = -3;
-            goto cleanup;
-        }
+        TEST_ASSERT_GOTO(ptr != NULL, cleanup, retcode);
         int actual_x = *ptr;
         int expected_x = 2 * i * i - 1;
-        if (actual_x != expected_x)
-        {
-            retcode = -4;
-            goto cleanup;
-        }
-        if (array.len != (unsigned)i) // Silence sign mis-match
-        {
-            retcode = -5;
-            goto cleanup;
-        }
+        TEST_ASSERT_GOTO(actual_x == expected_x, cleanup, retcode);
+        TEST_ASSERT_GOTO(array.len == (unsigned)i, cleanup, retcode); // Silence sign mis-match
     }
 
 cleanup:
@@ -305,41 +226,27 @@ cleanup:
 
 int test_get_out_of_bounds(void)
 {
-    int retcode = 0;
-    Array array;
+    int retcode = TEST_SUCCESS;
+    Array array = {0};
     int value;
 
     // Initialize
     value = array_init(&array, sizeof(int));
-    if (value != 0)
-    {
-        retcode = -1;
-        goto cleanup;
-    }
+    TEST_ASSERT_GOTO(value == 0, cleanup, retcode);
+
     // Append
     size_t len = 32;
     for (size_t i = 0; i < len; i++)
     {
         value = array_append(&array, &i);
-        if (value != 0)
-        {
-            retcode = -2;
-            goto cleanup;
-        }
+        TEST_ASSERT_GOTO(value == 0, cleanup, retcode);
     }
+
     // Get
     int *ptr = array_get(&array, len - 1);
-    if (!ptr)
-    {
-        retcode = -3;
-        goto cleanup;
-    }
+    TEST_ASSERT_GOTO(ptr != NULL, cleanup, retcode);
     ptr = array_get(&array, len);
-    if (ptr)
-    {
-        retcode = -4;
-        goto cleanup;
-    }
+    TEST_ASSERT_GOTO(ptr == NULL, cleanup, retcode);
 
 cleanup:
     array_deinit(&array);
@@ -348,33 +255,22 @@ cleanup:
 
 int test_shrink(void)
 {
-    int retcode = 0;
-    Array array;
+    int retcode = TEST_SUCCESS;
+    Array array = {0};
     int value;
 
     // Initialize
     value = array_init(&array, sizeof(int));
-    if (value != 0)
-    {
-        retcode = -1;
-        goto cleanup;
-    }
+    TEST_ASSERT_GOTO(value == 0, cleanup, retcode);
+
     // Shrink
     size_t capacity = array.capacity;
     array_shrink(&array);
-    if (array.capacity != capacity)
-    {
-        retcode = -2;
-        goto cleanup;
-    }
+    TEST_ASSERT_GOTO(array.capacity == capacity, cleanup, retcode);
     for (size_t i = 0; i < capacity + 1; i++)
         array_append(&array, &i);
     array_shrink(&array);
-    if (array.capacity != array.len)
-    {
-        retcode = -3;
-        goto cleanup;
-    }
+    TEST_ASSERT_GOTO(array.capacity == array.len, cleanup, retcode);
 
 cleanup:
     array_deinit(&array);

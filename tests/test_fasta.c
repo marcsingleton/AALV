@@ -62,17 +62,16 @@ void wrap_string_with_blanks(FILE *fp, const char *s, const int len, const int m
 
 int test_read_write(void)
 {
-    int retcode = 0;
+    int retcode = TEST_SUCCESS;
     char buffer[BUFFERLEN];
     FILE *fp = fmemopen(buffer, BUFFERLEN, "rw");
     fasta_fwrite(fp, &record_array, MAX_LEN);
     fseek(fp, 0, SEEK_SET);
     SeqRecordArray new_record_array;
     int fasta_retcode = fasta_fread(fp, &new_record_array);
-    if (fasta_retcode != FORMATS_ERROR_SUCCESS)
-        retcode = -1;
-    else if (records_equal(&record_array, &new_record_array) != 1)
-        retcode = -1;
+    TEST_ASSERT_GOTO(fasta_retcode == FORMATS_ERROR_SUCCESS, cleanup, retcode);
+    TEST_ASSERT_GOTO(records_equal(&record_array, &new_record_array) == 1, cleanup, retcode);
+cleanup:
     if (fasta_retcode == FORMATS_ERROR_SUCCESS)
         sequences_deinit_seq_record_array(&new_record_array);
     fclose(fp);
@@ -81,7 +80,7 @@ int test_read_write(void)
 
 int test_no_header(void)
 {
-    int retcode = 0;
+    int retcode = TEST_SUCCESS;
     char buffer[BUFFERLEN];
     FILE *fp = fmemopen(buffer, BUFFERLEN, "rw");
     SeqRecord *record = record_array.data;
@@ -91,8 +90,8 @@ int test_no_header(void)
     fseek(fp, 0, SEEK_SET);
     SeqRecordArray new_record_array;
     int fasta_retcode = fasta_fread(fp, &new_record_array);
-    if (fasta_retcode != FORMATS_ERROR_INVALID_FORMAT)
-        retcode = -1;
+    TEST_ASSERT_GOTO(fasta_retcode == FORMATS_ERROR_INVALID_FORMAT, cleanup, retcode);
+cleanup:
     if (fasta_retcode == 0)
         sequences_deinit_seq_record_array(&new_record_array);
     fclose(fp);
@@ -101,14 +100,15 @@ int test_no_header(void)
 
 int test_empty_file(void)
 {
-    int retcode = 0;
+    int retcode = TEST_SUCCESS;
     char buffer[BUFFERLEN];
     FILE *fp = fmemopen(buffer, 1, "rw");
     fgetc(fp); // Consume the single byte of buffer
     SeqRecordArray new_record_array;
     int fasta_retcode = fasta_fread(fp, &new_record_array);
-    if (fasta_retcode != 0 || new_record_array.len != 0)
-        retcode = -1;
+    TEST_ASSERT_GOTO(fasta_retcode == 0, cleanup, retcode);
+    TEST_ASSERT_GOTO(new_record_array.len == 0, cleanup, retcode);
+cleanup:
     if (fasta_retcode == 0)
         sequences_deinit_seq_record_array(&new_record_array);
     fclose(fp);
@@ -117,7 +117,7 @@ int test_empty_file(void)
 
 int test_blank_lines(void)
 {
-    int retcode = 0;
+    int retcode = TEST_SUCCESS;
     char buffer[BUFFERLEN];
     FILE *fp = fmemopen(buffer, BUFFERLEN, "rw");
     fputs("\n\n\n", fp);
@@ -130,10 +130,10 @@ int test_blank_lines(void)
     fseek(fp, 0, SEEK_SET);
     SeqRecordArray new_record_array;
     int fasta_retcode = fasta_fread(fp, &new_record_array);
-    if (fasta_retcode != FORMATS_ERROR_SUCCESS || new_record_array.len != record_array.len)
-        retcode = -1;
-    else if (records_equal(&record_array, &new_record_array) != 1)
-        retcode = -1;
+    TEST_ASSERT_GOTO(fasta_retcode == FORMATS_ERROR_SUCCESS, cleanup, retcode);
+    TEST_ASSERT_GOTO(new_record_array.len == record_array.len, cleanup, retcode);
+    TEST_ASSERT_GOTO(records_equal(&record_array, &new_record_array) == 1, cleanup, retcode);
+cleanup:
     if (fasta_retcode == FORMATS_ERROR_SUCCESS)
         sequences_deinit_seq_record_array(&new_record_array);
     fclose(fp);
@@ -142,7 +142,7 @@ int test_blank_lines(void)
 
 int test_non_fasta(void)
 {
-    int retcode = 0;
+    int retcode = TEST_SUCCESS;
     char buffer[BUFFERLEN] =
         "Here's a multiline\n"
         "file that's definitely not\n"
@@ -150,8 +150,8 @@ int test_non_fasta(void)
     FILE *fp = fmemopen(buffer, BUFFERLEN, "rw");
     SeqRecordArray new_record_array;
     int fasta_retcode = fasta_fread(fp, &new_record_array);
-    if (fasta_retcode != FORMATS_ERROR_INVALID_FORMAT)
-        retcode = -1;
+    TEST_ASSERT_GOTO(fasta_retcode == FORMATS_ERROR_INVALID_FORMAT, cleanup, retcode);
+cleanup:
     if (fasta_retcode == 0)
         sequences_deinit_seq_record_array(&new_record_array);
     fclose(fp);
@@ -175,19 +175,17 @@ int test_get_id(void)
         {NULL, NULL},
     };
 
-    int retcode = 0;
     char *expected_id = NULL;
     char *returned_id = NULL;
     for (IdTest *test = tests; test->header != NULL; test++)
     {
         expected_id = test->id;
         returned_id = fasta_get_id(test->header);
-        if (!returned_id || strcmp(expected_id, returned_id) != 0)
-            retcode -= 1;
+        TEST_ASSERT(returned_id != NULL && strcmp(expected_id, returned_id) == 0);
         free(returned_id);
     }
 
-    return retcode;
+    return TEST_SUCCESS;
 }
 
 Test tests[] = {

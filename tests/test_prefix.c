@@ -22,8 +22,7 @@ int test_tree_init(void)
     char s[] = "ABC";
 
     int retcode = prefix_tree_init(&tree, s, sizeof(int));
-    if (retcode != 0)
-        return -1;
+    TEST_ASSERT(retcode == 0);
 
     return 0;
 }
@@ -41,29 +40,23 @@ int test_tree_insert_get_delete_root(void)
     void *ptr;
 
     int retcode = prefix_tree_init(&tree, s, sizeof(int));
-    if (retcode != 0)
-        return -1;
+    TEST_ASSERT(retcode == 0);
 
     key = "A";
     value = 0;
-    if (prefix_tree_insert(&tree, key, &value) != 0)
-        return -2;
+    TEST_ASSERT(prefix_tree_insert(&tree, key, &value) == 0);
 
     key = "A";
     expected_value = 0;
     ptr = prefix_tree_get(&tree, key);
-    if (!ptr)
-        return -3;
+    TEST_ASSERT(ptr != NULL);
     returned_value = *(int *)ptr;
-    if (expected_value != returned_value)
-        return -4;
+    TEST_ASSERT(expected_value == returned_value);
 
     key = "A";
-    if (prefix_tree_delete(&tree, key) != 0)
-        return -5;
+    TEST_ASSERT(prefix_tree_delete(&tree, key) == 0);
     ptr = prefix_tree_get(&tree, key);
-    if (ptr)
-        return -6;
+    TEST_ASSERT(ptr == NULL);
 
     return 0;
 }
@@ -81,76 +74,60 @@ int test_tree_insert_get_delete_parent(void)
     void *ptr;
 
     int retcode = prefix_tree_init(&tree, s, sizeof(int));
-    if (retcode != 0)
-        return -1;
+    TEST_ASSERT(retcode == 0);
 
     // Insert
     key = "A";
     value = 0;
-    if (prefix_tree_insert(&tree, key, &value) != 0)
-        return -2;
+    TEST_ASSERT(prefix_tree_insert(&tree, key, &value) == 0);
     key = "AB";
     value = 1;
-    if (prefix_tree_insert(&tree, key, &value) != 0)
-        return -3;
+    TEST_ASSERT(prefix_tree_insert(&tree, key, &value) == 0);
     key = "ABC";
     value = 2;
-    if (prefix_tree_insert(&tree, key, &value) != 0)
-        return -4;
+    TEST_ASSERT(prefix_tree_insert(&tree, key, &value) == 0);
 
     // Get
     key = "A";
     expected_value = 0;
     ptr = prefix_tree_get(&tree, key);
-    if (!ptr)
-        return -5;
+    TEST_ASSERT(ptr != NULL);
     returned_value = *(int *)ptr;
-    if (expected_value != returned_value)
-        return -6;
+    TEST_ASSERT(expected_value == returned_value);
 
     key = "AB";
     expected_value = 1;
     ptr = prefix_tree_get(&tree, key);
-    if (!ptr)
-        return -7;
+    TEST_ASSERT(ptr != NULL);
     returned_value = *(int *)ptr;
-    if (expected_value != returned_value)
-        return -8;
+    TEST_ASSERT(expected_value == returned_value);
 
     key = "ABC";
     expected_value = 2;
     ptr = prefix_tree_get(&tree, key);
-    if (!ptr)
-        return -9;
+    TEST_ASSERT(ptr != NULL);
     returned_value = *(int *)ptr;
-    if (expected_value != returned_value)
-        return -10;
+    TEST_ASSERT(expected_value == returned_value);
 
     // Delete
     key = "AB";
-    if (prefix_tree_delete(&tree, key) != 0)
-        return -11;
+    TEST_ASSERT(prefix_tree_delete(&tree, key) == 0);
     ptr = prefix_tree_get(&tree, key);
-    if (ptr)
-        return -12;
+    TEST_ASSERT(ptr == NULL);
 
     key = "ABC";
     expected_value = 2;
     ptr = prefix_tree_get(&tree, key);
-    if (!ptr)
-        return -13;
+    TEST_ASSERT(ptr != NULL);
     returned_value = *(int *)ptr;
-    if (expected_value != returned_value)
-        return -14;
+    TEST_ASSERT(expected_value == returned_value);
 
     key = "A";
     expected_value = 0;
     ptr = prefix_tree_get(&tree, key);
-    if (!ptr)
-        return -15;
+    TEST_ASSERT(ptr != NULL);
     returned_value = *(int *)ptr;
-    if (expected_value != returned_value)
-        return -16;
+    TEST_ASSERT(expected_value == returned_value);
 
     return 0;
 }
@@ -168,54 +145,43 @@ int test_tree_insert_get_delete_parent_root(void)
     void *ptr;
 
     int retcode = prefix_tree_init(&tree, s, sizeof(int));
-    if (retcode != 0)
-        return -1;
+    TEST_ASSERT(retcode == 0);
 
     // Insert
     key = "A";
     value = 0;
-    if (prefix_tree_insert(&tree, key, &value) != 0)
-        return -2;
+    TEST_ASSERT(prefix_tree_insert(&tree, key, &value) == 0);
     key = "AB";
     value = 1;
-    if (prefix_tree_insert(&tree, key, &value) != 0)
-        return -3;
+    TEST_ASSERT(prefix_tree_insert(&tree, key, &value) == 0);
 
     // Get
     key = "A";
     expected_value = 0;
     ptr = prefix_tree_get(&tree, key);
-    if (!ptr)
-        return -4;
+    TEST_ASSERT(ptr != NULL);
     returned_value = *(int *)ptr;
-    if (expected_value != returned_value)
-        return -5;
+    TEST_ASSERT(expected_value == returned_value);
 
     key = "AB";
     expected_value = 1;
     ptr = prefix_tree_get(&tree, key);
-    if (!ptr)
-        return -6;
+    TEST_ASSERT(ptr != NULL);
     returned_value = *(int *)ptr;
-    if (expected_value != returned_value)
-        return -7;
+    TEST_ASSERT(expected_value == returned_value);
 
     // Delete
     key = "A";
-    if (prefix_tree_delete(&tree, key) != 0)
-        return -8;
+    TEST_ASSERT(prefix_tree_delete(&tree, key) == 0);
     ptr = prefix_tree_get(&tree, key);
-    if (ptr)
-        return -9;
+    TEST_ASSERT(ptr == NULL);
 
     key = "AB";
     expected_value = 1;
     ptr = prefix_tree_get(&tree, key);
-    if (!ptr)
-        return -10;
+    TEST_ASSERT(ptr != NULL);
     returned_value = *(int *)ptr;
-    if (expected_value != returned_value)
-        return -11;
+    TEST_ASSERT(expected_value == returned_value);
 
     return 0;
 }
@@ -233,54 +199,43 @@ int test_tree_insert_get_delete_leaf(void)
     void *ptr;
 
     int retcode = prefix_tree_init(&tree, s, sizeof(int));
-    if (retcode != 0)
-        return -1;
+    TEST_ASSERT(retcode == 0);
 
     // Insert
     key = "A";
     value = 0;
-    if (prefix_tree_insert(&tree, key, &value) != 0)
-        return -2;
+    TEST_ASSERT(prefix_tree_insert(&tree, key, &value) == 0);
     key = "AB";
     value = 1;
-    if (prefix_tree_insert(&tree, key, &value) != 0)
-        return -3;
+    TEST_ASSERT(prefix_tree_insert(&tree, key, &value) == 0);
 
     // Get
     key = "A";
     expected_value = 0;
     ptr = prefix_tree_get(&tree, key);
-    if (!ptr)
-        return -4;
+    TEST_ASSERT(ptr != NULL);
     returned_value = *(int *)ptr;
-    if (expected_value != returned_value)
-        return -5;
+    TEST_ASSERT(expected_value == returned_value);
 
     key = "AB";
     expected_value = 1;
     ptr = prefix_tree_get(&tree, key);
-    if (!ptr)
-        return -6;
+    TEST_ASSERT(ptr != NULL);
     returned_value = *(int *)ptr;
-    if (expected_value != returned_value)
-        return -7;
+    TEST_ASSERT(expected_value == returned_value);
 
     // Delete
     key = "AB";
-    if (prefix_tree_delete(&tree, key) != 0)
-        return -8;
+    TEST_ASSERT(prefix_tree_delete(&tree, key) == 0);
     ptr = prefix_tree_get(&tree, key);
-    if (ptr)
-        return -9;
+    TEST_ASSERT(ptr == NULL);
 
     key = "A";
     expected_value = 0;
     ptr = prefix_tree_get(&tree, key);
-    if (!ptr)
-        return -10;
+    TEST_ASSERT(ptr != NULL);
     returned_value = *(int *)ptr;
-    if (expected_value != returned_value)
-        return -11;
+    TEST_ASSERT(expected_value == returned_value);
 
     return 0;
 }
@@ -298,81 +253,65 @@ int test_tree_insert_get_prefix(void)
     void *ptr;
 
     int retcode = prefix_tree_init(&tree, s, sizeof(int));
-    if (retcode != 0)
-        return -1;
+    TEST_ASSERT(retcode == 0);
 
     // Insert
     key = "A";
     value = 0;
-    if (prefix_tree_insert(&tree, key, &value) != 0)
-        return -2;
+    TEST_ASSERT(prefix_tree_insert(&tree, key, &value) == 0);
 
     key = "AAA";
     value = 1;
-    if (prefix_tree_insert(&tree, key, &value) != 0)
-        return -3;
+    TEST_ASSERT(prefix_tree_insert(&tree, key, &value) == 0);
 
     // Get
     key = "A";
     expected_value = 0;
     ptr = prefix_tree_get_prefix_match(&tree, key);
-    if (!ptr)
-        return -4;
+    TEST_ASSERT(ptr != NULL);
     returned_value = *(int *)ptr;
-    if (expected_value != returned_value)
-        return -5;
+    TEST_ASSERT(expected_value == returned_value);
 
     key = "AA";
     expected_value = 1;
     ptr = prefix_tree_get_prefix_match(&tree, key);
-    if (!ptr)
-        return -6;
+    TEST_ASSERT(ptr != NULL);
     returned_value = *(int *)ptr;
-    if (expected_value != returned_value)
-        return -7;
+    TEST_ASSERT(expected_value == returned_value);
 
     key = "AAA";
     expected_value = 1;
     ptr = prefix_tree_get_prefix_match(&tree, key);
-    if (!ptr)
-        return -8;
+    TEST_ASSERT(ptr != NULL);
     returned_value = *(int *)ptr;
-    if (expected_value != returned_value)
-        return -9;
+    TEST_ASSERT(expected_value == returned_value);
 
     // Insert prefix
     key = "AA";
     value = 2;
-    if (prefix_tree_insert(&tree, key, &value) != 0)
-        return -10;
+    TEST_ASSERT(prefix_tree_insert(&tree, key, &value) == 0);
 
     // Get prefix
     key = "A";
     expected_value = 0;
     ptr = prefix_tree_get_prefix_match(&tree, key);
-    if (!ptr)
-        return -11;
+    TEST_ASSERT(ptr != NULL);
     returned_value = *(int *)ptr;
-    if (expected_value != returned_value)
-        return -12;
+    TEST_ASSERT(expected_value == returned_value);
 
     key = "AAA";
     expected_value = 1;
     ptr = prefix_tree_get_prefix_match(&tree, key);
-    if (!ptr)
-        return -13;
+    TEST_ASSERT(ptr != NULL);
     returned_value = *(int *)ptr;
-    if (expected_value != returned_value)
-        return -14;
+    TEST_ASSERT(expected_value == returned_value);
 
     key = "AA";
     expected_value = 2;
     ptr = prefix_tree_get_prefix_match(&tree, key);
-    if (!ptr)
-        return -15;
+    TEST_ASSERT(ptr != NULL);
     returned_value = *(int *)ptr;
-    if (expected_value != returned_value)
-        return -16;
+    TEST_ASSERT(expected_value == returned_value);
 
     return 0;
 }
@@ -390,37 +329,30 @@ int test_tree_insert_split_leaf(void)
     void *ptr;
 
     int retcode = prefix_tree_init(&tree, s, sizeof(int));
-    if (retcode != 0)
-        return -1;
+    TEST_ASSERT(retcode == 0);
 
     // Insert
     key = "AA";
     value = 0;
-    if (prefix_tree_insert(&tree, key, &value) != 0)
-        return -2;
+    TEST_ASSERT(prefix_tree_insert(&tree, key, &value) == 0);
     key = "AAB";
     value = 1;
-    if (prefix_tree_insert(&tree, key, &value) != 0)
-        return -3;
+    TEST_ASSERT(prefix_tree_insert(&tree, key, &value) == 0);
 
     // Get
     key = "AA";
     expected_value = 0;
     ptr = prefix_tree_get(&tree, key);
-    if (!ptr)
-        return -4;
+    TEST_ASSERT(ptr != NULL);
     returned_value = *(int *)ptr;
-    if (expected_value != returned_value)
-        return -5;
+    TEST_ASSERT(expected_value == returned_value);
 
     key = "AAB";
     expected_value = 1;
     ptr = prefix_tree_get(&tree, key);
-    if (!ptr)
-        return -6;
+    TEST_ASSERT(ptr != NULL);
     returned_value = *(int *)ptr;
-    if (expected_value != returned_value)
-        return -7;
+    TEST_ASSERT(expected_value == returned_value);
 
     return 0;
 }
@@ -438,45 +370,36 @@ int test_tree_insert_split_internal(void)
     void *ptr;
 
     int retcode = prefix_tree_init(&tree, s, sizeof(int));
-    if (retcode != 0)
-        return -1;
+    TEST_ASSERT(retcode == 0);
 
     // Insert
     key = "AAA";
     value = 0;
-    if (prefix_tree_insert(&tree, key, &value) != 0)
-        return -2;
+    TEST_ASSERT(prefix_tree_insert(&tree, key, &value) == 0);
     key = "AAB";
     value = 1;
-    if (prefix_tree_insert(&tree, key, &value) != 0)
-        return -3;
+    TEST_ASSERT(prefix_tree_insert(&tree, key, &value) == 0);
 
     // Get
     key = "AAA";
     expected_value = 0;
     ptr = prefix_tree_get(&tree, key);
-    if (!ptr)
-        return -4;
+    TEST_ASSERT(ptr != NULL);
     returned_value = *(int *)ptr;
-    if (expected_value != returned_value)
-        return -5;
+    TEST_ASSERT(expected_value == returned_value);
 
     key = "AAB";
     expected_value = 1;
     ptr = prefix_tree_get(&tree, key);
-    if (!ptr)
-        return -6;
+    TEST_ASSERT(ptr != NULL);
     returned_value = *(int *)ptr;
-    if (expected_value != returned_value)
-        return -7;
+    TEST_ASSERT(expected_value == returned_value);
 
     key = "AA";
     ptr = prefix_tree_get(&tree, key);
-    if (ptr)
-        return -8;
+    TEST_ASSERT(ptr == NULL);
 
-    if (tree.root.value)
-        return -9;
+    TEST_ASSERT(tree.root.value == NULL);
 
     return 0;
 }
@@ -487,13 +410,11 @@ int test_tree_insert_out_of_char_map(void)
     char s[] = "ABC";
 
     int retcode = prefix_tree_init(&tree, s, sizeof(int));
-    if (retcode != 0)
-        return -1;
+    TEST_ASSERT(retcode == 0);
 
     char *key = "abc";
     int value = 10;
-    if (prefix_tree_insert(&tree, key, &value) == 0)
-        return -2;
+    TEST_ASSERT(prefix_tree_insert(&tree, key, &value) != 0);
 
     return 0;
 }
