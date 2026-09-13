@@ -16,6 +16,7 @@ typedef enum
     FORMATS_ERROR_SEQUENCE_OVERFLOW = -4,
     FORMATS_ERROR_FILE_IO = -5,
     FORMATS_ERROR_MEMORY_ALLOCATION = -6,
+    FORMATS_ERROR_WRITE = -7,
 } FormatsRetCode;
 
 int formats_line_is_empty(char *line, ssize_t line_len);

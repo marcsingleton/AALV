@@ -221,6 +221,10 @@ int fasta_read(const char *path, SeqRecordArray *record_array)
 
 int fasta_fwrite(FILE *fp, SeqRecordArray *record_array, const int max_len)
 {
+    // Check writeable
+    if (fputs("", fp) == EOF)
+        return FORMATS_ERROR_WRITE;
+
     for (size_t i = 0; i < record_array->len; i++)
     {
         SeqRecord *record = record_array->data + i;
