@@ -56,9 +56,9 @@ int char_map_init(CharMap *char_map, char *s)
         char_map->map[i] = -1;
 
     unsigned int len = 0;
-    for (char *c = s; *c != '\0'; c++)
+    for (; *s != '\0'; s++)
     {
-        int index = *c;
+        int index = *s;
         if (char_map->map[index] == -1)
         {
             char_map->map[index] = len;
