@@ -147,15 +147,15 @@ int test_extend_get(void)
     TEST_ASSERT_GOTO(condition, cleanup, retcode);
 
     // Append
-    int n_1 = 1024;
-    for (int i = 0; i < n_1; i++)
+    int n1 = 1024;
+    for (int i = 0; i < n1; i++)
     {
         int x = 2 * i * i - 1;
         value = array_append(&array1, &x);
         TEST_ASSERT_GOTO(value == 0, cleanup, retcode);
     }
-    int n_2 = 1024;
-    for (int i = 0; i < n_2; i++)
+    int n2 = 1024;
+    for (int i = 0; i < n2; i++)
     {
         int x = i * i - 1;
         value = array_append(&array2, &x);
@@ -165,16 +165,16 @@ int test_extend_get(void)
     // Extend
     value = array_extend(&array1, array2.data, array2.len);
     TEST_ASSERT_GOTO(value == 0, cleanup, retcode);
-    for (int i = 0; i < n_1 + n_2; i++)
+    for (int i = 0; i < n1 + n2; i++)
     {
         int *ptr = array_get(&array1, i);
         TEST_ASSERT_GOTO(ptr != NULL, cleanup, retcode);
         int actual_x = *ptr;
         int expected_x;
-        if (i < n_1)
+        if (i < n1)
             expected_x = 2 * i * i - 1;
-        else if (i < n_1 + n_2)
-            expected_x = (i - n_1) * (i - n_1) - 1;
+        else if (i < n1 + n2)
+            expected_x = (i - n1) * (i - n1) - 1;
         else
         {
             retcode = -6;

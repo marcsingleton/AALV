@@ -32,12 +32,12 @@ int records_equal(SeqRecordArray *record_array_1, SeqRecordArray *record_array_2
     size_t nrecords = record_array_1->len;
     for (unsigned int i = 0; i < nrecords; i++)
     {
-        SeqRecord *record_1, *record_2;
-        record_1 = record_array_1->data + i;
-        record_2 = record_array_2->data + i;
-        if (strcmp(record_1->header, record_2->header) != 0)
+        SeqRecord *record1, *record2;
+        record1 = record_array_1->data + i;
+        record2 = record_array_2->data + i;
+        if (strcmp(record1->header, record2->header) != 0)
             return 0;
-        if (strcmp(record_1->seq, record_2->seq) != 0)
+        if (strcmp(record1->seq, record2->seq) != 0)
             return 0;
     }
     return 1;

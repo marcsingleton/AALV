@@ -123,16 +123,16 @@ int test_seq_in_alphabet(void)
         .gaps = ".-",
         .case_sensitive = false,
     };
-    SeqRecord seq_1 = {.seq = "AABBCC", .len = 6};
-    SeqRecord seq_2 = {.seq = "AABBXX", .len = 6};
+    SeqRecord seq1 = {.seq = "AABBCC", .len = 6};
+    SeqRecord seq2 = {.seq = "AABBXX", .len = 6};
 
     int retcode = sequences_init_alphabet(&test_alphabet, test_alphabet.name,
                                           test_alphabet.syms, test_alphabet.gaps,
                                           test_alphabet.case_sensitive);
     TEST_ASSERT_MSG(retcode != 1, "Failed to initialize alphabet.");
 
-    TEST_ASSERT(sequences_seq_in_alphabet(&test_alphabet, seq_1.seq) == 1);
-    TEST_ASSERT(sequences_seq_in_alphabet(&test_alphabet, seq_2.seq) != 1);
+    TEST_ASSERT(sequences_seq_in_alphabet(&test_alphabet, seq1.seq) == 1);
+    TEST_ASSERT(sequences_seq_in_alphabet(&test_alphabet, seq2.seq) != 1);
 
     return TEST_SUCCESS;
 }

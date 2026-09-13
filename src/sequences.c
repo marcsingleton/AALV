@@ -130,21 +130,21 @@ int sequences_init_alphabet(Alphabet *alphabet, char *name, char *syms, char *ga
             goto error;
         if (!case_sensitive && isalpha(*sym))
         {
-            unsigned int index_0, index_1;
+            unsigned int index0, index1;
             if (isupper(*sym))
             {
-                index_0 = *sym;
-                index_1 = tolower(*sym);
+                index0 = *sym;
+                index1 = tolower(*sym);
             }
             else
             {
-                index_0 = toupper(*sym);
-                index_1 = *sym;
+                index0 = toupper(*sym);
+                index1 = *sym;
             }
-            if (test_alphabet.index_map[index_0] != -1)
+            if (test_alphabet.index_map[index0] != -1)
                 continue;
-            test_alphabet.index_map[index_0] = len;
-            test_alphabet.index_map[index_1] = len;
+            test_alphabet.index_map[index0] = len;
+            test_alphabet.index_map[index1] = len;
             len++;
         }
         else
