@@ -9,14 +9,17 @@
 
 #define MODULE_NAME "test_fasta"
 
+#define HEADER1 "id1 metadata1"
 #define SEQ1 "This is the first sequence."
+#define HEADER2 "id2 metadata2"
 #define SEQ2 "This is the second sequence. It is a bit longer than the first."
+#define HEADER3 "id3 metadata3"
 #define SEQ3 "This is the third sequence in the array!"
 
 SeqRecord data[] = {
-    {.header = "id1 metadata1", .seq = SEQ1, .len = sizeof(SEQ1) - 1},
-    {.header = "id2 metadata2", .seq = SEQ2, .len = sizeof(SEQ2) - 1},
-    {.header = "id3 metadata3", .seq = SEQ3, .len = sizeof(SEQ3) - 1},
+    {.header = HEADER1, .seq = SEQ1, .len = sizeof(SEQ1) - 1},
+    {.header = HEADER2, .seq = SEQ2, .len = sizeof(SEQ2) - 1},
+    {.header = HEADER3, .seq = SEQ3, .len = sizeof(SEQ3) - 1},
 };
 #define NRECORDS sizeof(data) / sizeof(SeqRecord)
 
