@@ -219,7 +219,7 @@ int fasta_read(const char *path, SeqRecordArray *record_array)
     return retcode;
 }
 
-int fasta_fwrite(FILE *fp, SeqRecordArray *record_array, const int max_len)
+int fasta_fwrite(FILE *fp, SeqRecordArray *record_array, const unsigned int max_len)
 {
     // Check writeable
     if (fputs("", fp) == EOF)
@@ -228,14 +228,14 @@ int fasta_fwrite(FILE *fp, SeqRecordArray *record_array, const int max_len)
     for (size_t i = 0; i < record_array->len; i++)
     {
         SeqRecord *record = record_array->data + i;
-        fprintf(fp, ">%s\n", record->header);
-        fasta_wrap_sequence(fp, record->seq, record->len, max_len);
+        fasta_write_header(fp, record->header);
+        fasta_write_sequence(fp, record->seq, max_len);
     }
 
     return FORMATS_SUCCESS;
 }
 
-int fasta_write(const char *path, SeqRecordArray *record_array, const int max_len)
+int fasta_write(const char *path, SeqRecordArray *record_array, const unsigned int max_len)
 {
     FILE *fp = fopen(path, "w");
     if (!fp)
@@ -251,19 +251,30 @@ int fasta_write(const char *path, SeqRecordArray *record_array, const int max_le
     return FORMATS_SUCCESS;
 }
 
-void fasta_wrap_sequence(FILE *fp, const char *s, const size_t len, const int max_len)
+void fasta_write_header(FILE *fp, const char *s)
 {
-    size_t nlines = len / max_len;
-    size_t j;
-    for (j = 0; j < nlines; j++)
+    fputc('>', fp);
+    fputs(s, fp);
+    fputc('\n', fp);
+}
+
+void fasta_write_sequence(FILE *fp, const char *s, const unsigned int max_len)
+{
+    const char *t = s; // Tracks start of unwritten sequence
+    unsigned int len = 0;
+    for (; *s != '\0'; s++ && len++)
     {
-        fwrite(s + j * max_len, sizeof(char), max_len, fp);
-        fputc('\n', fp);
+        if (len >= max_len)
+        {
+            fwrite(t, sizeof(char), max_len, fp);
+            fputc('\n', fp);
+            t = s;
+            len = 0;
+        }
     }
-    size_t nchars = len % max_len;
-    if (nchars > 0)
+    if (len > 0)
     {
-        fwrite(s + j * max_len, sizeof(char), nchars, fp);
+        fputs(t, fp);
         fputc('\n', fp);
     }
 }
