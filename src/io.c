@@ -1,10 +1,12 @@
 #include "fasta.h"
 #include "io.h"
+#include "linefmt.h"
 #include "str.h"
 
 FormatOption format_options[] = {
     {"FASTA", "fasta,fa,faa,fna,afa", &fasta_fread},
     {"A2M/A3M", "a2m,a3m", &fasta_fread},
+    {"lines", "txt", &linefmt_fread},
     // CLUSTAL
     // PHYLIP
     // STOCKHOLM
