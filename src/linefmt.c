@@ -40,11 +40,6 @@ int linefmt_fread(FILE *fp, SeqRecordArray *record_array)
             trim_len--;
         if (trim_len == 0)
             continue;
-        else if (trim_len < 0)
-        {
-            retcode = FORMATS_ERROR_PARSING;
-            goto cleanup;
-        }
 
         // Get header
         header = malloc(1);

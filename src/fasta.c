@@ -67,9 +67,9 @@ int fasta_fread(FILE *fp, SeqRecordArray *record_array)
     {
         // Trim line
         trim_len = line_len;
-        while (line[trim_len - 1] == '\n' || line[trim_len - 1] == '\r')
+        while (trim_len > 0 && (line[trim_len - 1] == '\n' || line[trim_len - 1] == '\r'))
             trim_len--;
-        if (trim_len <= 0) // This block should always have a valid header line
+        if (trim_len == 0) // This block should always have a valid header line
         {
             retcode = FORMATS_ERROR_PARSING;
             goto cleanup;
@@ -103,11 +103,6 @@ int fasta_fread(FILE *fp, SeqRecordArray *record_array)
                 trim_len--;
             if (trim_len == 0)
                 continue;
-            else if (trim_len < 0)
-            {
-                retcode = FORMATS_ERROR_PARSING;
-                goto cleanup;
-            }
 
             // Check for sequence overflow
             if (seq_len > SIZE_MAX - trim_len - 1)
