@@ -34,6 +34,18 @@
         }                                                      \
     } while (0)
 
+#define TEST_ASSERT_GOTO(condition, label, flag)               \
+    do                                                         \
+    {                                                          \
+        if (!(condition))                                      \
+        {                                                      \
+            fprintf(stderr, TEST_RESULT_PREFIX "%s: %d: %s\n", \
+                    __FILE__, __LINE__, #condition);           \
+            flag = TEST_FAILURE;                               \
+            goto label;                                        \
+        }                                                      \
+    } while (0)
+
 typedef struct
 {
     int (*fn_ptr)(void);
