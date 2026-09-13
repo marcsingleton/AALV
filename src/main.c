@@ -165,6 +165,7 @@ int main(int argc, char *argv[])
 
     // Prepare options
     struct option long_options[noptions + 1]; // Extra struct of 0s to mark end
+    long_options[noptions] = (struct option){0};
     char *short_options = NULL;
     retcode = cli_prepare_options(noptions, options, &short_options, long_options, INVOCATION_NAME);
     if (retcode != 0)
