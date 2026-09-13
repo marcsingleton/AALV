@@ -69,10 +69,10 @@ int test_read_write(void)
     fseek(fp, 0, SEEK_SET);
     SeqRecordArray new_record_array;
     int fasta_retcode = fasta_fread(fp, &new_record_array);
-    TEST_ASSERT_GOTO(fasta_retcode == FORMATS_ERROR_SUCCESS, cleanup, retcode);
+    TEST_ASSERT_GOTO(fasta_retcode == FORMATS_SUCCESS, cleanup, retcode);
     TEST_ASSERT_GOTO(records_equal(&record_array, &new_record_array) == 1, cleanup, retcode);
 cleanup:
-    if (fasta_retcode == FORMATS_ERROR_SUCCESS)
+    if (fasta_retcode == FORMATS_SUCCESS)
         sequences_deinit_seq_record_array(&new_record_array);
     fclose(fp);
     return retcode;
@@ -130,11 +130,11 @@ int test_blank_lines(void)
     fseek(fp, 0, SEEK_SET);
     SeqRecordArray new_record_array;
     int fasta_retcode = fasta_fread(fp, &new_record_array);
-    TEST_ASSERT_GOTO(fasta_retcode == FORMATS_ERROR_SUCCESS, cleanup, retcode);
+    TEST_ASSERT_GOTO(fasta_retcode == FORMATS_SUCCESS, cleanup, retcode);
     TEST_ASSERT_GOTO(new_record_array.len == record_array.len, cleanup, retcode);
     TEST_ASSERT_GOTO(records_equal(&record_array, &new_record_array) == 1, cleanup, retcode);
 cleanup:
-    if (fasta_retcode == FORMATS_ERROR_SUCCESS)
+    if (fasta_retcode == FORMATS_SUCCESS)
         sequences_deinit_seq_record_array(&new_record_array);
     fclose(fp);
     return retcode;

@@ -13,7 +13,7 @@
 int fasta_fread(FILE *fp, SeqRecordArray *record_array)
 {
     // Declarations
-    int retcode = FORMATS_ERROR_SUCCESS;
+    int retcode = FORMATS_SUCCESS;
 
     void *ptr = NULL; // A generic temporary pointer for allocations
 
@@ -189,7 +189,7 @@ cleanup:
     free(id);
     free(seq);
 
-    if (retcode != FORMATS_ERROR_SUCCESS)
+    if (retcode != FORMATS_SUCCESS)
     {
         for (size_t i = 0; i < new_records.len; i++)
         {
@@ -210,6 +210,8 @@ int fasta_read(const char *path, SeqRecordArray *record_array)
         return FORMATS_ERROR_FILE_IO;
 
     int retcode = fasta_fread(fp, record_array);
+    if (retcode != FORMATS_SUCCESS)
+        return retcode;
 
     if (fclose(fp) != 0)
         return FORMATS_ERROR_FILE_IO;
@@ -225,7 +227,8 @@ int fasta_fwrite(FILE *fp, SeqRecordArray *record_array, const int max_len)
         fprintf(fp, ">%s\n", record->header);
         fasta_wrap_string(fp, record->seq, record->len, max_len);
     }
-    return 0;
+
+    return FORMATS_SUCCESS;
 }
 
 int fasta_write(const char *path, SeqRecordArray *record_array, const int max_len)
@@ -235,11 +238,13 @@ int fasta_write(const char *path, SeqRecordArray *record_array, const int max_le
         return FORMATS_ERROR_FILE_IO;
 
     int retcode = fasta_fwrite(fp, record_array, max_len);
+    if (retcode != FORMATS_SUCCESS)
+        return retcode;
 
     if (fclose(fp) != 0)
         return FORMATS_ERROR_FILE_IO;
 
-    return retcode;
+    return FORMATS_SUCCESS;
 }
 
 void fasta_wrap_string(FILE *fp, const char *s, const size_t len, const int max_len)
