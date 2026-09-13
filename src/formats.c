@@ -11,7 +11,7 @@ int formats_line_is_empty(char *line, ssize_t line_len)
         return 1;
     else if (line_len == 1 && line[0] == '\n')
         return 1;
-    else if (line_len == 2 && line[0] == '\n' && line[1] == '\r')
+    else if (line_len == 2 && line[1] == '\n' && line[0] == '\r')
         return 1;
     else
         return 0;
