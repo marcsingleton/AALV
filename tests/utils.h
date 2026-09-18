@@ -57,7 +57,7 @@ void test_result_printf(const char *format, ...)
     va_list ap;
     fputs(TEST_RESULT_PREFIX, stdout);
     va_start(ap, format);
-    printf(format, ap);
+    vprintf(format, ap);
     va_end(ap);
 }
 
