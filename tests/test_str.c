@@ -10,9 +10,17 @@ int split_tester(char *s, char **expected_fields, int expected_n, const char *de
     int retcode = TEST_SUCCESS;
     char **returned_fields = NULL;
     int returned_n = str_split(&returned_fields, s, delim);
-    TEST_ASSERT_GOTO(returned_n == expected_n, cleanup, retcode);
+    if (expected_n != returned_n) // Does not use asserts to keep output clean for the "wrong" tests
+    {
+        retcode = TEST_FAILURE;
+        goto cleanup;
+    }
     for (int i = 0; i < expected_n; i++)
-        TEST_ASSERT_GOTO(strcmp(expected_fields[i], returned_fields[i]) == 0, cleanup, retcode);
+        if (strcmp(expected_fields[i], returned_fields[i]) != 0)
+        {
+            retcode = TEST_FAILURE;
+            goto cleanup;
+        }
 cleanup:
     if (returned_n >= 0)
         str_free_split(returned_fields, returned_n);
