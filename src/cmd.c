@@ -313,7 +313,7 @@ void cmd_type(State *state, int argc, char **argv)
 /*
  * scheme new <name> <seq_type>
  * scheme remove <name>
- * scheme map fg|bg <name> <sym> <value>
+ * scheme map fg|bg <name> [<sym>=<value>]
  */
 void cmd_scheme(State *state, int argc, char **argv)
 {
@@ -345,7 +345,7 @@ void cmd_scheme(State *state, int argc, char **argv)
 
     if (argc > 1 && strcmp("map", argv[1]) == 0)
     {
-        if (argc != 6)
+        if (argc < 4)
             return;
 
         // Parse fg/bg
@@ -357,31 +357,33 @@ void cmd_scheme(State *state, int argc, char **argv)
         if (!color_scheme)
             return;
 
-        // Parse <sym>
-        char *sym_arg = argv[4];
-        if (strlen(sym_arg) != 1)
-            return;
-        char sym = sym_arg[0];
-        Alphabet *alphabet = sequences_seq_type_to_alphabet(color_scheme->type);
-        if (!alphabet)
-            return;
-        int index = alphabet->index_map[(unsigned int)sym];
-        if (index < 0)
-            return;
+        for (int i = 4; i < argc; i++)
+        {
+            char *arg = argv[i];
+            char sym;
+            int value;
+            if (sscanf(arg, "%c=%d", &sym, &value) < 2)
+                return;
 
-        // Parse <value>
-        char *value_arg = argv[5];
-        long value;
-        int retcode = parse_integer(value_arg, &value);
-        if (retcode != 0 || value < 0 || value > UINT8_MAX)
-            return;
-        Color color;
-        color.u8 = value;
+            // Parse <sym>
+            Alphabet *alphabet = sequences_seq_type_to_alphabet(color_scheme->type);
+            if (!alphabet)
+                return;
+            int index = alphabet->index_map[(unsigned int)sym];
+            if (index < 0)
+                return;
 
-        if (strcmp("fg", color_ground) == 0)
-            color_scheme_map_fg_color(&color_scheme->scheme, color, index);
-        else if (strcmp("bg", color_ground) == 0)
-            color_scheme_map_bg_color(&color_scheme->scheme, color, index);
+            // Parse <value>
+            if (value < 0 || value > UINT8_MAX)
+                return;
+            Color color;
+            color.u8 = value;
+
+            if (strcmp("fg", color_ground) == 0)
+                color_scheme_map_fg_color(&color_scheme->scheme, color, index);
+            else if (strcmp("bg", color_ground) == 0)
+                color_scheme_map_bg_color(&color_scheme->scheme, color, index);
+        }
     }
 }
 
