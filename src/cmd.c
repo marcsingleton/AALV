@@ -205,11 +205,14 @@ void cmd_previous_file(State *state, int argc, char **argv)
 }
 
 /*
- * set <name> [<value>]
+ * set <name> <value>
  */
 void cmd_set(State *state, int argc, char **argv)
 {
-    if (argc == 3 && strcmp("ruler_records_divider", argv[1]) == 0)
+    if (argc != 3)
+        return;
+
+    if (strcmp("ruler_records_divider", argv[1]) == 0)
     {
         // Parse <value> into unsigned int
         char *value_arg = argv[2];
@@ -221,8 +224,7 @@ void cmd_set(State *state, int argc, char **argv)
 
         state_set_ruler_records_divider(state, ruler_records_divider);
     }
-
-    if (argc == 3 && strcmp("header_sequence_divider", argv[1]) == 0)
+    else if (strcmp("header_sequence_divider", argv[1]) == 0)
     {
         // Parse <value> into unsigned int
         char *value_arg = argv[2];
@@ -234,8 +236,7 @@ void cmd_set(State *state, int argc, char **argv)
 
         state_set_header_sequence_divider(state, header_sequence_divider);
     }
-
-    if (argc == 3 && strcmp("tick_offset", argv[1]) == 0)
+    else if (strcmp("tick_offset", argv[1]) == 0)
     {
         // Parse <value> into unsigned int
         char *value_arg = argv[2];
@@ -247,8 +248,7 @@ void cmd_set(State *state, int argc, char **argv)
 
         state_set_tick_offset(state, tick_offset);
     }
-
-    if (argc == 3 && strcmp("tick_spacing", argv[1]) == 0)
+    else if (strcmp("tick_spacing", argv[1]) == 0)
     {
         // Parse <value> into unsigned int
         char *value_arg = argv[2];
@@ -260,8 +260,7 @@ void cmd_set(State *state, int argc, char **argv)
 
         state_set_tick_spacing(state, tick_spacing);
     }
-
-    if (argc == 3 && strcmp("scheme", argv[1]) == 0)
+    else if (strcmp("scheme", argv[1]) == 0)
     {
         // Parse <value> into color scheme
         char *color_scheme_arg = argv[2];
@@ -317,7 +316,10 @@ void cmd_type(State *state, int argc, char **argv)
  */
 void cmd_scheme(State *state, int argc, char **argv)
 {
-    if (argc > 1 && strcmp("new", argv[1]) == 0)
+    if (argc < 2)
+        return;
+
+    if (strcmp("new", argv[1]) == 0)
     {
         if (argc != 4)
             return;
@@ -332,8 +334,7 @@ void cmd_scheme(State *state, int argc, char **argv)
 
         state_new_color_scheme(state, name, seq_type, COLOR_8_BIT);
     }
-
-    if (argc > 1 && strcmp("remove", argv[1]) == 0)
+    else if (strcmp("remove", argv[1]) == 0)
     {
         if (argc != 3)
             return;
@@ -342,8 +343,7 @@ void cmd_scheme(State *state, int argc, char **argv)
 
         state_remove_color_scheme(state, name);
     }
-
-    if (argc > 1 && strcmp("map", argv[1]) == 0)
+    else if (strcmp("map", argv[1]) == 0)
     {
         if (argc < 4)
             return;
@@ -394,7 +394,10 @@ void cmd_config(State *state, int argc, char **argv)
 {
     (void)state; // Silence warnings
 
-    if (argc == 3 && strcmp("ruler_records_divider", argv[1]) == 0)
+    if (argc != 3)
+        return;
+
+    if (strcmp("ruler_records_divider", argv[1]) == 0)
     {
         // Parse <value> into unsigned int
         char *value_arg = argv[2];
@@ -406,8 +409,7 @@ void cmd_config(State *state, int argc, char **argv)
 
         config_set_ruler_records_divider(&state->config, ruler_records_divider);
     }
-
-    if (argc == 3 && strcmp("header_sequence_divider", argv[1]) == 0)
+    else if (strcmp("header_sequence_divider", argv[1]) == 0)
     {
         // Parse <value> into unsigned int
         char *value_arg = argv[2];
@@ -419,8 +421,7 @@ void cmd_config(State *state, int argc, char **argv)
 
         config_set_header_sequence_divider(&state->config, header_sequence_divider);
     }
-
-    if (argc == 3 && strcmp("tick_offset", argv[1]) == 0)
+    else if (strcmp("tick_offset", argv[1]) == 0)
     {
         // Parse <value> into unsigned int
         char *value_arg = argv[2];
@@ -432,8 +433,7 @@ void cmd_config(State *state, int argc, char **argv)
 
         config_set_tick_offset(&state->config, tick_offset);
     }
-
-    if (argc == 3 && strcmp("tick_spacing", argv[1]) == 0)
+    else if (strcmp("tick_spacing", argv[1]) == 0)
     {
         // Parse <value> into unsigned int
         char *value_arg = argv[2];
@@ -445,8 +445,7 @@ void cmd_config(State *state, int argc, char **argv)
 
         config_set_tick_spacing(&state->config, tick_spacing);
     }
-
-    if (argc == 3 && strcmp("nucleic_tiebreak_len", argv[1]) == 0)
+    else if (strcmp("nucleic_tiebreak_len", argv[1]) == 0)
     {
         // Parse <value> into unsigned int
         char *value_arg = argv[2];
