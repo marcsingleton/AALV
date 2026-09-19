@@ -5,25 +5,25 @@
 #include "str.h"
 #include "utils.h"
 
-int split_tester(char *s, char **expected_fields, int expected_n, const char *delim)
+int split_tester(char *s, char **exp_fields, int exp_n, const char *delim)
 {
     int retcode = TEST_SUCCESS;
-    char **returned_fields = NULL;
-    int returned_n = str_split(&returned_fields, s, delim);
-    if (expected_n != returned_n) // Does not use asserts to keep output clean for the "wrong" tests
+    char **ret_fields = NULL;
+    int ret_n = str_split(&ret_fields, s, delim);
+    if (exp_n != ret_n) // Does not use asserts to keep output clean for the "wrong" tests
     {
         retcode = TEST_FAILURE;
         goto cleanup;
     }
-    for (int i = 0; i < expected_n; i++)
-        if (strcmp(expected_fields[i], returned_fields[i]) != 0)
+    for (int i = 0; i < exp_n; i++)
+        if (strcmp(exp_fields[i], ret_fields[i]) != 0)
         {
             retcode = TEST_FAILURE;
             goto cleanup;
         }
 cleanup:
-    if (returned_n >= 0)
-        str_free_split(returned_fields, returned_n);
+    if (ret_n >= 0)
+        str_free_split(ret_fields, ret_n);
 
     return retcode;
 }
@@ -32,50 +32,50 @@ int test_split_empty_input(void)
 {
     char *s = "";
     char *delim = ",";
-    char *expected_fields[] = {""};
-    unsigned int expected_n = sizeof(expected_fields) / sizeof(char *);
+    char *exp_fields[] = {""};
+    unsigned int exp_n = sizeof(exp_fields) / sizeof(char *);
 
-    return split_tester(s, expected_fields, expected_n, delim);
+    return split_tester(s, exp_fields, exp_n, delim);
 }
 
 int test_split_nonempty_fields(void)
 {
     char *s = "a,1234,!@,xyz";
     char *delim = ",";
-    char *expected_fields[] = {"a", "1234", "!@", "xyz"};
-    unsigned int expected_n = sizeof(expected_fields) / sizeof(char *);
+    char *exp_fields[] = {"a", "1234", "!@", "xyz"};
+    unsigned int exp_n = sizeof(exp_fields) / sizeof(char *);
 
-    return split_tester(s, expected_fields, expected_n, delim);
+    return split_tester(s, exp_fields, exp_n, delim);
 }
 
 int test_split_empty_fields(void)
 {
     char *s = ",a,1234,,,!@,xyz,,,";
     char *delim = ",";
-    char *expected_fields[] = {"", "a", "1234", "", "", "!@", "xyz", "", "", ""};
-    unsigned int expected_n = sizeof(expected_fields) / sizeof(char *);
+    char *exp_fields[] = {"", "a", "1234", "", "", "!@", "xyz", "", "", ""};
+    unsigned int exp_n = sizeof(exp_fields) / sizeof(char *);
 
-    return split_tester(s, expected_fields, expected_n, delim);
+    return split_tester(s, exp_fields, exp_n, delim);
 }
 
 int test_split_alternate_delimiter(void)
 {
     char *s = "a\t1234\t!@\txyz";
     char *delim = "\t";
-    char *expected_fields[] = {"a", "1234", "!@", "xyz"};
-    unsigned int expected_n = sizeof(expected_fields) / sizeof(char *);
+    char *exp_fields[] = {"a", "1234", "!@", "xyz"};
+    unsigned int exp_n = sizeof(exp_fields) / sizeof(char *);
 
-    return split_tester(s, expected_fields, expected_n, delim);
+    return split_tester(s, exp_fields, exp_n, delim);
 }
 
 int test_split_wrong_expected_n(void)
 {
     char *s = "a\t1234\t!@\txyz";
     char *delim = "\t";
-    char *expected_fields[] = {"a", "1234", "!@"};
-    unsigned int expected_n = sizeof(expected_fields) / sizeof(char *);
+    char *exp_fields[] = {"a", "1234", "!@"};
+    unsigned int exp_n = sizeof(exp_fields) / sizeof(char *);
 
-    if (split_tester(s, expected_fields, expected_n, delim) != 0)
+    if (split_tester(s, exp_fields, exp_n, delim) != 0)
         return TEST_SUCCESS;
     else
         return TEST_FAILURE;
@@ -85,10 +85,10 @@ int test_split_wrong_expected_fields(void)
 {
     char *s = "a\t1234\t!@\txyz";
     char *delim = "\t";
-    char *expected_fields[] = {"a", "1234", "!@", "xy"};
-    unsigned int expected_n = sizeof(expected_fields) / sizeof(char *);
+    char *exp_fields[] = {"a", "1234", "!@", "xy"};
+    unsigned int exp_n = sizeof(exp_fields) / sizeof(char *);
 
-    if (split_tester(s, expected_fields, expected_n, delim) != 0)
+    if (split_tester(s, exp_fields, exp_n, delim) != 0)
         return TEST_SUCCESS;
     else
         return TEST_FAILURE;

@@ -20,23 +20,23 @@ int test_round_trip(void)
         {.header = "", .id = "", .seq = "12345", .len = 5},
         {.header = "", .id = "", .seq = "FGHI", .len = 4},
     };
-    SeqRecordArray expected_records = {.data = data, .len = sizeof(data) / sizeof(SeqRecord)};
+    SeqRecordArray exp_records = {.data = data, .len = sizeof(data) / sizeof(SeqRecord)};
 
     FILE *fp = fmemopen(buffer, sizeof(buffer), "w+");
     TEST_ASSERT_GOTO(fp != NULL, cleanup, test_retcode);
 
-    retcode = linefmt_fwrite(fp, &expected_records);
+    retcode = linefmt_fwrite(fp, &exp_records);
     TEST_ASSERT_GOTO(retcode == FORMATS_SUCCESS, cleanup, test_retcode);
 
     rewind(fp);
-    SeqRecordArray returned_records = {0};
-    retcode = linefmt_fread(fp, &returned_records);
+    SeqRecordArray ret_records = {0};
+    retcode = linefmt_fread(fp, &ret_records);
     TEST_ASSERT_GOTO(retcode == FORMATS_SUCCESS, cleanup, test_retcode);
-    TEST_ASSERT_GOTO(records_equal(&expected_records, &returned_records) == 1, cleanup, test_retcode);
+    TEST_ASSERT_GOTO(records_equal(&exp_records, &ret_records) == 1, cleanup, test_retcode);
 
 cleanup:
     if (retcode == FORMATS_SUCCESS)
-        sequences_deinit_seq_record_array(&returned_records);
+        sequences_deinit_seq_record_array(&ret_records);
     if (fp != NULL)
         fclose(fp);
     return test_retcode;
@@ -55,20 +55,20 @@ int test_skip_empty_lines(void)
         {.header = "", .id = "", .seq = "12345", .len = 5},
         {.header = "", .id = "", .seq = "FGHI", .len = 4},
     };
-    SeqRecordArray expected_records = {.data = data, .len = sizeof(data) / sizeof(SeqRecord)};
+    SeqRecordArray exp_records = {.data = data, .len = sizeof(data) / sizeof(SeqRecord)};
 
     FILE *fp = fmemopen(buffer, sizeof(buffer) - 1, "r");
     TEST_ASSERT_GOTO(fp != NULL, cleanup, test_retcode);
 
-    SeqRecordArray returned_records = {0};
-    retcode = linefmt_fread(fp, &returned_records);
+    SeqRecordArray ret_records = {0};
+    retcode = linefmt_fread(fp, &ret_records);
     TEST_ASSERT_GOTO(retcode == FORMATS_SUCCESS, cleanup, test_retcode);
-    TEST_ASSERT_GOTO(expected_records.len == returned_records.len, cleanup, test_retcode);
-    TEST_ASSERT_GOTO(records_equal(&expected_records, &returned_records) == 1, cleanup, test_retcode);
+    TEST_ASSERT_GOTO(exp_records.len == ret_records.len, cleanup, test_retcode);
+    TEST_ASSERT_GOTO(records_equal(&exp_records, &ret_records) == 1, cleanup, test_retcode);
 
 cleanup:
     if (retcode == FORMATS_SUCCESS)
-        sequences_deinit_seq_record_array(&returned_records);
+        sequences_deinit_seq_record_array(&ret_records);
     if (fp != NULL)
         fclose(fp);
     return test_retcode;
@@ -87,20 +87,20 @@ int test_dos_line_endings(void)
         {.header = "", .id = "", .seq = "12345", .len = 5},
         {.header = "", .id = "", .seq = "FGHI", .len = 4},
     };
-    SeqRecordArray expected_records = {.data = data, .len = sizeof(data) / sizeof(SeqRecord)};
+    SeqRecordArray exp_records = {.data = data, .len = sizeof(data) / sizeof(SeqRecord)};
 
     FILE *fp = fmemopen(buffer, sizeof(buffer) - 1, "r");
     TEST_ASSERT_GOTO(fp != NULL, cleanup, test_retcode);
 
-    SeqRecordArray returned_records = {0};
-    retcode = linefmt_fread(fp, &returned_records);
+    SeqRecordArray ret_records = {0};
+    retcode = linefmt_fread(fp, &ret_records);
     TEST_ASSERT_GOTO(retcode == FORMATS_SUCCESS, cleanup, test_retcode);
-    TEST_ASSERT_GOTO(expected_records.len == returned_records.len, cleanup, test_retcode);
-    TEST_ASSERT_GOTO(records_equal(&expected_records, &returned_records) == 1, cleanup, test_retcode);
+    TEST_ASSERT_GOTO(exp_records.len == ret_records.len, cleanup, test_retcode);
+    TEST_ASSERT_GOTO(records_equal(&exp_records, &ret_records) == 1, cleanup, test_retcode);
 
 cleanup:
     if (retcode == FORMATS_SUCCESS)
-        sequences_deinit_seq_record_array(&returned_records);
+        sequences_deinit_seq_record_array(&ret_records);
     if (fp != NULL)
         fclose(fp);
     return test_retcode;
@@ -116,14 +116,14 @@ int test_empty_file(void)
     TEST_ASSERT_GOTO(fp != NULL, cleanup, test_retcode);
 
     rewind(fp);
-    SeqRecordArray returned_records = {0};
-    retcode = linefmt_fread(fp, &returned_records);
+    SeqRecordArray ret_records = {0};
+    retcode = linefmt_fread(fp, &ret_records);
     TEST_ASSERT_GOTO(retcode == FORMATS_SUCCESS, cleanup, test_retcode);
-    TEST_ASSERT_GOTO(returned_records.len == 0, cleanup, test_retcode);
+    TEST_ASSERT_GOTO(ret_records.len == 0, cleanup, test_retcode);
 
 cleanup:
-    if (retcode == FORMATS_SUCCESS && returned_records.data != NULL)
-        sequences_deinit_seq_record_array(&returned_records);
+    if (retcode == FORMATS_SUCCESS && ret_records.data != NULL)
+        sequences_deinit_seq_record_array(&ret_records);
     if (fp != NULL)
         fclose(fp);
     return test_retcode;
@@ -132,10 +132,10 @@ cleanup:
 int main(void)
 {
     Test tests[] = {
-        {test_round_trip, "round_trip"},
-        {test_skip_empty_lines, "skip_empty_lines"},
-        {test_dos_line_endings, "dos_line_endings"},
-        {test_empty_file, "empty_file"},
+        {test_round_trip, "test_round_trip"},
+        {test_skip_empty_lines, "test_skip_empty_lines"},
+        {test_dos_line_endings, "test_dos_line_endings"},
+        {test_empty_file, "test_empty_file"},
     };
 
     run_tests(tests, sizeof(tests) / sizeof(Test), MODULE_NAME);

@@ -29,23 +29,23 @@ int test_round_trip(void)
         {.header = header2, .id = id2, .seq = seq2, .len = sizeof(seq2) - 1},
         {.header = header3, .id = id3, .seq = seq3, .len = sizeof(seq3) - 1},
     };
-    SeqRecordArray expected_records = {.data = data, .len = sizeof(data) / sizeof(SeqRecord)};
+    SeqRecordArray exp_records = {.data = data, .len = sizeof(data) / sizeof(SeqRecord)};
 
     FILE *fp = fmemopen(buffer, sizeof(buffer), "w+b");
     TEST_ASSERT_GOTO(fp != NULL, cleanup, test_retcode);
 
-    retcode = fasta_fwrite(fp, &expected_records, 10);
+    retcode = fasta_fwrite(fp, &exp_records, 10);
     TEST_ASSERT_GOTO(retcode == FORMATS_SUCCESS, cleanup, test_retcode);
 
     rewind(fp);
-    SeqRecordArray returned_records = {0};
-    retcode = fasta_fread(fp, &returned_records);
+    SeqRecordArray ret_records = {0};
+    retcode = fasta_fread(fp, &ret_records);
     TEST_ASSERT_GOTO(retcode == FORMATS_SUCCESS, cleanup, test_retcode);
-    TEST_ASSERT_GOTO(records_equal(&expected_records, &returned_records) == 1, cleanup, test_retcode);
+    TEST_ASSERT_GOTO(records_equal(&exp_records, &ret_records) == 1, cleanup, test_retcode);
 
 cleanup:
     if (retcode == FORMATS_SUCCESS)
-        sequences_deinit_seq_record_array(&returned_records);
+        sequences_deinit_seq_record_array(&ret_records);
     if (fp != NULL)
         fclose(fp);
     return test_retcode;
@@ -63,13 +63,13 @@ int test_no_header(void)
     FILE *fp = fmemopen(buffer, sizeof(buffer) - 1, "r");
     TEST_ASSERT_GOTO(fp != NULL, cleanup, test_retcode);
 
-    SeqRecordArray returned_records = {0};
-    retcode = fasta_fread(fp, &returned_records);
+    SeqRecordArray ret_records = {0};
+    retcode = fasta_fread(fp, &ret_records);
     TEST_ASSERT_GOTO(retcode == FORMATS_ERROR_INVALID_FORMAT, cleanup, test_retcode);
 
 cleanup:
     if (retcode == 0)
-        sequences_deinit_seq_record_array(&returned_records);
+        sequences_deinit_seq_record_array(&ret_records);
     if (fp != NULL)
         fclose(fp);
     return test_retcode;
@@ -85,14 +85,14 @@ int test_empty_file(void)
     TEST_ASSERT_GOTO(fp != NULL, cleanup, test_retcode);
 
     fgetc(fp); // Consume the single byte of buffer
-    SeqRecordArray returned_records = {0};
-    retcode = fasta_fread(fp, &returned_records);
+    SeqRecordArray ret_records = {0};
+    retcode = fasta_fread(fp, &ret_records);
     TEST_ASSERT_GOTO(retcode == 0, cleanup, test_retcode);
-    TEST_ASSERT_GOTO(returned_records.len == 0, cleanup, test_retcode);
+    TEST_ASSERT_GOTO(ret_records.len == 0, cleanup, test_retcode);
 
 cleanup:
     if (retcode == 0)
-        sequences_deinit_seq_record_array(&returned_records);
+        sequences_deinit_seq_record_array(&ret_records);
     if (fp != NULL)
         fclose(fp);
     return test_retcode;
@@ -114,20 +114,20 @@ int test_blank_lines(void)
         {.header = "id1 metadata1", .id = "id1", .seq = "ABCD", .len = 4},
         {.header = "id2 metadata2", .id = "id2", .seq = "12345", .len = 5},
     };
-    SeqRecordArray expected_records = {.data = data, .len = sizeof(data) / sizeof(SeqRecord)};
+    SeqRecordArray exp_records = {.data = data, .len = sizeof(data) / sizeof(SeqRecord)};
 
     FILE *fp = fmemopen(buffer, sizeof(buffer) - 1, "r");
     TEST_ASSERT_GOTO(fp != NULL, cleanup, test_retcode);
 
-    SeqRecordArray returned_records = {0};
-    retcode = fasta_fread(fp, &returned_records);
+    SeqRecordArray ret_records = {0};
+    retcode = fasta_fread(fp, &ret_records);
     TEST_ASSERT_GOTO(retcode == FORMATS_SUCCESS, cleanup, test_retcode);
-    TEST_ASSERT_GOTO(expected_records.len == returned_records.len, cleanup, test_retcode);
-    TEST_ASSERT_GOTO(records_equal(&expected_records, &returned_records) == 1, cleanup, test_retcode);
+    TEST_ASSERT_GOTO(exp_records.len == ret_records.len, cleanup, test_retcode);
+    TEST_ASSERT_GOTO(records_equal(&exp_records, &ret_records) == 1, cleanup, test_retcode);
 
 cleanup:
     if (retcode == FORMATS_SUCCESS)
-        sequences_deinit_seq_record_array(&returned_records);
+        sequences_deinit_seq_record_array(&ret_records);
     if (fp != NULL)
         fclose(fp);
     return test_retcode;
@@ -146,20 +146,20 @@ int test_no_eof_newline(void)
         {.header = "id1 metadata1", .id = "id1", .seq = "ABCD", .len = 4},
         {.header = "id2 metadata2", .id = "id2", .seq = "12345", .len = 5},
     };
-    SeqRecordArray expected_records = {.data = data, .len = sizeof(data) / sizeof(SeqRecord)};
+    SeqRecordArray exp_records = {.data = data, .len = sizeof(data) / sizeof(SeqRecord)};
 
     FILE *fp = fmemopen(buffer, sizeof(buffer) - 1, "r");
     TEST_ASSERT_GOTO(fp != NULL, cleanup, test_retcode);
 
-    SeqRecordArray returned_records = {0};
-    retcode = fasta_fread(fp, &returned_records);
+    SeqRecordArray ret_records = {0};
+    retcode = fasta_fread(fp, &ret_records);
     TEST_ASSERT_GOTO(retcode == FORMATS_SUCCESS, cleanup, test_retcode);
-    TEST_ASSERT_GOTO(expected_records.len == returned_records.len, cleanup, test_retcode);
-    TEST_ASSERT_GOTO(records_equal(&expected_records, &returned_records) == 1, cleanup, test_retcode);
+    TEST_ASSERT_GOTO(exp_records.len == ret_records.len, cleanup, test_retcode);
+    TEST_ASSERT_GOTO(records_equal(&exp_records, &ret_records) == 1, cleanup, test_retcode);
 
 cleanup:
     if (retcode == FORMATS_SUCCESS)
-        sequences_deinit_seq_record_array(&returned_records);
+        sequences_deinit_seq_record_array(&ret_records);
     if (fp != NULL)
         fclose(fp);
     return test_retcode;
@@ -179,20 +179,20 @@ int test_dos_line_endings(void)
         {.header = "id1 metadata1", .id = "id1", .seq = "ABCD", .len = 4},
         {.header = "id2 metadata2", .id = "id2", .seq = "12345", .len = 5},
     };
-    SeqRecordArray expected_records = {.data = data, .len = sizeof(data) / sizeof(SeqRecord)};
+    SeqRecordArray exp_records = {.data = data, .len = sizeof(data) / sizeof(SeqRecord)};
 
     FILE *fp = fmemopen(buffer, sizeof(buffer) - 1, "r");
     TEST_ASSERT_GOTO(fp != NULL, cleanup, test_retcode);
 
-    SeqRecordArray returned_records = {0};
-    retcode = fasta_fread(fp, &returned_records);
+    SeqRecordArray ret_records = {0};
+    retcode = fasta_fread(fp, &ret_records);
     TEST_ASSERT_GOTO(retcode == FORMATS_SUCCESS, cleanup, test_retcode);
-    TEST_ASSERT_GOTO(expected_records.len == returned_records.len, cleanup, test_retcode);
-    TEST_ASSERT_GOTO(records_equal(&expected_records, &returned_records) == 1, cleanup, test_retcode);
+    TEST_ASSERT_GOTO(exp_records.len == ret_records.len, cleanup, test_retcode);
+    TEST_ASSERT_GOTO(records_equal(&exp_records, &ret_records) == 1, cleanup, test_retcode);
 
 cleanup:
     if (retcode == FORMATS_SUCCESS)
-        sequences_deinit_seq_record_array(&returned_records);
+        sequences_deinit_seq_record_array(&ret_records);
     if (fp != NULL)
         fclose(fp);
     return test_retcode;
@@ -210,13 +210,13 @@ int test_non_fasta(void)
     FILE *fp = fmemopen(buffer, sizeof(buffer), "r");
     TEST_ASSERT_GOTO(fp != NULL, cleanup, test_retcode);
 
-    SeqRecordArray returned_records = {0};
-    retcode = fasta_fread(fp, &returned_records);
+    SeqRecordArray ret_records = {0};
+    retcode = fasta_fread(fp, &ret_records);
     TEST_ASSERT_GOTO(retcode == FORMATS_ERROR_INVALID_FORMAT, cleanup, test_retcode);
 
 cleanup:
     if (retcode == 0)
-        sequences_deinit_seq_record_array(&returned_records);
+        sequences_deinit_seq_record_array(&ret_records);
     if (fp != NULL)
         fclose(fp);
     return test_retcode;
@@ -239,14 +239,14 @@ int test_get_id(void)
         {NULL, NULL},
     };
 
-    char *expected_id = NULL;
-    char *returned_id = NULL;
+    char *exp_id = NULL;
+    char *ret_id = NULL;
     for (IdTest *test = tests; test->header != NULL; test++)
     {
-        expected_id = test->id;
-        returned_id = fasta_get_id(test->header);
-        TEST_ASSERT(returned_id != NULL && strcmp(expected_id, returned_id) == 0);
-        free(returned_id);
+        exp_id = test->id;
+        ret_id = fasta_get_id(test->header);
+        TEST_ASSERT(ret_id != NULL && strcmp(exp_id, ret_id) == 0);
+        free(ret_id);
     }
 
     return TEST_SUCCESS;
