@@ -4,9 +4,9 @@
 #include "str.h"
 
 FormatOption format_options[] = {
-    {"FASTA", "fasta,fa,faa,fna,afa", &fasta_fread},
-    {"A2M/A3M", "a2m,a3m", &fasta_fread},
-    {"lines", "txt", &linefmt_fread},
+    {"FASTA", "fasta,fa,faa,fna,afa", &fasta_fread, &io_fasta_fwrite},
+    {"A2M/A3M", "a2m,a3m", &fasta_fread, &io_fasta_fwrite},
+    {"lines", "txt", &linefmt_fread, &io_linefmt_fwrite},
     // CLUSTAL
     // PHYLIP
     // STOCKHOLM
@@ -33,6 +33,21 @@ FileReader io_get_reader(const char *format_arg,
             return format_option->reader;
     }
     return reader;
+}
+
+FileWriter io_get_writer(const char *format_arg,
+                         unsigned int n_format_options,
+                         FormatOption *format_options)
+{
+    FileWriter writer = NULL;
+    for (unsigned int i = 0; i < n_format_options; i++)
+    {
+        FormatOption *format_option = format_options + i;
+        const char *exts = format_option->exts;
+        if (str_is_in_strsep(exts, OPTION_DELIM, format_arg))
+            return format_option->writer;
+    }
+    return writer;
 }
 
 SeqType io_get_seq_type(const char *seq_type_arg,
@@ -110,4 +125,26 @@ int io_set_unaligned_indices(FileState *file)
             sequences_index_nongap_syms(alphabet, record, unaligned_indices);
     }
     return 0;
+}
+
+int io_fasta_fwrite(FILE *fp, SeqRecordArray *record_array, int kwargc, char **kwargv)
+{
+    unsigned int max_len = 80;
+    if (kwargc > 0)
+    {
+        char *kwarg = kwargv[0];
+        if (sscanf(kwarg, "max_len=%u", &max_len) < 1)
+            return -1;
+    }
+
+    return fasta_fwrite(fp, record_array, max_len);
+}
+
+int io_linefmt_fwrite(FILE *fp, SeqRecordArray *record_array, int kwargc, char **kwargv)
+{
+    // Silence warnings
+    (void)kwargc;
+    (void)kwargv;
+
+    return linefmt_fwrite(fp, record_array);
 }
