@@ -31,5 +31,6 @@ void cmd_type(State *state, int argc, char **argv);
 void cmd_scheme(State *state, int argc, char **argv);
 void cmd_config(State *state, int argc, char **argv);
 void cmd_edit(State *state, int argc, char **argv);
+void cmd_write(State *state, int argc, char **argv);
 
 #endif // CMD_H

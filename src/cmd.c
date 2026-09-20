@@ -25,6 +25,7 @@ Command cmds[] = {
     {&cmd_scheme, "scheme"},
     {&cmd_config, "config"},
     {&cmd_edit, "edit"},
+    {&cmd_write, "write"},
 };
 unsigned int ncmds = sizeof(cmds) / sizeof(Command);
 
@@ -494,6 +495,56 @@ void cmd_edit(State *state, int argc, char **argv)
     io_load_seqs(state->active_file, fp, reader);
     io_set_seq_types(state->active_file, "", state->config.nucleic_tiebreak_len);
     io_set_unaligned_indices(state->active_file);
+
+    // Close file
+    fclose(fp);
+}
+
+/*
+ * write [<file> [<kw>=<arg> ...]]
+ */
+void cmd_write(State *state, int argc, char **argv)
+{
+    (void)argc;
+    (void)argv;
+
+    // Get file path
+    char *file_path;
+    if (argc > 1)
+        file_path = argv[1];
+    else if (state->active_file->file_path)
+        file_path = state->active_file->file_path;
+    else
+        return;
+
+    // Get writer
+    char *format_arg = strrchr(file_path, '.');
+    if (format_arg)
+        format_arg++; // Shift past dot
+    else
+        return;
+    FileWriter writer = io_get_writer(format_arg, n_format_options, format_options);
+
+    // Open file
+    FILE *fp = fopen(file_path, "w");
+    if (!fp)
+        return;
+
+    // Get kwarg
+    int kwargc;
+    char **kwargv;
+    if (argc > 2)
+    {
+        kwargc = argc - 2;
+        kwargv = argv + 2;
+    }
+    else
+    {
+        kwargc = 0;
+        kwargv = NULL;
+    }
+
+    writer(fp, &state->active_file->record_array, kwargc, kwargv);
 
     // Close file
     fclose(fp);
