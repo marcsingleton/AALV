@@ -485,6 +485,8 @@ void cmd_edit(State *state, int argc, char **argv)
     else
         return;
     FileReader reader = io_get_reader(format_arg, n_format_options, format_options);
+    if (!reader)
+        return;
 
     // Open file
     FILE *fp = fopen(file_path, "r");
@@ -524,6 +526,8 @@ void cmd_write(State *state, int argc, char **argv)
     else
         return;
     FileWriter writer = io_get_writer(format_arg, n_format_options, format_options);
+    if (!writer)
+        return;
 
     // Open file
     FILE *fp = fopen(file_path, "w");
