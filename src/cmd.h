@@ -12,7 +12,7 @@
 
 typedef struct
 {
-    void (*fn_ptr)(State *, int, char **);
+    int (*fn_ptr)(State *, int, char **);
     char *name;
 } Command;
 
@@ -22,15 +22,15 @@ int cmd_parse_and_execute_command_line(State *state, char *cmd_line);
 int cmd_init_command_map(void);
 void cmd_deinit_command_map(void);
 
-void cmd_quit(State *state, int argc, char **argv);
-void cmd_quitall(State *state, int argc, char **argv);
-void cmd_next_file(State *state, int argc, char **argv);
-void cmd_previous_file(State *state, int argc, char **argv);
-void cmd_set(State *state, int argc, char **argv);
-void cmd_type(State *state, int argc, char **argv);
-void cmd_scheme(State *state, int argc, char **argv);
-void cmd_config(State *state, int argc, char **argv);
-void cmd_edit(State *state, int argc, char **argv);
-void cmd_write(State *state, int argc, char **argv);
+int cmd_quit(State *state, int argc, char **argv);
+int cmd_quitall(State *state, int argc, char **argv);
+int cmd_next_file(State *state, int argc, char **argv);
+int cmd_previous_file(State *state, int argc, char **argv);
+int cmd_set(State *state, int argc, char **argv);
+int cmd_type(State *state, int argc, char **argv);
+int cmd_scheme(State *state, int argc, char **argv);
+int cmd_config(State *state, int argc, char **argv);
+int cmd_edit(State *state, int argc, char **argv);
+int cmd_write(State *state, int argc, char **argv);
 
 #endif // CMD_H
