@@ -7,7 +7,7 @@
 
 #include "state.h"
 
-#define CMD_ARG_MAX 8
+#define CMD_ARG_MAX 32
 #define CMD_ALPHABET "abcdefghijklmnopqrstuvwxyz"
 
 typedef struct
