@@ -365,7 +365,7 @@ int state_set_active_color_scheme(State *state, SeqColorScheme *color_scheme)
         return -1;
     if (color_scheme->scheme.type == COLOR_8_BIT && state->ncolors < 256)
         return -1;
-    if (color_scheme->type > state->n_active_color_schemes)
+    if (color_scheme->type >= state->n_active_color_schemes)
         return -1;
 
     state->active_color_schemes[color_scheme->type] = color_scheme;
