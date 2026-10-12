@@ -342,7 +342,7 @@ int state_remove_file(State *state)
             return -1;
         state->files = files;
         state->nfiles -= 1;
-        state_set_active_file_index(state, state->nfiles);
+        state_set_active_file_index(state, state->active_file_index); // Setter checks bounds
     }
     else
     {
