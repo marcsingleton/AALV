@@ -374,7 +374,7 @@ void scroller_move_page_right(RowLinkedScroller *scroller, size_t nrows, size_t 
     if (page_size == PAGE_SIZE_HALF)
         x /= 2;
     if (offset_j + x + 1 > ncols)
-        scroller_set_offset_j(scroller, ncols - 1);
+        scroller_set_offset_j(scroller, (ncols > 0) ? ncols - 1 : 0);
     else
         scroller_set_offset_j(scroller, offset_j + x);
     if (cursor_j + scroller->offsets_j[active_index] + 1 > ncols) // Check for cursor exceeding ncols
