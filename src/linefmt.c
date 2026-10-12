@@ -131,18 +131,25 @@ cleanup:
 
 int linefmt_read(const char *path, SeqRecordArray *record_array)
 {
-    FILE *fp = fopen(path, "r");
+    int retcode = FORMATS_SUCCESS;
+    FILE *fp = NULL;
+
+    fp = fopen(path, "r");
     if (!fp)
-        return FORMATS_ERROR_FILE_IO;
+    {
+        retcode = FORMATS_ERROR_FILE_IO;
+        goto cleanup;
+    }
 
-    int retcode = linefmt_fread(fp, record_array);
+    retcode = linefmt_fread(fp, record_array);
     if (retcode != FORMATS_SUCCESS)
-        return retcode;
+        goto cleanup;
 
-    if (fclose(fp) != 0)
+cleanup:
+    if (fp && fclose(fp) != 0)
         return FORMATS_ERROR_FILE_IO;
 
-    return FORMATS_SUCCESS;
+    return retcode;
 }
 
 int linefmt_fwrite(FILE *fp, SeqRecordArray *record_array)
@@ -163,16 +170,23 @@ int linefmt_fwrite(FILE *fp, SeqRecordArray *record_array)
 
 int linefmt_write(const char *path, SeqRecordArray *record_array)
 {
-    FILE *fp = fopen(path, "w");
+    int retcode = FORMATS_SUCCESS;
+    FILE *fp = NULL;
+
+    fp = fopen(path, "w");
     if (!fp)
-        return FORMATS_ERROR_FILE_IO;
+    {
+        retcode = FORMATS_ERROR_FILE_IO;
+        goto cleanup;
+    }
 
-    int retcode = linefmt_fwrite(fp, record_array);
+    retcode = linefmt_fwrite(fp, record_array);
     if (retcode != FORMATS_SUCCESS)
-        return retcode;
+        goto cleanup;
 
-    if (fclose(fp) != 0)
-        return FORMATS_ERROR_FILE_IO;
+cleanup:
+    if (fp && fclose(fp) != 0)
+        retcode = FORMATS_ERROR_FILE_IO;
 
-    return FORMATS_SUCCESS;
+    return retcode;
 }
