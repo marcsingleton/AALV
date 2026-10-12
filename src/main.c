@@ -236,21 +236,19 @@ int main(int argc, char *argv[])
             }
 
             // Get CLI args
-            char *format_arg = "";
+            const char *format_arg = "";
             if (file_index < n_format_args)
                 format_arg = format_args[file_index];
 
-            char *seq_type_arg = "";
+            const char *seq_type_arg = "";
             if (file_index < n_seq_type_args)
                 seq_type_arg = seq_type_args[file_index];
 
             // Get reader
             if (format_arg[0] == '\0') // From format argument
             {
-                char *ext = strrchr(file_path, '.');
-                if (ext)
-                    format_arg = ++ext; // Shift past dot
-                else
+                format_arg = io_get_path_extension(file_path);
+                if (!format_arg)
                 {
                     error_printf("%s: %s: No format argument or extension\n", INVOCATION_NAME, file->file_path);
                     return EXIT_FAILURE;

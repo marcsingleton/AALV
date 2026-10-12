@@ -495,10 +495,8 @@ int cmd_edit(State *state, int argc, char **argv)
         return -1;
 
     // Get reader
-    char *format_arg = strrchr(file_path, '.');
-    if (format_arg)
-        format_arg++; // Shift past dot
-    else
+    const char *format_arg = io_get_path_extension(file_path);
+    if (!format_arg)
         return -1;
     FileReader reader = io_get_reader(format_arg, n_format_options, format_options);
     if (!reader)
@@ -538,10 +536,8 @@ int cmd_write(State *state, int argc, char **argv)
         return -1;
 
     // Get writer
-    char *format_arg = strrchr(file_path, '.');
-    if (format_arg)
-        format_arg++; // Shift past dot
-    else
+    const char *format_arg = io_get_path_extension(file_path);
+    if (!format_arg)
         return -1;
     FileWriter writer = io_get_writer(format_arg, n_format_options, format_options);
     if (!writer)

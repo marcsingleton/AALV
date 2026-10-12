@@ -1,3 +1,5 @@
+#include <string.h>
+
 #include "fasta.h"
 #include "io.h"
 #include "linefmt.h"
@@ -19,6 +21,23 @@ SeqTypeOption seq_type_options[] = {
     {"unicode", "unicode,utf", SEQ_TYPE_UNKNOWN, NULL},
 };
 unsigned int n_seq_type_options = sizeof(seq_type_options) / sizeof(SeqTypeOption);
+
+const char *io_get_path_extension(const char *path)
+{
+    if (!path)
+        return NULL;
+
+    const char *name = strrchr(path, '/');
+    name = name ? name + 1 : path;
+
+    const char *dot = strrchr(name, '.');
+    if (!dot || dot == name) // No dot or leading dot (hidden file)
+        return NULL;
+    if (dot[1] == '\0') // Trailing dot
+        return NULL;
+
+    return dot + 1;
+}
 
 FileReader io_get_reader(const char *format_arg,
                          unsigned int n_format_options,
