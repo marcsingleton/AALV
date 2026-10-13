@@ -261,27 +261,28 @@ void display_command_pane(State *state, Array *buffer)
     {
     case NORMAL:
     {
-        char status[256];
-        unsigned int n_status = 0;
+        // Indices
+        char indices[256];
+        unsigned int n_indices = 0;
 
         int n = 0;
 
-        n = snprintf(status + n_status, sizeof(status) - n_status,
+        n = snprintf(indices + n_indices, sizeof(indices) - n_indices,
                      "ROW %zu/%zu  ",
                      record_index + 1, // 1-based indexing
                      active_file->record_array.len);
         if (n < 0)
             return;
-        n_status += n;
+        n_indices += n;
 
-        n = snprintf(status + n_status, sizeof(status) - n_status,
+        n = snprintf(indices + n_indices, sizeof(indices) - n_indices,
                      "COL %d/%d,%d  ",
                      active_file->layout.tick_offset + (int)sequence_index,
                      active_file->layout.tick_offset,
                      active_file->layout.tick_offset + (int)active_file->metadata.max_len);
         if (n < 0)
             return;
-        n_status += n;
+        n_indices += n;
 
         UnalignedIndicesArray *indices_array = &active_file->metadata.indices_array;
         UnalignedIndices *unaligned_indices = indices_array->data + record_index;
@@ -289,7 +290,7 @@ void display_command_pane(State *state, Array *buffer)
         {
             size_t unaligned_index = (sequence_index + 1 > unaligned_indices->len) ? unaligned_indices->len - 1
                                                                                    : sequence_index;
-            n = snprintf(status + n_status, sizeof(status) - n_status,
+            n = snprintf(indices + n_indices, sizeof(indices) - n_indices,
                          "POS %d/%d,%d",
                          active_file->layout.tick_offset + (int)unaligned_indices->indices[unaligned_index],
                          active_file->layout.tick_offset,
@@ -297,28 +298,29 @@ void display_command_pane(State *state, Array *buffer)
         }
         else
         {
-            n = snprintf(status + n_status, sizeof(status) - n_status,
+            n = snprintf(indices + n_indices, sizeof(indices) - n_indices,
                          "POS ?/?");
         }
         if (n < 0)
             return;
-        n_status += n;
+        n_indices += n;
 
-        unsigned int n_file_name = strnlen(active_file->file_path, 256);
+        // Status
+        unsigned int n_status = strnlen(active_file->file_path, 256);
 
         pane_cursor_ij(pane, buffer, 1, 0);
-        if (n_file_name + n_status + 4 <= pane->w)
+        if (n_status + n_indices + 4 <= pane->w)
         {
-            array_extend(buffer, active_file->file_path, n_file_name);
-            for (unsigned int i = n_file_name; i + n_status < pane->w; i++)
+            array_extend(buffer, active_file->file_path, n_status);
+            for (unsigned int i = n_status; i + n_indices < pane->w; i++)
                 array_append(buffer, " ");
-            array_extend(buffer, status, n_status);
+            array_extend(buffer, indices, n_indices);
         }
-        else if (n_status <= pane->w)
+        else if (n_indices <= pane->w)
         {
-            for (unsigned int i = 0; i + n_status < pane->w; i++)
+            for (unsigned int i = 0; i + n_indices < pane->w; i++)
                 array_append(buffer, " ");
-            array_extend(buffer, status, n_status);
+            array_extend(buffer, indices, n_indices);
         }
         break;
     }
@@ -421,7 +423,7 @@ void display_splash_screen(State *state, Array *buffer)
             "  / ___ |/ ___ |/ /__| |/ /  ",
             " /_/  |_/_/  |_/_____/___/   ",
             NULL,
-        };
+    };
     char author[] = "by Marc Singleton";
     char version[] = "version " VERSION;
     char *help[] =
@@ -429,7 +431,7 @@ void display_splash_screen(State *state, Array *buffer)
             "type  :q<Enter>         to exit       ",
             "type  :e <path><Enter>  to open a file",
             NULL,
-        };
+    };
 
     // Magic numbers--update accordingly
     unsigned int splash_height = 12;
