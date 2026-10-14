@@ -50,7 +50,9 @@ int register_sigcont_handler(void);
 int init_terminal(void);
 int deinit_terminal(void);
 
-int run_user_config(State *state);
+int execute_user_config(State *state);
+int execute_normal_mode(State *state, Array *read_buffer, int input_fd);
+int execute_command_mode(State *state, int input_fd);
 
 // Main
 int main(int argc, char *argv[])
@@ -137,7 +139,7 @@ int main(int argc, char *argv[])
         error_printf("%s: Failed to initialize state\n", INVOCATION_NAME);
         return EXIT_FAILURE;
     };
-    run_user_config(&state);
+    execute_user_config(&state);
 
     // Get terminal color support
     state.ncolors = 1;
@@ -346,32 +348,13 @@ int main(int argc, char *argv[])
         {
         case NORMAL:
         {
-            input_read_key(&read_buffer, input_fd);
-
-            size_t count;
-            Action action;
-            retcode = input_parse_keys(&read_buffer, &action, &count);
-            switch (retcode)
-            {
-            case PARSE_SUCCESS:
-                input_execute_action(&state, &action, count);
-                input_read_buffer_flush(&read_buffer);
-                break;
-            case PARSE_INCOMPLETE:
-                break;
-            case PARSE_FAIL:
-                input_read_buffer_flush(&read_buffer);
-                break;
-            }
+            execute_normal_mode(&state, &read_buffer, input_fd);
             break;
         }
         case COMMAND:
         {
-            state.mode = NORMAL;
-            state.refresh_command_pane = true;
-            char *cmd_line = cmd_read_command_line(input_fd, ":");
-            retcode = cmd_parse_and_execute_command_line(&state, cmd_line);
-            free(cmd_line);
+            execute_command_mode(&state, input_fd);
+            break;
         }
         }
 
@@ -512,7 +495,7 @@ int deinit_terminal(void)
     return 0;
 }
 
-int run_user_config(State *state)
+int execute_user_config(State *state)
 {
     char *home_dir = NULL;
     char *config_path = NULL;
@@ -550,6 +533,40 @@ int run_user_config(State *state)
         cmd_parse_and_execute_command_line(state, cmd_line);
     free(cmd_line);
     fclose(config_fp);
+
+    return 0;
+}
+
+int execute_normal_mode(State *state, Array *read_buffer, int input_fd)
+{
+    input_read_key(read_buffer, input_fd);
+
+    size_t count;
+    Action action;
+    int retcode = input_parse_keys(read_buffer, &action, &count);
+    switch (retcode)
+    {
+    case PARSE_SUCCESS:
+        input_execute_action(state, &action, count);
+        input_read_buffer_flush(read_buffer);
+        break;
+    case PARSE_INCOMPLETE:
+        break;
+    case PARSE_FAIL:
+        input_read_buffer_flush(read_buffer);
+        break;
+    }
+
+    return 0;
+}
+
+int execute_command_mode(State *state, int input_fd)
+{
+    state->mode = NORMAL;
+    state->refresh_command_pane = true;
+    char *cmd_line = cmd_read_command_line(input_fd, ":");
+    int retcode = cmd_parse_and_execute_command_line(state, cmd_line);
+    free(cmd_line);
 
     return 0;
 }
