@@ -9,6 +9,9 @@
 #include "scroller.h"
 #include "terminal.h"
 
+#define INDICES_LEN 256
+#define STATUS_LEN 256
+
 // Private
 static void append_spaces(Array *buffer, unsigned int n)
 {
@@ -262,7 +265,7 @@ void display_command_pane(State *state, Array *buffer)
     case NORMAL:
     {
         // Indices
-        char indices[256];
+        char indices[INDICES_LEN];
         unsigned int n_indices = 0;
 
         int n = 0;
@@ -306,17 +309,36 @@ void display_command_pane(State *state, Array *buffer)
         n_indices += n;
 
         // Status
-        unsigned int n_status = strnlen(active_file->file_path, 256);
+        char status[STATUS_LEN];
+        unsigned int n_status;
+        Color4Bit status_fg_color = 0;
+        Color4Bit status_bg_color = 0;
+        if (state->cmd_errno == 0)
+        {
+            n = snprintf(status, STATUS_LEN, "%s", active_file->file_path);
+            n_status = (n > STATUS_LEN) ? STATUS_LEN : n;
+        }
+        else
+        {
+            n = snprintf(status, STATUS_LEN, "E%d: %s", state->cmd_errno, "Error message.");
+            n_status = (n > STATUS_LEN) ? STATUS_LEN : n;
+            status_bg_color = BG_RED;
+        }
 
         pane_cursor_ij(pane, buffer, 1, 0);
-        if (n_status + n_indices + 4 <= pane->w)
+        if (n_status + n_indices + 4 <= pane->w) // Status and indices
         {
-            array_extend(buffer, active_file->file_path, n_status);
+            if (status_fg_color != 0)
+                terminal_set_foreground_color_4bit(buffer, status_fg_color);
+            if (status_bg_color != 0)
+                terminal_set_background_color_4bit(buffer, status_bg_color);
+            array_extend(buffer, status, n_status);
+            terminal_set_color_default(buffer);
             for (unsigned int i = n_status; i + n_indices < pane->w; i++)
                 array_append(buffer, " ");
             array_extend(buffer, indices, n_indices);
         }
-        else if (n_indices <= pane->w)
+        else if (n_indices <= pane->w) // Indices only
         {
             for (unsigned int i = 0; i + n_indices < pane->w; i++)
                 array_append(buffer, " ");

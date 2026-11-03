@@ -27,6 +27,9 @@
 #define SCROLLER_HEADER_PANE 0
 #define SCROLLER_SEQUENCE_PANE 1
 
+extern SeqColorScheme *active_color_schemes[];
+extern unsigned int n_active_color_schemes;
+
 typedef struct
 {
     unsigned int ruler_records_divider;
@@ -78,6 +81,7 @@ typedef struct
     bool refresh_command_pane;
     bool refresh_window;
     bool visible_window;
+    unsigned int cmd_errno;
     // File state
     FileState *files;
     unsigned int nfiles;
@@ -90,9 +94,6 @@ typedef struct
     SeqColorScheme **active_color_schemes;
     unsigned int n_active_color_schemes;
 } State;
-
-extern SeqColorScheme *active_color_schemes[];
-extern unsigned int n_active_color_schemes;
 
 // FileState
 int state_init_file_data(FileState *file);

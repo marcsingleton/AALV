@@ -566,6 +566,7 @@ int execute_command_mode(State *state, int input_fd)
     state->refresh_command_pane = true;
     char *cmd_line = cmd_read_command_line(input_fd, ":");
     int retcode = cmd_parse_and_execute_command_line(state, cmd_line);
+    state->cmd_errno = retcode;
     free(cmd_line);
 
     return 0;
