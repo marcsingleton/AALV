@@ -17,7 +17,9 @@ typedef struct
 } Command;
 
 char *cmd_read_command_line(int input_fd, char *prompt);
-int cmd_parse_and_execute_command_line(State *state, char *cmd_line);
+int cmd_parse_command_line(char *line, int *argc, char *argv[CMD_ARG_MAX]);
+int cmd_execute_command(State *state, int argc, char *argv[CMD_ARG_MAX]);
+int cmd_parse_execute_command_line(State *state, char *line);
 
 int cmd_init_command_map(void);
 void cmd_deinit_command_map(void);

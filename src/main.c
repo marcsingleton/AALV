@@ -530,7 +530,7 @@ int execute_user_config(State *state)
     size_t capacity = 0;
     ssize_t line_len = 0;
     while ((line_len = getline(&cmd_line, &capacity, config_fp)) > 0)
-        cmd_parse_and_execute_command_line(state, cmd_line);
+        cmd_parse_execute_command_line(state, cmd_line);
     free(cmd_line);
     fclose(config_fp);
 
@@ -565,7 +565,7 @@ int execute_command_mode(State *state, int input_fd)
     state->mode = NORMAL;
     state->refresh_command_pane = true;
     char *cmd_line = cmd_read_command_line(input_fd, ":");
-    int retcode = cmd_parse_and_execute_command_line(state, cmd_line);
+    int retcode = cmd_parse_execute_command_line(state, cmd_line);
     state->cmd_errno = retcode;
     free(cmd_line);
 

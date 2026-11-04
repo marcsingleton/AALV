@@ -71,24 +71,23 @@ char *cmd_read_command_line(int input_fd, char *prompt)
     return line;
 }
 
-int cmd_parse_and_execute_command_line(State *state, char *line)
+int cmd_parse_command_line(char *line, int *argc, char *argv[CMD_ARG_MAX])
 {
-    if (!line)
+    if (!line || !argc || !argv)
         return -1;
 
-    int retcode = 0;
-
-    int argc = 0;
-    char *argv[CMD_ARG_MAX];
-
-    int i = 0;
-    for (int j = 0; line[j] != '\0'; j++)
+    int new_argc = 0;
+    unsigned int j = 0;
+    while (line[j] != '\0')
     {
         if (isspace(line[j]))
+        {
+            j++;
             continue;
+        }
 
         // Start of word
-        i = j;
+        unsigned int i = j;
 
         // End of word
         while (line[j] != '\0' && !isspace(line[j]))
@@ -99,29 +98,57 @@ int cmd_parse_and_execute_command_line(State *state, char *line)
         if (!arg)
             goto cleanup;
 
-        argv[argc++] = arg;
-
-        if (argc == CMD_ARG_MAX)
+        if (new_argc == CMD_ARG_MAX)
             goto cleanup;
+        argv[new_argc++] = arg;
+
         if (line[j] == '\0')
             break;
     }
+    *argc = new_argc;
 
-    if (argc == 0)
-    {
-        retcode = -1;
-        goto cleanup;
-    }
+    return 0;
+
+cleanup:
+    for (int i = 0; i < new_argc; i++)
+        free(argv[i]);
+
+    return -1;
+}
+
+int cmd_execute_command(State *state, int argc, char *argv[CMD_ARG_MAX])
+{
+    if (!state || argc <= 0 || !argv)
+        return -1;
+    for (int i = 0; i < argc; i++)
+        if (!argv[i])
+            return -1;
+
     void *ptr = prefix_tree_get_prefix_match(&cmd_map, argv[0]);
     if (!ptr)
-    {
-        retcode = -1;
-        goto cleanup;
-    }
+        return -1;
     Command *cmd = ptr;
 
     int (*fn)(State *, int, char **) = cmd->fn_ptr;
-    retcode = fn(state, argc, argv);
+
+    return fn(state, argc, argv);
+}
+
+int cmd_parse_execute_command_line(State *state, char *line)
+{
+    if (!state || !line)
+        return -1;
+
+    int retcode = 0;
+
+    int argc = 0;
+    char *argv[CMD_ARG_MAX];
+
+    retcode = cmd_parse_command_line(line, &argc, argv);
+    if (retcode != 0)
+        goto cleanup;
+
+    retcode = cmd_execute_command(state, argc, argv);
 
 cleanup:
     for (int i = 0; i < argc; i++)
