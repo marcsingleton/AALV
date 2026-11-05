@@ -40,7 +40,7 @@ static int parse_integer(char *str, long long min, long long max, long long *val
     if (errno == ERANGE || tmp < min || tmp > max)
         return CMD_ERANGE;
     *value = tmp;
-    return CMD_ESUCCESS;
+    return CMD_ENOERR;
 }
 
 static SeqColorScheme *parse_color_scheme_name(State *state, char *color_scheme_name)
@@ -65,8 +65,8 @@ char *cmd_strerror(int error)
 {
     switch ((CommandError)error)
     {
-    case CMD_ESUCCESS:
-        return "Success";
+    case CMD_ENOERR:
+        return "No error";
     case CMD_EARGNUM:
         return "Incorrect number of arguments";
     case CMD_EINVAL:
@@ -118,7 +118,7 @@ int cmd_parse_command_line(char *line, int *argc, char *argv[CMD_ARG_MAX])
     if (!line || !argc || !argv)
         return CMD_EINVAL;
 
-    int retcode = CMD_ESUCCESS;
+    int retcode = CMD_ENOERR;
     int new_argc = 0;
     unsigned int j = 0;
     while (line[j] != '\0')
@@ -186,13 +186,13 @@ int cmd_parse_execute_command_line(State *state, char *line)
     if (!state || !line)
         return CMD_EINVAL;
 
-    int retcode = CMD_ESUCCESS;
+    int retcode = CMD_ENOERR;
 
     int argc = 0;
     char *argv[CMD_ARG_MAX];
 
     retcode = cmd_parse_command_line(line, &argc, argv);
-    if (retcode != CMD_ESUCCESS)
+    if (retcode != CMD_ENOERR)
         goto cleanup;
 
     retcode = cmd_execute_command(state, argc, argv);
@@ -237,7 +237,7 @@ int cmd_quit(State *state, int argc, char **argv)
     if (state_remove_file(state) != 0)
         return CMD_EFILEOP;
 
-    return CMD_ESUCCESS;
+    return CMD_ENOERR;
 }
 
 /*
@@ -254,7 +254,7 @@ int cmd_quitall(State *state, int argc, char **argv)
         if (state_remove_file(state) != 0)
             return CMD_EFILEOP;
 
-    return CMD_ESUCCESS;
+    return CMD_ENOERR;
 }
 
 /*
@@ -266,11 +266,11 @@ int cmd_next_file(State *state, int argc, char **argv)
     (void)argv;
 
     if (state->active_file_index + 1 >= state->nfiles)
-        return CMD_ESUCCESS;
+        return CMD_ENOERR;
     state_set_active_file_index(state, state->active_file_index + 1);
     state->refresh_window = true;
 
-    return CMD_ESUCCESS;
+    return CMD_ENOERR;
 }
 
 /*
@@ -282,11 +282,11 @@ int cmd_previous_file(State *state, int argc, char **argv)
     (void)argv;
 
     if (state->active_file_index == 0)
-        return CMD_ESUCCESS;
+        return CMD_ENOERR;
     state_set_active_file_index(state, state->active_file_index - 1);
     state->refresh_window = true;
 
-    return CMD_ESUCCESS;
+    return CMD_ENOERR;
 }
 
 /*
@@ -306,28 +306,28 @@ int cmd_set(State *state, int argc, char **argv)
     if (strcmp("ruler_records_divider", name) == 0)
     {
         retcode = parse_integer(value_arg, 0, UINT_MAX, &value);
-        if (retcode != CMD_ESUCCESS)
+        if (retcode != CMD_ENOERR)
             return retcode;
         state_set_ruler_records_divider(state, (unsigned int)value);
     }
     else if (strcmp("header_sequence_divider", name) == 0)
     {
         retcode = parse_integer(value_arg, 0, UINT_MAX, &value);
-        if (retcode != CMD_ESUCCESS)
+        if (retcode != CMD_ENOERR)
             return retcode;
         state_set_header_sequence_divider(state, (unsigned int)value);
     }
     else if (strcmp("tick_offset", name) == 0)
     {
         retcode = parse_integer(value_arg, INT_MIN, INT_MAX, &value);
-        if (retcode != CMD_ESUCCESS)
+        if (retcode != CMD_ENOERR)
             return retcode;
         state_set_tick_offset(state, (int)value);
     }
     else if (strcmp("tick_spacing", name) == 0)
     {
         retcode = parse_integer(value_arg, 0, INT_MAX, &value);
-        if (retcode != CMD_ESUCCESS)
+        if (retcode != CMD_ENOERR)
             return retcode;
         state_set_tick_spacing(state, (int)value);
     }
@@ -341,7 +341,7 @@ int cmd_set(State *state, int argc, char **argv)
     else
         return CMD_EUNKARG;
 
-    return CMD_ESUCCESS;
+    return CMD_ENOERR;
 }
 
 /*
@@ -361,7 +361,7 @@ int cmd_type(State *state, int argc, char **argv)
     // Apply to record(s)
     FileState *active_file = state->active_file;
     if (active_file->record_array.len == 0) // Necessary when argc == 2
-        return CMD_ESUCCESS;
+        return CMD_ENOERR;
 
     if (argc == 2)
     {
@@ -383,7 +383,7 @@ int cmd_type(State *state, int argc, char **argv)
     }
     state->refresh_sequence_pane = true;
 
-    return CMD_ESUCCESS;
+    return CMD_ENOERR;
 }
 
 /*
@@ -471,7 +471,7 @@ int cmd_scheme(State *state, int argc, char **argv)
     else
         return CMD_EUNKARG;
 
-    return CMD_ESUCCESS;
+    return CMD_ENOERR;
 }
 
 /*
@@ -491,42 +491,42 @@ int cmd_config(State *state, int argc, char **argv)
     if (strcmp("ruler_records_divider", name) == 0)
     {
         retcode = parse_integer(value_arg, 0, UINT_MAX, &value);
-        if (retcode != CMD_ESUCCESS)
+        if (retcode != CMD_ENOERR)
             return retcode;
         config_set_ruler_records_divider(&state->config, (unsigned int)value);
     }
     else if (strcmp("header_sequence_divider", name) == 0)
     {
         retcode = parse_integer(value_arg, 0, UINT_MAX, &value);
-        if (retcode != CMD_ESUCCESS)
+        if (retcode != CMD_ENOERR)
             return retcode;
         config_set_header_sequence_divider(&state->config, (unsigned int)value);
     }
     else if (strcmp("tick_offset", name) == 0)
     {
         retcode = parse_integer(value_arg, INT_MIN, INT_MAX, &value);
-        if (retcode != CMD_ESUCCESS)
+        if (retcode != CMD_ENOERR)
             return retcode;
         config_set_tick_offset(&state->config, (int)value);
     }
     else if (strcmp("tick_spacing", name) == 0)
     {
         retcode = parse_integer(value_arg, 0, INT_MAX, &value);
-        if (retcode != CMD_ESUCCESS)
+        if (retcode != CMD_ENOERR)
             return retcode;
         config_set_tick_spacing(&state->config, (int)value);
     }
     else if (strcmp("nucleic_tiebreak_len", name) == 0)
     {
         retcode = parse_integer(value_arg, 0, UINT_MAX, &value);
-        if (retcode != CMD_ESUCCESS)
+        if (retcode != CMD_ENOERR)
             return retcode;
         config_set_nucleic_tiebreak_len(&state->config, (unsigned int)value);
     }
     else
         return CMD_EUNKARG;
 
-    return CMD_ESUCCESS;
+    return CMD_ENOERR;
 }
 
 /*
@@ -566,7 +566,7 @@ int cmd_edit(State *state, int argc, char **argv)
     // Close file
     fclose(fp);
 
-    return CMD_ESUCCESS;
+    return CMD_ENOERR;
 }
 
 /*
@@ -610,5 +610,5 @@ int cmd_write(State *state, int argc, char **argv)
     // Close file
     fclose(fp);
 
-    return CMD_ESUCCESS;
+    return CMD_ENOERR;
 }

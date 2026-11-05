@@ -18,7 +18,7 @@ typedef struct
 
 typedef enum
 {
-    CMD_ESUCCESS = 0,
+    CMD_ENOERR = 0,
     CMD_EARGNUM,   // Incorrect number of arguments
     CMD_EINVAL,    // Invalid argument(s)
     CMD_EINTPARSE, // Argument not valid integer
