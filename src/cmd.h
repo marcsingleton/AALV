@@ -26,6 +26,7 @@ typedef enum
     CMD_ENOMEM,    // Memory allocation failed
     CMD_EARGMAX,   // Exceeded maximum number of arguments
     CMD_EUNKCMD,   // Unknown command
+    CMD_EUNKARG,   // Unknown option or subcommand
     CMD_ESEQTYPE,  // Unknown sequence type
     CMD_ESCHEME,   // Unknown color scheme
     CMD_EFORMAT,   // Unknown file format
