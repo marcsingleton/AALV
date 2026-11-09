@@ -174,13 +174,10 @@ int state_set_layout(State *state, unsigned int ruler_records_divider, unsigned 
     if (!state || !state->active_file)
         return -1;
 
-    if (state_set_divider_limits(state) != 0)
-        return -1;
-    if (state_set_records_command_divider(state, state->terminal_rows - 2) != 0) // Needs to be first
-        return -1;
-    if (state_set_ruler_records_divider(state, ruler_records_divider) != 0)
-        return -1;
-    if (state_set_header_sequence_divider(state, header_sequence_divider) != 0)
+    if (state_set_divider_limits(state) != 0 ||
+        state_set_records_command_divider(state, state->terminal_rows - 2) != 0 || // Needs to be first
+        state_set_ruler_records_divider(state, ruler_records_divider) != 0 ||
+        state_set_header_sequence_divider(state, header_sequence_divider) != 0)
         return -1;
     state->active_file->layout.command_pane.w = state->terminal_cols;
     state->active_file->layout.ruler_pane.w = state->terminal_cols;
@@ -229,8 +226,9 @@ int state_init(State *state)
         return -1;
 
     memset(state, 0, sizeof(State));
-    state_set_terminal_size(state);
-    config_init(&state->config);
+    if (state_set_terminal_size(state) != 0 ||
+        config_init(&state->config) != 0)
+        return -1;
 
     return 0;
 }
@@ -264,7 +262,8 @@ int state_set_terminal_size(State *state)
         return -1;
 
     unsigned int rows, cols;
-    terminal_get_window_size(&rows, &cols);
+    if (terminal_get_window_size(&rows, &cols) != 0)
+        return -1;
     state->terminal_rows = rows;
     state->terminal_cols = cols;
 
@@ -304,17 +303,20 @@ int state_new_file(State *state)
         return -1;
 
     FileState *file = files + state->nfiles;
-    scroller_init(&file->layout.scroller, SCROLLER_NPANES);
+    if (scroller_init(&file->layout.scroller, SCROLLER_NPANES) != 0)
+        return -1;
     scroller_set_active_pane(&file->layout.scroller, SCROLLER_SEQUENCE_PANE);
-    state_init_file_data(file);
 
+    if (state_init_file_data(file) != 0)
+        return -1;
     state->files = files;
     state->nfiles += 1;
 
-    state_set_active_file_index(state, state->nfiles - 1);
-    state_set_layout(state, state->config.ruler_records_divider, state->config.header_sequence_divider);
-    state_set_tick_offset(state, state->config.tick_offset);
-    state_set_tick_spacing(state, state->config.tick_spacing);
+    if (state_set_active_file_index(state, state->nfiles - 1) != 0 ||
+        state_set_layout(state, state->config.ruler_records_divider, state->config.header_sequence_divider) != 0 ||
+        state_set_tick_offset(state, state->config.tick_offset) != 0 ||
+        state_set_tick_spacing(state, state->config.tick_spacing) != 0)
+        return -1;
 
     state->refresh_window = true;
 
@@ -342,14 +344,16 @@ int state_remove_file(State *state)
             return -1;
         state->files = files;
         state->nfiles -= 1;
-        state_set_active_file_index(state, state->active_file_index); // Setter checks bounds
+        if (state_set_active_file_index(state, state->active_file_index) != 0) // Setter checks bounds
+            return -1;
     }
     else
     {
         free(state->files);
         state->files = NULL;
         state->nfiles = 0;
-        state_set_active_file_index(state, 0);
+        if (state_set_active_file_index(state, 0) != 0)
+            return -1;
     }
 
     state->refresh_window = true;
