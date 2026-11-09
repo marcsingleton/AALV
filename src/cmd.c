@@ -70,7 +70,7 @@ char *cmd_strerror(int error)
     case CMD_EARGNUM:
         return "Incorrect number of arguments";
     case CMD_EINVAL:
-        return "Invalid argument";
+        return "Invalid argument(s)";
     case CMD_EINTPARSE:
         return "Argument not valid integer";
     case CMD_ERANGE:
@@ -85,16 +85,28 @@ char *cmd_strerror(int error)
         return "Unknown option or subcommand";
     case CMD_ESEQTYPE:
         return "Unknown sequence type";
-    case CMD_ESCHEME:
+    case CMD_EUNKSCH:
         return "Unknown color scheme";
+    case CMD_ENEWSCH:
+        return "Failed to create color scheme";
+    case CMD_ERMSCH:
+        return "Failed to remove color scheme";
+    case CMD_ECFG:
+        return "Failed to set configuration";
+    case CMD_ENOPATH:
+        return "No file path available";
     case CMD_EFORMAT:
         return "Unknown file format";
     case CMD_EOPEN:
         return "Failed to open file";
-    case CMD_ENOPATH:
-        return "No file path available";
-    case CMD_EFILEOP:
+    case CMD_EWRITE:
+        return "Failed to write file";
+    case CMD_EINTFOP:
         return "Failure in internal file operation";
+    case CMD_EINTIOOP:
+        return "Failure in internal io operation";
+    case CMD_EMISC:
+        return "Failure in miscellaneous operation";
     }
     // No default case to trigger warning for missed values
 
@@ -119,6 +131,7 @@ int cmd_parse_command_line(char *line, int *argc, char *argv[CMD_ARG_MAX])
         return CMD_EINVAL;
 
     int retcode = CMD_ENOERR;
+
     int new_argc = 0;
     unsigned int j = 0;
     while (line[j] != '\0')
@@ -235,7 +248,7 @@ int cmd_quit(State *state, int argc, char **argv)
     (void)argv;
 
     if (state_remove_file(state) != 0)
-        return CMD_EFILEOP;
+        return CMD_EINTFOP;
 
     return CMD_ENOERR;
 }
@@ -252,7 +265,7 @@ int cmd_quitall(State *state, int argc, char **argv)
     // TODO: If files are editable, check none are modified before closing any to mimic Vim behavior
     while (state->nfiles > 0)
         if (state_remove_file(state) != 0)
-            return CMD_EFILEOP;
+            return CMD_EINTFOP;
 
     return CMD_ENOERR;
 }
@@ -308,40 +321,41 @@ int cmd_set(State *state, int argc, char **argv)
         retcode = parse_integer(value_arg, 0, UINT_MAX, &value);
         if (retcode != CMD_ENOERR)
             return retcode;
-        state_set_ruler_records_divider(state, (unsigned int)value);
+        retcode = state_set_ruler_records_divider(state, (unsigned int)value);
     }
     else if (strcmp("header_sequence_divider", name) == 0)
     {
         retcode = parse_integer(value_arg, 0, UINT_MAX, &value);
         if (retcode != CMD_ENOERR)
             return retcode;
-        state_set_header_sequence_divider(state, (unsigned int)value);
+        retcode = state_set_header_sequence_divider(state, (unsigned int)value);
     }
     else if (strcmp("tick_offset", name) == 0)
     {
         retcode = parse_integer(value_arg, INT_MIN, INT_MAX, &value);
         if (retcode != CMD_ENOERR)
             return retcode;
-        state_set_tick_offset(state, (int)value);
+        retcode = state_set_tick_offset(state, (int)value);
     }
     else if (strcmp("tick_spacing", name) == 0)
     {
         retcode = parse_integer(value_arg, 0, INT_MAX, &value);
         if (retcode != CMD_ENOERR)
             return retcode;
-        state_set_tick_spacing(state, (int)value);
+        retcode = state_set_tick_spacing(state, (int)value);
     }
     else if (strcmp("scheme", name) == 0)
     {
         SeqColorScheme *color_scheme = parse_color_scheme_name(state, value_arg);
         if (!color_scheme)
-            return CMD_ESCHEME;
-        state_set_active_color_scheme(state, color_scheme);
+            return CMD_EUNKSCH;
+        retcode = state_set_active_color_scheme(state, color_scheme);
     }
     else
         return CMD_EUNKARG;
 
-    return CMD_ENOERR;
+    retcode = (retcode == 0) ? CMD_ENOERR : CMD_EMISC;
+    return retcode;
 }
 
 /*
@@ -409,7 +423,8 @@ int cmd_scheme(State *state, int argc, char **argv)
         if (seq_type == SEQ_TYPE_UNSPECIFIED)
             return CMD_ESEQTYPE;
 
-        state_new_color_scheme(state, name, seq_type, COLOR_8_BIT);
+        if (state_new_color_scheme(state, name, seq_type, COLOR_8_BIT) != 0)
+            return CMD_ENEWSCH;
     }
     else if (strcmp("remove", argv[1]) == 0)
     {
@@ -418,7 +433,8 @@ int cmd_scheme(State *state, int argc, char **argv)
 
         char *name = argv[2];
 
-        state_remove_color_scheme(state, name);
+        if (state_remove_color_scheme(state, name) != 0)
+            return CMD_ERMSCH;
     }
     else if (strcmp("map", argv[1]) == 0)
     {
@@ -436,7 +452,7 @@ int cmd_scheme(State *state, int argc, char **argv)
         char *color_scheme_arg = argv[3];
         SeqColorScheme *color_scheme = parse_color_scheme_name(state, color_scheme_arg);
         if (!color_scheme)
-            return CMD_ESCHEME;
+            return CMD_EUNKSCH;
 
         // Get corresponding alphabet
         Alphabet *alphabet = sequences_seq_type_to_alphabet(color_scheme->type);
@@ -493,40 +509,41 @@ int cmd_config(State *state, int argc, char **argv)
         retcode = parse_integer(value_arg, 0, UINT_MAX, &value);
         if (retcode != CMD_ENOERR)
             return retcode;
-        config_set_ruler_records_divider(&state->config, (unsigned int)value);
+        retcode = config_set_ruler_records_divider(&state->config, (unsigned int)value);
     }
     else if (strcmp("header_sequence_divider", name) == 0)
     {
         retcode = parse_integer(value_arg, 0, UINT_MAX, &value);
         if (retcode != CMD_ENOERR)
             return retcode;
-        config_set_header_sequence_divider(&state->config, (unsigned int)value);
+        retcode = config_set_header_sequence_divider(&state->config, (unsigned int)value);
     }
     else if (strcmp("tick_offset", name) == 0)
     {
         retcode = parse_integer(value_arg, INT_MIN, INT_MAX, &value);
         if (retcode != CMD_ENOERR)
             return retcode;
-        config_set_tick_offset(&state->config, (int)value);
+        retcode = config_set_tick_offset(&state->config, (int)value);
     }
     else if (strcmp("tick_spacing", name) == 0)
     {
         retcode = parse_integer(value_arg, 0, INT_MAX, &value);
         if (retcode != CMD_ENOERR)
             return retcode;
-        config_set_tick_spacing(&state->config, (int)value);
+        retcode = config_set_tick_spacing(&state->config, (int)value);
     }
     else if (strcmp("nucleic_tiebreak_len", name) == 0)
     {
         retcode = parse_integer(value_arg, 0, UINT_MAX, &value);
         if (retcode != CMD_ENOERR)
             return retcode;
-        config_set_nucleic_tiebreak_len(&state->config, (unsigned int)value);
+        retcode = config_set_nucleic_tiebreak_len(&state->config, (unsigned int)value);
     }
     else
         return CMD_EUNKARG;
 
-    return CMD_ENOERR;
+    retcode = (retcode == 0) ? CMD_ENOERR : CMD_ECFG;
+    return retcode;
 }
 
 /*
@@ -543,7 +560,7 @@ int cmd_edit(State *state, int argc, char **argv)
     if (state_remove_file(state) != 0 ||
         state_new_file(state) != 0 ||
         state_set_file_path(state->active_file, file_path) != 0)
-        return CMD_EFILEOP;
+        return CMD_EINTFOP;
 
     // Get reader
     const char *format_arg = io_get_path_extension(file_path);
@@ -559,14 +576,16 @@ int cmd_edit(State *state, int argc, char **argv)
         return CMD_EOPEN;
 
     // Load seqs and set metadata
-    io_load_seqs(state->active_file, fp, reader);
-    io_set_seq_types(state->active_file, "", state->config.nucleic_tiebreak_len);
-    io_set_unaligned_indices(state->active_file);
+    int retcode = CMD_ENOERR;
+    if (io_load_seqs(state->active_file, fp, reader) != 0 ||
+        io_set_seq_types(state->active_file, "", state->config.nucleic_tiebreak_len) != 0 ||
+        io_set_unaligned_indices(state->active_file) != 0)
+        retcode = CMD_EINTIOOP;
 
     // Close file
     fclose(fp);
 
-    return CMD_ENOERR;
+    return retcode;
 }
 
 /*
@@ -605,10 +624,13 @@ int cmd_write(State *state, int argc, char **argv)
         kwargv = argv + 2;
     }
 
-    writer(fp, &state->active_file->record_array, kwargc, kwargv);
+    // Write file
+    int retcode = CMD_ENOERR;
+    if (writer(fp, &state->active_file->record_array, kwargc, kwargv) != 0)
+        retcode = CMD_EWRITE;
 
     // Close file
     fclose(fp);
 
-    return CMD_ENOERR;
+    return retcode;
 }

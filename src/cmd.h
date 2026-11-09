@@ -28,11 +28,17 @@ typedef enum
     CMD_EUNKCMD,   // Unknown command
     CMD_EUNKARG,   // Unknown option or subcommand
     CMD_ESEQTYPE,  // Unknown sequence type
-    CMD_ESCHEME,   // Unknown color scheme
+    CMD_EUNKSCH,   // Unknown color scheme
+    CMD_ENEWSCH,   // Failed to create color scheme
+    CMD_ERMSCH,    // Failed to remove color scheme
+    CMD_ECFG,      // Failed to set configuration
+    CMD_ENOPATH,   // No file path available
     CMD_EFORMAT,   // Unknown file format
     CMD_EOPEN,     // Failed to open file
-    CMD_ENOPATH,   // No file path available
-    CMD_EFILEOP,   // Failure in internal file operation
+    CMD_EWRITE,    // Failed to write file
+    CMD_EINTFOP,   // Failure in internal file operation
+    CMD_EINTIOOP,  // Failure in internal io operation
+    CMD_EMISC,     // Failure in miscellaneous operation
 } CommandError;
 
 char *cmd_read_command_line(int input_fd, char *prompt);
