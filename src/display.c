@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "cmd.h"
 #include "color.h"
 #include "display.h"
 #include "macros.h"
@@ -320,7 +321,7 @@ void display_command_pane(State *state, Array *buffer)
         }
         else
         {
-            n = snprintf(status, STATUS_LEN, "E%d: %s", state->cmd_errno, "Error message.");
+            n = snprintf(status, STATUS_LEN, "E%d: %s", state->cmd_errno, cmd_strerror(state->cmd_errno));
             n_status = (n > STATUS_LEN) ? STATUS_LEN : n;
             status_bg_color = BG_RED;
         }
