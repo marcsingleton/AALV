@@ -14,12 +14,12 @@ typedef struct
     unsigned int nucleic_tiebreak_len; // Threshold for when indeterminate sequences are called nucleic
 } Config;
 
-void config_init(Config *config);
+int config_init(Config *config);
 
-void config_set_ruler_records_divider(Config *config, unsigned int j);
-void config_set_header_sequence_divider(Config *config, unsigned int i);
-void config_set_tick_offset(Config *config, int tick_offset);
-void config_set_tick_spacing(Config *config, int tick_spacing);
-void config_set_nucleic_tiebreak_len(Config *config, unsigned int nucleic_tiebreak_len);
+int config_set_ruler_records_divider(Config *config, unsigned int j);
+int config_set_header_sequence_divider(Config *config, unsigned int i);
+int config_set_tick_offset(Config *config, int tick_offset);
+int config_set_tick_spacing(Config *config, int tick_spacing);
+int config_set_nucleic_tiebreak_len(Config *config, unsigned int nucleic_tiebreak_len);
 
 #endif // CONFIG_H
