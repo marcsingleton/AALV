@@ -91,6 +91,9 @@ int io_load_seqs(FileState *file, FILE *fp, FileReader reader)
     if (retcode != 0)
         return -1;
 
+    if (record_array->len > INT_MAX)
+        return -1;
+
     size_t max_len = 0;
     for (size_t i = 0; i < record_array->len; i++)
     {
@@ -99,7 +102,7 @@ int io_load_seqs(FileState *file, FILE *fp, FileReader reader)
             max_len = record->len;
     }
     if (max_len > INT_MAX)
-        return -2;
+        return -1;
     file->metadata.max_len = max_len;
 
     return 0;
