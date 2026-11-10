@@ -21,13 +21,13 @@ int input_read_key(Array *buffer, int fd)
     return n;
 }
 
-int input_parse_keys(Array *buffer, Action *action, size_t *count)
+int input_parse_keys(Array *buffer, Action *action, int *count)
 {
     size_t index = 0;
     char *ptr, c;
 
     // Parse digits
-    size_t accum = 0;
+    int accum = 0;
     int accum_default_is_set = 0;
     while (index < buffer->len)
     {
@@ -37,7 +37,7 @@ int input_parse_keys(Array *buffer, Action *action, size_t *count)
             break;
         if (accum == 0 && c == '0') // 0 is line start, so ignore at start of digits
             break;
-        if (accum > (SIZE_MAX - (c - '0')) / 10)
+        if (accum > (INT_MAX - (c - '0')) / 10)
             return PARSE_FAIL;
         accum = 10 * accum + (c - '0');
         index++;
@@ -67,40 +67,40 @@ int input_parse_keys(Array *buffer, Action *action, size_t *count)
         switch (c)
         {
         case 'A':
-            action->fn.size_t_arg = action_move_up;
-            action->args = SIZE_T_ARG;
+            action->fn.int_arg = action_move_up;
+            action->args = INT_ARG;
             break;
         case 'B':
-            action->fn.size_t_arg = action_move_down;
-            action->args = SIZE_T_ARG;
+            action->fn.int_arg = action_move_down;
+            action->args = INT_ARG;
             break;
         case 'C':
-            action->fn.size_t_arg = action_move_right;
-            action->args = SIZE_T_ARG;
+            action->fn.int_arg = action_move_right;
+            action->args = INT_ARG;
             break;
         case 'D':
-            action->fn.size_t_arg = action_move_left;
-            action->args = SIZE_T_ARG;
+            action->fn.int_arg = action_move_left;
+            action->args = INT_ARG;
             break;
         default:
             return PARSE_FAIL;
         }
         break;
     case 'k':
-        action->fn.size_t_arg = action_move_up;
-        action->args = SIZE_T_ARG;
+        action->fn.int_arg = action_move_up;
+        action->args = INT_ARG;
         break;
     case 'j':
-        action->fn.size_t_arg = action_move_down;
-        action->args = SIZE_T_ARG;
+        action->fn.int_arg = action_move_down;
+        action->args = INT_ARG;
         break;
     case 'l':
-        action->fn.size_t_arg = action_move_right;
-        action->args = SIZE_T_ARG;
+        action->fn.int_arg = action_move_right;
+        action->args = INT_ARG;
         break;
     case 'h':
-        action->fn.size_t_arg = action_move_left;
-        action->args = SIZE_T_ARG;
+        action->fn.int_arg = action_move_left;
+        action->args = INT_ARG;
         break;
     case CTRL('b'):
         action->fn.page_size_arg = action_move_page_up;
@@ -151,9 +151,8 @@ int input_parse_keys(Array *buffer, Action *action, size_t *count)
         action->args = VOID_ARG;
         break;
     case '|':
-        action->fn.size_t_arg = action_move_to_column;
-        action->args = SIZE_T_ARG;
-        accum--; // Convert to 0-based index
+        action->fn.int_arg = action_move_to_column;
+        action->args = INT_ARG;
         break;
     case '^':
         action->fn.void_arg = action_move_first_non_gap_or_non_whitespace;
@@ -202,9 +201,8 @@ int input_parse_keys(Array *buffer, Action *action, size_t *count)
         }
         else
         {
-            action->fn.size_t_arg = action_move_to_row;
-            action->args = SIZE_T_ARG;
-            accum--; // Convert to 0-based index
+            action->fn.int_arg = action_move_to_row;
+            action->args = INT_ARG;
         }
         break;
     case 'H':
@@ -305,7 +303,7 @@ int input_parse_keys(Array *buffer, Action *action, size_t *count)
     return PARSE_SUCCESS;
 }
 
-int input_execute_action(State *state, Action *action, size_t count)
+int input_execute_action(State *state, Action *action, int count)
 {
     switch (action->args)
     {
@@ -315,10 +313,10 @@ int input_execute_action(State *state, Action *action, size_t count)
         fn(state);
         break;
     }
-    case SIZE_T_ARG:
+    case INT_ARG:
     {
-        void (*fn)(State *, size_t) = action->fn.size_t_arg;
-        size_t arg = count;
+        void (*fn)(State *, int) = action->fn.int_arg;
+        int arg = count;
         fn(state, arg);
         break;
     }

@@ -541,7 +541,7 @@ int execute_normal_mode(State *state, Array *read_buffer, int input_fd)
 {
     input_read_key(read_buffer, input_fd);
 
-    size_t count;
+    int count;
     Action action;
     int retcode = input_parse_keys(read_buffer, &action, &count);
     switch (retcode)

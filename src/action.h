@@ -6,6 +6,9 @@
  *
  * Functions in this module may modify the global State variable. They should refrain from displaying any changes and
  * should instead mark panes to be refreshed as necessary.
+ *
+ * An int argument are taken directly from the parsing accumulator. Each function should interpret the meaning of this
+ * value accordingly.
  */
 
 #include <stddef.h>
@@ -16,14 +19,14 @@
 typedef union
 {
     void (*void_arg)(State *);
-    void (*size_t_arg)(State *, size_t);
+    void (*int_arg)(State *, int);
     void (*page_size_arg)(State *, PageSize);
 } ActionFunction;
 
 typedef enum
 {
     VOID_ARG = 0,
-    SIZE_T_ARG,
+    INT_ARG,
     PAGE_SIZE_ARG,
 } ActionArguments;
 
@@ -33,10 +36,10 @@ typedef struct
     ActionArguments args;
 } Action;
 
-void action_move_up(State *state, size_t x);
-void action_move_down(State *state, size_t x);
-void action_move_right(State *state, size_t x);
-void action_move_left(State *state, size_t x);
+void action_move_up(State *state, int x);
+void action_move_down(State *state, int x);
+void action_move_right(State *state, int x);
+void action_move_left(State *state, int x);
 void action_move_page_up(State *state, PageSize page_size);
 void action_move_page_down(State *state, PageSize page_size);
 void action_move_page_right(State *state, PageSize page_size);
@@ -44,12 +47,12 @@ void action_move_page_left(State *state, PageSize page_size);
 void action_move_row_start(State *state);
 void action_move_row_middle(State *state);
 void action_move_row_end(State *state);
-void action_move_to_column(State *state, size_t x);
+void action_move_to_column(State *state, int x);
 void action_move_first_non_gap_or_non_whitespace(State *state);
 void action_move_last_non_gap_or_non_whitespace(State *state);
 void action_move_first_row(State *state);
 void action_move_last_row(State *state);
-void action_move_to_row(State *state, size_t x);
+void action_move_to_row(State *state, int x);
 void action_move_top_edge(State *state);
 void action_move_bottom_edge(State *state);
 void action_move_right_edge(State *state);
