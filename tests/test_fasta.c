@@ -13,7 +13,7 @@
 int test_round_trip(void)
 {
     int test_retcode = TEST_SUCCESS;
-    int retcode = FORMATS_SUCCESS;
+    int retcode = FORMATS_ENOERR;
     char buffer[512];
     char header1[] = "id1 metadata1";
     char id1[] = "id1";
@@ -35,16 +35,16 @@ int test_round_trip(void)
     TEST_ASSERT_GOTO(fp != NULL, cleanup, test_retcode);
 
     retcode = fasta_fwrite(fp, &exp_records, 10);
-    TEST_ASSERT_GOTO(retcode == FORMATS_SUCCESS, cleanup, test_retcode);
+    TEST_ASSERT_GOTO(retcode == FORMATS_ENOERR, cleanup, test_retcode);
 
     rewind(fp);
     SeqRecordArray ret_records = {0};
     retcode = fasta_fread(fp, &ret_records);
-    TEST_ASSERT_GOTO(retcode == FORMATS_SUCCESS, cleanup, test_retcode);
+    TEST_ASSERT_GOTO(retcode == FORMATS_ENOERR, cleanup, test_retcode);
     TEST_ASSERT_GOTO(records_equal(&exp_records, &ret_records) == 1, cleanup, test_retcode);
 
 cleanup:
-    if (retcode == FORMATS_SUCCESS)
+    if (retcode == FORMATS_ENOERR)
         sequences_deinit_seq_record_array(&ret_records);
     if (fp != NULL)
         fclose(fp);
@@ -54,7 +54,7 @@ cleanup:
 int test_no_header(void)
 {
     int test_retcode = TEST_SUCCESS;
-    int retcode = FORMATS_SUCCESS;
+    int retcode = FORMATS_ENOERR;
     char buffer[] =
         "ABCD\n"
         ">id2\n"
@@ -65,7 +65,7 @@ int test_no_header(void)
 
     SeqRecordArray ret_records = {0};
     retcode = fasta_fread(fp, &ret_records);
-    TEST_ASSERT_GOTO(retcode == FORMATS_ERROR_INVALID_FORMAT, cleanup, test_retcode);
+    TEST_ASSERT_GOTO(retcode == FORMATS_EINVFMT, cleanup, test_retcode);
 
 cleanup:
     if (retcode == 0)
@@ -78,7 +78,7 @@ cleanup:
 int test_empty_file(void)
 {
     int test_retcode = TEST_SUCCESS;
-    int retcode = FORMATS_SUCCESS;
+    int retcode = FORMATS_ENOERR;
     char buffer[1];
 
     FILE *fp = fmemopen(buffer, sizeof(buffer), "rw");
@@ -101,7 +101,7 @@ cleanup:
 int test_blank_lines(void)
 {
     int test_retcode = TEST_SUCCESS;
-    int retcode = FORMATS_SUCCESS;
+    int retcode = FORMATS_ENOERR;
     char buffer[] =
         "\n\n\n"
         ">id1 metadata1\n"
@@ -121,12 +121,12 @@ int test_blank_lines(void)
 
     SeqRecordArray ret_records = {0};
     retcode = fasta_fread(fp, &ret_records);
-    TEST_ASSERT_GOTO(retcode == FORMATS_SUCCESS, cleanup, test_retcode);
+    TEST_ASSERT_GOTO(retcode == FORMATS_ENOERR, cleanup, test_retcode);
     TEST_ASSERT_GOTO(exp_records.len == ret_records.len, cleanup, test_retcode);
     TEST_ASSERT_GOTO(records_equal(&exp_records, &ret_records) == 1, cleanup, test_retcode);
 
 cleanup:
-    if (retcode == FORMATS_SUCCESS)
+    if (retcode == FORMATS_ENOERR)
         sequences_deinit_seq_record_array(&ret_records);
     if (fp != NULL)
         fclose(fp);
@@ -136,7 +136,7 @@ cleanup:
 int test_no_eof_newline(void)
 {
     int test_retcode = TEST_SUCCESS;
-    int retcode = FORMATS_SUCCESS;
+    int retcode = FORMATS_ENOERR;
     char buffer[] =
         ">id1 metadata1\n"
         "ABCD\n"
@@ -153,12 +153,12 @@ int test_no_eof_newline(void)
 
     SeqRecordArray ret_records = {0};
     retcode = fasta_fread(fp, &ret_records);
-    TEST_ASSERT_GOTO(retcode == FORMATS_SUCCESS, cleanup, test_retcode);
+    TEST_ASSERT_GOTO(retcode == FORMATS_ENOERR, cleanup, test_retcode);
     TEST_ASSERT_GOTO(exp_records.len == ret_records.len, cleanup, test_retcode);
     TEST_ASSERT_GOTO(records_equal(&exp_records, &ret_records) == 1, cleanup, test_retcode);
 
 cleanup:
-    if (retcode == FORMATS_SUCCESS)
+    if (retcode == FORMATS_ENOERR)
         sequences_deinit_seq_record_array(&ret_records);
     if (fp != NULL)
         fclose(fp);
@@ -168,7 +168,7 @@ cleanup:
 int test_dos_line_endings(void)
 {
     int test_retcode = TEST_SUCCESS;
-    int retcode = FORMATS_SUCCESS;
+    int retcode = FORMATS_ENOERR;
     char buffer[] =
         ">id1 metadata1\r\n"
         "ABCD\r\n"
@@ -186,12 +186,12 @@ int test_dos_line_endings(void)
 
     SeqRecordArray ret_records = {0};
     retcode = fasta_fread(fp, &ret_records);
-    TEST_ASSERT_GOTO(retcode == FORMATS_SUCCESS, cleanup, test_retcode);
+    TEST_ASSERT_GOTO(retcode == FORMATS_ENOERR, cleanup, test_retcode);
     TEST_ASSERT_GOTO(exp_records.len == ret_records.len, cleanup, test_retcode);
     TEST_ASSERT_GOTO(records_equal(&exp_records, &ret_records) == 1, cleanup, test_retcode);
 
 cleanup:
-    if (retcode == FORMATS_SUCCESS)
+    if (retcode == FORMATS_ENOERR)
         sequences_deinit_seq_record_array(&ret_records);
     if (fp != NULL)
         fclose(fp);
@@ -201,7 +201,7 @@ cleanup:
 int test_non_fasta(void)
 {
     int test_retcode = TEST_SUCCESS;
-    int retcode = FORMATS_SUCCESS;
+    int retcode = FORMATS_ENOERR;
     char buffer[] =
         "Here's a multiline\n"
         "file that's definitely not\n"
@@ -212,7 +212,7 @@ int test_non_fasta(void)
 
     SeqRecordArray ret_records = {0};
     retcode = fasta_fread(fp, &ret_records);
-    TEST_ASSERT_GOTO(retcode == FORMATS_ERROR_INVALID_FORMAT, cleanup, test_retcode);
+    TEST_ASSERT_GOTO(retcode == FORMATS_EINVFMT, cleanup, test_retcode);
 
 cleanup:
     if (retcode == 0)

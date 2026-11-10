@@ -11,7 +11,7 @@
 int linefmt_fread(FILE *fp, SeqRecordArray *record_array)
 {
     // Declarations
-    int retcode = FORMATS_SUCCESS;
+    int retcode = FORMATS_ENOERR;
 
     Array new_records = {.data = NULL};
 
@@ -27,7 +27,7 @@ int linefmt_fread(FILE *fp, SeqRecordArray *record_array)
 
     if (array_init(&new_records, sizeof(SeqRecord)) != 0)
     {
-        retcode = FORMATS_ERROR_MEMORY_ALLOCATION;
+        retcode = FORMATS_ENOMEM;
         goto cleanup;
     }
 
@@ -45,7 +45,7 @@ int linefmt_fread(FILE *fp, SeqRecordArray *record_array)
         header = malloc(1);
         if (!header)
         {
-            retcode = FORMATS_ERROR_MEMORY_ALLOCATION;
+            retcode = FORMATS_ENOMEM;
             goto cleanup;
         }
         header[0] = '\0';
@@ -54,7 +54,7 @@ int linefmt_fread(FILE *fp, SeqRecordArray *record_array)
         id = malloc(1);
         if (!id)
         {
-            retcode = FORMATS_ERROR_MEMORY_ALLOCATION;
+            retcode = FORMATS_ENOMEM;
             goto cleanup;
         }
         id[0] = '\0';
@@ -63,7 +63,7 @@ int linefmt_fread(FILE *fp, SeqRecordArray *record_array)
         seq = malloc(trim_len + 1);
         if (!seq)
         {
-            retcode = FORMATS_ERROR_MEMORY_ALLOCATION;
+            retcode = FORMATS_ENOMEM;
             goto cleanup;
         }
         memcpy(seq, line, trim_len);
@@ -82,12 +82,12 @@ int linefmt_fread(FILE *fp, SeqRecordArray *record_array)
         // Check for records overflow
         if (new_records.len > SIZE_MAX - 1)
         {
-            retcode = FORMATS_ERROR_RECORD_OVERFLOW;
+            retcode = FORMATS_ESEQMAX;
             goto cleanup;
         }
         if (array_append(&new_records, &new_record) != 0)
         {
-            retcode = FORMATS_ERROR_MEMORY_ALLOCATION;
+            retcode = FORMATS_ENOMEM;
             goto cleanup;
         }
 
@@ -98,7 +98,7 @@ int linefmt_fread(FILE *fp, SeqRecordArray *record_array)
 
     if (array_shrink(&new_records) != 0)
     {
-        retcode = FORMATS_ERROR_MEMORY_ALLOCATION;
+        retcode = FORMATS_ENOMEM;
         goto cleanup;
     }
 
@@ -111,7 +111,7 @@ cleanup:
     free(id);
     free(seq);
 
-    if (retcode != FORMATS_SUCCESS)
+    if (retcode != FORMATS_ENOERR)
     {
         for (size_t i = 0; i < new_records.len; i++)
         {
@@ -131,23 +131,23 @@ cleanup:
 
 int linefmt_read(const char *path, SeqRecordArray *record_array)
 {
-    int retcode = FORMATS_SUCCESS;
+    int retcode = FORMATS_ENOERR;
     FILE *fp = NULL;
 
     fp = fopen(path, "r");
     if (!fp)
     {
-        retcode = FORMATS_ERROR_FILE_IO;
+        retcode = FORMATS_EIO;
         goto cleanup;
     }
 
     retcode = linefmt_fread(fp, record_array);
-    if (retcode != FORMATS_SUCCESS)
+    if (retcode != FORMATS_ENOERR)
         goto cleanup;
 
 cleanup:
     if (fp && fclose(fp) != 0)
-        return FORMATS_ERROR_FILE_IO;
+        return FORMATS_EIO;
 
     return retcode;
 }
@@ -156,7 +156,7 @@ int linefmt_fwrite(FILE *fp, SeqRecordArray *record_array)
 {
     // Check writeable
     if (fputs("", fp) == EOF)
-        return FORMATS_ERROR_WRITE;
+        return FORMATS_EWRITE;
 
     for (size_t i = 0; i < record_array->len; i++)
     {
@@ -165,28 +165,28 @@ int linefmt_fwrite(FILE *fp, SeqRecordArray *record_array)
         fputc('\n', fp);
     }
 
-    return FORMATS_SUCCESS;
+    return FORMATS_ENOERR;
 }
 
 int linefmt_write(const char *path, SeqRecordArray *record_array)
 {
-    int retcode = FORMATS_SUCCESS;
+    int retcode = FORMATS_ENOERR;
     FILE *fp = NULL;
 
     fp = fopen(path, "w");
     if (!fp)
     {
-        retcode = FORMATS_ERROR_FILE_IO;
+        retcode = FORMATS_EIO;
         goto cleanup;
     }
 
     retcode = linefmt_fwrite(fp, record_array);
-    if (retcode != FORMATS_SUCCESS)
+    if (retcode != FORMATS_ENOERR)
         goto cleanup;
 
 cleanup:
     if (fp && fclose(fp) != 0)
-        retcode = FORMATS_ERROR_FILE_IO;
+        retcode = FORMATS_EIO;
 
     return retcode;
 }
