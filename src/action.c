@@ -163,6 +163,12 @@ void action_move_to_column(State *state, int x)
     FileState *active_file = state->active_file;
     RowLinkedScroller *scroller = &active_file->layout.scroller;
     size_t ncols = get_row_ncols(active_file);
+
+    if (active_file->layout.tick_offset > x)
+        x = 0;
+    else
+        x = x - active_file->layout.tick_offset;
+
     scroller_move_to_column(scroller, active_file->record_array.len, ncols, x);
 }
 
@@ -262,6 +268,11 @@ void action_move_to_row(State *state, int x)
 {
     FileState *active_file = state->active_file;
     RowLinkedScroller *scroller = &active_file->layout.scroller;
+
+    if (x <= 0) // Non-positive as row 1
+        x = 1;
+    x--; // 0-indexed
+
     scroller_move_to_row(scroller, active_file->record_array.len, x);
 }
 
