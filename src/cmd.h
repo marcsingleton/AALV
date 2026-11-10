@@ -10,36 +10,36 @@
 #define CMD_ARG_MAX 32
 #define CMD_ALPHABET "abcdefghijklmnopqrstuvwxyz"
 
-typedef struct
-{
-    int (*fn_ptr)(State *, int, char **);
-    char *name;
-} Command;
-
 typedef enum
 {
     CMD_ENOERR = 0,
+    CMD_EARGMAX,   // Exceeded maximum number of arguments
     CMD_EARGNUM,   // Incorrect number of arguments
-    CMD_EINVAL,    // Invalid argument(s)
+    CMD_EARGINV,   // Invalid argument(s)
     CMD_EINTPARSE, // Argument not valid integer
     CMD_ERANGE,    // Value out of range
     CMD_ENOMEM,    // Memory allocation failed
-    CMD_EARGMAX,   // Exceeded maximum number of arguments
     CMD_EUNKCMD,   // Unknown command
     CMD_EUNKARG,   // Unknown option or subcommand
     CMD_ESEQTYPE,  // Unknown sequence type
-    CMD_EUNKSCH,   // Unknown color scheme
-    CMD_ENEWSCH,   // Failed to create color scheme
-    CMD_ERMSCH,    // Failed to remove color scheme
-    CMD_ECFG,      // Failed to set configuration
+    CMD_EUNKSCHM,  // Unknown color scheme
+    CMD_ENEWSCHM,  // Failed to create color scheme
+    CMD_ERMSCHM,   // Failed to remove color scheme
+    CMD_ECONFIG,   // Failed to set configuration
     CMD_ENOPATH,   // No file path available
-    CMD_EFORMAT,   // Unknown file format
+    CMD_EUNKFMT,   // Unknown file format
     CMD_EOPEN,     // Failed to open file
     CMD_EWRITE,    // Failed to write file
     CMD_EINTFOP,   // Failure in internal file operation
     CMD_EINTIOOP,  // Failure in internal io operation
     CMD_EMISC,     // Failure in miscellaneous operation
-} CommandError;
+} CmdError;
+
+typedef struct
+{
+    int (*fn_ptr)(State *, int, char **);
+    char *name;
+} Command;
 
 char *cmd_read_command_line(int input_fd, char *prompt);
 int cmd_parse_command_line(char *line, int *argc, char *argv[CMD_ARG_MAX]);

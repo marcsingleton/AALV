@@ -63,13 +63,15 @@ static SeqColorScheme *parse_color_scheme_name(State *state, char *color_scheme_
 // Public
 char *cmd_strerror(int error)
 {
-    switch ((CommandError)error)
+    switch ((CmdError)error)
     {
     case CMD_ENOERR:
         return "No error";
+    case CMD_EARGMAX:
+        return "Exceeded maximum number of arguments";
     case CMD_EARGNUM:
         return "Incorrect number of arguments";
-    case CMD_EINVAL:
+    case CMD_EARGINV:
         return "Invalid argument(s)";
     case CMD_EINTPARSE:
         return "Argument not valid integer";
@@ -77,25 +79,23 @@ char *cmd_strerror(int error)
         return "Value out of range";
     case CMD_ENOMEM:
         return "Memory allocation failed";
-    case CMD_EARGMAX:
-        return "Exceeded maximum number of arguments";
     case CMD_EUNKCMD:
         return "Unknown command";
     case CMD_EUNKARG:
         return "Unknown option or subcommand";
     case CMD_ESEQTYPE:
         return "Unknown sequence type";
-    case CMD_EUNKSCH:
+    case CMD_EUNKSCHM:
         return "Unknown color scheme";
-    case CMD_ENEWSCH:
+    case CMD_ENEWSCHM:
         return "Failed to create color scheme";
-    case CMD_ERMSCH:
+    case CMD_ERMSCHM:
         return "Failed to remove color scheme";
-    case CMD_ECFG:
+    case CMD_ECONFIG:
         return "Failed to set configuration";
     case CMD_ENOPATH:
         return "No file path available";
-    case CMD_EFORMAT:
+    case CMD_EUNKFMT:
         return "Unknown file format";
     case CMD_EOPEN:
         return "Failed to open file";
@@ -128,7 +128,7 @@ char *cmd_read_command_line(int input_fd, char *prompt)
 int cmd_parse_command_line(char *line, int *argc, char *argv[CMD_ARG_MAX])
 {
     if (!line || !argc || !argv)
-        return CMD_EINVAL;
+        return CMD_EARGINV;
 
     int retcode = CMD_ENOERR;
 
@@ -179,10 +179,10 @@ cleanup:
 int cmd_execute_command(State *state, int argc, char *argv[CMD_ARG_MAX])
 {
     if (!state || argc <= 0 || !argv)
-        return CMD_EINVAL;
+        return CMD_EARGINV;
     for (int i = 0; i < argc; i++)
         if (!argv[i])
-            return CMD_EINVAL;
+            return CMD_EARGINV;
 
     void *ptr = prefix_tree_get_prefix_match(&cmd_map, argv[0]);
     if (!ptr)
@@ -197,7 +197,7 @@ int cmd_execute_command(State *state, int argc, char *argv[CMD_ARG_MAX])
 int cmd_parse_execute_command_line(State *state, char *line)
 {
     if (!state || !line)
-        return CMD_EINVAL;
+        return CMD_EARGINV;
 
     int retcode = CMD_ENOERR;
 
@@ -348,7 +348,7 @@ int cmd_set(State *state, int argc, char **argv)
     {
         SeqColorScheme *color_scheme = parse_color_scheme_name(state, value_arg);
         if (!color_scheme)
-            return CMD_EUNKSCH;
+            return CMD_EUNKSCHM;
         retcode = state_set_active_color_scheme(state, color_scheme);
     }
     else
@@ -424,7 +424,7 @@ int cmd_scheme(State *state, int argc, char **argv)
             return CMD_ESEQTYPE;
 
         if (state_new_color_scheme(state, name, seq_type, COLOR_8_BIT) != 0)
-            return CMD_ENEWSCH;
+            return CMD_ENEWSCHM;
     }
     else if (strcmp("remove", argv[1]) == 0)
     {
@@ -434,7 +434,7 @@ int cmd_scheme(State *state, int argc, char **argv)
         char *name = argv[2];
 
         if (state_remove_color_scheme(state, name) != 0)
-            return CMD_ERMSCH;
+            return CMD_ERMSCHM;
     }
     else if (strcmp("map", argv[1]) == 0)
     {
@@ -452,7 +452,7 @@ int cmd_scheme(State *state, int argc, char **argv)
         char *color_scheme_arg = argv[3];
         SeqColorScheme *color_scheme = parse_color_scheme_name(state, color_scheme_arg);
         if (!color_scheme)
-            return CMD_EUNKSCH;
+            return CMD_EUNKSCHM;
 
         // Get corresponding alphabet
         Alphabet *alphabet = sequences_seq_type_to_alphabet(color_scheme->type);
@@ -465,12 +465,12 @@ int cmd_scheme(State *state, int argc, char **argv)
             char sym;
             int value;
             if (sscanf(arg, "%c=%d", &sym, &value) != 2)
-                return CMD_EINVAL;
+                return CMD_EARGINV;
 
             // Parse <sym>
             int index = alphabet->index_map[(unsigned char)sym];
             if (index < 0)
-                return CMD_EINVAL;
+                return CMD_EARGINV;
 
             // Parse <value>
             if (value < 0 || value > UINT8_MAX)
@@ -542,7 +542,7 @@ int cmd_config(State *state, int argc, char **argv)
     else
         return CMD_EUNKARG;
 
-    retcode = (retcode == 0) ? CMD_ENOERR : CMD_ECFG;
+    retcode = (retcode == 0) ? CMD_ENOERR : CMD_ECONFIG;
     return retcode;
 }
 
@@ -565,10 +565,10 @@ int cmd_edit(State *state, int argc, char **argv)
     // Get reader
     const char *format_arg = io_get_path_extension(file_path);
     if (!format_arg)
-        return CMD_EFORMAT;
+        return CMD_EUNKFMT;
     FileReader reader = io_get_reader(format_arg, n_format_options, format_options);
     if (!reader)
-        return CMD_EFORMAT;
+        return CMD_EUNKFMT;
 
     // Open file
     FILE *fp = fopen(file_path, "r");
@@ -605,10 +605,10 @@ int cmd_write(State *state, int argc, char **argv)
     // Get writer
     const char *format_arg = io_get_path_extension(file_path);
     if (!format_arg)
-        return CMD_EFORMAT;
+        return CMD_EUNKFMT;
     FileWriter writer = io_get_writer(format_arg, n_format_options, format_options);
     if (!writer)
-        return CMD_EFORMAT;
+        return CMD_EUNKFMT;
 
     // Open file
     FILE *fp = fopen(file_path, "w");
