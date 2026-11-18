@@ -1,6 +1,6 @@
 #include "scroller.h"
 
-int scroller_init(RowLinkedScroller *scroller, unsigned int npanes)
+int scroller_init(LinkedScroller *scroller, unsigned int npanes)
 {
     if (!scroller || npanes == 0)
         return -1;
@@ -62,7 +62,7 @@ int scroller_init(RowLinkedScroller *scroller, unsigned int npanes)
     return 0;
 }
 
-void scroller_deinit(RowLinkedScroller *scroller)
+void scroller_deinit(LinkedScroller *scroller)
 {
     if (!scroller)
         return;
@@ -90,7 +90,7 @@ void scroller_deinit(RowLinkedScroller *scroller)
     scroller->active_pane_index = 0;
 }
 
-void scroller_set_offset_i(RowLinkedScroller *scroller, size_t i)
+void scroller_set_offset_i(LinkedScroller *scroller, size_t i)
 {
     if (!scroller)
         return;
@@ -105,7 +105,7 @@ void scroller_set_offset_i(RowLinkedScroller *scroller, size_t i)
     }
 }
 
-void scroller_set_offset_j(RowLinkedScroller *scroller, size_t j)
+void scroller_set_offset_j(LinkedScroller *scroller, size_t j)
 {
     if (!scroller)
         return;
@@ -120,7 +120,7 @@ void scroller_set_offset_j(RowLinkedScroller *scroller, size_t j)
     }
 }
 
-void scroller_set_cursor_i(RowLinkedScroller *scroller, size_t i)
+void scroller_set_cursor_i(LinkedScroller *scroller, size_t i)
 {
     if (!scroller)
         return;
@@ -133,7 +133,7 @@ void scroller_set_cursor_i(RowLinkedScroller *scroller, size_t i)
     }
 }
 
-void scroller_set_cursor_j(RowLinkedScroller *scroller, size_t j)
+void scroller_set_cursor_j(LinkedScroller *scroller, size_t j)
 {
     if (!scroller)
         return;
@@ -146,7 +146,7 @@ void scroller_set_cursor_j(RowLinkedScroller *scroller, size_t j)
     }
 }
 
-void scroller_set_group_i(RowLinkedScroller *scroller, unsigned int i)
+void scroller_set_group_i(LinkedScroller *scroller, unsigned int i)
 {
     if (!scroller)
         return;
@@ -154,7 +154,7 @@ void scroller_set_group_i(RowLinkedScroller *scroller, unsigned int i)
     scroller->groups_i[scroller->active_pane_index] = i;
 }
 
-void scroller_set_group_j(RowLinkedScroller *scroller, unsigned int j)
+void scroller_set_group_j(LinkedScroller *scroller, unsigned int j)
 {
     if (!scroller)
         return;
@@ -162,7 +162,7 @@ void scroller_set_group_j(RowLinkedScroller *scroller, unsigned int j)
     scroller->groups_j[scroller->active_pane_index] = j;
 }
 
-void scroller_set_height(RowLinkedScroller *scroller, unsigned int height)
+void scroller_set_height(LinkedScroller *scroller, unsigned int height)
 {
     if (!scroller)
         return;
@@ -172,7 +172,7 @@ void scroller_set_height(RowLinkedScroller *scroller, unsigned int height)
     scroller->refreshes[index] = true;
 }
 
-void scroller_set_width(RowLinkedScroller *scroller, unsigned int width)
+void scroller_set_width(LinkedScroller *scroller, unsigned int width)
 {
     if (!scroller)
         return;
@@ -182,7 +182,7 @@ void scroller_set_width(RowLinkedScroller *scroller, unsigned int width)
     scroller->refreshes[index] = true;
 }
 
-void scroller_set_active_pane(RowLinkedScroller *scroller, unsigned int index)
+void scroller_set_active_pane(LinkedScroller *scroller, unsigned int index)
 {
     if (!scroller)
         return;
@@ -193,7 +193,7 @@ void scroller_set_active_pane(RowLinkedScroller *scroller, unsigned int index)
     scroller->active_pane_index = index;
 }
 
-void scroller_set_refresh(RowLinkedScroller *scroller, bool refresh)
+void scroller_set_refresh(LinkedScroller *scroller, bool refresh)
 {
     if (!scroller)
         return;
@@ -202,7 +202,7 @@ void scroller_set_refresh(RowLinkedScroller *scroller, bool refresh)
     scroller->refreshes[index] = refresh;
 }
 
-void scroller_set_refreshes(RowLinkedScroller *scroller, bool refresh)
+void scroller_set_refreshes(LinkedScroller *scroller, bool refresh)
 {
     if (!scroller)
         return;
@@ -211,7 +211,7 @@ void scroller_set_refreshes(RowLinkedScroller *scroller, bool refresh)
         scroller->refreshes[index] = refresh;
 }
 
-void scroller_cursor_clamp(RowLinkedScroller *scroller)
+void scroller_cursor_clamp(LinkedScroller *scroller)
 {
     if (!scroller)
         return;
@@ -234,7 +234,7 @@ void scroller_cursor_clamp(RowLinkedScroller *scroller)
         scroller_set_cursor_j(scroller, scroller_width - 1);
 }
 
-void scroller_move_up(RowLinkedScroller *scroller, size_t nrows, size_t x)
+void scroller_move_up(LinkedScroller *scroller, size_t nrows, size_t x)
 {
     if (!scroller)
         return;
@@ -259,7 +259,7 @@ void scroller_move_up(RowLinkedScroller *scroller, size_t nrows, size_t x)
         scroller_set_cursor_i(scroller, cursor_i - x);
 }
 
-void scroller_move_down(RowLinkedScroller *scroller, size_t nrows, size_t x)
+void scroller_move_down(LinkedScroller *scroller, size_t nrows, size_t x)
 {
     if (!scroller)
         return;
@@ -289,7 +289,7 @@ void scroller_move_down(RowLinkedScroller *scroller, size_t nrows, size_t x)
         scroller_set_cursor_i(scroller, cursor_i + x);
 }
 
-void scroller_move_right(RowLinkedScroller *scroller, size_t nrows, size_t ncols, size_t x)
+void scroller_move_right(LinkedScroller *scroller, size_t nrows, size_t ncols, size_t x)
 {
     if (!scroller)
         return;
@@ -338,7 +338,7 @@ void scroller_move_right(RowLinkedScroller *scroller, size_t nrows, size_t ncols
         scroller_set_cursor_j(scroller, cursor_j + x);
 }
 
-void scroller_move_left(RowLinkedScroller *scroller, size_t nrows, size_t ncols, size_t x)
+void scroller_move_left(LinkedScroller *scroller, size_t nrows, size_t ncols, size_t x)
 {
     if (!scroller)
         return;
@@ -380,7 +380,7 @@ void scroller_move_left(RowLinkedScroller *scroller, size_t nrows, size_t ncols,
         scroller_set_cursor_j(scroller, cursor_j - x);
 }
 
-void scroller_move_page_up(RowLinkedScroller *scroller, size_t nrows, PageSize page_size)
+void scroller_move_page_up(LinkedScroller *scroller, size_t nrows, PageSize page_size)
 {
     if (!scroller)
         return;
@@ -406,7 +406,7 @@ void scroller_move_page_up(RowLinkedScroller *scroller, size_t nrows, PageSize p
         scroller_set_offset_i(scroller, offset_i - x);
 }
 
-void scroller_move_page_down(RowLinkedScroller *scroller, size_t nrows, PageSize page_size)
+void scroller_move_page_down(LinkedScroller *scroller, size_t nrows, PageSize page_size)
 {
     if (!scroller)
         return;
@@ -438,7 +438,7 @@ void scroller_move_page_down(RowLinkedScroller *scroller, size_t nrows, PageSize
         scroller_set_cursor_i(scroller, nrows - offset_i - 1);
 }
 
-void scroller_move_page_right(RowLinkedScroller *scroller, size_t nrows, size_t ncols, PageSize page_size)
+void scroller_move_page_right(LinkedScroller *scroller, size_t nrows, size_t ncols, PageSize page_size)
 {
     if (!scroller)
         return;
@@ -471,7 +471,7 @@ void scroller_move_page_right(RowLinkedScroller *scroller, size_t nrows, size_t 
     }
 }
 
-void scroller_move_page_left(RowLinkedScroller *scroller, size_t nrows, PageSize page_size)
+void scroller_move_page_left(LinkedScroller *scroller, size_t nrows, PageSize page_size)
 {
     if (!scroller)
         return;
@@ -496,7 +496,7 @@ void scroller_move_page_left(RowLinkedScroller *scroller, size_t nrows, PageSize
         scroller_set_offset_j(scroller, offset_j - x);
 }
 
-void scroller_move_row_start(RowLinkedScroller *scroller, size_t nrows)
+void scroller_move_row_start(LinkedScroller *scroller, size_t nrows)
 {
     if (!scroller)
         return;
@@ -509,7 +509,7 @@ void scroller_move_row_start(RowLinkedScroller *scroller, size_t nrows)
     scroller_set_cursor_j(scroller, 0);
 }
 
-void scroller_move_row_end(RowLinkedScroller *scroller, size_t nrows, size_t ncols)
+void scroller_move_row_end(LinkedScroller *scroller, size_t nrows, size_t ncols)
 {
     if (!scroller)
         return;
@@ -527,7 +527,7 @@ void scroller_move_row_end(RowLinkedScroller *scroller, size_t nrows, size_t nco
     scroller_move_right(scroller, nrows, ncols, x);
 }
 
-void scroller_move_to_column(RowLinkedScroller *scroller, size_t nrows, size_t ncols, size_t x)
+void scroller_move_to_column(LinkedScroller *scroller, size_t nrows, size_t ncols, size_t x)
 {
     if (!scroller)
         return;
@@ -547,7 +547,7 @@ void scroller_move_to_column(RowLinkedScroller *scroller, size_t nrows, size_t n
         scroller_move_left(scroller, nrows, ncols, index_j - x);
 }
 
-void scroller_move_first_row(RowLinkedScroller *scroller, size_t nrows)
+void scroller_move_first_row(LinkedScroller *scroller, size_t nrows)
 {
     if (!scroller)
         return;
@@ -560,7 +560,7 @@ void scroller_move_first_row(RowLinkedScroller *scroller, size_t nrows)
     scroller_set_cursor_i(scroller, 0);
 }
 
-void scroller_move_last_row(RowLinkedScroller *scroller, size_t nrows)
+void scroller_move_last_row(LinkedScroller *scroller, size_t nrows)
 {
     if (!scroller)
         return;
@@ -578,7 +578,7 @@ void scroller_move_last_row(RowLinkedScroller *scroller, size_t nrows)
     scroller_move_down(scroller, nrows, x);
 }
 
-void scroller_move_to_row(RowLinkedScroller *scroller, size_t nrows, size_t x)
+void scroller_move_to_row(LinkedScroller *scroller, size_t nrows, size_t x)
 {
     if (!scroller)
         return;
@@ -598,7 +598,7 @@ void scroller_move_to_row(RowLinkedScroller *scroller, size_t nrows, size_t x)
         scroller_move_up(scroller, nrows, index_i - x);
 }
 
-void scroller_move_top_edge(RowLinkedScroller *scroller, size_t nrows)
+void scroller_move_top_edge(LinkedScroller *scroller, size_t nrows)
 {
     if (!scroller)
         return;
@@ -610,7 +610,7 @@ void scroller_move_top_edge(RowLinkedScroller *scroller, size_t nrows)
     scroller_set_cursor_i(scroller, 0);
 }
 
-void scroller_move_bottom_edge(RowLinkedScroller *scroller, size_t nrows)
+void scroller_move_bottom_edge(LinkedScroller *scroller, size_t nrows)
 {
     if (!scroller)
         return;
@@ -631,7 +631,7 @@ void scroller_move_bottom_edge(RowLinkedScroller *scroller, size_t nrows)
         scroller_set_cursor_i(scroller, scroller_height - 1);
 }
 
-void scroller_move_right_edge(RowLinkedScroller *scroller, size_t nrows)
+void scroller_move_right_edge(LinkedScroller *scroller, size_t nrows)
 {
     if (!scroller)
         return;
@@ -648,7 +648,7 @@ void scroller_move_right_edge(RowLinkedScroller *scroller, size_t nrows)
     scroller_set_cursor_j(scroller, scroller_width - 1); // Not (scroller_width - 1) b/c column positions intrinsically offset
 }
 
-void scroller_move_left_edge(RowLinkedScroller *scroller, size_t nrows)
+void scroller_move_left_edge(LinkedScroller *scroller, size_t nrows)
 {
     if (!scroller)
         return;
@@ -660,7 +660,7 @@ void scroller_move_left_edge(RowLinkedScroller *scroller, size_t nrows)
     scroller_set_cursor_j(scroller, 0);
 }
 
-void scroller_move_vertical_middle(RowLinkedScroller *scroller, size_t nrows)
+void scroller_move_vertical_middle(LinkedScroller *scroller, size_t nrows)
 {
     if (!scroller)
         return;
@@ -681,7 +681,7 @@ void scroller_move_vertical_middle(RowLinkedScroller *scroller, size_t nrows)
         scroller_set_cursor_i(scroller, (scroller_height - 1) / 2);
 }
 
-void scroller_move_horizontal_middle(RowLinkedScroller *scroller, size_t nrows)
+void scroller_move_horizontal_middle(LinkedScroller *scroller, size_t nrows)
 {
     if (!scroller)
         return;
@@ -698,7 +698,7 @@ void scroller_move_horizontal_middle(RowLinkedScroller *scroller, size_t nrows)
     scroller_set_cursor_j(scroller, scroller_width / 2); // Not (scroller_width - 1) b/c column positions intrinsically offset
 }
 
-void scroller_move_row_to_center(RowLinkedScroller *scroller, size_t nrows)
+void scroller_move_row_to_center(LinkedScroller *scroller, size_t nrows)
 {
     if (!scroller)
         return;

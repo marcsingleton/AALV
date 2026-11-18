@@ -379,7 +379,7 @@ int cmd_type(State *state, int argc, char **argv)
 
     if (argc == 2)
     {
-        RowLinkedScroller *scroller = &active_file->layout.scroller;
+        LinkedScroller *scroller = &active_file->layout.scroller;
         unsigned int active_index = scroller->active_pane_index;
         size_t offset_i = scroller->offsets_i[active_index];
         size_t cursor_i = scroller->cursors_i[active_index];

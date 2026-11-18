@@ -45,7 +45,7 @@ typedef struct
     Pane header_pane;
     Pane sequence_pane;
     Pane command_pane;
-    RowLinkedScroller scroller;
+    LinkedScroller scroller;
 } Layout;
 
 typedef struct

@@ -35,7 +35,7 @@ void display_refresh(State *state, Array *buffer)
         state->terminal_cols = cols;
         state->refresh_window = true;
     }
-    RowLinkedScroller *scroller = &state->active_file->layout.scroller;
+    LinkedScroller *scroller = &state->active_file->layout.scroller;
     if (scroller->refreshes[SCROLLER_HEADER_PANE])
     {
         state->refresh_header_pane = true;
@@ -94,7 +94,7 @@ void display_header_pane(State *state, Array *buffer)
 {
     FileState *active_file = state->active_file;
 
-    RowLinkedScroller *scroller = &active_file->layout.scroller;
+    LinkedScroller *scroller = &active_file->layout.scroller;
     size_t offset_i = scroller->offsets_i[SCROLLER_HEADER_PANE];
     size_t offset_j = scroller->offsets_j[SCROLLER_HEADER_PANE];
 
@@ -155,7 +155,7 @@ void display_ruler_pane_ticks(State *state, Array *buffer)
 {
     FileState *active_file = state->active_file;
 
-    RowLinkedScroller *scroller = &active_file->layout.scroller;
+    LinkedScroller *scroller = &active_file->layout.scroller;
     size_t offset_sequence = scroller->offsets_j[SCROLLER_SEQUENCE_PANE];
 
     Pane *pane = &active_file->layout.ruler_pane;
@@ -218,7 +218,7 @@ void display_sequence_pane(State *state, Array *buffer)
 {
     FileState *active_file = state->active_file;
 
-    RowLinkedScroller *scroller = &active_file->layout.scroller;
+    LinkedScroller *scroller = &active_file->layout.scroller;
     size_t offset_i = scroller->offsets_i[SCROLLER_SEQUENCE_PANE];
     size_t offset_j = scroller->offsets_j[SCROLLER_SEQUENCE_PANE];
 
@@ -245,7 +245,7 @@ void display_command_pane(State *state, Array *buffer)
     FileState *active_file = state->active_file;
     Pane *pane = &active_file->layout.command_pane;
     unsigned int header_sequence_divider = active_file->layout.header_sequence_divider;
-    RowLinkedScroller *scroller = &active_file->layout.scroller;
+    LinkedScroller *scroller = &active_file->layout.scroller;
     size_t record_index = scroller->offsets_i[SCROLLER_SEQUENCE_PANE] + scroller->cursors_i[SCROLLER_SEQUENCE_PANE];
     size_t sequence_index = scroller->offsets_j[SCROLLER_SEQUENCE_PANE] + scroller->cursors_j[SCROLLER_SEQUENCE_PANE];
 
@@ -365,7 +365,7 @@ void display_cursor(State *state, Array *buffer)
         if (active_file->record_array.len == 0)
             return;
 
-        RowLinkedScroller *scroller = &active_file->layout.scroller;
+        LinkedScroller *scroller = &active_file->layout.scroller;
         unsigned int active_index = scroller->active_pane_index;
 
         Pane *pane;
