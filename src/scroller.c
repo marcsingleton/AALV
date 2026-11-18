@@ -275,7 +275,7 @@ void scroller_set_refreshes(LinkedScroller *scroller, bool refresh)
         scroller->refreshes[index] = refresh;
 }
 
-void scroller_cursor_clamp(LinkedScroller *scroller)
+void scroller_cursor_clamp_viewport(LinkedScroller *scroller)
 {
     if (!scroller)
         return;
@@ -297,11 +297,31 @@ void scroller_cursor_clamp(LinkedScroller *scroller)
         scroller_set_cursor_j(scroller, width - 1);
 }
 
+void scroller_cursor_clamp_row(LinkedScroller *scroller, size_t ncols)
+{
+    if (!scroller)
+        return;
+
+    size_t offset_j = scroller_get_offset_j(scroller);
+    size_t index_j = scroller_get_index_j(scroller);
+    if (index_j + 1 <= ncols)
+        return;
+
+    index_j = (ncols > 0) ? ncols - 1 : 0;
+    if (index_j < offset_j)
+    {
+        scroller_set_offset_j(scroller, index_j);
+        scroller_set_cursor_j(scroller, 0);
+    }
+    else
+        scroller_set_cursor_j(scroller, index_j - offset_j);
+}
+
 void scroller_move_up(LinkedScroller *scroller, size_t nrows, size_t x)
 {
     if (!scroller)
         return;
-    scroller_cursor_clamp(scroller);
+    scroller_cursor_clamp_viewport(scroller);
 
     if (nrows == 0)
         return;
@@ -324,7 +344,7 @@ void scroller_move_down(LinkedScroller *scroller, size_t nrows, size_t x)
 {
     if (!scroller)
         return;
-    scroller_cursor_clamp(scroller);
+    scroller_cursor_clamp_viewport(scroller);
 
     if (nrows == 0)
         return;
@@ -353,9 +373,13 @@ void scroller_move_right(LinkedScroller *scroller, size_t nrows, size_t ncols, s
 {
     if (!scroller)
         return;
-    scroller_cursor_clamp(scroller);
+    scroller_cursor_clamp_viewport(scroller);
 
     if (nrows == 0)
+        return;
+    scroller_cursor_clamp_row(scroller, ncols);
+
+    if (ncols == 0)
         return;
 
     unsigned int width = scroller_get_width(scroller);
@@ -363,30 +387,12 @@ void scroller_move_right(LinkedScroller *scroller, size_t nrows, size_t ncols, s
         width = 1; // Treat collapsed scroller as single column
 
     size_t offset_j = scroller_get_offset_j(scroller);
+    size_t cursor_j = scroller_get_cursor_j(scroller);
     size_t index_j = scroller_get_index_j(scroller);
 
-    // Snap to end
-    if (index_j + 1 > ncols)
-    {
-        index_j = (ncols > 0) ? ncols - 1 : 0;
-        if (index_j < offset_j)
-        {
-            scroller_set_offset_j(scroller, index_j);
-            scroller_set_cursor_j(scroller, 0);
-        }
-        else
-            scroller_set_cursor_j(scroller, index_j - offset_j);
-    }
-    offset_j = scroller_get_offset_j(scroller);
-    size_t cursor_j = scroller_get_cursor_j(scroller);
-    index_j = scroller_get_index_j(scroller);
-
-    // Move
-    if (ncols == 0)
-        return;
-    if (x + index_j + 1 >= ncols)
+    if (x + index_j + 1 >= ncols) // Check row bounds
         x = ncols - index_j - 1;
-    if (x + cursor_j + 1 > width)
+    if (x + cursor_j + 1 > width) // Check right viewport edge
     {
         x = (x + cursor_j + 1) - width;
         scroller_set_offset_j(scroller, offset_j + x);
@@ -400,33 +406,18 @@ void scroller_move_left(LinkedScroller *scroller, size_t nrows, size_t ncols, si
 {
     if (!scroller)
         return;
-    scroller_cursor_clamp(scroller);
+    scroller_cursor_clamp_viewport(scroller);
 
     if (nrows == 0)
         return;
+    scroller_cursor_clamp_row(scroller, ncols);
 
-    size_t offset_j = scroller_get_offset_j(scroller);
+    size_t cursor_j = scroller_get_cursor_j(scroller);
     size_t index_j = scroller_get_index_j(scroller);
 
-    // Snap to end
-    if (index_j + 1 > ncols)
-    {
-        index_j = (ncols > 0) ? ncols - 1 : 0;
-        if (index_j < offset_j)
-        {
-            scroller_set_offset_j(scroller, index_j);
-            scroller_set_cursor_j(scroller, 0);
-        }
-        else
-            scroller_set_cursor_j(scroller, index_j - offset_j);
-    }
-    size_t cursor_j = scroller_get_cursor_j(scroller);
-    index_j = scroller_get_index_j(scroller);
-
-    // Move
-    if (x > index_j)
+    if (x > index_j) // Check row bounds
         x = index_j;
-    if (x > cursor_j)
+    if (x > cursor_j) // Check left viewport edge
     {
         scroller_set_offset_j(scroller, index_j - x);
         scroller_set_cursor_j(scroller, 0);
@@ -439,7 +430,7 @@ void scroller_move_page_up(LinkedScroller *scroller, size_t nrows, PageSize page
 {
     if (!scroller)
         return;
-    scroller_cursor_clamp(scroller);
+    scroller_cursor_clamp_viewport(scroller);
 
     if (nrows == 0)
         return;
@@ -464,7 +455,7 @@ void scroller_move_page_down(LinkedScroller *scroller, size_t nrows, PageSize pa
 {
     if (!scroller)
         return;
-    scroller_cursor_clamp(scroller);
+    scroller_cursor_clamp_viewport(scroller);
 
     if (nrows == 0)
         return;
@@ -495,7 +486,7 @@ void scroller_move_page_right(LinkedScroller *scroller, size_t nrows, size_t nco
 {
     if (!scroller)
         return;
-    scroller_cursor_clamp(scroller);
+    scroller_cursor_clamp_viewport(scroller);
 
     if (nrows == 0)
         return;
@@ -527,7 +518,7 @@ void scroller_move_page_left(LinkedScroller *scroller, size_t nrows, PageSize pa
 {
     if (!scroller)
         return;
-    scroller_cursor_clamp(scroller);
+    scroller_cursor_clamp_viewport(scroller);
 
     if (nrows == 0)
         return;
@@ -551,7 +542,7 @@ void scroller_move_row_start(LinkedScroller *scroller, size_t nrows)
 {
     if (!scroller)
         return;
-    scroller_cursor_clamp(scroller);
+    scroller_cursor_clamp_viewport(scroller);
 
     if (nrows == 0)
         return;
@@ -564,7 +555,7 @@ void scroller_move_row_end(LinkedScroller *scroller, size_t nrows, size_t ncols)
 {
     if (!scroller)
         return;
-    scroller_cursor_clamp(scroller);
+    scroller_cursor_clamp_viewport(scroller);
 
     if (nrows == 0)
         return;
@@ -578,7 +569,7 @@ void scroller_move_to_column(LinkedScroller *scroller, size_t nrows, size_t ncol
 {
     if (!scroller)
         return;
-    scroller_cursor_clamp(scroller);
+    scroller_cursor_clamp_viewport(scroller);
 
     if (nrows == 0)
         return;
@@ -594,7 +585,7 @@ void scroller_move_first_row(LinkedScroller *scroller, size_t nrows)
 {
     if (!scroller)
         return;
-    scroller_cursor_clamp(scroller);
+    scroller_cursor_clamp_viewport(scroller);
 
     if (nrows == 0)
         return;
@@ -607,7 +598,7 @@ void scroller_move_last_row(LinkedScroller *scroller, size_t nrows)
 {
     if (!scroller)
         return;
-    scroller_cursor_clamp(scroller);
+    scroller_cursor_clamp_viewport(scroller);
 
     if (nrows == 0)
         return;
@@ -621,7 +612,7 @@ void scroller_move_to_row(LinkedScroller *scroller, size_t nrows, size_t x)
 {
     if (!scroller)
         return;
-    scroller_cursor_clamp(scroller);
+    scroller_cursor_clamp_viewport(scroller);
 
     if (nrows == 0)
         return;
@@ -638,7 +629,7 @@ void scroller_move_top_edge(LinkedScroller *scroller, size_t nrows)
 {
     if (!scroller)
         return;
-    scroller_cursor_clamp(scroller);
+    scroller_cursor_clamp_viewport(scroller);
 
     if (nrows == 0)
         return;
@@ -650,7 +641,7 @@ void scroller_move_bottom_edge(LinkedScroller *scroller, size_t nrows)
 {
     if (!scroller)
         return;
-    scroller_cursor_clamp(scroller);
+    scroller_cursor_clamp_viewport(scroller);
 
     if (nrows == 0)
         return;
@@ -670,7 +661,7 @@ void scroller_move_right_edge(LinkedScroller *scroller, size_t nrows)
 {
     if (!scroller)
         return;
-    scroller_cursor_clamp(scroller);
+    scroller_cursor_clamp_viewport(scroller);
 
     if (nrows == 0)
         return;
@@ -686,7 +677,7 @@ void scroller_move_left_edge(LinkedScroller *scroller, size_t nrows)
 {
     if (!scroller)
         return;
-    scroller_cursor_clamp(scroller);
+    scroller_cursor_clamp_viewport(scroller);
 
     if (nrows == 0)
         return;
@@ -698,7 +689,7 @@ void scroller_move_vertical_middle(LinkedScroller *scroller, size_t nrows)
 {
     if (!scroller)
         return;
-    scroller_cursor_clamp(scroller);
+    scroller_cursor_clamp_viewport(scroller);
 
     if (nrows == 0)
         return;
@@ -718,7 +709,7 @@ void scroller_move_horizontal_middle(LinkedScroller *scroller, size_t nrows)
 {
     if (!scroller)
         return;
-    scroller_cursor_clamp(scroller);
+    scroller_cursor_clamp_viewport(scroller);
 
     if (nrows == 0)
         return;
@@ -734,7 +725,7 @@ void scroller_move_row_to_center(LinkedScroller *scroller, size_t nrows)
 {
     if (!scroller)
         return;
-    scroller_cursor_clamp(scroller);
+    scroller_cursor_clamp_viewport(scroller);
 
     if (nrows == 0)
         return;

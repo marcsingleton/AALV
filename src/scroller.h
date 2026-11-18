@@ -54,7 +54,9 @@ void scroller_set_active_pane(LinkedScroller *scroller, unsigned int index);
 void scroller_set_refresh(LinkedScroller *scroller, bool refresh);
 void scroller_set_refreshes(LinkedScroller *scroller, bool refresh);
 
-void scroller_cursor_clamp(LinkedScroller *scroller);
+void scroller_cursor_clamp_viewport(LinkedScroller *scroller);
+void scroller_cursor_clamp_row(LinkedScroller *scroller, size_t ncols);
+
 void scroller_move_up(LinkedScroller *scroller, size_t nrows, size_t x);
 void scroller_move_down(LinkedScroller *scroller, size_t nrows, size_t x);
 void scroller_move_right(LinkedScroller *scroller, size_t nrows, size_t ncols, size_t x);
