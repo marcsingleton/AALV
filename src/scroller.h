@@ -11,15 +11,17 @@
 
 typedef struct
 {
-    size_t offset_i;
-    size_t cursor_i;
+    size_t *offsets_i;
     size_t *offsets_j;
+    size_t *cursors_i;
     size_t *cursors_j;
+    unsigned int *groups_i;
+    unsigned int *groups_j;
+    unsigned int *heights;
+    unsigned int *widths;
+    bool *refreshes;
     unsigned int npanes;
     unsigned int active_pane_index;
-    unsigned int h;
-    unsigned int *ws;
-    bool *refreshes;
 } RowLinkedScroller;
 
 typedef enum
@@ -32,11 +34,13 @@ int scroller_init(RowLinkedScroller *scroller, unsigned int npanes);
 void scroller_deinit(RowLinkedScroller *scroller);
 
 void scroller_set_offset_i(RowLinkedScroller *scroller, size_t i);
-void scroller_set_cursor_i(RowLinkedScroller *scroller, size_t i);
 void scroller_set_offset_j(RowLinkedScroller *scroller, size_t j);
-void scroller_set_offsets_j(RowLinkedScroller *scroller, size_t j);
+void scroller_set_cursor_i(RowLinkedScroller *scroller, size_t i);
 void scroller_set_cursor_j(RowLinkedScroller *scroller, size_t j);
-void scroller_set_cursors_j(RowLinkedScroller *scroller, size_t j);
+void scroller_set_group_i(RowLinkedScroller *scroller, unsigned int i);
+void scroller_set_group_j(RowLinkedScroller *scroller, unsigned int j);
+void scroller_set_height(RowLinkedScroller *scroller, unsigned int height);
+void scroller_set_width(RowLinkedScroller *scroller, unsigned int width);
 void scroller_set_active_pane(RowLinkedScroller *scroller, unsigned int index);
 void scroller_set_refresh(RowLinkedScroller *scroller, bool refresh);
 void scroller_set_refreshes(RowLinkedScroller *scroller, bool refresh);
