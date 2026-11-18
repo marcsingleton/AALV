@@ -76,7 +76,8 @@ int state_set_ruler_records_divider(State *state, unsigned int i)
     layout->sequence_pane.i = layout->ruler_records_divider + 1;
     layout->sequence_pane.h = h;
 
-    layout->scroller.h = h;
+    layout->scroller.heights[SCROLLER_HEADER_PANE] = h;
+    layout->scroller.heights[SCROLLER_SEQUENCE_PANE] = h;
 
     state->refresh_ruler_pane = true;
     state->refresh_header_pane = true;
@@ -99,11 +100,11 @@ int state_set_header_sequence_divider(State *state, unsigned int j)
     layout->header_sequence_divider = j;
 
     layout->header_pane.w = layout->header_sequence_divider + 1;
-    layout->scroller.ws[SCROLLER_HEADER_PANE] = layout->header_sequence_divider;
+    layout->scroller.widths[SCROLLER_HEADER_PANE] = layout->header_sequence_divider;
 
     layout->sequence_pane.j = layout->header_sequence_divider + 1;
     layout->sequence_pane.w = state->terminal_cols - layout->header_sequence_divider - 1;
-    layout->scroller.ws[SCROLLER_SEQUENCE_PANE] = state->terminal_cols - layout->header_sequence_divider - 1;
+    layout->scroller.widths[SCROLLER_SEQUENCE_PANE] = state->terminal_cols - layout->header_sequence_divider - 1;
 
     state->refresh_ruler_pane = true;
     state->refresh_header_pane = true;
@@ -134,7 +135,8 @@ int state_set_records_command_divider(State *state, unsigned int i)
 
     layout->header_pane.h = h;
     layout->sequence_pane.h = h;
-    layout->scroller.h = h;
+    layout->scroller.heights[SCROLLER_HEADER_PANE] = h;
+    layout->scroller.heights[SCROLLER_SEQUENCE_PANE] = h;
 
     layout->command_pane.i = layout->records_command_divider;
     layout->command_pane.h = state->terminal_rows - layout->records_command_divider;
@@ -306,6 +308,7 @@ int state_new_file(State *state)
     if (scroller_init(&file->layout.scroller, SCROLLER_NPANES) != 0)
         return -1;
     scroller_set_active_pane(&file->layout.scroller, SCROLLER_SEQUENCE_PANE);
+    scroller_set_group_i(&file->layout.scroller, SCROLLER_HEADER_PANE);
 
     if (state_init_file_data(file) != 0)
         return -1;

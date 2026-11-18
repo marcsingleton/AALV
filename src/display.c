@@ -95,7 +95,7 @@ void display_header_pane(State *state, Array *buffer)
     FileState *active_file = state->active_file;
 
     RowLinkedScroller *scroller = &active_file->layout.scroller;
-    size_t offset_i = scroller->offset_i;
+    size_t offset_i = scroller->offsets_i[SCROLLER_HEADER_PANE];
     size_t offset_j = scroller->offsets_j[SCROLLER_HEADER_PANE];
 
     Pane *pane = &active_file->layout.header_pane;
@@ -219,7 +219,7 @@ void display_sequence_pane(State *state, Array *buffer)
     FileState *active_file = state->active_file;
 
     RowLinkedScroller *scroller = &active_file->layout.scroller;
-    size_t offset_i = scroller->offset_i;
+    size_t offset_i = scroller->offsets_i[SCROLLER_SEQUENCE_PANE];
     size_t offset_j = scroller->offsets_j[SCROLLER_SEQUENCE_PANE];
 
     Pane *pane = &active_file->layout.sequence_pane;
@@ -246,7 +246,7 @@ void display_command_pane(State *state, Array *buffer)
     Pane *pane = &active_file->layout.command_pane;
     unsigned int header_sequence_divider = active_file->layout.header_sequence_divider;
     RowLinkedScroller *scroller = &active_file->layout.scroller;
-    size_t record_index = scroller->offset_i + scroller->cursor_i;
+    size_t record_index = scroller->offsets_i[SCROLLER_SEQUENCE_PANE] + scroller->cursors_i[SCROLLER_SEQUENCE_PANE];
     size_t sequence_index = scroller->offsets_j[SCROLLER_SEQUENCE_PANE] + scroller->cursors_j[SCROLLER_SEQUENCE_PANE];
 
     // Records-command divider
@@ -381,16 +381,17 @@ void display_cursor(State *state, Array *buffer)
         if (pane->h == 0)
             return;
 
-        size_t offset_i = scroller->offset_i;
-        size_t cursor_i = scroller->cursor_i;
+        size_t offset_i = scroller->offsets_i[active_index];
+        size_t cursor_i = scroller->cursors_i[active_index];
         size_t offset_j = scroller->offsets_j[active_index];
         size_t cursor_j = scroller->cursors_j[active_index];
-        unsigned int scroller_width = scroller->ws[active_index];
+        unsigned int scroller_height = scroller->heights[active_index];
+        unsigned int scroller_width = scroller->widths[active_index];
 
         // Clamp display row to pane
         unsigned display_i;
-        if (cursor_i >= scroller->h)
-            display_i = scroller->h - 1;
+        if (cursor_i >= scroller_height)
+            display_i = scroller_height - 1;
         else
             display_i = cursor_i;
         size_t index_i = offset_i + display_i;

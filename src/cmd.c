@@ -380,7 +380,10 @@ int cmd_type(State *state, int argc, char **argv)
     if (argc == 2)
     {
         RowLinkedScroller *scroller = &active_file->layout.scroller;
-        size_t record_index = scroller->offset_i + scroller->cursor_i;
+        unsigned int active_index = scroller->active_pane_index;
+        size_t offset_i = scroller->offsets_i[active_index];
+        size_t cursor_i = scroller->cursors_i[active_index];
+        size_t record_index = offset_i + cursor_i;
         SeqRecord *record = active_file->record_array.data + record_index;
         record->type = seq_type;
     }

@@ -12,16 +12,21 @@ static size_t get_page_ncols(FileState *active_file)
         return 0;
 
     RowLinkedScroller *scroller = &active_file->layout.scroller;
+    unsigned int active_index = scroller->active_pane_index;
+    size_t offset_i = scroller->offsets_i[active_index];
+    size_t offset_j = scroller->offsets_j[active_index];
+    unsigned int scroller_height = scroller->heights[active_index];
+
     size_t max_index;
-    if (scroller->h > active_file->record_array.len - scroller->offset_i) // Invariant: offset < len
+    if (scroller_height > active_file->record_array.len - offset_j) // Invariant: offset < len
         max_index = active_file->record_array.len;
     else
-        max_index = scroller->offset_i + scroller->h;
+        max_index = offset_j + scroller_height;
     size_t ncols = 0;
     switch (scroller->active_pane_index)
     {
     case SCROLLER_HEADER_PANE:
-        for (size_t record_index = scroller->offset_i; record_index < max_index; record_index++)
+        for (size_t record_index = offset_i; record_index < max_index; record_index++)
         {
             SeqRecord *record = active_file->record_array.data + record_index;
             size_t row_ncols = strlen(record->header);
@@ -30,7 +35,7 @@ static size_t get_page_ncols(FileState *active_file)
         }
         break;
     case SCROLLER_SEQUENCE_PANE:
-        for (size_t record_index = scroller->offset_i; record_index < max_index; record_index++)
+        for (size_t record_index = offset_i; record_index < max_index; record_index++)
         {
             SeqRecord *record = active_file->record_array.data + record_index;
             size_t row_ncols = record->len;
@@ -48,7 +53,11 @@ static size_t get_row_ncols(FileState *active_file)
         return 0;
 
     RowLinkedScroller *scroller = &active_file->layout.scroller;
-    size_t record_index = scroller->offset_i + scroller->cursor_i;
+    unsigned int active_index = scroller->active_pane_index;
+    size_t offset_i = scroller->offsets_i[active_index];
+    size_t cursor_i = scroller->cursors_i[active_index];
+
+    size_t record_index = offset_i + cursor_i;
     SeqRecord *record = active_file->record_array.data + record_index;
     size_t ncols;
     switch (scroller->active_pane_index)
@@ -175,10 +184,14 @@ void action_move_to_column(State *state, int x)
 void action_move_first_non_gap_or_non_whitespace(State *state)
 {
     FileState *active_file = state->active_file;
+
     RowLinkedScroller *scroller = &active_file->layout.scroller;
+    unsigned int active_index = scroller->active_pane_index;
+    size_t offset_i = scroller->offsets_i[active_index];
+    size_t cursor_i = scroller->cursors_i[active_index];
     size_t ncols = get_row_ncols(active_file);
 
-    size_t record_index = scroller->offset_i + scroller->cursor_i;
+    size_t record_index = offset_i + cursor_i;
     SeqRecord *record = active_file->record_array.data + record_index;
     size_t x;
     switch (scroller->active_pane_index)
@@ -213,10 +226,14 @@ void action_move_first_non_gap_or_non_whitespace(State *state)
 void action_move_last_non_gap_or_non_whitespace(State *state)
 {
     FileState *active_file = state->active_file;
+
     RowLinkedScroller *scroller = &active_file->layout.scroller;
+    unsigned int active_index = scroller->active_pane_index;
+    size_t offset_i = scroller->offsets_i[active_index];
+    size_t cursor_i = scroller->cursors_i[active_index];
     size_t ncols = get_row_ncols(active_file);
 
-    size_t record_index = scroller->offset_i + scroller->cursor_i;
+    size_t record_index = offset_i + cursor_i;
     SeqRecord *record = active_file->record_array.data + record_index;
     size_t x;
     switch (scroller->active_pane_index)
