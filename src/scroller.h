@@ -33,6 +33,15 @@ typedef enum
 int scroller_init(LinkedScroller *scroller, unsigned int npanes);
 void scroller_deinit(LinkedScroller *scroller);
 
+size_t scroller_get_offset_i(const LinkedScroller *scroller);
+size_t scroller_get_offset_j(const LinkedScroller *scroller);
+size_t scroller_get_cursor_i(const LinkedScroller *scroller);
+size_t scroller_get_cursor_j(const LinkedScroller *scroller);
+size_t scroller_get_index_i(const LinkedScroller *scroller);
+size_t scroller_get_index_j(const LinkedScroller *scroller);
+unsigned int scroller_get_height(const LinkedScroller *scroller);
+unsigned int scroller_get_width(const LinkedScroller *scroller);
+
 void scroller_set_offset_i(LinkedScroller *scroller, size_t i);
 void scroller_set_offset_j(LinkedScroller *scroller, size_t j);
 void scroller_set_cursor_i(LinkedScroller *scroller, size_t i);
