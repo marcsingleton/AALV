@@ -1,5 +1,4 @@
 #include <ctype.h>
-#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -21,286 +20,372 @@ int input_read_key(Array *buffer, int fd)
     return n;
 }
 
-int input_parse_keys(Array *buffer, Action *action, int *count)
+int input_parse_digits(Array *buffer, size_t *index, int *count)
 {
-    size_t index = 0;
-    char *ptr, c;
-
-    // Parse digits
-    int accum = 0;
-    int accum_default_is_set = 0;
-    while (index < buffer->len)
-    {
-        ptr = array_get(buffer, index);
-        c = *ptr;
-        if (!isdigit(c))
-            break;
-        if (accum == 0 && c == '0') // 0 is line start, so ignore at start of digits
-            break;
-        if (accum > (INT_MAX - (c - '0')) / 10)
-            return PARSE_FAIL;
-        accum = 10 * accum + (c - '0');
-        index++;
-    }
-    if (index >= buffer->len)
+    size_t new_index = *index;
+    if (new_index >= buffer->len)
         return PARSE_INCOMPLETE;
-    if (accum == 0)
+
+    int new_count = 0;
+    char c = *(char *)array_get(buffer, new_index);
+    if (!isdigit(c))
+        return PARSE_FAIL;
+    else
     {
-        accum = 1;
-        accum_default_is_set = 1;
+        for (; new_index < buffer->len; new_index++)
+        {
+            c = *(char *)array_get(buffer, new_index);
+            if (!isdigit(c))
+                break;
+            if (new_count > (INT_MAX - (c - '0')) / 10)
+                return PARSE_FAIL;
+            new_count = 10 * new_count + (c - '0');
+        }
     }
 
-    // Parse command
+    *index = new_index;
+    *count = new_count;
+
+    return PARSE_SUCCESS;
+}
+
+int input_parse_count(Array *buffer, size_t *index, int *count)
+{
+    size_t new_index = *index;
+    if (new_index >= buffer->len)
+        return PARSE_INCOMPLETE;
+
+    int sign;
+    char c = *(char *)array_get(buffer, new_index);
+    if (c == '+' || c == '-')
+    {
+        sign = (c == '+') ? 1 : -1;
+        new_index++;
+    }
+    else
+        sign = 1;
+
+    int digits;
+    int retcode = input_parse_digits(buffer, &new_index, &digits);
+    switch (retcode)
+    {
+    case PARSE_SUCCESS:
+        break;
+    case PARSE_INCOMPLETE:
+    case PARSE_FAIL:
+        return retcode;
+    }
+
+    *index = new_index;
+    *count = sign * digits;
+
+    return PARSE_SUCCESS;
+}
+
+int input_parse_action(Array *buffer, size_t *index, Action *action, int default_count_branch)
+{
+    size_t new_index = *index;
+    if (new_index >= buffer->len)
+        return PARSE_INCOMPLETE;
+
+    Action new_action;
+    char c = *(char *)array_get(buffer, new_index);
     switch (c)
     {
     case ESC:
-        if (index + 1 < buffer->len && *(char *)array_get(buffer, index + 1) == ESC) // Special case: Error on two escapes
+        if (new_index + 1 < buffer->len && *(char *)array_get(buffer, new_index + 1) == ESC) // Special case: Error on two escapes
             return PARSE_FAIL;
-        if (index + 2 >= buffer->len) // Otherwise wait for complete escape sequence
+        if (new_index + 2 >= buffer->len) // Otherwise wait for complete escape sequence
             return PARSE_INCOMPLETE;
 
-        c = *(char *)array_get(buffer, index + 1);
+        c = *(char *)array_get(buffer, new_index + 1);
         if (c != '[')
             return PARSE_FAIL;
 
-        c = *(char *)array_get(buffer, index + 2);
+        c = *(char *)array_get(buffer, new_index + 2);
         switch (c)
         {
         case 'A':
-            action->fn.int_arg = action_move_up;
-            action->args = INT_ARG;
+            new_action.fn.int_arg = action_move_up;
+            new_action.args = INT_ARG;
             break;
         case 'B':
-            action->fn.int_arg = action_move_down;
-            action->args = INT_ARG;
+            new_action.fn.int_arg = action_move_down;
+            new_action.args = INT_ARG;
             break;
         case 'C':
-            action->fn.int_arg = action_move_right;
-            action->args = INT_ARG;
+            new_action.fn.int_arg = action_move_right;
+            new_action.args = INT_ARG;
             break;
         case 'D':
-            action->fn.int_arg = action_move_left;
-            action->args = INT_ARG;
+            new_action.fn.int_arg = action_move_left;
+            new_action.args = INT_ARG;
             break;
         default:
             return PARSE_FAIL;
         }
         break;
     case 'k':
-        action->fn.int_arg = action_move_up;
-        action->args = INT_ARG;
+        new_action.fn.int_arg = action_move_up;
+        new_action.args = INT_ARG;
         break;
     case 'j':
-        action->fn.int_arg = action_move_down;
-        action->args = INT_ARG;
+        new_action.fn.int_arg = action_move_down;
+        new_action.args = INT_ARG;
         break;
     case 'l':
-        action->fn.int_arg = action_move_right;
-        action->args = INT_ARG;
+        new_action.fn.int_arg = action_move_right;
+        new_action.args = INT_ARG;
         break;
     case 'h':
-        action->fn.int_arg = action_move_left;
-        action->args = INT_ARG;
+        new_action.fn.int_arg = action_move_left;
+        new_action.args = INT_ARG;
         break;
     case CTRL('b'):
-        action->fn.page_size_arg = action_move_page_up;
-        action->args = PAGE_SIZE_ARG;
-        accum = PAGE_SIZE_FULL;
+        new_action.fn.void_arg = action_move_page_up;
+        new_action.args = VOID_ARG;
         break;
     case CTRL('f'):
-        action->fn.page_size_arg = action_move_page_down;
-        action->args = PAGE_SIZE_ARG;
-        accum = PAGE_SIZE_FULL;
+        new_action.fn.void_arg = action_move_page_down;
+        new_action.args = VOID_ARG;
         break;
     case CTRL('n'):
-        action->fn.page_size_arg = action_move_page_right;
-        action->args = PAGE_SIZE_ARG;
-        accum = PAGE_SIZE_FULL;
+        new_action.fn.void_arg = action_move_page_right;
+        new_action.args = VOID_ARG;
         break;
     case CTRL('p'):
-        action->fn.page_size_arg = action_move_page_left;
-        action->args = PAGE_SIZE_ARG;
-        accum = PAGE_SIZE_FULL;
+        new_action.fn.void_arg = action_move_page_left;
+        new_action.args = VOID_ARG;
         break;
     case CTRL('u'):
-        action->fn.page_size_arg = action_move_page_up;
-        action->args = PAGE_SIZE_ARG;
-        accum = PAGE_SIZE_HALF;
+        new_action.fn.void_arg = action_move_half_page_up;
+        new_action.args = VOID_ARG;
         break;
     case CTRL('d'):
-        action->fn.page_size_arg = action_move_page_down;
-        action->args = PAGE_SIZE_ARG;
-        accum = PAGE_SIZE_HALF;
+        new_action.fn.void_arg = action_move_half_page_down;
+        new_action.args = VOID_ARG;
         break;
     case CTRL('r'):
-        action->fn.page_size_arg = action_move_page_right;
-        action->args = PAGE_SIZE_ARG;
-        accum = PAGE_SIZE_HALF;
+        new_action.fn.void_arg = action_move_half_page_right;
+        new_action.args = VOID_ARG;
         break;
     case CTRL('l'):
-        action->fn.page_size_arg = action_move_page_left;
-        action->args = PAGE_SIZE_ARG;
-        accum = PAGE_SIZE_HALF;
+        new_action.fn.void_arg = action_move_half_page_left;
+        new_action.args = VOID_ARG;
         break;
     case '$':
-        action->fn.void_arg = action_move_last_column;
-        action->args = VOID_ARG;
+        new_action.fn.void_arg = action_move_last_column;
+        new_action.args = VOID_ARG;
         break;
     case '0':
-        action->fn.void_arg = action_move_first_column;
-        action->args = VOID_ARG;
+        new_action.fn.void_arg = action_move_first_column;
+        new_action.args = VOID_ARG;
         break;
     case '|':
-        action->fn.int_arg = action_move_to_column;
-        action->args = INT_ARG;
+        new_action.fn.int_arg = action_move_to_column;
+        new_action.args = INT_ARG;
         break;
     case '^':
-        action->fn.void_arg = action_move_first_non_gap_or_non_whitespace;
-        action->args = VOID_ARG;
+        new_action.fn.void_arg = action_move_first_non_gap_or_non_whitespace;
+        new_action.args = VOID_ARG;
         break;
     case 'g':
-        if (index + 1 >= buffer->len)
+        if (new_index + 1 >= buffer->len)
             return PARSE_INCOMPLETE;
-        ptr = array_get(buffer, index + 1);
-        c = *ptr;
+        c = *(char *)array_get(buffer, new_index);
         switch (c)
         {
         case 'g':
-            action->fn.void_arg = action_move_first_row;
-            action->args = VOID_ARG;
+            new_action.fn.void_arg = action_move_first_row;
+            new_action.args = VOID_ARG;
             break;
         case '_':
-            action->fn.void_arg = action_move_last_non_gap_or_non_whitespace;
-            action->args = VOID_ARG;
+            new_action.fn.void_arg = action_move_last_non_gap_or_non_whitespace;
+            new_action.args = VOID_ARG;
             break;
         case '0':
-            action->fn.void_arg = action_move_left_edge;
-            action->args = VOID_ARG;
+            new_action.fn.void_arg = action_move_left_edge;
+            new_action.args = VOID_ARG;
             break;
         case 'm':
-            action->fn.void_arg = action_move_horizontal_middle;
-            action->args = VOID_ARG;
+            new_action.fn.void_arg = action_move_horizontal_middle;
+            new_action.args = VOID_ARG;
             break;
         case 'M':
-            action->fn.void_arg = action_move_middle_column;
-            action->args = VOID_ARG;
+            new_action.fn.void_arg = action_move_middle_column;
+            new_action.args = VOID_ARG;
             break;
         case '$':
-            action->fn.void_arg = action_move_right_edge;
-            action->args = VOID_ARG;
+            new_action.fn.void_arg = action_move_right_edge;
+            new_action.args = VOID_ARG;
             break;
         default:
             return PARSE_FAIL;
         }
         break;
     case 'G':
-        if (accum_default_is_set == 1)
+        if (default_count_branch == 1)
         {
-            action->fn.void_arg = action_move_last_row;
-            action->args = VOID_ARG;
+            new_action.fn.void_arg = action_move_last_row;
+            new_action.args = VOID_ARG;
         }
         else
         {
-            action->fn.int_arg = action_move_to_row;
-            action->args = INT_ARG;
+            new_action.fn.int_arg = action_move_to_row;
+            new_action.args = INT_ARG;
         }
         break;
     case 'H':
-        action->fn.void_arg = action_move_top_edge;
-        action->args = VOID_ARG;
+        new_action.fn.void_arg = action_move_top_edge;
+        new_action.args = VOID_ARG;
         break;
     case 'M':
-        action->fn.void_arg = action_move_vertical_middle;
-        action->args = VOID_ARG;
+        new_action.fn.void_arg = action_move_vertical_middle;
+        new_action.args = VOID_ARG;
         break;
     case 'L':
-        action->fn.void_arg = action_move_bottom_edge;
-        action->args = VOID_ARG;
+        new_action.fn.void_arg = action_move_bottom_edge;
+        new_action.args = VOID_ARG;
         break;
     case 'z':
-        if (index + 1 >= buffer->len)
+        if (new_index + 1 >= buffer->len)
             return PARSE_INCOMPLETE;
-        ptr = array_get(buffer, index + 1);
-        c = *ptr;
+        c = *(char *)array_get(buffer, new_index);
         switch (c)
         {
         case 'z':
-            action->fn.void_arg = action_move_row_to_center;
-            action->args = VOID_ARG;
+            new_action.fn.void_arg = action_move_row_to_center;
+            new_action.args = VOID_ARG;
             break;
         default:
             return PARSE_FAIL;
         }
         break;
     case ']':
-        action->fn.void_arg = action_increase_header_sequence_divider;
-        action->args = VOID_ARG;
+        new_action.fn.void_arg = action_increase_header_sequence_divider;
+        new_action.args = VOID_ARG;
         break;
     case '[':
-        action->fn.void_arg = action_decrease_header_sequence_divider;
-        action->args = VOID_ARG;
+        new_action.fn.void_arg = action_decrease_header_sequence_divider;
+        new_action.args = VOID_ARG;
         break;
     case '}':
-        action->fn.void_arg = action_increase_ruler_records_divider;
-        action->args = VOID_ARG;
+        new_action.fn.void_arg = action_increase_ruler_records_divider;
+        new_action.args = VOID_ARG;
         break;
     case '{':
-        action->fn.void_arg = action_decrease_ruler_records_divider;
-        action->args = VOID_ARG;
+        new_action.fn.void_arg = action_decrease_ruler_records_divider;
+        new_action.args = VOID_ARG;
         break;
-    case '+':
-        action->fn.void_arg = action_increase_tick_spacing;
-        action->args = VOID_ARG;
+    case ')':
+        new_action.fn.void_arg = action_increase_tick_spacing;
+        new_action.args = VOID_ARG;
         break;
-    case '-':
-        action->fn.void_arg = action_decrease_tick_spacing;
-        action->args = VOID_ARG;
+    case '(':
+        new_action.fn.void_arg = action_decrease_tick_spacing;
+        new_action.args = VOID_ARG;
         break;
     case ':':
-        action->fn.void_arg = action_enter_command_mode;
-        action->args = VOID_ARG;
+        new_action.fn.void_arg = action_enter_command_mode;
+        new_action.args = VOID_ARG;
         break;
     case CTRL('w'):
         // A little inelegant, but it's only twice
-        if (index + 1 >= buffer->len)
+        if (new_index + 1 >= buffer->len)
             return PARSE_INCOMPLETE;
-        c = *(char *)array_get(buffer, index + 1);
+        c = *(char *)array_get(buffer, new_index + 1);
         if (c != ESC)
             return PARSE_FAIL;
 
-        if (index + 2 >= buffer->len)
+        if (new_index + 2 >= buffer->len)
             return PARSE_INCOMPLETE;
-        c = *(char *)array_get(buffer, index + 2);
+        c = *(char *)array_get(buffer, new_index + 2);
         if (c != '[')
             return PARSE_FAIL;
 
-        if (index + 3 >= buffer->len)
+        if (new_index + 3 >= buffer->len)
             return PARSE_INCOMPLETE;
-        c = *(char *)array_get(buffer, index + 3);
+        c = *(char *)array_get(buffer, new_index + 3);
         switch (c)
         {
         case 'C':
-            action->fn.void_arg = action_set_sequence_pane_active;
-            action->args = VOID_ARG;
+            new_action.fn.void_arg = action_set_sequence_pane_active;
+            new_action.args = VOID_ARG;
             break;
         case 'D':
-            action->fn.void_arg = action_set_header_pane_active;
-            action->args = VOID_ARG;
+            new_action.fn.void_arg = action_set_header_pane_active;
+            new_action.args = VOID_ARG;
             break;
         default:
             return PARSE_FAIL;
         }
         break;
     case CTRL('Z'):
-        raise(SIGTSTP);
+        new_action.fn.void_arg = action_raise_sigtstp;
+        new_action.args = VOID_ARG;
         break;
     default:
         return PARSE_FAIL;
     }
 
-    *count = accum;
+    *index = new_index;
+    *action = new_action;
 
     return PARSE_SUCCESS;
+}
+
+int input_parse_count_action(Array *buffer, size_t *index, Action *action, int *count)
+{
+    size_t new_index = *index;
+    if (new_index >= buffer->len)
+        return PARSE_INCOMPLETE;
+
+    int retcode;
+
+    retcode = input_parse_count(buffer, index, count);
+    switch (retcode)
+    {
+    case PARSE_SUCCESS:
+        break;
+    case PARSE_INCOMPLETE:
+    case PARSE_FAIL:
+        return retcode;
+    }
+
+    retcode = input_parse_action(buffer, index, action, 0);
+
+    return retcode;
+}
+
+int input_parse_buffer(Array *buffer, Action *action, int *count)
+{
+    size_t index = 0;
+
+    int retcode1 = input_parse_action(buffer, &index, action, 1);
+    switch (retcode1)
+    {
+    case PARSE_SUCCESS:
+        *count = 1;
+        return PARSE_SUCCESS;
+    case PARSE_INCOMPLETE:
+    case PARSE_FAIL:
+        break;
+    }
+
+    int retcode2 = input_parse_count_action(buffer, &index, action, count);
+    switch (retcode2)
+    {
+    case PARSE_SUCCESS:
+        return PARSE_SUCCESS;
+    case PARSE_INCOMPLETE:
+    case PARSE_FAIL:
+        break;
+    }
+
+    if (retcode1 == PARSE_FAIL && retcode2 == PARSE_FAIL)
+        return PARSE_FAIL;
+    else
+        return PARSE_INCOMPLETE;
 }
 
 int input_execute_action(State *state, Action *action, int count)
@@ -317,13 +402,6 @@ int input_execute_action(State *state, Action *action, int count)
     {
         void (*fn)(State *, int) = action->fn.int_arg;
         int arg = count;
-        fn(state, arg);
-        break;
-    }
-    case PAGE_SIZE_ARG:
-    {
-        void (*fn)(State *, PageSize) = action->fn.page_size_arg;
-        PageSize arg = count;
         fn(state, arg);
         break;
     }

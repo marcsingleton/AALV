@@ -27,7 +27,6 @@ typedef enum
 {
     VOID_ARG = 0,
     INT_ARG,
-    PAGE_SIZE_ARG,
 } ActionArguments;
 
 typedef struct
@@ -40,10 +39,14 @@ void action_move_up(State *state, int x);
 void action_move_down(State *state, int x);
 void action_move_right(State *state, int x);
 void action_move_left(State *state, int x);
-void action_move_page_up(State *state, PageSize page_size);
-void action_move_page_down(State *state, PageSize page_size);
-void action_move_page_right(State *state, PageSize page_size);
-void action_move_page_left(State *state, PageSize page_size);
+void action_move_page_up(State *state);
+void action_move_half_page_up(State *state);
+void action_move_page_down(State *state);
+void action_move_half_page_down(State *state);
+void action_move_page_right(State *state);
+void action_move_half_page_right(State *state);
+void action_move_page_left(State *state);
+void action_move_half_page_left(State *state);
 void action_move_first_column(State *state);
 void action_move_middle_column(State *state);
 void action_move_last_column(State *state);
@@ -69,5 +72,6 @@ void action_decrease_tick_spacing(State *state);
 void action_enter_command_mode(State *state);
 void action_set_header_pane_active(State *state);
 void action_set_sequence_pane_active(State *state);
+void action_raise_sigtstp(State *state);
 
 #endif // ACTION_H

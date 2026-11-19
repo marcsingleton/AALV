@@ -543,7 +543,7 @@ int execute_normal_mode(State *state, Array *read_buffer, int input_fd)
 
     int count;
     Action action;
-    int retcode = input_parse_keys(read_buffer, &action, &count);
+    int retcode = input_parse_buffer(read_buffer, &action, &count);
     switch (retcode)
     {
     case PARSE_SUCCESS:

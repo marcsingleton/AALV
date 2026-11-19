@@ -1,4 +1,5 @@
 #include <ctype.h>
+#include <signal.h>
 #include <stdbool.h>
 #include <string.h>
 
@@ -112,33 +113,62 @@ void action_move_left(State *state, int x)
         scroller_move_right(scroller, active_file->record_array.len, ncols, -x);
 }
 
-void action_move_page_up(State *state, PageSize page_size)
+void action_move_page_up(State *state)
 {
     FileState *active_file = state->active_file;
     LinkedScroller *scroller = &active_file->layout.scroller;
-    scroller_move_page_up(scroller, active_file->record_array.len, page_size);
+    scroller_move_page_up(scroller, active_file->record_array.len, PAGE_SIZE_FULL);
 }
 
-void action_move_page_down(State *state, PageSize page_size)
+void action_move_half_page_up(State *state)
 {
     FileState *active_file = state->active_file;
     LinkedScroller *scroller = &active_file->layout.scroller;
-    scroller_move_page_down(scroller, active_file->record_array.len, page_size);
+    scroller_move_page_up(scroller, active_file->record_array.len, PAGE_SIZE_HALF);
 }
 
-void action_move_page_right(State *state, PageSize page_size)
+void action_move_page_down(State *state)
+{
+    FileState *active_file = state->active_file;
+    LinkedScroller *scroller = &active_file->layout.scroller;
+    scroller_move_page_down(scroller, active_file->record_array.len, PAGE_SIZE_FULL);
+}
+
+void action_move_half_page_down(State *state)
+{
+    FileState *active_file = state->active_file;
+    LinkedScroller *scroller = &active_file->layout.scroller;
+    scroller_move_page_down(scroller, active_file->record_array.len, PAGE_SIZE_HALF);
+}
+
+void action_move_page_right(State *state)
 {
     FileState *active_file = state->active_file;
     LinkedScroller *scroller = &active_file->layout.scroller;
     size_t ncols = get_page_ncols(active_file);
-    scroller_move_page_right(scroller, active_file->record_array.len, ncols, page_size);
+    scroller_move_page_right(scroller, active_file->record_array.len, ncols, PAGE_SIZE_FULL);
 }
 
-void action_move_page_left(State *state, PageSize page_size)
+void action_move_half_page_right(State *state)
 {
     FileState *active_file = state->active_file;
     LinkedScroller *scroller = &active_file->layout.scroller;
-    scroller_move_page_left(scroller, active_file->record_array.len, page_size);
+    size_t ncols = get_page_ncols(active_file);
+    scroller_move_page_right(scroller, active_file->record_array.len, ncols, PAGE_SIZE_HALF);
+}
+
+void action_move_page_left(State *state)
+{
+    FileState *active_file = state->active_file;
+    LinkedScroller *scroller = &active_file->layout.scroller;
+    scroller_move_page_left(scroller, active_file->record_array.len, PAGE_SIZE_FULL);
+}
+
+void action_move_half_page_left(State *state)
+{
+    FileState *active_file = state->active_file;
+    LinkedScroller *scroller = &active_file->layout.scroller;
+    scroller_move_page_left(scroller, active_file->record_array.len, PAGE_SIZE_HALF);
 }
 
 void action_move_first_column(State *state)
@@ -386,4 +416,11 @@ void action_set_sequence_pane_active(State *state)
     FileState *active_file = state->active_file;
     LinkedScroller *scroller = &active_file->layout.scroller;
     scroller_set_active_pane(scroller, SCROLLER_SEQUENCE_PANE);
+}
+
+void action_raise_sigtstp(State *state)
+{
+    (void)state; // Silence warnings
+
+    raise(SIGTSTP);
 }
