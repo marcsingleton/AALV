@@ -27,8 +27,7 @@ typedef struct
 } Option;
 
 int cli_prepare_options(unsigned int noptions, Option *options,
-                        char **short_options_ptr, struct option *long_options,
-                        const char *invocation_name);
+                        char **short_options_ptr, struct option *long_options);
 void cli_print_long_help(unsigned int noptions, Option *options,
                          char *program_name, char *positional_usage, char *synopsis);
 void cli_print_short_help(unsigned int noptions, Option *options, char *program_name, char *positional_usage);

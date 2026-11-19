@@ -169,9 +169,12 @@ int main(int argc, char *argv[])
     struct option long_options[noptions + 1]; // Extra struct of 0s to mark end
     long_options[noptions] = (struct option){0};
     char *short_options = NULL;
-    retcode = cli_prepare_options(noptions, options, &short_options, long_options, INVOCATION_NAME);
+    retcode = cli_prepare_options(noptions, options, &short_options, long_options);
     if (retcode != 0)
+    {
+        error_printf("%s: Failed to prepare options\n", INVOCATION_NAME);
         return retcode;
+    }
 
     // Parse options
     unsigned int n_format_args = 0;
