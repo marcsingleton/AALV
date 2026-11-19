@@ -196,8 +196,10 @@ int cmd_execute_command(State *state, int argc, char *argv[CMD_ARG_MAX])
 
 int cmd_parse_execute_command_line(State *state, char *line)
 {
-    if (!state || !line)
+    if (!state)
         return CMD_EARGINV;
+    if (!line)
+        return CMD_ENOERR;
 
     int retcode = CMD_ENOERR;
 
