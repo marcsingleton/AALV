@@ -11,8 +11,6 @@
  * value accordingly.
  */
 
-#include <stddef.h>
-
 #include "scroller.h"
 #include "state.h"
 

@@ -5,8 +5,6 @@
  * Arguments and parsing
  */
 
-#include <stdio.h>
-
 #include "cli.h"
 #include "io.h"
 

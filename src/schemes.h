@@ -9,8 +9,6 @@
  *
  */
 
-#include <stdbool.h>
-
 #include "color.h"
 #include "sequences.h"
 

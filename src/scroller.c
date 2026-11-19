@@ -1,3 +1,5 @@
+#include <stdlib.h>
+
 #include "scroller.h"
 
 int scroller_init(LinkedScroller *scroller, unsigned int npanes)
