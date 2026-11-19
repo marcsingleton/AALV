@@ -2,7 +2,7 @@
 #define CMD_H
 
 /*
- * Command parsing
+ * Parsing command mode input
  */
 
 #include "state.h"

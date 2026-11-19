@@ -2,7 +2,7 @@
 #define CLI_H
 
 /*
- * Generic command-line interface functions
+ * Generic command-line interface
  */
 
 #include <getopt.h>

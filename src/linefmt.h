@@ -3,6 +3,7 @@
 
 /*
  * Line-based sequence IO
+ *
  * Each line contains a complete sequence, no headers
  */
 

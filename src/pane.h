@@ -2,7 +2,7 @@
 #define PANE_H
 
 /*
- * Panes
+ * Simple container for rectangular panes
  */
 
 #include "array.h"

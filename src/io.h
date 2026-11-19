@@ -2,7 +2,7 @@
 #define IO_H
 
 /*
- * IO
+ * IO interface
  */
 
 #include <stdio.h>

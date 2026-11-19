@@ -7,6 +7,10 @@
 
 #include "array.h"
 
+/*
+ * Terminal interface
+ */
+
 extern int TERMINAL_FILENO;
 
 typedef enum
