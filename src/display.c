@@ -25,8 +25,8 @@ static void append_spaces(Array *buffer, unsigned int n)
 void display_refresh(State *state, Array *buffer)
 {
     terminal_cursor_hide(buffer);
-    state->refresh_command_pane = true;
 
+    // Update window
     unsigned int rows, cols;
     terminal_get_window_size(&rows, &cols);
     if (state->terminal_rows != rows || state->terminal_cols != cols)
@@ -35,19 +35,27 @@ void display_refresh(State *state, Array *buffer)
         state->terminal_cols = cols;
         state->refresh_window = true;
     }
+
     LinkedScroller *scroller = &state->active_file->layout.scroller;
+
+    // Map refresh flags from scroller to state
     if (scroller->refreshes[SCROLLER_HEADER_PANE])
     {
         state->refresh_header_pane = true;
-        scroller->refreshes[SCROLLER_HEADER_PANE] = false;
     }
     if (scroller->refreshes[SCROLLER_SEQUENCE_PANE])
     {
         state->refresh_sequence_pane = true;
         state->refresh_ruler_pane = true;
-        scroller->refreshes[SCROLLER_SEQUENCE_PANE] = false;
     }
+    state->refresh_command_pane = true; // Always refresh (to update indices)
+    scroller_set_refreshes(scroller, false);
 
+    // Clear errors on record panes refresh
+    if (state->refresh_header_pane || state->refresh_sequence_pane)
+        state->cmd_errno = 0;
+
+    // Execute pane updates
     if (state->refresh_window)
     {
         terminal_clear_screen(buffer);
