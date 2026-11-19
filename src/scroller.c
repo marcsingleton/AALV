@@ -538,7 +538,7 @@ void scroller_move_page_left(LinkedScroller *scroller, size_t nrows, PageSize pa
         scroller_set_offset_j(scroller, offset_j - x);
 }
 
-void scroller_move_row_start(LinkedScroller *scroller, size_t nrows)
+void scroller_move_first_column(LinkedScroller *scroller, size_t nrows)
 {
     if (!scroller)
         return;
@@ -551,7 +551,7 @@ void scroller_move_row_start(LinkedScroller *scroller, size_t nrows)
     scroller_set_cursor_j(scroller, 0);
 }
 
-void scroller_move_row_end(LinkedScroller *scroller, size_t nrows, size_t ncols)
+void scroller_move_last_column(LinkedScroller *scroller, size_t nrows, size_t ncols)
 {
     if (!scroller)
         return;

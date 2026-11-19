@@ -143,11 +143,11 @@ int input_parse_keys(Array *buffer, Action *action, int *count)
         accum = PAGE_SIZE_HALF;
         break;
     case '$':
-        action->fn.void_arg = action_move_row_end;
+        action->fn.void_arg = action_move_last_column;
         action->args = VOID_ARG;
         break;
     case '0':
-        action->fn.void_arg = action_move_row_start;
+        action->fn.void_arg = action_move_first_column;
         action->args = VOID_ARG;
         break;
     case '|':
@@ -182,7 +182,7 @@ int input_parse_keys(Array *buffer, Action *action, int *count)
             action->args = VOID_ARG;
             break;
         case 'M':
-            action->fn.void_arg = action_move_row_middle;
+            action->fn.void_arg = action_move_middle_column;
             action->args = VOID_ARG;
             break;
         case '$':

@@ -141,14 +141,14 @@ void action_move_page_left(State *state, PageSize page_size)
     scroller_move_page_left(scroller, active_file->record_array.len, page_size);
 }
 
-void action_move_row_start(State *state)
+void action_move_first_column(State *state)
 {
     FileState *active_file = state->active_file;
     LinkedScroller *scroller = &active_file->layout.scroller;
-    scroller_move_row_start(scroller, active_file->record_array.len);
+    scroller_move_first_column(scroller, active_file->record_array.len);
 }
 
-void action_move_row_middle(State *state)
+void action_move_middle_column(State *state)
 {
     FileState *active_file = state->active_file;
     LinkedScroller *scroller = &active_file->layout.scroller;
@@ -156,12 +156,12 @@ void action_move_row_middle(State *state)
     scroller_move_to_column(scroller, active_file->record_array.len, ncols, ncols / 2);
 }
 
-void action_move_row_end(State *state)
+void action_move_last_column(State *state)
 {
     FileState *active_file = state->active_file;
     LinkedScroller *scroller = &active_file->layout.scroller;
     size_t ncols = get_row_ncols(active_file);
-    scroller_move_row_end(scroller, active_file->record_array.len, ncols);
+    scroller_move_last_column(scroller, active_file->record_array.len, ncols);
 }
 
 void action_move_to_column(State *state, int x)
